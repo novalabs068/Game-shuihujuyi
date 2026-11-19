@@ -1,15 +1,41 @@
 class_name MapActor
 extends Node2D
-## 俯视场景里的占位人物或物件：脚下阴影 + 圆形头像（没有头像就是写着一个字的色块）+ 名字。
-## position 是脚底的位置，配合父节点的 y_sort 实现前后遮挡。第 3 步换成像素行走图。
+## 俯视场景里的人物或物件：脚下阴影 + 像素小人（sprite）；没有像素图时画圆形头像，
+## 再没有就是写着一个字的色块。position 是脚底的位置，配合父节点的 y_sort 实现前后遮挡。
+## 像素图不做逐帧动画：走路时由程序上下起伏，朝左时水平翻转。
 
 const RADIUS := 22.0
 const LIFT := 26.0
+## 像素图放大倍数：物件和瓦片一致用 3 倍；人物像素更细（约 48 像素高），用 2 倍
+const PIXEL_SCALE := 3.0
+const CHARACTER_SCALE := 2.0
+const BOB_HEIGHT := 4.0
+const BOB_SPEED := 14.0
 
 var texture: Texture2D
 var glyph := ""
 var color := Color("8a6a4a")
 var facing_left := false
+var sprite: Texture2D
+var sprite_scale := PIXEL_SCALE
+## 正在走路：上下起伏
+var moving := false:
+	set(value):
+		moving = value
+		set_process(value)
+		queue_redraw()
+
+var _time := 0.0
+
+
+func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	set_process(moving)
+
+
+func _process(delta: float) -> void:
+	_time += delta
+	queue_redraw()
 
 
 func setup(p_texture: Texture2D, p_glyph: String, p_color: Color, caption: String) -> void:
@@ -41,6 +67,14 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, -2), 0.0, Vector2(1.0, 0.35))
 	draw_circle(Vector2.ZERO, RADIUS, Color(0, 0, 0, 0.35))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if sprite != null:
+		var lift := absf(sin(_time * BOB_SPEED)) * BOB_HEIGHT if moving else 0.0
+		var flip := -1.0 if facing_left else 1.0
+		draw_set_transform(Vector2(0, -lift), 0.0, Vector2(sprite_scale * flip, sprite_scale))
+		var px := Vector2(sprite.get_size())
+		draw_texture(sprite, Vector2(-px.x / 2, -px.y))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		return
 	var center := Vector2(0, -LIFT)
 	draw_circle(center, RADIUS + 3, Color("1e1c1a"))
 	if texture != null:

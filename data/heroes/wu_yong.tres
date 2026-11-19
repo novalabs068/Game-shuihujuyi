@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_fjwj3"]
 [ext_resource type="Texture2D" path="res://art/faces/wu_yong.png" id="2_rin8f"]
 [ext_resource type="Texture2D" path="res://art/portraits/wu_yong.png" id="3_orvyx"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/wu_yong.png" id="3_rin8f"]
 
 [sub_resource type="Resource" id="Resource_c2vee"]
 script = ExtResource("2_fjwj3")
@@ -30,4 +31,5 @@ base_spd = 115
 portrait = ExtResource("3_orvyx")
 bust = ExtResource("1_2r81q")
 face = ExtResource("2_rin8f")
+map_sprite = ExtResource("3_rin8f")
 skill = SubResource("Resource_c2vee")

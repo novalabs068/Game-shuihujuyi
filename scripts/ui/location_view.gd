@@ -68,9 +68,12 @@ func _build_tiles() -> void:
 	source.texture = scene_data.tileset_texture
 	source.texture_region_size = Vector2i(px, px)
 	@warning_ignore("integer_division")
-	var count := scene_data.tileset_texture.get_width() / px
-	for i in count:
-		source.create_tile(Vector2i(i, 0))
+	var columns := scene_data.tileset_texture.get_width() / px
+	@warning_ignore("integer_division")
+	var tile_rows := scene_data.tileset_texture.get_height() / px
+	for y in tile_rows:
+		for x in columns:
+			source.create_tile(Vector2i(x, y))
 	tileset.add_source(source, 0)
 
 	var layer := TileMapLayer.new()
@@ -81,7 +84,9 @@ func _build_tiles() -> void:
 	for y in rows.size():
 		for x in rows[y].length():
 			var info: Dictionary = SceneData.TERRAIN.get(rows[y][x], SceneData.TERRAIN["#"])
-			layer.set_cell(Vector2i(x, y), 0, Vector2i(info["tile"], 0))
+			var block := scene_data.tile_block
+			var tile: int = info["tile"]
+			layer.set_cell(Vector2i(x, y), 0, Vector2i(tile * block + x % block, y % block))
 	_world.add_child(layer)
 
 
@@ -98,8 +103,18 @@ func _build_pathfinding() -> void:
 
 
 func _spawn_objects() -> void:
+	var rows := scene_data.rows()
+	for y in rows.size():
+		for x in rows[y].length():
+			var overlay: Texture2D = scene_data.overlays.get(rows[y][x])
+			if overlay != null:
+				_actors.add_child(_pixel_sprite(overlay, _cell_bottom(Vector2i(x, y))))
+	for prop in scene_data.props:
+		_actors.add_child(_pixel_sprite(prop.texture, _cell_bottom(prop.cell) + prop.offset))
 	for npc in scene_data.npcs:
 		var actor := MapActor.new()
+		actor.sprite = npc.sprite if npc.sprite != null else (npc.unit.map_sprite if npc.unit != null else null)
+		actor.sprite_scale = MapActor.CHARACTER_SCALE
 		var face: Texture2D = npc.unit.face if npc.unit != null else null
 		actor.setup(face, npc.display_name.right(1), Color("6b4f8a"), npc.display_name)
 		actor.position = _feet(npc.cell)
@@ -110,6 +125,7 @@ func _spawn_objects() -> void:
 	for chest in scene_data.chests:
 		var actor := MapActor.new()
 		var opened := GameState.has_flag(_chest_flag(chest))
+		actor.sprite = scene_data.chest_open if opened else scene_data.chest_closed
 		actor.setup(null, "空" if opened else "箱", Color("6e5a3a") if opened else Color("b8862e"), "")
 		actor.position = _feet(chest.cell)
 		_actors.add_child(actor)
@@ -118,6 +134,8 @@ func _spawn_objects() -> void:
 		_astar.set_point_solid(chest.cell, true)
 	var team := GameState.team()
 	_player = MapActor.new()
+	_player.sprite = team[0].map_sprite if not team.is_empty() else null
+	_player.sprite_scale = MapActor.CHARACTER_SCALE
 	_player.setup(team[0].face if not team.is_empty() else null, "我", UiKit.ACCENT, "")
 	_player.position = _feet(scene_data.spawn_cell)
 	_actors.add_child(_player)
@@ -226,6 +244,7 @@ func _walk_to(cell: Vector2i, on_arrive: Callable) -> void:
 
 
 func _step_player(delta: float) -> void:
+	_player.moving = not _path.is_empty()
 	if _path.is_empty():
 		return
 	var next := _path[0]
@@ -270,6 +289,7 @@ func _open_chest(chest: ChestData) -> void:
 		return
 	GameState.set_flag(flag)
 	GameState.save_game()
+	_chest_actors[chest.cell].sprite = scene_data.chest_open
 	_chest_actors[chest.cell].set_glyph("空", Color("6e5a3a"))
 	_flash("获得：%s" % chest.reward_text)
 
@@ -287,6 +307,22 @@ func _flash(text: String) -> void:
 
 
 # --- 工具 ---
+
+## 像素物件图：底边中点放在 bottom，放大到和瓦片同样的倍数。
+func _pixel_sprite(texture: Texture2D, bottom: Vector2) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = texture
+	s.centered = false
+	s.offset = Vector2(-texture.get_width() / 2.0, -texture.get_height())
+	s.scale = Vector2(PIXEL_SCALE, PIXEL_SCALE)
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	s.position = bottom
+	return s
+
+
+func _cell_bottom(cell: Vector2i) -> Vector2:
+	return Vector2(cell) * _tile + Vector2(_tile * 0.5, _tile * 0.95)
+
 
 func _feet(cell: Vector2i) -> Vector2:
 	return Vector2(cell) * _tile + Vector2(_tile * 0.5, _tile * 0.8)

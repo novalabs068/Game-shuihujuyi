@@ -15,17 +15,28 @@ const TERRAIN := {
 	"_": {"tile": 8, "walk": true},   # 石板地
 	"W": {"tile": 9, "walk": false},  # 水井
 	"P": {"tile": 10, "walk": false}, # 粪窖
+	"H": {"tile": 11, "walk": false}, # 建筑占地（上面摆 PropData 的建筑图）
 }
 
 @export var id: String
 @export var title: String
-## 瓦片图集：一行排开，每块 tile_pixels 见方，顺序同 TERRAIN 的 tile 序号
+## 瓦片图集：每种地形一个图块，一行排开，顺序同 TERRAIN 的 tile 序号
 @export var tileset_texture: Texture2D
+## 每格的像素边长
 @export var tile_pixels := 16
+## 每个图块是 tile_block × tile_block 格的循环图案（地面就不会每格都一样）；1 表示每块就是一格
+@export var tile_block := 1
 @export_multiline var layout: String
 @export var spawn_cell: Vector2i
 @export var npcs: Array[NpcData] = []
 @export var chests: Array[ChestData] = []
+
+@export_group("像素图")
+## 画在某种地形格子上的物件图，比如 "T" → 树、"W" → 水井；图的底边中点对齐格子底边中点
+@export var overlays: Dictionary[String, Texture2D] = {}
+@export var props: Array[PropData] = []
+@export var chest_closed: Texture2D
+@export var chest_open: Texture2D
 
 
 func rows() -> PackedStringArray:

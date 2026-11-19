@@ -7,3 +7,6 @@
 
 # macOS
 .DS_Store
+
+# Python 缓存
+__pycache__/

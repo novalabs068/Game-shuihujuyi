@@ -1,10 +1,23 @@
 [gd_resource type="Resource" script_class="SceneData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/props/chest_closed.png" id="1_ksavd"]
 [ext_resource type="Script" path="res://scripts/data/chest_data.gd" id="1_kwhtk"]
 [ext_resource type="Script" path="res://scripts/data/npc_data.gd" id="2_4tth7"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/chest_open.png" id="2_xveqm"]
 [ext_resource type="Resource" path="res://data/heroes/lin_chong.tres" id="3_fe4vo"]
 [ext_resource type="Script" path="res://scripts/data/scene_data.gd" id="4_fyy3c"]
-[ext_resource type="Texture2D" path="res://art/tiles/placeholder.png" id="5_iqgxv"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/old_monk.png" id="5_kb5ui"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_san.png" id="6_vxuke"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="7_xs33v"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/willow.png" id="9_5krpj"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/fence.png" id="10_15oec"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/well.png" id="11_ao81w"]
+[ext_resource type="Script" path="res://scripts/data/prop_data.gd" id="12_1rfvs"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/hall.png" id="13_npk5w"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/gate.png" id="14_d7yj5"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/pit.png" id="15_46cpb"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/lantern.png" id="16_e7ffu"]
+[ext_resource type="Texture2D" path="res://art/tiles/xiangguosi.png" id="18_n23ah"]
 
 [sub_resource type="Resource" id="Resource_3rb5v"]
 script = ExtResource("1_kwhtk")
@@ -16,6 +29,7 @@ reward_text = "聚义令 ×3"
 script = ExtResource("2_4tth7")
 id = &"old_monk"
 display_name = "看园老僧"
+sprite = ExtResource("5_kb5ui")
 cell = Vector2i(9, 8)
 lines = PackedStringArray("看园老僧：智深师兄，长老吩咐你来看管这片菜园。", "看园老僧：这附近有二三十个泼皮，常来偷菜，师兄可要当心。", "我：洒家倒要看看，是哪个不怕死的。")
 
@@ -23,6 +37,7 @@ lines = PackedStringArray("看园老僧：智深师兄，长老吩咐你来看�
 script = ExtResource("2_4tth7")
 id = &"zhang_san"
 display_name = "泼皮张三"
+sprite = ExtResource("6_vxuke")
 cell = Vector2i(31, 7)
 lines = PackedStringArray("泼皮张三：听说新来了个胖和尚管菜园？兄弟们正要去「贺喜」呢，嘿嘿。", "（张三朝粪窖那边使了个眼色。）")
 
@@ -30,6 +45,7 @@ lines = PackedStringArray("泼皮张三：听说新来了个胖和尚管菜园�
 script = ExtResource("2_4tth7")
 id = &"li_si"
 display_name = "泼皮李四"
+sprite = ExtResource("7_xs33v")
 cell = Vector2i(32, 8)
 lines = PackedStringArray("泼皮李四：大师！小的们特来拜见。", "泼皮李四：请大师走到粪窖边上来，受我们一拜……", "（这事以后再说——支线在第 4 步做。）")
 
@@ -41,19 +57,47 @@ unit = ExtResource("3_fe4vo")
 cell = Vector2i(16, 10)
 lines = PackedStringArray("林冲：好一个胖大和尚！这条禅杖使得端的是好！", "我：洒家鲁智深。官人是谁？", "林冲：在下林冲，八十万禁军枪棒教头。今日得见师兄，三生有幸！")
 
+[sub_resource type="Resource" id="Resource_502s1"]
+script = ExtResource("12_1rfvs")
+texture = ExtResource("13_npk5w")
+cell = Vector2i(7, 5)
+
+[sub_resource type="Resource" id="Resource_k0p2p"]
+script = ExtResource("12_1rfvs")
+texture = ExtResource("14_d7yj5")
+cell = Vector2i(20, 20)
+offset = Vector2(0, 12)
+
+[sub_resource type="Resource" id="Resource_yxlws"]
+script = ExtResource("12_1rfvs")
+texture = ExtResource("15_46cpb")
+cell = Vector2i(33, 6)
+offset = Vector2(24, 0)
+
+[sub_resource type="Resource" id="Resource_gk7y2"]
+script = ExtResource("12_1rfvs")
+texture = ExtResource("16_e7ffu")
+cell = Vector2i(4, 7)
+
+[sub_resource type="Resource" id="Resource_srpoj"]
+script = ExtResource("12_1rfvs")
+texture = ExtResource("16_e7ffu")
+cell = Vector2i(10, 7)
+
 [resource]
 script = ExtResource("4_fyy3c")
 id = "xiangguosi"
 title = "东京·大相国寺菜园"
-tileset_texture = ExtResource("5_iqgxv")
+tileset_texture = ExtResource("18_n23ah")
+tile_block = 4
 layout = "########################################
 #______________#TTTTT.........TTTTTTTTT#
 #______________#T.......FFFFFF......TTT#
-#___#######____#........FFFFFF.......TT#
-#___#######____=........FFFFFF........T#
-#___#######____=..W.....FFFFFF...PP....#
+#___HHHHHHH____#........FFFFFF.......TT#
+#___HHHHHHH____=........FFFFFF........T#
+#___HHHHHHH____=..W.....FFFFFF...PP....#
 #______________,,,,,,,..FFFFFF...PP....#
-#______________=.....,...........,,....#
+#___H_____H____=.....,...........,,....#
 #______________=.....,,,,,,,,,,,,,.....#
 #______________#.....,.....TT..........#
 #_______________.....,.....TT.....~~~~~#
@@ -65,9 +109,17 @@ layout = "########################################
 #..TT..,,,,,,,,,,,,,,,......FFFF....T..#
 #..TT................,.............TTT.#
 #....................,.................#
-#TTTT................,.............TTTT#
+#T..T................,.............TTTT#
 ###################EEE##################
 "
-spawn_cell = Vector2i(20, 18)
+spawn_cell = Vector2i(20, 16)
 npcs = Array[ExtResource("2_4tth7")]([SubResource("Resource_vyxfh"), SubResource("Resource_dgu0q"), SubResource("Resource_s2na7"), SubResource("Resource_arty7")])
 chests = Array[ExtResource("1_kwhtk")]([SubResource("Resource_3rb5v")])
+overlays = Dictionary[String, Texture2D]({
+"=": ExtResource("10_15oec"),
+"T": ExtResource("9_5krpj"),
+"W": ExtResource("11_ao81w")
+})
+props = Array[ExtResource("12_1rfvs")]([SubResource("Resource_502s1"), SubResource("Resource_k0p2p"), SubResource("Resource_yxlws"), SubResource("Resource_gk7y2"), SubResource("Resource_srpoj")])
+chest_closed = ExtResource("1_ksavd")
+chest_open = ExtResource("2_xveqm")

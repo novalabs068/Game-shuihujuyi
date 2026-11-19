@@ -23,6 +23,8 @@ enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 @export var portrait: Texture2D
 @export var bust: Texture2D
 @export var face: Texture2D
+## 俯视场景里的像素小人（全身、脸朝右），由 tools/pixel_pipeline.py 生成
+@export var map_sprite: Texture2D
 
 @export_group("技能")
 @export var skill: SkillData

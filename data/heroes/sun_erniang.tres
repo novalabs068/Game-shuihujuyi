@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_e72y8"]
 [ext_resource type="Texture2D" path="res://art/faces/sun_erniang.png" id="2_sgclb"]
 [ext_resource type="Texture2D" path="res://art/portraits/sun_erniang.png" id="3_digai"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/sun_erniang.png" id="3_sgclb"]
 
 [sub_resource type="Resource" id="Resource_qtstr"]
 script = ExtResource("2_e72y8")
@@ -28,4 +29,5 @@ base_spd = 104
 portrait = ExtResource("3_digai")
 bust = ExtResource("1_qigqk")
 face = ExtResource("2_sgclb")
+map_sprite = ExtResource("3_sgclb")
 skill = SubResource("Resource_qtstr")
