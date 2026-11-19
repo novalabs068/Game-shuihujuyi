@@ -112,6 +112,9 @@ func _spawn_objects() -> void:
 	for prop in scene_data.props:
 		_actors.add_child(_pixel_sprite(prop.texture, _cell_bottom(prop.cell) + prop.offset))
 	for npc in scene_data.npcs:
+		# 已经随行的好汉不再站在场景里
+		if npc.unit != null and npc.unit.id in GameState.team_ids:
+			continue
 		var actor := MapActor.new()
 		actor.sprite = npc.sprite if npc.sprite != null else (npc.unit.map_sprite if npc.unit != null else null)
 		actor.sprite_scale = MapActor.CHARACTER_SCALE

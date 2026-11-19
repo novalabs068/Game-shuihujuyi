@@ -25,6 +25,8 @@ func _initialize() -> void:
 		"test_ai_guards_when_threatened",
 		"test_map_routes",
 		"test_scene_layout",
+		"test_guard_strike_shields_team",
+		"test_origins_load",
 		"test_simulated_win_rate",
 	]:
 		if call(t) != true:
@@ -318,6 +320,31 @@ func test_scene_layout() -> bool:
 			if astar.is_in_boundsv(spot) and not astar.is_point_solid(spot) and not astar.get_id_path(scene.spawn_cell, spot).is_empty():
 				reachable = true
 		check(reachable, "object at %s reachable from spawn" % t)
+	return true
+
+
+func test_guard_strike_shields_team() -> bool:
+	var escort := unit_data(&"escort", [500, 100, 0, 200], skill(SkillData.Effect.GUARD_STRIKE, {power = 2.0, amount = 0.1}))
+	var m := battle([escort, unit_data(&"ally", [800, 10, 0, 50])], [unit_data(&"e", [100000, 1, 100, 1])])
+	var e := by_id(m, &"e")
+	advance_to(m, &"escort")
+	m.act(BattleModel.Action.SKILL, e)
+	check(e.hp < e.max_hp, "guard strike deals damage")
+	var shield := roundi(by_id(m, &"escort").max_hp * 0.1)
+	check_eq(by_id(m, &"escort").shield, shield, "caster gets the shield")
+	check_eq(by_id(m, &"ally").shield, shield, "ally gets the same shield")
+	return true
+
+
+func test_origins_load() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var origins: Array[Resource] = GameDB.load_dir("res://data/origins/")
+	check_eq(origins.size(), 2, "two origins")
+	for res in origins:
+		var o := res as OriginData
+		check(o.unit != null and o.unit.skill != null, "%s has a unit and a skill" % o.id)
+		check(o.unit.rarity == UnitData.Rarity.PROTAGONIST, "%s is marked as protagonist" % o.id)
+		check(o.unit.map_sprite != null, "%s has a pixel sprite" % o.id)
 	return true
 
 

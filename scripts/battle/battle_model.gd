@@ -267,6 +267,12 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
 				ally.stun_turns = 0
 				_emit("heal", ally, "+%d" % amount, "")
 			_emit("info", actor, "", "%s 为全队疗伤" % actor.display_name())
+		SkillData.Effect.GUARD_STRIKE:
+			_deal(actor, _pick_foe(actor, wanted), s.power)
+			var shield := roundi(actor.max_hp * s.amount)
+			for ally in allies_of(actor):
+				ally.shield += shield
+				_emit("info", ally, "护盾 +%d" % shield, "")
 		SkillData.Effect.BACKSTAB:
 			# 绕过嘲讽，打预告里的目标（预告时血量比例最低的人）
 			var target := wanted if wanted != null and wanted.is_alive() else _weakest(foes_of(actor))

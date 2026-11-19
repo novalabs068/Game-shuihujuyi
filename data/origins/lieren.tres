@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="OriginData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/origin_data.gd" id="1_jtk5r"]
+[ext_resource type="Texture2D" path="res://art/busts/hero_lieren.png" id="2_fx6um"]
+[ext_resource type="Texture2D" path="res://art/faces/hero_lieren.png" id="3_red7e"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_lieren.png" id="4_mdv2h"]
+[ext_resource type="Texture2D" path="res://art/portraits/hero_lieren.png" id="5_by7k2"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_2vrm8"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_oxwai"]
+
+[sub_resource type="Resource" id="Resource_lqkfy"]
+script = ExtResource("7_oxwai")
+display_name = "穿林追魂箭"
+description = "单体 220% 伤害，目标血量低于 30% 时伤害翻倍。"
+effect = 1
+power = 2.2
+
+[sub_resource type="Resource" id="Resource_6qvw8"]
+script = ExtResource("6_2vrm8")
+id = &"hero_lieren"
+display_name = "猎户"
+rarity = 3
+role = 2
+base_hp = 440
+base_atk = 80
+base_def = 30
+base_spd = 114
+portrait = ExtResource("5_by7k2")
+bust = ExtResource("2_fx6um")
+face = ExtResource("3_red7e")
+map_sprite = ExtResource("4_mdv2h")
+skill = SubResource("Resource_lqkfy")
+
+[resource]
+script = ExtResource("1_jtk5r")
+id = &"lieren"
+display_name = "猎户"
+description = "在野猪林外的山里打猎长大，眼尖手快，箭无虚发。"
+sort_order = 2
+unit = SubResource("Resource_6qvw8")
+start_location = &"yezhulin"

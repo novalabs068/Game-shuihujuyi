@@ -13,6 +13,7 @@ enum Effect {
 	STEAL,       ## 偷取目标 1 个增益，并立刻再行动一次
 	HEAL,        ## 全队恢复 amount 比例的生命，并解除眩晕
 	BACKSTAB,    ## 敌人用：无视嘲讽，打血量比例最低的好汉，power 倍
+	GUARD_STRIKE, ## 单体 power 倍伤害，同时全队获得施放者 amount 比例生命的护盾
 }
 
 @export var display_name: String
@@ -28,4 +29,4 @@ enum Effect {
 
 ## 出手前是否需要玩家选一个敌人。
 func needs_enemy_target() -> bool:
-	return effect in [Effect.DAMAGE, Effect.EXECUTE, Effect.MULTI_HIT, Effect.SURE_CRIT, Effect.STUN, Effect.STEAL]
+	return effect in [Effect.DAMAGE, Effect.EXECUTE, Effect.MULTI_HIT, Effect.SURE_CRIT, Effect.STUN, Effect.STEAL, Effect.GUARD_STRIKE]

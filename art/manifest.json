@@ -1722,6 +1722,278 @@
         "technical_checks_passed": true,
         "approved_by": ""
       }
+    },
+    {
+      "id": "hero_biaoshi-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/hero_biaoshi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/hero_biaoshi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/hero_biaoshi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "hero_biaoshi-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/hero_biaoshi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/hero_biaoshi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/hero_biaoshi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "hero_biaoshi-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/hero_biaoshi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/hero_biaoshi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/hero_biaoshi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-hero_biaoshi",
+      "role": "俯视场景人物",
+      "path": "art/pixel/characters/hero_biaoshi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_protagonists.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_protagonists.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "hero_lieren-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/hero_lieren.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/hero_lieren.txt + art/STYLE.md 提示词固定段；原图 art/inbox/hero_lieren.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "hero_lieren-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/hero_lieren.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/hero_lieren.txt + art/STYLE.md 提示词固定段；原图 art/inbox/hero_lieren.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "hero_lieren-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/hero_lieren.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/hero_lieren.txt + art/STYLE.md 提示词固定段；原图 art/inbox/hero_lieren.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-hero_lieren",
+      "role": "俯视场景人物",
+      "path": "art/pixel/characters/hero_lieren.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_protagonists.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_protagonists.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
     }
   ]
 }

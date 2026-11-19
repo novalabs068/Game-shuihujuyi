@@ -37,10 +37,12 @@ func _ready() -> void:
 
 
 ## 逐句播放。每行「说话人：台词」，没有冒号的是旁白。speakers 把说话人名字对到 UnitData（用来显示半身像），
-## 「我」对应主角，显示时换成主角的名字。
+## 「我」对应主角，显示时换成主角的名字；台词里的 {name} 换成主角的名字。
 func run(lines: PackedStringArray, speakers: Dictionary) -> void:
 	visible = true
-	for line in lines:
+	var me: UnitData = speakers.get("我")
+	for raw in lines:
+		var line := raw.replace("{name}", me.display_name if me != null else "")
 		var speaker := ""
 		var text := line
 		var colon := line.find("：")

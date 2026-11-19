@@ -1,10 +1,12 @@
 class_name TeamSelect
 extends Control
-## 编队：点卡片选最多 3 人，底部提示能触发的组合技。stage 为空时不显示关卡信息。
+## 编队：主角固定上场，再点卡片选最多 2 位随行好汉，底部提示能触发的组合技。
+## stage 为空时不显示关卡信息。
 
-signal start_requested(team: Array[UnitData])
+## heroes 只含好汉，不含主角
+signal start_requested(heroes: Array[UnitData])
 
-const MAX_TEAM := 3
+const MAX_TEAM := GameState.MAX_HEROES
 const TILE_SIZE := Vector2(282, 196)
 
 var stage: StageData
@@ -33,7 +35,7 @@ func _ready() -> void:
 	v.add_theme_constant_override("separation", 14)
 	margin.add_child(v)
 
-	v.add_child(UiKit.label("编队：选择出战好汉（最多 3 人）", 32))
+	v.add_child(UiKit.label("编队：主角%s固定上场，再选 %d 位好汉随行" % [GameState.player_name, MAX_TEAM], 32))
 	if stage != null:
 		var enemy_names := PackedStringArray()
 		for e in stage.enemies:
@@ -65,7 +67,7 @@ func _ready() -> void:
 	_start_button.pressed.connect(func() -> void: start_requested.emit(_selected.duplicate()))
 	bottom.add_child(_start_button)
 
-	_selected = GameState.team()
+	_selected = GameState.heroes()
 	_refresh()
 
 
@@ -128,7 +130,7 @@ func _refresh() -> void:
 	var names := PackedStringArray()
 	for hero in _selected:
 		names.append(hero.display_name)
-	_team_label.text = "出战：%s（%d/%d）" % ["、".join(names) if not names.is_empty() else "未选", _selected.size(), MAX_TEAM]
+	_team_label.text = "出战：%s + %s（%d/%d）" % [GameState.player_name, "、".join(names) if not names.is_empty() else "未选", _selected.size(), MAX_TEAM]
 
 	var lines := PackedStringArray()
 	for combo in GameDB.combos:

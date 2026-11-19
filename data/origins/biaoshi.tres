@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="OriginData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/origin_data.gd" id="1_jdeac"]
+[ext_resource type="Texture2D" path="res://art/busts/hero_biaoshi.png" id="2_qf3mf"]
+[ext_resource type="Texture2D" path="res://art/faces/hero_biaoshi.png" id="3_jx0uc"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_biaoshi.png" id="4_3axxw"]
+[ext_resource type="Texture2D" path="res://art/portraits/hero_biaoshi.png" id="5_gn8rf"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_pgnk1"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_nsnri"]
+
+[sub_resource type="Resource" id="Resource_fksru"]
+script = ExtResource("7_nsnri")
+display_name = "押镖横刀"
+description = "单体 200% 伤害，同时全队获得自身 12% 生命的护盾。"
+effect = 10
+power = 2.0
+amount = 0.12
+
+[sub_resource type="Resource" id="Resource_66qdh"]
+script = ExtResource("6_pgnk1")
+id = &"hero_biaoshi"
+display_name = "镖师"
+rarity = 3
+role = 1
+base_hp = 540
+base_atk = 72
+base_def = 42
+portrait = ExtResource("5_gn8rf")
+bust = ExtResource("2_qf3mf")
+face = ExtResource("3_jx0uc")
+map_sprite = ExtResource("4_3axxw")
+skill = SubResource("Resource_fksru")
+
+[resource]
+script = ExtResource("1_jdeac")
+id = &"biaoshi"
+display_name = "镖师"
+description = "在东京一家镖局走镖多年，刀法扎实，最懂得护着同伴。"
+sort_order = 1
+unit = SubResource("Resource_66qdh")
+start_location = &"dongjing"

@@ -2,7 +2,8 @@ class_name UnitData
 extends Resource
 ## 一个好汉或敌人的静态数据（1 级属性）。加新好汉 = 在 data/heroes/ 加一个 .tres。
 
-enum Rarity { NONE, DISHA, TIANGANG }
+## PROTAGONIST 是原创主角，不在卡池里
+enum Rarity { NONE, DISHA, TIANGANG, PROTAGONIST }
 enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 
 @export var id: StringName
