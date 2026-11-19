@@ -32,6 +32,7 @@ func _initialize() -> void:
 		"test_encounter_levels",
 		"test_rewards",
 		"test_bounties_and_events_data",
+		"test_gacha",
 		"test_simulated_win_rate",
 	]:
 		if call(t) != true:
@@ -430,6 +431,34 @@ func test_bounties_and_events_data() -> bool:
 	var li_si: NpcData = scene.npcs.filter(func(n: NpcData) -> bool: return n.id == &"li_si")[0]
 	check(li_si.event != null and li_si.event.choices.size() == 3, "garden quest has three choices")
 	check(li_si.event.choices.all(func(c: EventChoice) -> bool: return c.flag == "garden_done"), "every garden choice finishes the quest")
+	return true
+
+
+func test_gacha() -> bool:
+	var pool: Array[UnitData] = []
+	for t in [UnitData.Tier.JIA, UnitData.Tier.YI, UnitData.Tier.BING]:
+		var h := unit_data(StringName("h%d" % t), [100, 10, 10, 100])
+		h.tier = t
+		pool.append(h)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	for i in 300:
+		var out: Dictionary = Gacha.pull(pool, 10, 0, rng)
+		var heroes: Array = out["heroes"]
+		check(heroes.any(func(h: UnitData) -> bool: return h.tier <= UnitData.Tier.YI), "a ten-pull has at least one 乙 or better")
+	var pity: Dictionary = Gacha.pull(pool, 1, Gacha.PITY_JIA - 1, rng)
+	check_eq((pity["heroes"][0] as UnitData).tier, UnitData.Tier.JIA, "the 50th pull without a 甲 is a 甲")
+	check_eq(pity["pulls_since_jia"], 0, "pity counter resets after a 甲")
+	for i in 50:
+		var first: Dictionary = Gacha.pull(pool, 10, 0, rng, true)
+		check((first["heroes"] as Array).any(func(h: UnitData) -> bool: return h.tier == UnitData.Tier.JIA), "the first ten-pull has a 甲")
+	var counts := [0, 0, 0, 0]
+	for i in 100000:
+		counts[Gacha._roll_tier(rng)] += 1
+	for t in 4:
+		var pct: float = counts[t] / 1000.0
+		check(absf(pct - Gacha.RATES[t]) < 1.0, "tier %d rate %.1f%% close to %d%%" % [t, pct, Gacha.RATES[t]])
+	check_eq(Gacha._pick(pool, UnitData.Tier.DING, rng).tier, UnitData.Tier.BING, "an empty 丁 falls back to 丙")
 	return true
 
 

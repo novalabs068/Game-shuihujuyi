@@ -95,7 +95,7 @@ func _make_tile(hero: UnitData) -> PanelContainer:
 	name_row.add_child(badge)
 	_badges[hero] = badge
 	head.add_child(UiKit.label(hero.nickname, 18, UiKit.rarity_color(hero)))
-	head.add_child(UiKit.label("%s · %s" % [UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 16, UiKit.TEXT_DIM))
+	head.add_child(UiKit.label("%s级 · %s · %s" % [UiKit.TIER_NAMES[hero.tier], UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 16, UiKit.TIER_COLORS[hero.tier]))
 	v.add_child(UiKit.label("「%s」" % hero.skill.display_name, 20))
 	var desc := UiKit.label(hero.skill.description, 16, UiKit.TEXT_DIM)
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -113,6 +113,8 @@ func _make_tile(hero: UnitData) -> PanelContainer:
 
 
 func _toggle(hero: UnitData) -> void:
+	if not GameState.owns(hero.id):
+		return
 	if hero in _selected:
 		_selected.erase(hero)
 	elif _selected.size() < MAX_TEAM:
@@ -125,7 +127,12 @@ func _refresh() -> void:
 		var picked := hero in _selected
 		var border := UiKit.ACCENT if picked else UiKit.rarity_color(hero)
 		_tiles[hero].add_theme_stylebox_override("panel", UiKit.box(UiKit.role_color(hero), border, 5 if picked else 2))
+		# 还没招募的好汉变暗，标「未招募」，不能选
+		var owned := GameState.owns(hero.id)
+		_tiles[hero].modulate = Color.WHITE if owned else Color(0.45, 0.45, 0.45)
 		_badges[hero].text = "①②③"[_selected.find(hero)] if picked else ""
+		if not owned:
+			_badges[hero].text = "未招募"
 
 	var names := PackedStringArray()
 	for hero in _selected:

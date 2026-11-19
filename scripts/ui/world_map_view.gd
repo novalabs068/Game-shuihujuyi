@@ -7,6 +7,7 @@ extends Control
 signal battle_requested(stage: StageData, destination: StringName, progress: float, bonus: Dictionary)
 signal team_requested
 signal scene_requested(scene_id: String)
+signal recruit_requested
 
 const MAP_SIZE := Vector2(1280, 720)
 const WALK_SPEED := 260.0
@@ -182,6 +183,11 @@ func _build_top_bar() -> void:
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.add_child(_status)
 	_refresh_status()
+	var recruit_button := UiKit.button("招募", Vector2(100, 40), 20)
+	recruit_button.pressed.connect(func() -> void:
+		if not _walking:
+			recruit_requested.emit())
+	row.add_child(recruit_button)
 	var team_button := UiKit.button("编队", Vector2(100, 40), 20)
 	team_button.pressed.connect(func() -> void:
 		if not _walking:

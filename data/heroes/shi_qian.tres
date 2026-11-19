@@ -20,6 +20,7 @@ display_name = "时迁"
 nickname = "鼓上蚤"
 rarity = 1
 role = 4
+tier = 1
 sort_order = 7
 base_hp = 380
 base_atk = 64

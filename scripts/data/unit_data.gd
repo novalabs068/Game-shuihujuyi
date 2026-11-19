@@ -2,8 +2,10 @@ class_name UnitData
 extends Resource
 ## 一个好汉或敌人的静态数据（1 级属性）。加新好汉 = 在 data/heroes/ 加一个 .tres。
 
-## PROTAGONIST 是原创主角，不在卡池里
+## 身份：天罡、地煞（以后还有江湖人物）；PROTAGONIST 是原创主角，不在卡池里
 enum Rarity { NONE, DISHA, TIANGANG, PROTAGONIST }
+## 品级：强弱，决定抽卡概率和星数上限。和身份无关，见设计文档「好汉卡牌与招募」
+enum Tier { JIA, YI, BING, DING }
 enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 
 @export var id: StringName
@@ -11,6 +13,7 @@ enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 @export var nickname: String
 @export var rarity: Rarity
 @export var role: Role
+@export var tier: Tier = Tier.DING
 @export var sort_order := 0
 
 @export_group("1 级属性")

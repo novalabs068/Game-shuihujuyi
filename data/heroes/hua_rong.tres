@@ -21,6 +21,7 @@ display_name = "花荣"
 nickname = "小李广"
 rarity = 2
 role = 2
+tier = 1
 sort_order = 4
 base_hp = 400
 base_atk = 88

@@ -18,6 +18,9 @@ const HEAL := Color("7be07f")
 
 const ROLE_NAMES: Array[String] = ["猛将", "武将", "射手", "谋士", "奇人"]
 const RARITY_NAMES: Array[String] = ["", "地煞", "天罡", "主角"]
+const TIER_NAMES: Array[String] = ["甲", "乙", "丙", "丁"]
+## 卡框颜色按品级：甲金、乙紫、丙蓝、丁灰
+const TIER_COLORS: Array[Color] = [Color("e0b040"), Color("a070e0"), Color("5a9ae8"), Color("9aa0a8")]
 ## 职业底色：猛将蓝、武将红、射手绿、谋士紫、奇人青
 const ROLE_COLORS: Array[Color] = [Color("34465f"), Color("5a3434"), Color("3d5634"), Color("4a3d5e"), Color("2f5252")]
 
@@ -83,10 +86,8 @@ static func rarity_color(data: UnitData) -> Color:
 	match data.rarity:
 		UnitData.Rarity.PROTAGONIST:
 			return ACCENT
-		UnitData.Rarity.TIANGANG:
-			return GOLD
-		UnitData.Rarity.DISHA:
-			return SILVER
+		UnitData.Rarity.TIANGANG, UnitData.Rarity.DISHA:
+			return TIER_COLORS[data.tier]
 	return ENEMY
 
 

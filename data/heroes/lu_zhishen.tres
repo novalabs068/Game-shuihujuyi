@@ -22,6 +22,7 @@ id = &"lu_zhishen"
 display_name = "鲁智深"
 nickname = "花和尚"
 rarity = 2
+tier = 0
 sort_order = 1
 base_hp = 620
 base_atk = 62

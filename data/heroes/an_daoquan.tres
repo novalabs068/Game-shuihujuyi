@@ -21,6 +21,7 @@ display_name = "安道全"
 nickname = "神医"
 rarity = 1
 role = 4
+tier = 1
 sort_order = 8
 base_hp = 430
 base_atk = 50

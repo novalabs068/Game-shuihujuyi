@@ -7,8 +7,8 @@ const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 2
 ## 队伍是主角 + 最多这么多位好汉
 const MAX_HEROES := 2
-## M2 还没有抽卡，先给两位不在大相国寺场景里出现的好汉
-const DEFAULT_HEROES: Array[StringName] = [&"wu_song", &"hua_rong"]
+## 新开局送的聚义令，正好一次十连
+const STARTING_TOKENS := 10
 const DEFAULT_MAP := "ch1"
 const PROTAGONIST_ID := &"protagonist"
 ## 队伍等级上限（M3 做养成时再细分到每个人）
@@ -25,6 +25,10 @@ var experience := 0
 var silver := 0
 ## 聚义令：抽卡用，只能靠闯荡获得
 var tokens := 0
+## 已招募的好汉、每位好汉攒下的将魂（重复抽到时得到，M3 升星用）、距上次抽出甲级已经抽了几次
+var owned: Array[StringName] = []
+var souls: Dictionary[StringName, int] = {}
+var pulls_since_jia := 0
 
 var _protagonist: UnitData
 
@@ -39,6 +43,7 @@ func new_game(p_name: String, origin: OriginData) -> void:
 	player_name = p_name
 	origin_id = origin.id
 	location_id = origin.start_location
+	tokens = STARTING_TOKENS
 	_protagonist = null
 	save_game()
 
@@ -64,9 +69,40 @@ func heroes() -> Array[UnitData]:
 	var out: Array[UnitData] = []
 	for id in team_ids:
 		var hero := GameDB.hero(id)
-		if hero != null:
+		if hero != null and id in owned:
 			out.append(hero)
 	return out
+
+
+func owns(id: StringName) -> bool:
+	return id in owned
+
+
+## 用聚义令招募 count 次（1 或 10）。返回每一抽的结果 [{hero, is_new}]；聚义令不够时返回空。
+## 新招到的好汉在队伍没满时自动随行；第一次十连保证出一个甲。
+func recruit(count: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	if tokens < count:
+		return results
+	tokens -= count
+	var first_ten := count >= 10 and not has_flag("first_ten_pull")
+	if count >= 10:
+		set_flag("first_ten_pull")
+	var outcome := Gacha.pull(GameDB.heroes, count, pulls_since_jia, rng, first_ten)
+	pulls_since_jia = outcome["pulls_since_jia"]
+	var drawn: Array[UnitData] = []
+	drawn.assign(outcome["heroes"])
+	for hero in drawn:
+		var is_new := not owns(hero.id)
+		if is_new:
+			owned.append(hero.id)
+			if team_ids.size() < MAX_HEROES:
+				team_ids.append(hero.id)
+		else:
+			souls[hero.id] = souls.get(hero.id, 0) + Gacha.DUPLICATE_SOULS
+		results.append({"hero": hero, "is_new": is_new})
+	save_game()
+	return results
 
 
 ## 出战队伍：主角在第一位，后面是随行好汉。
@@ -119,7 +155,10 @@ func set_flag(flag: String) -> void:
 func reset() -> void:
 	player_name = ""
 	origin_id = &""
-	team_ids = DEFAULT_HEROES.duplicate()
+	team_ids.clear()
+	owned.clear()
+	souls.clear()
+	pulls_since_jia = 0
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
 	level = 1
@@ -148,6 +187,9 @@ func save_game() -> void:
 		"exp": experience,
 		"silver": silver,
 		"tokens": tokens,
+		"owned": owned.map(func(id: StringName) -> String: return String(id)),
+		"souls": _souls_to_json(),
+		"pulls_since_jia": pulls_since_jia,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -184,3 +226,17 @@ func load_game() -> void:
 	experience = data.get("exp", 0)
 	silver = data.get("silver", 0)
 	tokens = data.get("tokens", 0)
+	var saved_owned: Array = data.get("owned", saved_team)
+	for id: String in saved_owned:
+		owned.append(StringName(id))
+	var saved_souls: Dictionary = data.get("souls", {})
+	for id: String in saved_souls:
+		souls[StringName(id)] = int(saved_souls[id])
+	pulls_since_jia = data.get("pulls_since_jia", 0)
+
+
+func _souls_to_json() -> Dictionary:
+	var out := {}
+	for id in souls:
+		out[String(id)] = souls[id]
+	return out

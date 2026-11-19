@@ -34,6 +34,13 @@ func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, not
 	screen.battle_requested.connect(_start_battle)
 	screen.team_requested.connect(_show_team_select)
 	screen.scene_requested.connect(_show_scene)
+	screen.recruit_requested.connect(_show_recruit)
+	_set_screen(screen)
+
+
+func _show_recruit() -> void:
+	var screen := RecruitView.new()
+	screen.back_requested.connect(_show_map)
 	_set_screen(screen)
 
 

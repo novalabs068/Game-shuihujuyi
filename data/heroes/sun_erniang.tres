@@ -21,6 +21,7 @@ display_name = "孙二娘"
 nickname = "母夜叉"
 rarity = 1
 role = 4
+tier = 2
 sort_order = 6
 base_hp = 450
 base_atk = 66

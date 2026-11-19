@@ -21,6 +21,7 @@ display_name = "林冲"
 nickname = "豹子头"
 rarity = 2
 role = 1
+tier = 0
 sort_order = 2
 base_hp = 470
 base_atk = 84

@@ -23,6 +23,7 @@ display_name = "吴用"
 nickname = "智多星"
 rarity = 2
 role = 3
+tier = 1
 sort_order = 5
 base_hp = 420
 base_atk = 58

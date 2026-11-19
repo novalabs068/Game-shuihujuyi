@@ -22,6 +22,7 @@ display_name = "武松"
 nickname = "行者"
 rarity = 2
 role = 1
+tier = 0
 sort_order = 3
 base_hp = 500
 base_atk = 80
