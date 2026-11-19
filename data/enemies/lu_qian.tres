@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/lu_qian.png" id="1_7xg4j"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_id81r"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_fbq6j"]
+[ext_resource type="Texture2D" path="res://art/faces/lu_qian.png" id="2_id6lk"]
+[ext_resource type="Texture2D" path="res://art/portraits/lu_qian.png" id="3_hdwvd"]
+
+[sub_resource type="Resource" id="Resource_eoeij"]
+script = ExtResource("2_fbq6j")
+display_name = "背后捅刀"
+description = "无视嘲讽，打血量比例最低的好汉，280% 伤害。会提前一回合预告目标。"
+effect = 9
+power = 2.8
+
+[resource]
+script = ExtResource("1_id81r")
+id = &"lu_qian"
+display_name = "陆谦"
+nickname = "Boss"
+role = 1
+base_hp = 1100
+base_atk = 104
+base_def = 34
+base_spd = 102
+portrait = ExtResource("3_hdwvd")
+bust = ExtResource("1_7xg4j")
+face = ExtResource("2_id6lk")
+skill = SubResource("Resource_eoeij")
+is_boss = true
+enrage_name = "狗仗人势"
+enrage_atk_bonus = 0.5

@@ -1,0 +1,370 @@
+# 战斗规则测试 + 数值模拟。
+# godot --headless --path . --script res://tests/test_runner.gd
+extends SceneTree
+
+const SIM_BATTLES := 300
+const SIM_TURN_LIMIT := 500
+
+var passed := 0
+var failed := 0
+
+
+func _initialize() -> void:
+	for t: String in [
+		"test_data_loads",
+		"test_damage_formula",
+		"test_guard_halves_damage",
+		"test_faster_unit_acts_first",
+		"test_taunt_forces_target",
+		"test_stun_skips_turn",
+		"test_skill_cooldown",
+		"test_execute_doubles_on_low_hp",
+		"test_combo_needs_both_full_rage",
+		"test_steal_grants_extra_action",
+		"test_backstab_intent_ignores_taunt",
+		"test_ai_guards_when_threatened",
+		"test_map_routes",
+		"test_scene_layout",
+		"test_simulated_win_rate",
+	]:
+		if call(t) != true:
+			failed += 1
+			push_error("FAIL %s: did not finish (runtime error?)" % t)
+	print("Results: %d passed, %d failed" % [passed, failed])
+	quit(1 if failed > 0 else 0)
+
+
+func check(ok: bool, label: String) -> void:
+	if ok:
+		passed += 1
+	else:
+		failed += 1
+		push_error("FAIL " + label)
+
+
+func check_eq(actual: Variant, expected: Variant, label: String) -> void:
+	check(actual == expected, "%s: expected %s, got %s" % [label, expected, actual])
+
+
+# --- 帮助函数 ---
+
+func unit_data(id: StringName, stats: Array, skill: SkillData = null) -> UnitData:
+	var u := UnitData.new()
+	u.id = id
+	u.display_name = String(id)
+	u.base_hp = stats[0]
+	u.base_atk = stats[1]
+	u.base_def = stats[2]
+	u.base_spd = stats[3]
+	u.skill = skill
+	return u
+
+
+func skill(effect: SkillData.Effect, params: Dictionary = {}) -> SkillData:
+	var s := SkillData.new()
+	s.display_name = "技能"
+	s.effect = effect
+	for key: String in params:
+		s.set(key, params[key])
+	return s
+
+
+func battle(team: Array[UnitData], enemies: Array[UnitData], combos: Array[ComboData] = []) -> BattleModel:
+	var stage := StageData.new()
+	stage.enemies = enemies
+	stage.enemy_level = 1
+	return BattleModel.new(stage, team, 1, combos, 42)
+
+
+func by_id(model: BattleModel, id: StringName) -> BattleUnit:
+	for u in model.units:
+		if u.data.id == id:
+			return u
+	return null
+
+
+## 推进到 id 对应的单位行动为止，其他单位都只防御。
+func advance_to(model: BattleModel, id: StringName) -> void:
+	for i in 50:
+		model.start_next_turn()
+		if model.current == null:
+			continue
+		if model.current.data.id == id:
+			return
+		model.act(BattleModel.Action.GUARD)
+	push_error("advance_to: %s never acted" % id)
+
+
+# --- 测试 ---
+
+func test_data_loads() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	check_eq(GameDB.load_dir("res://data/heroes/").size(), 8, "8 heroes")
+	check_eq(GameDB.load_dir("res://data/combos/").size(), 3, "3 combos")
+	var stage: StageData = load("res://data/stages/stage_1_7.tres")
+	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
+	check(stage.enemies[1].is_boss, "Lu Qian is the boss")
+	return true
+
+
+func test_damage_formula() -> bool:
+	# 攻击 100、防御 100：100 × 1.0 × 100/200 = 50，随机 ±5%，暴击 ×1.5
+	var m := battle([unit_data(&"a", [500, 100, 0, 100])], [unit_data(&"e", [100000, 1, 100, 1])])
+	var a := by_id(m, &"a")
+	var e := by_id(m, &"e")
+	for i in 50:
+		var dmg := m._deal(a, e, 1.0)
+		check(dmg >= 47 and dmg <= 79, "damage %d in [47, 79]" % dmg)
+	var crit := m._deal(a, e, 1.0, true)
+	check(crit >= 71 and crit <= 79, "forced crit %d in [71, 79]" % crit)
+	return true
+
+
+func test_guard_halves_damage() -> bool:
+	var m := battle([unit_data(&"a", [500, 100, 0, 100])], [unit_data(&"e", [100000, 1, 100, 1])])
+	var e := by_id(m, &"e")
+	e.guarding = true
+	var dmg := m._deal(by_id(m, &"a"), e, 1.0, true)
+	check(dmg >= 35 and dmg <= 40, "guarded crit %d in [35, 40]" % dmg)
+	return true
+
+
+func test_faster_unit_acts_first() -> bool:
+	var m := battle([unit_data(&"slow", [500, 10, 10, 80])], [unit_data(&"fast", [500, 10, 10, 120])])
+	m.start_next_turn()
+	check_eq(m.current.data.id, &"fast", "speed 120 acts before speed 80")
+	check_eq(m.turn_order_preview().size(), BattleModel.TURN_PREVIEW_COUNT, "preview length")
+	# 速度 120 对 80：前 6 次行动里快的占 4 次
+	var fast_count := m.turn_order_preview().filter(func(u: BattleUnit) -> bool: return u.data.id == &"fast").size()
+	check_eq(fast_count, 4, "fast acts 4 of 6")
+	return true
+
+
+func test_taunt_forces_target() -> bool:
+	var tank := unit_data(&"tank", [5000, 10, 10, 200], skill(SkillData.Effect.TAUNT, {turns = 2, amount = 0.4}))
+	var m := battle([tank, unit_data(&"weak", [100, 10, 0, 50])], [unit_data(&"e", [5000, 50, 10, 100])])
+	advance_to(m, &"tank")
+	m.act(BattleModel.Action.SKILL)
+	check(by_id(m, &"tank").is_taunting(), "tank is taunting")
+	var weak := by_id(m, &"weak")
+	advance_to(m, &"e")
+	m.act(BattleModel.Action.ATTACK, weak)
+	check_eq(weak.hp, weak.max_hp, "taunt redirects the attack away from weak")
+	check(by_id(m, &"tank").hp < by_id(m, &"tank").max_hp, "tank took the hit")
+	return true
+
+
+func test_stun_skips_turn() -> bool:
+	var m := battle([unit_data(&"a", [500, 10, 10, 200], skill(SkillData.Effect.STUN, {turns = 1}))], [unit_data(&"e", [500, 10, 10, 100])])
+	advance_to(m, &"a")
+	m.act(BattleModel.Action.SKILL)
+	var e := by_id(m, &"e")
+	check_eq(e.stun_turns, 1, "enemy stunned")
+	# 下一个轮到敌人时被跳过
+	for i in 5:
+		m.start_next_turn()
+		if m.current == null:
+			break
+		m.act(BattleModel.Action.GUARD)
+	check_eq(e.stun_turns, 0, "stun consumed")
+	return true
+
+
+func test_skill_cooldown() -> bool:
+	var m := battle([unit_data(&"a", [500, 10, 10, 100], skill(SkillData.Effect.DAMAGE, {power = 1.0}))], [unit_data(&"e", [100000, 1, 10, 1])])
+	var a := by_id(m, &"a")
+	advance_to(m, &"a")
+	m.act(BattleModel.Action.SKILL)
+	var ready_after := 0
+	for i in 5:
+		advance_to(m, &"a")
+		ready_after += 1
+		if a.skill_ready():
+			break
+		m.act(BattleModel.Action.GUARD)
+	check_eq(ready_after, 3, "skill ready again on the 3rd turn after use")
+	return true
+
+
+func test_execute_doubles_on_low_hp() -> bool:
+	var lin := unit_data(&"lin", [500, 100, 0, 100], skill(SkillData.Effect.EXECUTE, {power = 1.0}))
+	var m := battle([lin], [unit_data(&"e", [10000, 1, 100, 1])])
+	var e := by_id(m, &"e")
+	m.rng.seed = 1
+	advance_to(m, &"lin")
+	m.act(BattleModel.Action.SKILL, e)
+	var normal := e.max_hp - e.hp
+	e.hp = int(e.max_hp * 0.2)
+	var before := e.hp
+	by_id(m, &"lin").skill_cooldown = 0
+	advance_to(m, &"lin")
+	m.act(BattleModel.Action.SKILL, e)
+	var doubled := before - e.hp
+	check(doubled > normal * 1.6, "execute on low hp (%d) roughly doubles normal (%d)" % [doubled, normal])
+	return true
+
+
+func test_combo_needs_both_full_rage() -> bool:
+	var combo := ComboData.new()
+	combo.hero_a = &"lu"
+	combo.hero_b = &"lin"
+	combo.effect = ComboData.Effect.SHIELD_STRIKE
+	combo.amount = 0.2
+	combo.power = 4.0
+	var m := battle([unit_data(&"lu", [500, 50, 10, 100]), unit_data(&"lin", [500, 50, 10, 90])], [unit_data(&"e", [100000, 1, 10, 1])], [combo])
+	var lu := by_id(m, &"lu")
+	var lin := by_id(m, &"lin")
+	advance_to(m, &"lu")
+	lu.rage = 100
+	check(m.available_combo(lu) == null, "no combo while partner rage is low")
+	lin.rage = 100
+	check(m.available_combo(lu) == combo, "combo when both are full")
+	m.act(BattleModel.Action.COMBO, by_id(m, &"e"))
+	check_eq(lu.rage, 0, "initiator rage spent")
+	check_eq(lin.rage, 0, "partner rage spent")
+	check_eq(lu.shield, roundi(lu.max_hp * 0.2), "shield granted")
+	lin.hp = 0
+	lu.rage = 100
+	check(m.available_combo(lu) == null, "no combo when partner is down")
+	return true
+
+
+func test_steal_grants_extra_action() -> bool:
+	var m := battle([unit_data(&"thief", [500, 10, 10, 100], skill(SkillData.Effect.STEAL))], [unit_data(&"e", [500, 10, 10, 90])])
+	var e := by_id(m, &"e")
+	e.buffs.append(BattleUnit.Buff.new("狗仗人势", 0.5, 0.0, 3))
+	advance_to(m, &"thief")
+	m.act(BattleModel.Action.SKILL, e)
+	check(e.buffs.is_empty(), "buff removed from enemy")
+	check_eq(by_id(m, &"thief").buffs.size(), 1, "thief has the buff")
+	m.start_next_turn()
+	check(m.current != null and m.current.data.id == &"thief", "thief acts again immediately")
+	return true
+
+
+func test_backstab_intent_ignores_taunt() -> bool:
+	var tank := unit_data(&"tank", [5000, 10, 10, 200], skill(SkillData.Effect.TAUNT, {turns = 2, amount = 0.4}))
+	var boss := unit_data(&"boss", [5000, 50, 10, 100], skill(SkillData.Effect.BACKSTAB, {power = 2.0}))
+	var m := battle([tank, unit_data(&"weak", [100, 10, 0, 50])], [boss])
+	var weak := by_id(m, &"weak")
+	weak.hp = 10
+	m._plan_intent(by_id(m, &"boss"))
+	advance_to(m, &"tank")
+	m.act(BattleModel.Action.SKILL)
+	var b := by_id(m, &"boss")
+	check(b.intent_skill, "boss plans its skill")
+	check(m.intent_target_of(b) == weak, "backstab intent stays on the weakest despite taunt")
+	check(m.is_threatened(weak), "weak is threatened")
+	b.intent_skill = false
+	check(m.intent_target_of(b) == by_id(m, &"tank"), "a plain attack intent is pulled by taunt")
+	return true
+
+
+func test_ai_guards_when_threatened() -> bool:
+	var boss := unit_data(&"boss", [5000, 50, 10, 50], skill(SkillData.Effect.BACKSTAB, {power = 2.0}))
+	var m := battle([unit_data(&"hero", [500, 10, 10, 100])], [boss])
+	var hero := by_id(m, &"hero")
+	check(m.is_threatened(hero), "hero is the backstab target")
+	advance_to(m, &"hero")
+	m.act_ai()
+	check(hero.guarding, "auto battle guards against a telegraphed skill")
+	return true
+
+
+func test_map_routes() -> bool:
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	check_eq(map.locations.size(), 5, "chapter 1 has 5 locations")
+	var forward := map.route(&"dongjing", &"cangzhou")
+	check_eq(forward[0], map.location(&"dongjing").map_position, "route starts at the origin")
+	check_eq(forward[forward.size() - 1], map.location(&"cangzhou").map_position, "route ends at the destination")
+	var back := map.route(&"cangzhou", &"dongjing")
+	back.reverse()
+	check_eq(back, forward, "walking back retraces the same road")
+	check_eq(map.location(&"dongjing").road_to_next.size(), 5, "road data untouched by route()")
+	check(has_stage_file(map.encounter_stage_id), "encounter stage exists")
+	return true
+
+
+func test_scene_layout() -> bool:
+	var scene: SceneData = load("res://data/scenes/xiangguosi.tres")
+	var rows := scene.rows()
+	var width := rows[0].length()
+	for r in rows:
+		check_eq(r.length(), width, "layout row width")
+	for y in rows.size():
+		for x in width:
+			check(SceneData.TERRAIN.has(rows[y][x]), "known terrain '%s' at %d,%d" % [rows[y][x], x, y])
+	check(scene.is_walkable(scene.spawn_cell), "spawn is walkable")
+	check(scene.layout.contains("E"), "scene has an exit")
+	# 从出生点能走到出口，也能走到每个人物和宝箱旁边
+	var astar := AStarGrid2D.new()
+	astar.region = Rect2i(Vector2i.ZERO, scene.size())
+	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+	astar.update()
+	for y in rows.size():
+		for x in width:
+			astar.set_point_solid(Vector2i(x, y), not scene.is_walkable(Vector2i(x, y)))
+	var targets: Array[Vector2i] = []
+	for npc in scene.npcs:
+		targets.append(npc.cell)
+	for chest in scene.chests:
+		targets.append(chest.cell)
+	for t in targets:
+		astar.set_point_solid(t, true)
+	for t in targets:
+		var reachable := false
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var spot: Vector2i = t + d
+			if astar.is_in_boundsv(spot) and not astar.is_point_solid(spot) and not astar.get_id_path(scene.spawn_cell, spot).is_empty():
+				reachable = true
+		check(reachable, "object at %s reachable from spawn" % t)
+	return true
+
+
+func has_stage_file(id: String) -> bool:
+	return ResourceLoader.exists("res://data/stages/%s.tres" % id.replace("-", "_")) or ResourceLoader.exists("res://data/stages/%s.tres" % id)
+
+
+## 用设计文档里的默认队伍（鲁智深、林冲、武松）自动打 1-7，看胜率和回合数是否在目标附近。
+func test_simulated_win_rate() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var heroes: Dictionary[StringName, UnitData] = {}
+	for res in GameDB.load_dir("res://data/heroes/"):
+		var h := res as UnitData
+		heroes[h.id] = h
+	var combos: Array[ComboData] = []
+	for res in GameDB.load_dir("res://data/combos/"):
+		combos.append(res as ComboData)
+	var stage: StageData = load("res://data/stages/stage_1_7.tres")
+	for team_ids: Array in [[&"lu_zhishen", &"lin_chong", &"wu_song"], [&"sun_erniang", &"wu_song", &"an_daoquan"], [&"shi_qian", &"wu_yong", &"hua_rong"]]:
+		var team: Array[UnitData] = []
+		var label := ""
+		for id: StringName in team_ids:
+			team.append(heroes[id])
+			label += heroes[id].display_name
+		for run: Array in [[stage.recommended_level, false], [stage.recommended_level - 3, false], [stage.recommended_level, true]]:
+			var level: int = run[0]
+			var naive: bool = run[1]
+			var wins := 0
+			var rounds := 0
+			var stars := 0
+			for n in SIM_BATTLES:
+				var m := BattleModel.new(stage, team, level, combos, n)
+				var turns := 0
+				while m.result == BattleModel.Result.ONGOING and turns < SIM_TURN_LIMIT:
+					m.start_next_turn()
+					if m.current != null:
+						if naive and m.current.side == BattleUnit.Side.PLAYER:
+							m.act(BattleModel.Action.ATTACK, m._weakest(m.foes_of(m.current)))
+						else:
+							m.act_ai()
+					turns += 1
+				check(m.result != BattleModel.Result.ONGOING, "battle %d ends within %d turns" % [n, SIM_TURN_LIMIT])
+				if m.result == BattleModel.Result.WIN:
+					wins += 1
+					rounds += m.round_number()
+					stars += m.stars()
+			print("  %s Lv%d%s: win %d%%, avg %.1f rounds, avg %.1f stars" % [
+				label, level, "（只点普攻）" if naive else "", wins * 100 / SIM_BATTLES,
+				float(rounds) / maxi(wins, 1), float(stars) / maxi(wins, 1)])
+	return true

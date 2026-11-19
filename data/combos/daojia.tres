@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_dorar"]
+
+[resource]
+script = ExtResource("1_dorar")
+id = &"daojia"
+display_name = "盗甲赚徐宁"
+description = "偷取敌方全部增益，全队怒气 +30。"
+hero_a = &"shi_qian"
+hero_b = &"wu_yong"
+effect = 2
+rage_gain = 30

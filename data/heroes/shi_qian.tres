@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/shi_qian.png" id="1_2v714"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_l0n7y"]
+[ext_resource type="Texture2D" path="res://art/faces/shi_qian.png" id="2_mhilm"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_r4hhm"]
+[ext_resource type="Texture2D" path="res://art/portraits/shi_qian.png" id="3_l6byi"]
+
+[sub_resource type="Resource" id="Resource_ekhxr"]
+script = ExtResource("2_r4hhm")
+display_name = "妙手空空"
+description = "偷取敌人 1 个增益，并立刻再行动 1 次。"
+effect = 7
+
+[resource]
+script = ExtResource("1_l0n7y")
+id = &"shi_qian"
+display_name = "时迁"
+nickname = "鼓上蚤"
+rarity = 1
+role = 4
+sort_order = 7
+base_hp = 380
+base_atk = 64
+base_def = 26
+base_spd = 125
+portrait = ExtResource("3_l6byi")
+bust = ExtResource("1_2v714")
+face = ExtResource("2_mhilm")
+skill = SubResource("Resource_ekhxr")

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_8efwv"]
+[ext_resource type="Texture2D" path="res://art/busts/an_daoquan.png" id="1_e70vg"]
+[ext_resource type="Texture2D" path="res://art/faces/an_daoquan.png" id="2_3ll25"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_38bck"]
+[ext_resource type="Texture2D" path="res://art/portraits/an_daoquan.png" id="3_dpriw"]
+
+[sub_resource type="Resource" id="Resource_23d7t"]
+script = ExtResource("2_38bck")
+display_name = "妙手回春"
+description = "恢复全队 25% 生命，解除负面状态。"
+effect = 8
+amount = 0.25
+
+[resource]
+script = ExtResource("1_8efwv")
+id = &"an_daoquan"
+display_name = "安道全"
+nickname = "神医"
+rarity = 1
+role = 4
+sort_order = 8
+base_hp = 430
+base_atk = 50
+base_def = 30
+base_spd = 96
+portrait = ExtResource("3_dpriw")
+bust = ExtResource("1_e70vg")
+face = ExtResource("2_3ll25")
+skill = SubResource("Resource_23d7t")

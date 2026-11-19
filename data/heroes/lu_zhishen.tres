@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/lu_zhishen.png" id="1_0843t"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_l7e01"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_a4odt"]
+[ext_resource type="Texture2D" path="res://art/faces/lu_zhishen.png" id="2_cfk01"]
+[ext_resource type="Texture2D" path="res://art/portraits/lu_zhishen.png" id="3_m8dm8"]
+
+[sub_resource type="Resource" id="Resource_sr7h7"]
+script = ExtResource("2_a4odt")
+display_name = "倒拔垂杨柳"
+description = "嘲讽全体敌人 2 回合，自身减伤 40%。"
+effect = 4
+turns = 2
+amount = 0.4
+cooldown = 4
+
+[resource]
+script = ExtResource("1_l7e01")
+id = &"lu_zhishen"
+display_name = "鲁智深"
+nickname = "花和尚"
+rarity = 2
+sort_order = 1
+base_hp = 620
+base_atk = 62
+base_def = 48
+base_spd = 88
+portrait = ExtResource("3_m8dm8")
+bust = ExtResource("1_0843t")
+face = ExtResource("2_cfk01")
+skill = SubResource("Resource_sr7h7")

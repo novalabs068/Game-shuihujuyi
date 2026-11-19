@@ -1,0 +1,47 @@
+extends Node
+## 启动时读入 data/ 下的所有好汉、组合技和关卡（自动加载为 GameDB）。
+
+const HEROES_DIR := "res://data/heroes/"
+const COMBOS_DIR := "res://data/combos/"
+const STAGES_DIR := "res://data/stages/"
+const MAPS_DIR := "res://data/maps/"
+const SCENES_DIR := "res://data/scenes/"
+
+var heroes: Array[UnitData] = []
+var combos: Array[ComboData] = []
+var stages: Dictionary[String, StageData] = {}
+var maps: Dictionary[String, WorldMapData] = {}
+var scenes: Dictionary[String, SceneData] = {}
+
+
+func _ready() -> void:
+	for res in load_dir(HEROES_DIR):
+		heroes.append(res as UnitData)
+	heroes.sort_custom(func(a: UnitData, b: UnitData) -> bool: return a.sort_order < b.sort_order)
+	for res in load_dir(COMBOS_DIR):
+		combos.append(res as ComboData)
+	for res in load_dir(STAGES_DIR):
+		var stage := res as StageData
+		stages[stage.id] = stage
+	for res in load_dir(MAPS_DIR):
+		var map := res as WorldMapData
+		maps[map.id] = map
+	for res in load_dir(SCENES_DIR):
+		var scene := res as SceneData
+		scenes[scene.id] = scene
+
+
+func hero(id: StringName) -> UnitData:
+	for h in heroes:
+		if h.id == id:
+			return h
+	return null
+
+
+## 导出后的包里文件名会变（.remap），所以用 ResourceLoader.list_directory 而不是 DirAccess。
+static func load_dir(path: String) -> Array[Resource]:
+	var out: Array[Resource] = []
+	for file in ResourceLoader.list_directory(path):
+		if file.ends_with(".tres") or file.ends_with(".res"):
+			out.append(load(path + file))
+	return out

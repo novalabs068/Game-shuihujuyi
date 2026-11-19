@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_t516r"]
+
+[resource]
+script = ExtResource("1_t516r")
+id = &"yezhulin"
+display_name = "野猪林救义"
+description = "全队获得 20% 生命的护盾，林冲对单体造成 400% 伤害。"
+hero_a = &"lu_zhishen"
+hero_b = &"lin_chong"
+power = 4.0
+amount = 0.2

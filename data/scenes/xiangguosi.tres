@@ -1,0 +1,73 @@
+[gd_resource type="Resource" script_class="SceneData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/chest_data.gd" id="1_kwhtk"]
+[ext_resource type="Script" path="res://scripts/data/npc_data.gd" id="2_4tth7"]
+[ext_resource type="Resource" path="res://data/heroes/lin_chong.tres" id="3_fe4vo"]
+[ext_resource type="Script" path="res://scripts/data/scene_data.gd" id="4_fyy3c"]
+[ext_resource type="Texture2D" path="res://art/tiles/placeholder.png" id="5_iqgxv"]
+
+[sub_resource type="Resource" id="Resource_3rb5v"]
+script = ExtResource("1_kwhtk")
+id = &"tree_corner"
+cell = Vector2i(2, 18)
+reward_text = "聚义令 ×3"
+
+[sub_resource type="Resource" id="Resource_vyxfh"]
+script = ExtResource("2_4tth7")
+id = &"old_monk"
+display_name = "看园老僧"
+cell = Vector2i(9, 8)
+lines = PackedStringArray("看园老僧：智深师兄，长老吩咐你来看管这片菜园。", "看园老僧：这附近有二三十个泼皮，常来偷菜，师兄可要当心。", "我：洒家倒要看看，是哪个不怕死的。")
+
+[sub_resource type="Resource" id="Resource_dgu0q"]
+script = ExtResource("2_4tth7")
+id = &"zhang_san"
+display_name = "泼皮张三"
+cell = Vector2i(31, 7)
+lines = PackedStringArray("泼皮张三：听说新来了个胖和尚管菜园？兄弟们正要去「贺喜」呢，嘿嘿。", "（张三朝粪窖那边使了个眼色。）")
+
+[sub_resource type="Resource" id="Resource_s2na7"]
+script = ExtResource("2_4tth7")
+id = &"li_si"
+display_name = "泼皮李四"
+cell = Vector2i(32, 8)
+lines = PackedStringArray("泼皮李四：大师！小的们特来拜见。", "泼皮李四：请大师走到粪窖边上来，受我们一拜……", "（这事以后再说——支线在第 4 步做。）")
+
+[sub_resource type="Resource" id="Resource_arty7"]
+script = ExtResource("2_4tth7")
+id = &"lin_chong"
+display_name = "林冲"
+unit = ExtResource("3_fe4vo")
+cell = Vector2i(16, 10)
+lines = PackedStringArray("林冲：好一个胖大和尚！这条禅杖使得端的是好！", "我：洒家鲁智深。官人是谁？", "林冲：在下林冲，八十万禁军枪棒教头。今日得见师兄，三生有幸！")
+
+[resource]
+script = ExtResource("4_fyy3c")
+id = "xiangguosi"
+title = "东京·大相国寺菜园"
+tileset_texture = ExtResource("5_iqgxv")
+layout = "########################################
+#______________#TTTTT.........TTTTTTTTT#
+#______________#T.......FFFFFF......TTT#
+#___#######____#........FFFFFF.......TT#
+#___#######____=........FFFFFF........T#
+#___#######____=..W.....FFFFFF...PP....#
+#______________,,,,,,,..FFFFFF...PP....#
+#______________=.....,...........,,....#
+#______________=.....,,,,,,,,,,,,,.....#
+#______________#.....,.....TT..........#
+#_______________.....,.....TT.....~~~~~#
+#______________#.....,...........~~~~~~#
+#T_____________#.....,...........~~~~~~#
+#TT____________#.....,..T.........~~~~~#
+#######,########.....,.................#
+#......,.............,......FFFF.......#
+#..TT..,,,,,,,,,,,,,,,......FFFF....T..#
+#..TT................,.............TTT.#
+#....................,.................#
+#TTTT................,.............TTTT#
+###################EEE##################
+"
+spawn_cell = Vector2i(20, 18)
+npcs = Array[ExtResource("2_4tth7")]([SubResource("Resource_vyxfh"), SubResource("Resource_dgu0q"), SubResource("Resource_s2na7"), SubResource("Resource_arty7")])
+chests = Array[ExtResource("1_kwhtk")]([SubResource("Resource_3rb5v")])

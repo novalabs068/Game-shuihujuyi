@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/wu_song.png" id="1_2mver"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_l8s1c"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_e2x3b"]
+[ext_resource type="Texture2D" path="res://art/faces/wu_song.png" id="2_vqh3j"]
+[ext_resource type="Texture2D" path="res://art/portraits/wu_song.png" id="3_jdagm"]
+
+[sub_resource type="Resource" id="Resource_4evxd"]
+script = ExtResource("2_e2x3b")
+display_name = "醉拳"
+description = "连击 3 次，每次 110% 伤害。"
+effect = 2
+power = 1.1
+hits = 3
+
+[resource]
+script = ExtResource("1_l8s1c")
+id = &"wu_song"
+display_name = "武松"
+nickname = "行者"
+rarity = 2
+role = 1
+sort_order = 3
+base_hp = 500
+base_atk = 80
+base_def = 36
+portrait = ExtResource("3_jdagm")
+bust = ExtResource("1_2mver")
+face = ExtResource("2_vqh3j")
+skill = SubResource("Resource_4evxd")

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/lin_chong.png" id="1_0f42t"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_yx64e"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_6s73u"]
+[ext_resource type="Texture2D" path="res://art/faces/lin_chong.png" id="2_8jxta"]
+[ext_resource type="Texture2D" path="res://art/portraits/lin_chong.png" id="3_mqytj"]
+
+[sub_resource type="Resource" id="Resource_0wtma"]
+script = ExtResource("2_6s73u")
+display_name = "风雪夜枪"
+description = "单体 300% 伤害，目标血量低于 30% 时伤害翻倍。"
+effect = 1
+power = 3.0
+
+[resource]
+script = ExtResource("1_yx64e")
+id = &"lin_chong"
+display_name = "林冲"
+nickname = "豹子头"
+rarity = 2
+role = 1
+sort_order = 2
+base_hp = 470
+base_atk = 84
+base_def = 34
+base_spd = 108
+portrait = ExtResource("3_mqytj")
+bust = ExtResource("1_0f42t")
+face = ExtResource("2_8jxta")
+skill = SubResource("Resource_0wtma")

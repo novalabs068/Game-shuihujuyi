@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_c0yak"]
+
+[resource]
+script = ExtResource("1_c0yak")
+id = &"shiziopo"
+display_name = "十字坡不打不相识"
+description = "全体敌人眩晕 1 回合，武松连击 4 次，每次 90% 伤害。"
+hero_a = &"sun_erniang"
+hero_b = &"wu_song"
+effect = 1
+power = 0.9
+hits = 4

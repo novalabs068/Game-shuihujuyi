@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_1wdkm"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="2_wb6tu"]
+[ext_resource type="Resource" path="res://data/enemies/lu_qian.tres" id="3_0sss4"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_jpvuw"]
+
+[resource]
+script = ExtResource("4_jpvuw")
+id = "1-7"
+title = "风雪山神庙"
+enemies = Array[ExtResource("1_1wdkm")]([ExtResource("2_wb6tu"), ExtResource("3_0sss4"), ExtResource("2_wb6tu")])
+enemy_level = 13
+recommended_level = 13
+star_round_limit = 10

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_0p4sm"]
+[ext_resource type="Texture2D" path="res://art/busts/sun_erniang.png" id="1_qigqk"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_e72y8"]
+[ext_resource type="Texture2D" path="res://art/faces/sun_erniang.png" id="2_sgclb"]
+[ext_resource type="Texture2D" path="res://art/portraits/sun_erniang.png" id="3_digai"]
+
+[sub_resource type="Resource" id="Resource_qtstr"]
+script = ExtResource("2_e72y8")
+display_name = "蒙汗药"
+description = "单体眩晕 1 回合。"
+effect = 6
+turns = 1
+
+[resource]
+script = ExtResource("1_0p4sm")
+id = &"sun_erniang"
+display_name = "孙二娘"
+nickname = "母夜叉"
+rarity = 1
+role = 4
+sort_order = 6
+base_hp = 450
+base_atk = 66
+base_def = 32
+base_spd = 104
+portrait = ExtResource("3_digai")
+bust = ExtResource("1_qigqk")
+face = ExtResource("2_sgclb")
+skill = SubResource("Resource_qtstr")

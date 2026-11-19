@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_j670x"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="2_ueko4"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_y6ke5"]
+
+[resource]
+script = ExtResource("3_y6ke5")
+id = "road_guards"
+title = "路遇官兵盘查"
+enemies = Array[ExtResource("1_j670x")]([ExtResource("2_ueko4"), ExtResource("2_ueko4")])
+enemy_level = 11
+recommended_level = 11
+star_round_limit = 6

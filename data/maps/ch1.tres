@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="WorldMapData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/location_data.gd" id="1_juigf"]
+[ext_resource type="Script" path="res://scripts/data/world_map_data.gd" id="2_nn1cj"]
+[ext_resource type="Texture2D" path="res://art/maps/ch1.png" id="3_hoelj"]
+
+[sub_resource type="Resource" id="Resource_2yr8w"]
+script = ExtResource("1_juigf")
+id = &"weizhou"
+display_name = "渭州"
+description = "西北边城。鲁提辖在这里三拳打死了镇关西。"
+map_position = Vector2(150, 370)
+label_position = Vector2(110, 250)
+road_to_next = PackedVector2Array(150, 370, 200, 420, 260, 455, 330, 470, 400, 455, 440, 445)
+
+[sub_resource type="Resource" id="Resource_ibthg"]
+script = ExtResource("1_juigf")
+id = &"dongjing"
+display_name = "东京"
+description = "汴梁城，天下第一繁华之地。大相国寺的菜园就在城里。"
+map_position = Vector2(440, 445)
+label_position = Vector2(440, 170)
+scene_id = "xiangguosi"
+road_to_next = PackedVector2Array(440, 445, 520, 425, 580, 430, 640, 455, 690, 470)
+
+[sub_resource type="Resource" id="Resource_f4jke"]
+script = ExtResource("1_juigf")
+id = &"yezhulin"
+display_name = "野猪林"
+description = "东京去沧州的必经之路，林深路暗，正好下手。"
+map_position = Vector2(690, 470)
+label_position = Vector2(680, 220)
+arrive_flag = "visited_yezhulin"
+arrive_text = "解差董超、薛霸押着林冲走进野猪林，把他绑在树上，举起水火棍……
+松树后跳出一个胖大和尚，一条铁禅杖把水火棍打飞——是鲁智深！
+
+（剧情演出待做）林冲被一路护送到沧州，沧州已开放。"
+road_to_next = PackedVector2Array(690, 470, 760, 470, 830, 470, 905, 495)
+
+[sub_resource type="Resource" id="Resource_62d41"]
+script = ExtResource("1_juigf")
+id = &"cangzhou"
+display_name = "沧州"
+description = "大雪漫天。林冲在这里看守草料场，陆谦却追来放火。"
+map_position = Vector2(905, 495)
+label_position = Vector2(890, 295)
+unlock_flag = "visited_yezhulin"
+stage_id = "1-7"
+road_to_next = PackedVector2Array(905, 495, 950, 505, 1010, 480, 1090, 455, 1120, 445)
+
+[sub_resource type="Resource" id="Resource_wch8f"]
+script = ExtResource("1_juigf")
+id = &"liangshan"
+display_name = "梁山泊"
+description = "八百里水泊，一座山寨。林冲走投无路，只能来投奔。"
+map_position = Vector2(1120, 445)
+label_position = Vector2(1150, 250)
+unlock_flag = "clear_1-7"
+
+[resource]
+script = ExtResource("2_nn1cj")
+id = "ch1"
+title = "第一章　鲁提辖与林教头"
+texture = ExtResource("3_hoelj")
+locations = Array[ExtResource("1_juigf")]([SubResource("Resource_2yr8w"), SubResource("Resource_ibthg"), SubResource("Resource_f4jke"), SubResource("Resource_62d41"), SubResource("Resource_wch8f")])
+start_location = &"dongjing"
+encounter_chance = 0.35
+encounter_stage_id = "road_guards"
