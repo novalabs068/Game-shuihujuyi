@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_s3e8b"]
+[ext_resource type="Resource" path="res://data/enemies/ma_zei.tres" id="2_8lwer"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_f3nqr"]
+
+[resource]
+script = ExtResource("3_f3nqr")
+id = "ma_zei_jie_lue"
+title = "马贼劫掠"
+enemies = Array[ExtResource("1_s3e8b")]([ExtResource("2_8lwer"), ExtResource("2_8lwer"), ExtResource("2_8lwer")])
+star_round_limit = 6

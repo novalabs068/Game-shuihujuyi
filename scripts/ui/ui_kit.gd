@@ -105,6 +105,18 @@ static func picture(texture: Texture2D, side: int, flip := false) -> TextureRect
 	return rect
 
 
+## 人物的半身像（prefer_face 时用头像）。没有版画图的敌人退回用像素小人，按最近邻放大保持像素清晰。
+static func unit_picture(data: UnitData, side: int, flip := false, prefer_face := false) -> TextureRect:
+	var texture: Texture2D = data.face if prefer_face else data.bust
+	var pixel := texture == null and data.map_sprite != null
+	if pixel:
+		texture = data.map_sprite
+	var rect := picture(texture, side, flip)
+	if pixel:
+		rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	return rect
+
+
 ## 让 node 下所有控件都不吃点击，交给最外层处理。
 static func ignore_mouse(node: Node) -> void:
 	for child in node.get_children():

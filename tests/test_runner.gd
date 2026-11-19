@@ -27,6 +27,10 @@ func _initialize() -> void:
 		"test_scene_layout",
 		"test_guard_strike_shields_team",
 		"test_origins_load",
+		"test_iron_halves_basic_attacks",
+		"test_berserk_doubles_attack",
+		"test_encounter_levels",
+		"test_rewards",
 		"test_simulated_win_rate",
 	]:
 		if call(t) != true:
@@ -345,6 +349,62 @@ func test_origins_load() -> bool:
 		check(o.unit != null and o.unit.skill != null, "%s has a unit and a skill" % o.id)
 		check(o.unit.rarity == UnitData.Rarity.PROTAGONIST, "%s is marked as protagonist" % o.id)
 		check(o.unit.map_sprite != null, "%s has a pixel sprite" % o.id)
+	return true
+
+
+func test_iron_halves_basic_attacks() -> bool:
+	var iron := Encounters.make_elite(unit_data(&"e", [100000, 1, 100, 1]), &"iron")
+	var m := battle([unit_data(&"a", [500, 100, 0, 100])], [iron])
+	var a := by_id(m, &"a")
+	var e := by_id(m, &"e")
+	var basic := m._deal(a, e, 1.0, true, true)
+	var skill_hit := m._deal(a, e, 1.0, true, false)
+	check(basic * 2 >= skill_hit - 4 and basic * 2 <= skill_hit + 4, "iron halves a basic hit (%d vs %d)" % [basic, skill_hit])
+	check(e.data.display_name.begins_with("铁甲·"), "elite name has its prefix")
+	return true
+
+
+func test_berserk_doubles_attack() -> bool:
+	var m := battle([unit_data(&"a", [500, 100, 0, 100])], [Encounters.make_elite(unit_data(&"e", [1000, 50, 0, 1]), &"berserk")])
+	var e := by_id(m, &"e")
+	var calm := e.atk()
+	e.hp = int(e.max_hp * 0.2)
+	check_eq(e.atk(), calm * 2.0, "berserk doubles attack below 30% hp")
+	return true
+
+
+func test_encounter_levels() -> bool:
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	var dongjing := map.location(&"dongjing")
+	var liangshan := map.location(&"liangshan")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for i in 50:
+		var low := Encounters.build(dongjing, 15, rng)
+		check(low.enemy_level <= dongjing.level_max, "a strong party still meets weak enemies in Dongjing")
+		var high := Encounters.build(liangshan, 1, rng)
+		check(high.enemy_level >= liangshan.level_min, "a weak party meets level %d+ enemies at Liangshan" % liangshan.level_min)
+		var near := Encounters.build(dongjing, 5, rng)
+		check(near.enemy_level == 5 or near.enemy_level == 6, "enemies stay near the party level")
+	for loc in map.locations:
+		check(loc.unlock_flag == "", "%s is open from the start" % loc.id)
+		check(not loc.encounter_groups.is_empty(), "%s has encounter groups" % loc.id)
+	return true
+
+
+func test_rewards() -> bool:
+	var stage := StageData.new()
+	stage.enemies = [unit_data(&"e1", [1, 1, 0, 1]), Encounters.make_elite(unit_data(&"e2", [1, 1, 0, 1]), &"iron")]
+	stage.enemy_level = 4
+	var m := BattleModel.new(stage, [unit_data(&"a", [500, 100, 0, 100])], 4, [], 1)
+	check_eq(Encounters.rewards(m)["exp"], 0, "no rewards before winning")
+	for u in m.units:
+		if u.side == BattleUnit.Side.ENEMY:
+			u.hp = 0
+	m.result = BattleModel.Result.WIN
+	var r := Encounters.rewards(m)
+	check_eq(r["exp"], 4 * Encounters.EXP_PER_LEVEL * 3, "elite counts double for exp")
+	check_eq(r["silver"], 4 * Encounters.SILVER_PER_LEVEL * 3, "elite counts double for silver")
 	return true
 
 

@@ -177,7 +177,7 @@ func _skill_cutin(unit: BattleUnit, skill_name: String) -> void:
 	row.add_theme_constant_override("separation", 20)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	band.add_child(row)
-	var bust := UiKit.picture(unit.data.bust, 150, not from_left)
+	var bust := UiKit.unit_picture(unit.data, 150, not from_left)
 	var title := UiKit.label(skill_name, 52, UiKit.GOLD)
 	title.add_theme_constant_override("outline_size", 8)
 	title.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -311,7 +311,10 @@ func _refresh() -> void:
 
 	var actor := model.current
 	var input := _awaiting_input and actor != null
-	_actor_bust.texture = actor.data.bust if actor != null else null
+	_actor_bust.texture = null
+	if actor != null:
+		_actor_bust.texture = actor.data.bust if actor.data.bust != null else actor.data.map_sprite
+		_actor_bust.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if actor.data.bust == null else CanvasItem.TEXTURE_FILTER_PARENT_NODE
 	_actor_bust.flip_h = actor != null and actor.side == BattleUnit.Side.ENEMY
 	for b in [_attack_button, _skill_button, _guard_button, _combo_button]:
 		(b as Button).disabled = not input
@@ -374,7 +377,7 @@ func _update_turn_order() -> void:
 		var chip_row := HBoxContainer.new()
 		chip_row.add_theme_constant_override("separation", 4)
 		chip.add_child(chip_row)
-		chip_row.add_child(UiKit.picture(u.data.face, 40 if first else 32, u.side == BattleUnit.Side.ENEMY))
+		chip_row.add_child(UiKit.unit_picture(u.data, 40 if first else 32, u.side == BattleUnit.Side.ENEMY, true))
 		chip_row.add_child(UiKit.label(u.display_name(), 18 if first else 15))
 		_order_box.add_child(chip)
 		first = false
@@ -525,6 +528,11 @@ func _show_result() -> void:
 	var texts := ["获胜", "无人倒下", "%d 回合内获胜（用了 %d 回合）" % [stage.star_round_limit, model.round_number()]]
 	for i in texts.size():
 		v.add_child(UiKit.label(("● " if conditions[i] else "○ ") + texts[i], 20, UiKit.TEXT if conditions[i] else UiKit.TEXT_DIM))
+	if won:
+		var r := Encounters.rewards(model)
+		var gain := UiKit.label("获得：经验 +%d　银两 +%d" % [r["exp"], r["silver"]], 22, UiKit.GOLD)
+		gain.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(gain)
 
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER

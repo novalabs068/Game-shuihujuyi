@@ -20,6 +20,8 @@ const RAGE_ON_ATTACK := 20
 const RAGE_ON_SKILL := 10
 const RAGE_ON_GUARD := 25
 const GUARD_REDUCTION := 0.5
+## 「铁甲」精英受到的普攻伤害倍率
+const IRON_BASIC_MULTIPLIER := 0.5
 const EXECUTE_THRESHOLD := 0.3
 const ENRAGE_THRESHOLD := 0.5
 const TURN_PREVIEW_COUNT := 6
@@ -184,7 +186,9 @@ func intent_target_of(enemy: BattleUnit) -> BattleUnit:
 	var foes := foes_of(enemy)
 	if foes.is_empty():
 		return null
-	if not enemy.intent_skill:
+	# 只有「背后捅刀」这类技能无视嘲讽，其他攻击都会被嘲讽拉走
+	var ignores_taunt := enemy.intent_skill and enemy.data.skill != null and enemy.data.skill.effect == SkillData.Effect.BACKSTAB
+	if not ignores_taunt:
 		for f in foes:
 			if f.is_taunting():
 				return f
@@ -208,7 +212,7 @@ func _do_attack(actor: BattleUnit, wanted: BattleUnit) -> void:
 	if target == null:
 		return
 	_emit("action", actor, "普攻", "%s 普攻 %s" % [actor.display_name(), target.display_name()])
-	_deal(actor, target, 1.0)
+	_deal(actor, target, 1.0, false, true)
 	actor.add_rage(RAGE_ON_ATTACK)
 
 
@@ -317,8 +321,8 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 				_emit("info", ally, "怒气 +%d" % combo.rage_gain, "")
 
 
-## 按设计文档的公式结算一次伤害，返回造成的伤害（含被护盾吸收的部分）。
-func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_crit := false) -> int:
+## 按设计文档的公式结算一次伤害，返回造成的伤害（含被护盾吸收的部分）。basic 表示普攻（「铁甲」只减普攻）。
+func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_crit := false, basic := false) -> int:
 	if target == null or not target.is_alive():
 		return 0
 	var crit := force_crit or rng.randf() < CRIT_CHANCE
@@ -329,6 +333,8 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 		raw *= 1.0 - GUARD_REDUCTION
 	if target.reduction_turns >= 0:
 		raw *= 1.0 - target.reduction
+	if basic and target.data.elite_trait == &"iron":
+		raw *= IRON_BASIC_MULTIPLIER
 	var amount := maxi(1, roundi(raw))
 	var absorbed := mini(target.shield, amount)
 	target.shield -= absorbed

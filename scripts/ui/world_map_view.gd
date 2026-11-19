@@ -18,6 +18,8 @@ var map: WorldMapData
 ## 从战斗回来时由 main.gd 设置：接着从 resume_progress 处走到 resume_destination
 var resume_destination: StringName = &""
 var resume_progress := 0.0
+## 打开地图时先提示一句，比如升级
+var notice := ""
 
 var _layer: Control
 var _avatar: Control
@@ -28,6 +30,7 @@ var _panel_title: Label
 var _panel_desc: Label
 var _panel_buttons: HBoxContainer
 var _toast: Label
+var _status: Label
 var _walking := false
 var _rng := RandomNumberGenerator.new()
 
@@ -70,6 +73,8 @@ func _ready() -> void:
 		_travel(resume_destination, resume_progress, false)
 	else:
 		_show_panel(map.location(GameState.location_id))
+	if notice != "":
+		_flash_toast(notice)
 
 
 # --- 搭界面 ---
@@ -81,9 +86,19 @@ func _build_location(loc: LocationData) -> void:
 	var chars := PackedStringArray()
 	for i in loc.display_name.length():
 		chars.append(loc.display_name[i])
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 2)
+	tag.add_child(column)
 	var name_label := UiKit.label("\n".join(chars), 24, PAPER)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	tag.add_child(name_label)
+	column.add_child(name_label)
+	# 危险星级竖排在地名下面
+	var star_lines := PackedStringArray()
+	for i in loc.danger:
+		star_lines.append("★")
+	var stars := UiKit.label("\n".join(star_lines), 14, UiKit.GOLD)
+	stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(stars)
 	_layer.add_child(tag)
 	tag.position = loc.label_position - Vector2(20, 0)
 	UiKit.ignore_mouse(tag)
@@ -152,8 +167,12 @@ func _build_top_bar() -> void:
 	row.add_theme_constant_override("separation", 16)
 	bar.add_child(row)
 	var title := UiKit.label(map.title, 26, PAPER)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(title)
+	_status = UiKit.label("", 20, UiKit.GOLD)
+	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(_status)
+	_refresh_status()
 	var team_button := UiKit.button("编队", Vector2(100, 40), 20)
 	team_button.pressed.connect(func() -> void:
 		if not _walking:
@@ -213,7 +232,13 @@ func _travel(destination: StringName, from_progress: float, can_encounter: bool)
 		return
 	_walking = true
 	_panel.visible = false
-	var encounter := can_encounter and map.encounter_stage_id != "" and _rng.randf() < map.encounter_chance
+	# 先决定这一程会不会遇敌：按目的地一带的敌人组合生成，没有配置时退回地图的默认遭遇
+	var stage: StageData = null
+	if can_encounter and _rng.randf() < map.encounter_chance:
+		stage = Encounters.build(map.location(destination), GameState.level, _rng)
+		if stage == null and map.encounter_stage_id != "":
+			stage = GameDB.stages[map.encounter_stage_id]
+	var encounter := stage != null
 	var stop_at := ENCOUNTER_AT if encounter else 1.0
 	var duration := _length(points) * (stop_at - from_progress) / WALK_SPEED
 	var bob := _avatar.create_tween().set_loops()
@@ -225,7 +250,6 @@ func _travel(destination: StringName, from_progress: float, can_encounter: bool)
 	bob.kill()
 	_avatar.rotation = 0.0
 	if encounter:
-		var stage: StageData = GameDB.stages[map.encounter_stage_id]
 		_flash_toast("%s！" % stage.title)
 		await get_tree().create_timer(0.9).timeout
 		battle_requested.emit(stage, destination, ENCOUNTER_AT)
@@ -248,8 +272,8 @@ func _arrive(loc: LocationData) -> void:
 
 func _show_panel(loc: LocationData) -> void:
 	_panel.visible = true
-	_panel_title.text = loc.display_name
-	_panel_desc.text = loc.description
+	_panel_title.text = "%s　%s" % [loc.display_name, "★".repeat(loc.danger)]
+	_panel_desc.text = "%s\n这一带的敌人：%d～%d 级（你现在 %d 级）" % [loc.description, loc.level_min, loc.level_max, GameState.level]
 	for child in _panel_buttons.get_children():
 		_panel_buttons.remove_child(child)
 		child.queue_free()
@@ -271,6 +295,10 @@ func _show_panel(loc: LocationData) -> void:
 	if _panel_buttons.get_child_count() == 0:
 		_panel_buttons.add_child(UiKit.label("点地图上的地名前往别处。", 17, UiKit.TEXT_DIM))
 	_layout()
+
+
+func _refresh_status() -> void:
+	_status.text = "%s　Lv%d　经验 %d/%d　银两 %d" % [GameState.player_name, GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver]
 
 
 func _refresh_locks() -> void:

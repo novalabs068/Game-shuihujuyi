@@ -33,7 +33,7 @@ func setup(p_unit: BattleUnit) -> void:
 	var row_main := HBoxContainer.new()
 	row_main.add_theme_constant_override("separation", 10)
 	add_child(row_main)
-	var bust := UiKit.picture(unit.data.bust, BUST_SIZE, enemy)
+	var bust := UiKit.unit_picture(unit.data, BUST_SIZE, enemy)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL

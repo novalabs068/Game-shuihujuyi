@@ -30,6 +30,10 @@ enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 @export_group("技能")
 @export var skill: SkillData
 
+@export_group("精英")
+## 精英特性：&"iron" 铁甲（普攻伤害减半）、&"berserk" 狂暴（血量低于 30% 时攻击翻倍）。由遭遇战生成时设置
+@export var elite_trait: StringName
+
 @export_group("Boss")
 @export var is_boss := false
 ## 血量第一次降到 50% 以下时给自己加的增益

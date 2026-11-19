@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_bfk1u"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="2_ff8bf"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi_tou.tres" id="3_75kdp"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_0yk7g"]
+
+[resource]
+script = ExtResource("4_0yk7g")
+id = "po_pi_xun_xin"
+title = "泼皮寻衅"
+enemies = Array[ExtResource("1_bfk1u")]([ExtResource("2_ff8bf"), ExtResource("3_75kdp"), ExtResource("2_ff8bf")])
+star_round_limit = 6

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_2lrvd"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="2_ff7na"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_47kho"]
+
+[resource]
+script = ExtResource("3_47kho")
+id = "jie_tou_po_pi"
+title = "街头泼皮"
+enemies = Array[ExtResource("1_2lrvd")]([ExtResource("2_ff7na"), ExtResource("2_ff7na")])
+star_round_limit = 6

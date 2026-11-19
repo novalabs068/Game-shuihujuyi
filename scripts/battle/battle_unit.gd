@@ -7,8 +7,11 @@ extends RefCounted
 
 enum Side { PLAYER, ENEMY }
 
-const LEVEL_GROWTH := 0.08
+## 每升一级属性乘这个倍数（复利成长：每差 7 级约差 2 倍，前期后期一样明显）
+const LEVEL_GROWTH := 1.1
 const RAGE_MAX := 100
+const BERSERK_THRESHOLD := 0.3
+const BERSERK_BONUS := 1.0
 
 
 class Buff:
@@ -63,7 +66,7 @@ func _init(p_data: UnitData, p_side: BattleUnit.Side, p_slot: int, p_level: int)
 
 
 func _scaled(base: int) -> int:
-	return roundi(base * (1.0 + LEVEL_GROWTH * (level - 1)))
+	return roundi(base * pow(LEVEL_GROWTH, level - 1))
 
 
 func display_name() -> String:
@@ -82,6 +85,8 @@ func atk() -> float:
 	var bonus := 0.0
 	for b in buffs:
 		bonus += b.atk_bonus
+	if data.elite_trait == &"berserk" and hp_ratio() < BERSERK_THRESHOLD:
+		bonus += BERSERK_BONUS
 	return _atk * (1.0 + bonus)
 
 
@@ -129,6 +134,10 @@ func tick_turn_start() -> void:
 
 func status_tags() -> PackedStringArray:
 	var tags := PackedStringArray()
+	if data.elite_trait == &"iron":
+		tags.append("铁甲")
+	elif data.elite_trait == &"berserk":
+		tags.append("狂暴！" if hp_ratio() < BERSERK_THRESHOLD else "狂暴")
 	if is_taunting():
 		tags.append("嘲讽")
 	if reduction_turns >= 0:

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="1_6snh3"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_gkw5b"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_hrkoj"]
+
+[sub_resource type="Resource" id="Resource_n5c4x"]
+script = ExtResource("3_hrkoj")
+display_name = "开山斧"
+description = "重击单体 180% 伤害。会提前一回合预告。"
+power = 1.8
+
+[resource]
+script = ExtResource("2_gkw5b")
+id = &"shan_zei_tou_mu"
+display_name = "山贼头目"
+role = 1
+base_hp = 588
+base_atk = 99
+base_def = 28
+base_spd = 90
+map_sprite = ExtResource("1_6snh3")
+skill = SubResource("Resource_n5c4x")

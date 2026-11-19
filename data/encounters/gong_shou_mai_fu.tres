@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_wa3fy"]
+[ext_resource type="Resource" path="res://data/enemies/guan_bing_gong_shou.tres" id="2_yfjnw"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="3_rexoo"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_tpq3g"]
+
+[resource]
+script = ExtResource("4_tpq3g")
+id = "gong_shou_mai_fu"
+title = "弓手埋伏"
+enemies = Array[ExtResource("1_wa3fy")]([ExtResource("2_yfjnw"), ExtResource("3_rexoo"), ExtResource("2_yfjnw")])
+star_round_limit = 6

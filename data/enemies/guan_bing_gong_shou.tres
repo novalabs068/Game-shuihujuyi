@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/guan_bing_gong_shou.png" id="1_4nbpg"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_101ae"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_wsdvu"]
+
+[sub_resource type="Resource" id="Resource_m1my6"]
+script = ExtResource("3_wsdvu")
+display_name = "冷箭"
+description = "无视嘲讽，射血量比例最低的人 160% 伤害。会提前一回合预告。"
+effect = 9
+power = 1.6
+
+[resource]
+script = ExtResource("2_101ae")
+id = &"guan_bing_gong_shou"
+display_name = "官兵弓手"
+role = 1
+base_hp = 308
+base_atk = 99
+base_def = 16
+base_spd = 105
+map_sprite = ExtResource("1_4nbpg")
+skill = SubResource("Resource_m1my6")

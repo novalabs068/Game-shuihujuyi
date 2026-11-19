@@ -25,8 +25,9 @@ func _show_character_create() -> void:
 	_set_screen(screen)
 
 
-func _show_map(resume_destination: StringName = &"", resume_progress := 0.0) -> void:
+func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, notice := "") -> void:
 	var screen := WorldMapView.new()
+	screen.notice = notice
 	screen.map = GameDB.maps[GameState.DEFAULT_MAP]
 	screen.resume_destination = resume_destination
 	screen.resume_progress = resume_progress
@@ -57,17 +58,23 @@ func _start_battle(stage: StageData, destination: StringName, progress: float) -
 	var screen := BattleView.new()
 	screen.stage = stage
 	screen.team = GameState.team()
-	screen.hero_level = stage.recommended_level
+	screen.hero_level = GameState.level
 	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress))
 	screen.exit_requested.connect(_show_map)
 	screen.finished.connect(func(won: bool) -> void:
-		if won and destination == &"":
-			GameState.set_flag("clear_" + stage.id)
+		var notice := ""
+		if won:
+			var r := Encounters.rewards(screen.model)
+			var ups := GameState.add_rewards(r["exp"], r["silver"])
+			if ups > 0:
+				notice = "升到 %d 级！" % GameState.level
+			if destination == &"":
+				GameState.set_flag("clear_" + stage.id)
 			GameState.save_game()
 		if won and destination != &"":
-			_show_map(destination, progress)
+			_show_map(destination, progress, notice)
 		else:
-			_show_map())
+			_show_map(&"", 0.0, notice))
 	_set_screen(screen)
 
 

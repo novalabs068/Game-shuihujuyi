@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_vmduk"]
+[ext_resource type="Resource" path="res://data/enemies/lin_zhong_qiang_ren.tres" id="2_lu5pu"]
+[ext_resource type="Resource" path="res://data/enemies/shan_zei_tou_mu.tres" id="3_sawgc"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_n3jf8"]
+
+[resource]
+script = ExtResource("4_n3jf8")
+id = "shan_zhai_xun_shan"
+title = "山寨巡山"
+enemies = Array[ExtResource("1_vmduk")]([ExtResource("2_lu5pu"), ExtResource("3_sawgc"), ExtResource("2_lu5pu")])
+star_round_limit = 6

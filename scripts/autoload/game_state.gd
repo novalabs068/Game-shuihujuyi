@@ -11,12 +11,18 @@ const MAX_HEROES := 2
 const DEFAULT_HEROES: Array[StringName] = [&"wu_song", &"hua_rong"]
 const DEFAULT_MAP := "ch1"
 const PROTAGONIST_ID := &"protagonist"
+## 队伍等级上限（M3 做养成时再细分到每个人）
+const MAX_LEVEL := 30
 
 var player_name := ""
 var origin_id: StringName = &""
 var team_ids: Array[StringName] = []
 var flags: Dictionary[String, bool] = {}
 var location_id: StringName = &""
+## 主角和随行好汉共用的队伍等级（M3 前的简化）
+var level := 1
+var experience := 0
+var silver := 0
 
 var _protagonist: UnitData
 
@@ -77,6 +83,25 @@ func set_heroes(list: Array[UnitData]) -> void:
 		team_ids.append(h.id)
 
 
+## 从 level 升到下一级需要的经验。
+static func exp_to_next(at_level: int) -> int:
+	return 40 + 30 * at_level
+
+
+## 加经验和银两，返回升了几级。
+func add_rewards(gained_exp: int, gained_silver: int) -> int:
+	silver += gained_silver
+	experience += gained_exp
+	var ups := 0
+	while level < MAX_LEVEL and experience >= exp_to_next(level):
+		experience -= exp_to_next(level)
+		level += 1
+		ups += 1
+	if level >= MAX_LEVEL:
+		experience = 0
+	return ups
+
+
 func has_flag(flag: String) -> bool:
 	if flag == "":
 		return true
@@ -95,6 +120,9 @@ func reset() -> void:
 	team_ids = DEFAULT_HEROES.duplicate()
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
+	level = 1
+	experience = 0
+	silver = 0
 	_protagonist = null
 
 
@@ -113,6 +141,9 @@ func save_game() -> void:
 		"team": team_names,
 		"flags": flags.keys(),
 		"location": String(location_id),
+		"level": level,
+		"exp": experience,
+		"silver": silver,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -145,3 +176,6 @@ func load_game() -> void:
 	var saved_location: String = data.get("location", "")
 	if saved_location != "":
 		location_id = StringName(saved_location)
+	level = data.get("level", 1)
+	experience = data.get("exp", 0)
+	silver = data.get("silver", 0)

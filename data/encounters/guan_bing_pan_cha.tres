@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_mkhkx"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="2_xp2mb"]
+[ext_resource type="Resource" path="res://data/enemies/guan_bing_gong_shou.tres" id="3_jhhwv"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_wtr12"]
+
+[resource]
+script = ExtResource("4_wtr12")
+id = "guan_bing_pan_cha"
+title = "官兵盘查"
+enemies = Array[ExtResource("1_mkhkx")]([ExtResource("2_xp2mb"), ExtResource("3_jhhwv"), ExtResource("2_xp2mb")])
+star_round_limit = 6
