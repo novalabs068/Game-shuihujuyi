@@ -31,6 +31,7 @@ func _initialize() -> void:
 		"test_berserk_doubles_attack",
 		"test_encounter_levels",
 		"test_rewards",
+		"test_bounties_and_events_data",
 		"test_simulated_win_rate",
 	]:
 		if call(t) != true:
@@ -405,6 +406,30 @@ func test_rewards() -> bool:
 	var r := Encounters.rewards(m)
 	check_eq(r["exp"], 4 * Encounters.EXP_PER_LEVEL * 3, "elite counts double for exp")
 	check_eq(r["silver"], 4 * Encounters.SILVER_PER_LEVEL * 3, "elite counts double for silver")
+	return true
+
+
+func test_bounties_and_events_data() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var bounties: Array[Resource] = GameDB.load_dir("res://data/bounties/")
+	check_eq(bounties.size(), 6, "six bounties")
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	for res in bounties:
+		var b := res as BountyData
+		check(map.location(b.location) != null, "bounty %s is at a real location" % b.id)
+		check(not b.stage.enemies.is_empty() and b.stage.enemy_level > 0, "bounty %s has a fight" % b.id)
+		check(b.tokens() == BountyData.GRADE_TOKENS[b.grade], "bounty %s pays by grade" % b.id)
+	var events: Array[Resource] = GameDB.load_dir("res://data/events/")
+	check_eq(events.size(), 6, "six roadside events")
+	for res in events:
+		var e := res as EventData
+		check(e.choices.size() >= 2, "event %s offers a real choice" % e.id)
+		for loc in e.locations:
+			check(map.location(loc) != null, "event %s location %s exists" % [e.id, loc])
+	var scene: SceneData = load("res://data/scenes/xiangguosi.tres")
+	var li_si: NpcData = scene.npcs.filter(func(n: NpcData) -> bool: return n.id == &"li_si")[0]
+	check(li_si.event != null and li_si.event.choices.size() == 3, "garden quest has three choices")
+	check(li_si.event.choices.all(func(c: EventChoice) -> bool: return c.flag == "garden_done"), "every garden choice finishes the quest")
 	return true
 
 

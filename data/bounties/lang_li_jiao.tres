@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_h034e"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_6pt7y"]
+[ext_resource type="Resource" path="res://data/enemies/shui_kou.tres" id="3_r5jcj"]
+[ext_resource type="Resource" path="res://data/enemies/lang_li_jiao.tres" id="4_urw80"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_eixpb"]
+
+[sub_resource type="Resource" id="Resource_08ukp"]
+script = ExtResource("5_eixpb")
+id = "bounty_lang_li_jiao"
+title = "悬赏：浪里蛟"
+enemies = Array[ExtResource("2_6pt7y")]([ExtResource("3_r5jcj"), ExtResource("4_urw80"), ExtResource("3_r5jcj")])
+enemy_level = 19
+recommended_level = 19
+
+[resource]
+script = ExtResource("1_h034e")
+id = &"lang_li_jiao"
+location = &"liangshan"
+grade = 2
+target = "浪里蛟"
+description = "八百里水泊上最凶的水寇头子，专劫过往客船，官府屡剿不平。"
+stage = SubResource("Resource_08ukp")

@@ -7,6 +7,8 @@ const STAGES_DIR := "res://data/stages/"
 const MAPS_DIR := "res://data/maps/"
 const SCENES_DIR := "res://data/scenes/"
 const ORIGINS_DIR := "res://data/origins/"
+const BOUNTIES_DIR := "res://data/bounties/"
+const EVENTS_DIR := "res://data/events/"
 
 var heroes: Array[UnitData] = []
 var combos: Array[ComboData] = []
@@ -14,6 +16,9 @@ var stages: Dictionary[String, StageData] = {}
 var maps: Dictionary[String, WorldMapData] = {}
 var scenes: Dictionary[String, SceneData] = {}
 var origins: Dictionary[StringName, OriginData] = {}
+var bounties: Array[BountyData] = []
+## 赶路时可能发生的奇遇（支线事件挂在 NPC 上，不在这里）
+var events: Array[EventData] = []
 
 
 func _ready() -> void:
@@ -34,6 +39,11 @@ func _ready() -> void:
 	for res in load_dir(ORIGINS_DIR):
 		var origin := res as OriginData
 		origins[origin.id] = origin
+	for res in load_dir(BOUNTIES_DIR):
+		bounties.append(res as BountyData)
+	bounties.sort_custom(func(a: BountyData, b: BountyData) -> bool: return a.grade < b.grade)
+	for res in load_dir(EVENTS_DIR):
+		events.append(res as EventData)
 
 
 ## 出身按 sort_order 排好的列表，给创建角色界面用。
@@ -41,6 +51,15 @@ func origin_list() -> Array[OriginData]:
 	var out: Array[OriginData] = []
 	out.assign(origins.values())
 	out.sort_custom(func(a: OriginData, b: OriginData) -> bool: return a.sort_order < b.sort_order)
+	return out
+
+
+## 某个地点还没揭下的悬赏。
+func open_bounties(location_id: StringName) -> Array[BountyData]:
+	var out: Array[BountyData] = []
+	for b in bounties:
+		if b.location == location_id and not GameState.has_flag("bounty_" + String(b.id)):
+			out.append(b)
 	return out
 
 

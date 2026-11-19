@@ -63,7 +63,6 @@ danger = 3
 level_min = 12
 level_max = 16
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("9_08vw3"), ExtResource("10_bor2l")])
-stage_id = "1-7"
 road_to_next = PackedVector2Array(905, 495, 950, 505, 1010, 480, 1090, 455, 1120, 445)
 
 [sub_resource type="Resource" id="Resource_wch8f"]

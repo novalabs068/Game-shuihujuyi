@@ -11,3 +11,7 @@ extends Resource
 @export var cell: Vector2i
 ## 对话台词，每行「说话人：台词」；说话人写「我」代表主角
 @export var lines: PackedStringArray
+## 对话结束后弹出的事件（比如支线的选择）；做过一次（标记 "event_<id>"）后不再弹出
+@export var event: EventData
+## 这个标记出现后，人物不再出现在场景里（比如支线结束后泼皮掉进了粪窖）
+@export var hide_flag: String

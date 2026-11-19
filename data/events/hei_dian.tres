@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EventData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_choice.gd" id="1_2bjrh"]
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="2_7unvk"]
+
+[sub_resource type="Resource" id="Resource_c7rv5"]
+script = ExtResource("1_2bjrh")
+label = "喝几碗再走"
+result_text = "酒刚下肚就天旋地转……醒来时躺在路边，钱袋轻了一截。好像是家黑店！"
+silver = -15
+
+[sub_resource type="Resource" id="Resource_yettf"]
+script = ExtResource("1_2bjrh")
+label = "只买些干粮就走"
+cost_silver = 5
+result_text = "老板娘撇撇嘴，没多说什么。"
+experience = 10
+
+[resource]
+script = ExtResource("2_7unvk")
+id = &"hei_dian"
+title = "路边酒店"
+text = "走得口干舌燥，路边正好有家酒店，老板娘笑盈盈地招呼你进去喝碗酒。"
+choices = Array[ExtResource("1_2bjrh")]([SubResource("Resource_c7rv5"), SubResource("Resource_yettf")])

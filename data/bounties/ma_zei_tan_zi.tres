@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_butb5"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_8pxwq"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/ma_zei.png" id="3_at3mu"]
+[ext_resource type="Resource" path="res://data/enemies/ma_zei.tres" id="4_p3j4o"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_ntpdx"]
+
+[sub_resource type="Resource" id="Resource_5n81l"]
+script = ExtResource("2_8pxwq")
+id = &"ma_zei"
+display_name = "狂暴·马贼"
+role = 1
+base_hp = 437
+base_atk = 92
+base_def = 18
+base_spd = 115
+map_sprite = ExtResource("3_at3mu")
+elite_trait = &"berserk"
+
+[sub_resource type="Resource" id="Resource_h7aep"]
+script = ExtResource("5_ntpdx")
+id = "bounty_ma_zei_tan_zi"
+title = "悬赏：马贼探子"
+enemies = Array[ExtResource("2_8pxwq")]([SubResource("Resource_5n81l"), ExtResource("4_p3j4o"), ExtResource("4_p3j4o")])
+enemy_level = 9
+recommended_level = 9
+
+[resource]
+script = ExtResource("1_butb5")
+id = &"ma_zei_tan_zi"
+location = &"weizhou"
+target = "马贼探子"
+description = "替城外马贼踩点的探子，好几支商队因此遭劫。"
+stage = SubResource("Resource_h7aep")

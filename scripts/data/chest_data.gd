@@ -5,3 +5,5 @@ extends Resource
 @export var id: StringName
 @export var cell: Vector2i
 @export var reward_text: String
+@export var tokens := 0
+@export var silver := 0

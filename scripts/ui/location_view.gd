@@ -4,6 +4,8 @@ extends Control
 ## 地形来自 SceneData 的文字地图，用瓦片图集拼成 TileMapLayer；镜头跟着主角走。
 
 signal exit_requested
+## 支线事件里选了要打一仗；bonus 见 main.gd 的 _start_battle()
+signal battle_requested(stage: StageData, bonus: Dictionary)
 
 ## 像素瓦片放大倍数：16 像素的瓦片在画面上是 48 像素一格
 const PIXEL_SCALE := 3
@@ -11,6 +13,8 @@ const WALK_SPEED := 230.0
 const CAMERA_FOLLOW := 8.0
 
 var scene_data: SceneData
+## 进场景时先提示一句，比如支线战斗打赢后的结果
+var notice := ""
 
 var _tile := 48.0
 var _world: Node2D
@@ -25,6 +29,7 @@ var _on_arrive: Callable
 var _busy := false
 var _marker: Node2D
 var _dialogue: DialogueBox
+var _event_panel: EventPanel
 var _toast: Label
 
 
@@ -51,6 +56,8 @@ func _ready() -> void:
 	# 刚加进场景树时尺寸还是 0，等铺满屏幕后再把镜头对准主角
 	resized.connect(_center_camera.bind(true))
 	_center_camera(true)
+	if notice != "":
+		_flash(notice)
 
 
 func _process(delta: float) -> void:
@@ -114,6 +121,8 @@ func _spawn_objects() -> void:
 	for npc in scene_data.npcs:
 		# 已经随行的好汉不再站在场景里
 		if npc.unit != null and npc.unit.id in GameState.team_ids:
+			continue
+		if npc.hide_flag != "" and GameState.has_flag(npc.hide_flag):
 			continue
 		var actor := MapActor.new()
 		actor.sprite = npc.sprite if npc.sprite != null else (npc.unit.map_sprite if npc.unit != null else null)
@@ -182,6 +191,10 @@ func _build_ui() -> void:
 	_dialogue.offset_right = -40
 	_dialogue.offset_top = -200
 	_dialogue.offset_bottom = -16
+
+	_event_panel = EventPanel.new()
+	add_child(_event_panel)
+	_event_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _make_marker() -> Node2D:
@@ -282,6 +295,16 @@ func _talk(npc: NpcData) -> void:
 	var team := GameState.team()
 	var speakers := {npc.display_name: npc.unit, "我": team[0] if not team.is_empty() else null}
 	await _dialogue.run(npc.lines, speakers)
+	if npc.event != null and not GameState.has_flag("event_" + String(npc.event.id)):
+		GameState.set_flag("event_" + String(npc.event.id))
+		var choice := await _event_panel.ask(npc.event)
+		if choice.battle != null:
+			_event_panel.close()
+			battle_requested.emit(choice.battle, WorldMapView._choice_bonus(choice))
+			return
+		var gained := Rewards.apply_choice(choice)
+		GameState.save_game()
+		await _event_panel.show_result(choice.result_text, gained)
 	_busy = false
 
 
@@ -291,10 +314,11 @@ func _open_chest(chest: ChestData) -> void:
 		_flash("箱子是空的")
 		return
 	GameState.set_flag(flag)
+	var gained := Rewards.grant(chest.tokens, chest.silver, 0)
 	GameState.save_game()
 	_chest_actors[chest.cell].sprite = scene_data.chest_open
 	_chest_actors[chest.cell].set_glyph("空", Color("6e5a3a"))
-	_flash("获得：%s" % chest.reward_text)
+	_flash("打开宝箱：%s" % gained)
 
 
 func _chest_flag(chest: ChestData) -> String:

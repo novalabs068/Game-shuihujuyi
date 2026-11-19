@@ -23,6 +23,8 @@ var location_id: StringName = &""
 var level := 1
 var experience := 0
 var silver := 0
+## 聚义令：抽卡用，只能靠闯荡获得
+var tokens := 0
 
 var _protagonist: UnitData
 
@@ -123,6 +125,7 @@ func reset() -> void:
 	level = 1
 	experience = 0
 	silver = 0
+	tokens = 0
 	_protagonist = null
 
 
@@ -144,6 +147,7 @@ func save_game() -> void:
 		"level": level,
 		"exp": experience,
 		"silver": silver,
+		"tokens": tokens,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -179,3 +183,4 @@ func load_game() -> void:
 	level = data.get("level", 1)
 	experience = data.get("exp", 0)
 	silver = data.get("silver", 0)
+	tokens = data.get("tokens", 0)

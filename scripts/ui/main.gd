@@ -37,10 +37,13 @@ func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, not
 	_set_screen(screen)
 
 
-func _show_scene(scene_id: String) -> void:
+func _show_scene(scene_id: String, notice := "") -> void:
 	var screen := LocationView.new()
 	screen.scene_data = GameDB.scenes[scene_id]
+	screen.notice = notice
 	screen.exit_requested.connect(_show_map)
+	screen.battle_requested.connect(func(stage: StageData, bonus: Dictionary) -> void:
+		_start_battle(stage, &"", 0.0, bonus, scene_id))
 	_set_screen(screen)
 
 
@@ -54,27 +57,40 @@ func _show_team_select() -> void:
 
 
 ## destination 非空表示这是赶路时的遭遇战：赢了接着走完，输了或撤退就留在原地。
-func _start_battle(stage: StageData, destination: StringName, progress: float) -> void:
+## bonus 是打赢后额外的奖励（悬赏、奇遇、支线）：tokens、silver、experience、flag、text。
+## return_scene 非空时，打完回到这个地点场景，否则回大地图。
+func _start_battle(stage: StageData, destination: StringName, progress: float, bonus := {}, return_scene := "") -> void:
 	var screen := BattleView.new()
 	screen.stage = stage
 	screen.team = GameState.team()
 	screen.hero_level = GameState.level
-	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress))
-	screen.exit_requested.connect(_show_map)
+	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress, bonus, return_scene))
+	var leave := func(notice: String) -> void:
+		if return_scene != "":
+			_show_scene(return_scene, notice)
+		else:
+			_show_map(&"", 0.0, notice)
+	screen.exit_requested.connect(leave.bind(""))
 	screen.finished.connect(func(won: bool) -> void:
 		var notice := ""
 		if won:
-			var r := Encounters.rewards(screen.model)
+			var r: Dictionary = Encounters.rewards(screen.model)
 			var ups := GameState.add_rewards(r["exp"], r["silver"])
+			var parts := PackedStringArray()
+			if bonus.has("text"):
+				parts.append(String(bonus["text"]).replace("{name}", GameState.player_name))
+			var extra := Rewards.grant(bonus.get("tokens", 0), bonus.get("silver", 0), bonus.get("experience", 0))
+			if extra != "":
+				parts.append(extra)
+			GameState.set_flag(bonus.get("flag", ""))
 			if ups > 0:
-				notice = "升到 %d 级！" % GameState.level
-			if destination == &"":
-				GameState.set_flag("clear_" + stage.id)
+				parts.append("升到 %d 级！" % GameState.level)
+			notice = "　".join(parts)
 			GameState.save_game()
 		if won and destination != &"":
 			_show_map(destination, progress, notice)
 		else:
-			_show_map(&"", 0.0, notice))
+			leave.call(notice))
 	_set_screen(screen)
 
 

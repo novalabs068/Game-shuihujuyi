@@ -8,12 +8,18 @@
 [ext_resource type="Script" path="res://scripts/data/scene_data.gd" id="4_fyy3c"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/old_monk.png" id="5_kb5ui"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_san.png" id="6_vxuke"]
+[ext_resource type="Script" path="res://scripts/data/event_choice.gd" id="7_ao81w"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="7_xs33v"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="8_1rfvs"]
 [ext_resource type="Texture2D" path="res://art/pixel/props/willow.png" id="9_5krpj"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="9_npk5w"]
 [ext_resource type="Resource" path="res://data/heroes/lu_zhishen.tres" id="9_xveqm"]
 [ext_resource type="Texture2D" path="res://art/pixel/props/fence.png" id="10_15oec"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi_tou.tres" id="10_d7yj5"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="11_46cpb"]
 [ext_resource type="Texture2D" path="res://art/pixel/props/well.png" id="11_ao81w"]
 [ext_resource type="Script" path="res://scripts/data/prop_data.gd" id="12_1rfvs"]
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="12_e7ffu"]
 [ext_resource type="Texture2D" path="res://art/pixel/buildings/hall.png" id="13_npk5w"]
 [ext_resource type="Texture2D" path="res://art/pixel/buildings/gate.png" id="14_d7yj5"]
 [ext_resource type="Texture2D" path="res://art/pixel/props/pit.png" id="15_46cpb"]
@@ -25,6 +31,7 @@ script = ExtResource("1_kwhtk")
 id = &"tree_corner"
 cell = Vector2i(2, 18)
 reward_text = "聚义令 ×3"
+tokens = 3
 
 [sub_resource type="Resource" id="Resource_vyxfh"]
 script = ExtResource("2_4tth7")
@@ -41,6 +48,46 @@ display_name = "泼皮张三"
 sprite = ExtResource("6_vxuke")
 cell = Vector2i(31, 7)
 lines = PackedStringArray("泼皮张三：哪来的？少管闲事！", "泼皮张三：那胖和尚今天要倒大霉了，嘿嘿。", "（张三朝粪窖那边使了个眼色。）")
+hide_flag = "garden_done"
+
+[sub_resource type="Resource" id="Resource_n23ah"]
+script = ExtResource("7_ao81w")
+label = "去提醒鲁智深"
+result_text = "鲁智深听了哈哈大笑：「洒家倒要看看他们怎么掀！」
+第二天泼皮们来「拜见」，还没近身，就被鲁智深一脚一个踢进了粪窖。从此再没人敢来偷菜。"
+tokens = 2
+flag = "garden_done"
+
+[sub_resource type="Resource" id="Resource_efgxc"]
+script = ExtResource("11_46cpb")
+id = "garden_brawl"
+title = "菜园泼皮"
+enemies = Array[ExtResource("8_1rfvs")]([ExtResource("9_npk5w"), ExtResource("10_d7yj5"), ExtResource("9_npk5w")])
+enemy_level = 4
+recommended_level = 4
+
+[sub_resource type="Resource" id="Resource_anb1j"]
+script = ExtResource("7_ao81w")
+label = "当场教训他们"
+result_text = "{name}三拳两脚，把泼皮们打得哭爹喊娘，一个个滚进了粪窖。鲁智深闻声赶来，拍着你的肩膀直叫好。"
+tokens = 2
+battle = SubResource("Resource_efgxc")
+flag = "garden_done"
+
+[sub_resource type="Resource" id="Resource_0oj20"]
+script = ExtResource("7_ao81w")
+label = "在一旁看热闹"
+result_text = "泼皮们去「拜」鲁智深，结果被他一脚一个踢进了粪窖。你在一旁笑出了眼泪。"
+experience = 20
+flag = "garden_done"
+
+[sub_resource type="Resource" id="Resource_kyp5f"]
+script = ExtResource("12_e7ffu")
+id = &"garden_pranksters"
+title = "菜园泼皮"
+text = "李四压低声音：「那胖和尚新来管菜园，我们兄弟要请他到粪窖边受一拜，到时候一人抱一条腿，把他掀下粪窖去！你可别坏我们好事。」"
+choices = Array[ExtResource("7_ao81w")]([SubResource("Resource_n23ah"), SubResource("Resource_anb1j"), SubResource("Resource_0oj20")])
+once = true
 
 [sub_resource type="Resource" id="Resource_s2na7"]
 script = ExtResource("2_4tth7")
@@ -48,7 +95,9 @@ id = &"li_si"
 display_name = "泼皮李四"
 sprite = ExtResource("7_xs33v")
 cell = Vector2i(32, 8)
-lines = PackedStringArray("泼皮李四：我们兄弟正要去给大师「贺喜」……", "泼皮李四：你叫{name}是吧？你可别多嘴。", "（他们好像在打粪窖的主意。这件事以后再说。）")
+lines = PackedStringArray("泼皮李四：喂，你过来。", "（他左右看看，把你拉到一边。）")
+event = SubResource("Resource_kyp5f")
+hide_flag = "garden_done"
 
 [sub_resource type="Resource" id="Resource_arty7"]
 script = ExtResource("2_4tth7")

@@ -3,13 +3,18 @@ extends Control
 ## 江湖大地图：点地名，主角沿道路走过去；没开放的地点盖着云雾；路上可能遇敌。
 ## 打仗、编队都交给 main.gd 切换画面，回来时用 resume_* 接着走完剩下的路。
 
-signal battle_requested(stage: StageData, destination: StringName, progress: float)
+## bonus：打赢后额外的奖励和标记，见 main.gd 的 _start_battle()
+signal battle_requested(stage: StageData, destination: StringName, progress: float, bonus: Dictionary)
 signal team_requested
 signal scene_requested(scene_id: String)
 
 const MAP_SIZE := Vector2(1280, 720)
 const WALK_SPEED := 260.0
 const ENCOUNTER_AT := 0.5
+## 一程路上没遇敌时，碰上奇遇的概率
+const EVENT_CHANCE := 0.3
+## 第一次到一个地点给的聚义令
+const FIRST_VISIT_TOKENS := 3
 const PAPER := Color("efe7d4")
 const INK := Color("1e1c1a")
 const CINNABAR := Color("be3226")
@@ -30,6 +35,7 @@ var _panel_title: Label
 var _panel_desc: Label
 var _panel_buttons: HBoxContainer
 var _toast: Label
+var _event_panel: EventPanel
 var _status: Label
 var _walking := false
 var _rng := RandomNumberGenerator.new()
@@ -58,6 +64,9 @@ func _ready() -> void:
 	_layer.add_child(_avatar)
 	_build_top_bar()
 	_build_panel()
+	_event_panel = EventPanel.new()
+	add_child(_event_panel)
+	_event_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_toast = UiKit.label("", 26, PAPER)
 	_toast.add_theme_constant_override("outline_size", 8)
 	_toast.add_theme_color_override("font_outline_color", INK)
@@ -232,37 +241,91 @@ func _travel(destination: StringName, from_progress: float, can_encounter: bool)
 		return
 	_walking = true
 	_panel.visible = false
-	# 先决定这一程会不会遇敌：按目的地一带的敌人组合生成，没有配置时退回地图的默认遭遇
+	# 先决定这一程路上会发生什么：遇敌（按目的地一带的敌人组合生成）、奇遇，或者一路平安
 	var stage: StageData = null
-	if can_encounter and _rng.randf() < map.encounter_chance:
-		stage = Encounters.build(map.location(destination), GameState.level, _rng)
-		if stage == null and map.encounter_stage_id != "":
-			stage = GameDB.stages[map.encounter_stage_id]
-	var encounter := stage != null
-	var stop_at := ENCOUNTER_AT if encounter else 1.0
-	var duration := _length(points) * (stop_at - from_progress) / WALK_SPEED
+	var event: EventData = null
+	if can_encounter:
+		if _rng.randf() < map.encounter_chance:
+			stage = Encounters.build(map.location(destination), GameState.level, _rng)
+			if stage == null and map.encounter_stage_id != "":
+				stage = GameDB.stages[map.encounter_stage_id]
+		elif _rng.randf() < EVENT_CHANCE:
+			event = _pick_event(destination)
+	var stops := stage != null or event != null
+	await _walk(points, from_progress, ENCOUNTER_AT if stops else 1.0)
+	if stage != null:
+		_flash_toast("%s！" % stage.title)
+		await get_tree().create_timer(0.9).timeout
+		battle_requested.emit(stage, destination, ENCOUNTER_AT, {})
+		return
+	if event != null:
+		if await _run_event(event, destination):
+			return
+		await _walk(points, ENCOUNTER_AT, 1.0)
+	_walking = false
+	_arrive(map.location(destination))
+
+
+func _walk(points: PackedVector2Array, from: float, to: float) -> void:
 	var bob := _avatar.create_tween().set_loops()
 	bob.tween_property(_avatar, "rotation", 0.08, 0.15)
 	bob.tween_property(_avatar, "rotation", -0.08, 0.15)
 	var walk := create_tween()
-	walk.tween_method(func(p: float) -> void: _place_avatar(_sample(points, p)), from_progress, stop_at, maxf(duration, 0.1))
+	var duration := _length(points) * (to - from) / WALK_SPEED
+	walk.tween_method(func(p: float) -> void: _place_avatar(_sample(points, p)), from, to, maxf(duration, 0.1))
 	await walk.finished
 	bob.kill()
 	_avatar.rotation = 0.0
-	if encounter:
-		_flash_toast("%s！" % stage.title)
-		await get_tree().create_timer(0.9).timeout
-		battle_requested.emit(stage, destination, ENCOUNTER_AT)
-		return
-	_walking = false
-	_arrive(map.location(destination))
+
+
+## 随机挑一个能在去 destination 的路上发生的奇遇；只发生一次的，发生过就不再出现。
+func _pick_event(destination: StringName) -> EventData:
+	var pool: Array[EventData] = []
+	for e in GameDB.events:
+		if e.once and GameState.has_flag("event_" + String(e.id)):
+			continue
+		if not e.locations.is_empty() and not destination in e.locations:
+			continue
+		pool.append(e)
+	return pool[_rng.randi_range(0, pool.size() - 1)] if not pool.is_empty() else null
+
+
+## 弹出奇遇让玩家选。选了要打仗的就发出 battle_requested 并返回 true（地图会被换掉）。
+func _run_event(event: EventData, destination: StringName) -> bool:
+	if event.once:
+		GameState.set_flag("event_" + String(event.id))
+	var choice := await _event_panel.ask(event)
+	if choice.battle != null or choice.battle_from_region:
+		var stage := choice.battle
+		if stage == null:
+			stage = Encounters.build(map.location(destination), GameState.level, _rng)
+		_event_panel.close()
+		battle_requested.emit(stage, destination, ENCOUNTER_AT, _choice_bonus(choice))
+		return true
+	var gained := Rewards.apply_choice(choice)
+	GameState.save_game()
+	_refresh_status()
+	await _event_panel.show_result(choice.result_text, gained)
+	return false
+
+
+static func _choice_bonus(choice: EventChoice) -> Dictionary:
+	return {"tokens": choice.tokens, "silver": choice.silver - choice.cost_silver, "experience": choice.experience,
+		"flag": choice.flag, "text": choice.result_text}
 
 
 func _arrive(loc: LocationData) -> void:
 	GameState.location_id = loc.id
 	var first_time := loc.arrive_flag != "" and not GameState.has_flag(loc.arrive_flag)
 	GameState.set_flag(loc.arrive_flag)
+	var visit_flag := "visited_" + String(loc.id)
+	var first_visit := not GameState.has_flag(visit_flag)
+	GameState.set_flag(visit_flag)
+	if first_visit:
+		GameState.tokens += FIRST_VISIT_TOKENS
+		_flash_toast("初到%s，聚义令 +%d" % [loc.display_name, FIRST_VISIT_TOKENS])
 	GameState.save_game()
+	_refresh_status()
 	_refresh_locks()
 	_show_panel(loc)
 	if first_time and loc.arrive_text != "":
@@ -286,19 +349,29 @@ func _show_panel(loc: LocationData) -> void:
 			else:
 				_flash_toast("这里还在建设中"))
 		_panel_buttons.add_child(enter)
-	if loc.stage_id != "" and GameDB.stages.has(loc.stage_id):
-		var stage: StageData = GameDB.stages[loc.stage_id]
-		var cleared := GameState.has_flag("clear_" + loc.stage_id)
-		var fight := UiKit.button("主线 %s「%s」%s" % [stage.id, stage.title, "（已通关）" if cleared else ""], Vector2(260, 52), 22)
-		fight.pressed.connect(func() -> void: battle_requested.emit(stage, &"", 0.0))
-		_panel_buttons.add_child(fight)
+	if GameDB.bounties.any(func(b: BountyData) -> bool: return b.location == loc.id):
+		var open := GameDB.open_bounties(loc.id)
+		var board := UiKit.button("悬赏告示（%d）" % open.size(), Vector2(200, 52), 22)
+		board.pressed.connect(_open_board.bind(loc))
+		_panel_buttons.add_child(board)
 	if _panel_buttons.get_child_count() == 0:
 		_panel_buttons.add_child(UiKit.label("点地图上的地名前往别处。", 17, UiKit.TEXT_DIM))
 	_layout()
 
 
+func _open_board(loc: LocationData) -> void:
+	var board := BountyBoard.new()
+	board.bounties = GameDB.open_bounties(loc.id)
+	add_child(board)
+	board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	board.closed.connect(board.queue_free)
+	board.accepted.connect(func(b: BountyData) -> void:
+		battle_requested.emit(b.stage, &"", 0.0, {"tokens": b.tokens(), "flag": "bounty_" + String(b.id),
+			"text": "揭下了「%s」的悬赏。" % b.target}))
+
+
 func _refresh_status() -> void:
-	_status.text = "%s　Lv%d　经验 %d/%d　银两 %d" % [GameState.player_name, GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver]
+	_status.text = "%s　Lv%d　经验 %d/%d　银两 %d　聚义令 %d" % [GameState.player_name, GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver, GameState.tokens]
 
 
 func _refresh_locks() -> void:

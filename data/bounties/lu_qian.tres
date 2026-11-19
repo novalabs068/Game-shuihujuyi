@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_4h7wl"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_4icfj"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="3_vusvq"]
+[ext_resource type="Resource" path="res://data/enemies/lu_qian.tres" id="4_3y535"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_htgtj"]
+
+[sub_resource type="Resource" id="Resource_x3s8j"]
+script = ExtResource("5_htgtj")
+id = "bounty_lu_qian"
+title = "悬赏：陆谦"
+enemies = Array[ExtResource("2_4icfj")]([ExtResource("3_vusvq"), ExtResource("4_3y535"), ExtResource("3_vusvq")])
+enemy_level = 14
+recommended_level = 14
+
+[resource]
+script = ExtResource("1_4h7wl")
+id = &"lu_qian"
+location = &"cangzhou"
+grade = 1
+target = "陆谦"
+description = "高太尉府的虞候，为讨好高衙内陷害林教头，如今带着亲兵在沧州一带出没。"
+stage = SubResource("Resource_x3s8j")

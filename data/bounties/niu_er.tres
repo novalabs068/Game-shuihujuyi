@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_rqv05"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_otwax"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="3_q6xrc"]
+[ext_resource type="Resource" path="res://data/enemies/niu_er.tres" id="4_ylnus"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_8xp7w"]
+
+[sub_resource type="Resource" id="Resource_ns4wc"]
+script = ExtResource("5_8xp7w")
+id = "bounty_niu_er"
+title = "悬赏：泼皮牛二"
+enemies = Array[ExtResource("2_otwax")]([ExtResource("3_q6xrc"), ExtResource("4_ylnus"), ExtResource("3_q6xrc")])
+enemy_level = 5
+recommended_level = 5
+
+[resource]
+script = ExtResource("1_rqv05")
+id = &"niu_er"
+location = &"dongjing"
+target = "泼皮牛二"
+description = "东京城里有名的破落户泼皮，专在天汉州桥一带撒泼耍赖、强抢财物。"
+stage = SubResource("Resource_ns4wc")

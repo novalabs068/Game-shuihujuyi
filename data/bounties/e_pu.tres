@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_2pfga"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_fe1fj"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="3_0na6i"]
+[ext_resource type="Resource" path="res://data/enemies/fu_an.tres" id="4_35qxu"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="7_4xu0n"]
+
+[sub_resource type="Resource" id="Resource_u2d35"]
+script = ExtResource("7_4xu0n")
+id = "bounty_e_pu"
+title = "悬赏：太尉府恶仆"
+enemies = Array[ExtResource("2_fe1fj")]([ExtResource("3_0na6i"), ExtResource("4_35qxu"), ExtResource("3_0na6i")])
+enemy_level = 8
+recommended_level = 8
+
+[resource]
+script = ExtResource("1_2pfga")
+id = &"e_pu"
+location = &"dongjing"
+grade = 1
+target = "太尉府恶仆"
+description = "高太尉府的帮闲富安带着几个恶仆横行街市，打伤了好几个卖菜的老汉。"
+stage = SubResource("Resource_u2d35")
