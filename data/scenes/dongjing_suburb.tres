@@ -265,6 +265,7 @@ Vector2i(34, 1): "dongjing_street",
 Vector2i(35, 1): "dongjing_street",
 Vector2i(36, 1): "dongjing_street"
 })
+music = &"jiaoye"
 overlays = Dictionary[String, Texture2D]({
 "=": ExtResource("8_5abb1"),
 "T": ExtResource("9_jpxqb"),

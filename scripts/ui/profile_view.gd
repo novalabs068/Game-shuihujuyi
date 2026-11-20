@@ -60,6 +60,11 @@ func _ready() -> void:
 	var title := UiKit.label("主角", 30, UiKit.GOLD)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(title)
+	var music := UiKit.button("音乐：开" if Music.enabled else "音乐：关", Vector2(120, 46), 20)
+	music.pressed.connect(func() -> void:
+		Music.enabled = not Music.enabled
+		music.text = "音乐：开" if Music.enabled else "音乐：关")
+	top.add_child(music)
 	var adjust := UiKit.button("换武学、装备", Vector2(170, 46), 20)
 	adjust.pressed.connect(func() -> void: heroes_requested.emit())
 	top.add_child(adjust)

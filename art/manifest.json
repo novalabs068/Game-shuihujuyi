@@ -4427,6 +4427,81 @@
         "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
         "prompt_file": "art/prompts/world_map_2.txt"
       }
+    },
+    {
+      "id": "app-icon",
+      "role": "游戏图标（林冲风雪山神庙背影，版画）",
+      "path": "icon.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "512×512，另有 art/icon/ 下的安卓图标",
+        "alpha": true
+      },
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_file": "art/prompts/app_icon_linchong.txt"
+      }
+    },
+    {
+      "id": "music-jianghu",
+      "role": "背景音乐（大地图）",
+      "path": "audio/music/jianghu.ogg",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/music/compose.py（程序合成，原创）",
+        "date": "2026-11-19"
+      }
+    },
+    {
+      "id": "music-jieshi",
+      "role": "背景音乐（街市）",
+      "path": "audio/music/jieshi.ogg",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/music/compose.py（程序合成，原创）",
+        "date": "2026-11-19"
+      }
+    },
+    {
+      "id": "music-jiaoye",
+      "role": "背景音乐（郊野）",
+      "path": "audio/music/jiaoye.ogg",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/music/compose.py（程序合成，原创）",
+        "date": "2026-11-19"
+      }
+    },
+    {
+      "id": "music-zhandou",
+      "role": "背景音乐（战斗）",
+      "path": "audio/music/zhandou.ogg",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/music/compose.py（程序合成，原创）",
+        "date": "2026-11-19"
+      }
+    },
+    {
+      "id": "music-liezhuan",
+      "role": "背景音乐（列传）",
+      "path": "audio/music/liezhuan.ogg",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/music/compose.py（程序合成，原创）",
+        "date": "2026-11-19"
+      }
     }
   ]
 }

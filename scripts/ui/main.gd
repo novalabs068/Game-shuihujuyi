@@ -43,6 +43,18 @@ func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, not
 	_set_screen(screen)
 
 
+## 换画面时换配乐：大地图「江湖」、场景按场景配、战斗「战斗」、列传「列传」；菜单页不换曲。
+func _play_music_for(screen: Control) -> void:
+	if screen is WorldMapView or screen is TitleScreen or screen is CharacterCreate:
+		Music.play(&"jianghu")
+	elif screen is LocationView:
+		Music.play((screen as LocationView).scene_data.music)
+	elif screen is BattleView:
+		Music.play(&"zhandou")
+	elif screen is StoryView:
+		Music.play(&"liezhuan")
+
+
 func _show_profile() -> void:
 	var screen := ProfileView.new()
 	screen.back_requested.connect(_show_map)
@@ -192,6 +204,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 
 
 func _set_screen(screen: Control) -> void:
+	_play_music_for(screen)
 	if _screen != null:
 		_screen.queue_free()
 	_screen = screen

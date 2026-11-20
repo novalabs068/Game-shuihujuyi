@@ -44,6 +44,8 @@ const TERRAIN := {
 @export var doors: Dictionary[Vector2i, String] = {}
 ## 走到出口（地形 E）去哪个场景、出现在哪一格；为空就回江湖大地图
 @export var exit_scene: String
+## 这个场景的配乐（audio/music/ 下的曲名）
+@export var music: StringName = &"jieshi"
 @export var exit_cell: Vector2i
 
 @export_group("像素图")
