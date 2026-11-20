@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_san.png" id="1_2vsp7"]
+[ext_resource type="Texture2D" path="res://art/busts/po_pi.png" id="1_uq474"]
+[ext_resource type="Texture2D" path="res://art/faces/po_pi.png" id="2_go7y0"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_qsd7m"]
+[ext_resource type="Texture2D" path="res://art/portraits/po_pi.png" id="4_qei0d"]
 
 [resource]
 script = ExtResource("2_qsd7m")
@@ -12,4 +15,7 @@ base_hp = 252
 base_atk = 68
 base_def = 14
 base_spd = 96
+portrait = ExtResource("4_qei0d")
+bust = ExtResource("1_uq474")
+face = ExtResource("2_go7y0")
 map_sprite = ExtResource("1_2vsp7")

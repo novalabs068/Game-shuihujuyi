@@ -1,11 +1,12 @@
 class_name Stars
 ## 升星和义气的规则（见设计文档「养成与组合技」「重复卡和用不上的卡的去处」）。纯规则，数值是初稿。
 
-## 甲、乙、丙、丁的星数上限
-const MAX_STARS: Array[int] = [10, 8, 5, 3]
-## 每升 1 星生命、攻击、防御 +5%；速度不加，免得打乱出手顺序
-const STAT_BONUS := 0.05
-## 到这个星数时主动技强化一次
+## 界面上用勾玉表示：甲 5 颗、乙 4 颗、丙 3 颗、丁 2 颗，刚抽到时全是空心，每升一星点亮一颗。
+## 内部星级从 1 起（1 = 一颗都没点亮），所以星级上限 = 勾玉数 + 1。
+const MAX_STARS: Array[int] = [6, 5, 4, 3]
+## 每点亮一颗勾玉，生命、攻击、防御 +10%；速度不加，免得打乱出手顺序
+const STAT_BONUS := 0.10
+## 到这个星级（点亮 2 颗勾玉）时主动技强化一次
 const SKILL_UP_STAR := 3
 const SKILL_UP_RATIO := 1.25
 ## 没招到的好汉攒够这么多将魂可以直接招募
@@ -19,9 +20,14 @@ static func max_stars(hero: UnitData) -> int:
 	return MAX_STARS[hero.tier]
 
 
-## 从 star 星升到下一星要多少将魂。
+## 点亮了几颗勾玉。
+static func lit(star: int) -> int:
+	return star - 1
+
+
+## 从 star 星升到下一星（再点亮一颗勾玉）要多少将魂：20、40、60、80、100。
 static func cost(star: int) -> int:
-	return 10 * star
+	return 20 * star
 
 
 ## 带上星级加成的战斗数据：star 为 1 时原样返回，否则返回一份复制。
@@ -50,7 +56,7 @@ static func upgraded_skill(skill: SkillData) -> SkillData:
 			s.cooldown = maxi(s.cooldown - 1, 1)
 		_:
 			s.power *= SKILL_UP_RATIO
-	s.description = "%s（%d 星强化：%s）" % [skill.description, SKILL_UP_STAR, upgrade_text(skill)]
+	s.description = "%s（点亮 %d 颗勾玉强化：%s）" % [skill.description, lit(SKILL_UP_STAR), upgrade_text(skill)]
 	return s
 
 

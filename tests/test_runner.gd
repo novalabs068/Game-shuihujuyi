@@ -515,16 +515,18 @@ func test_stars() -> bool:
 	h.tier = UnitData.Tier.BING
 	check(Stars.apply(h, 1) == h, "1 star returns the original")
 	var s3 := Stars.apply(h, 3)
-	check_eq(s3.base_hp, 1100, "3 stars: hp +10%")
-	check_eq(s3.base_atk, 110, "3 stars: atk +10%")
+	check_eq(s3.base_hp, 1200, "2 lit magatama: hp +20%")
+	check_eq(s3.base_atk, 120, "2 lit magatama: atk +20%")
 	check_eq(s3.base_spd, 100, "speed is not boosted")
 	check(is_equal_approx(s3.skill.power, 2.5), "3 stars: skill power x1.25")
 	check(is_equal_approx(h.skill.power, 2.0), "original skill untouched")
 	check(is_equal_approx(Stars.apply(h, 2).skill.power, 2.0), "2 stars: skill not upgraded yet")
 	var stun := Stars.upgraded_skill(skill(SkillData.Effect.STUN, {turns = 1}))
 	check_eq(stun.turns, 2, "control skills last one more turn")
-	check_eq(Stars.max_stars(h), 5, "丙 caps at 5 stars")
-	check_eq(Stars.cost(1) + Stars.cost(2) + Stars.cost(3) + Stars.cost(4), 100, "1→5 stars costs 100 souls")
+	check_eq(Stars.max_stars(h), 4, "丙 has 3 magatama (star cap 4)")
+	check_eq(UiKit.tier_magatama(UnitData.Tier.JIA), 5, "甲 has 5 magatama")
+	check_eq(UiKit.tier_magatama(UnitData.Tier.DING), 2, "丁 has 2 magatama")
+	check_eq(Stars.cost(1) + Stars.cost(2) + Stars.cost(3), 120, "lighting all 3 of 丙 costs 120 souls")
 	check_eq(Stars.soul_price(h), 2, "丙 souls cost 2 义气")
 	return true
 

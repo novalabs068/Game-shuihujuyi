@@ -18,13 +18,19 @@ const HEAL := Color("7be07f")
 
 const ROLE_NAMES: Array[String] = ["猛将", "武将", "射手", "谋士", "奇人"]
 const RARITY_NAMES: Array[String] = ["", "地煞", "天罡", "主角"]
+## 内部和设计文档里的品级名；界面上不显示，品级只用勾玉数（MagatamaRow）和名字颜色表示
 const TIER_NAMES: Array[String] = ["甲", "乙", "丙", "丁"]
-## 卡框颜色按品级：甲金、乙紫、丙蓝、丁灰
+## 品级的名字颜色：甲金、乙紫、丙蓝、丁灰（参考《三国志·战略版》名字按品质上色）
 const TIER_COLORS: Array[Color] = [Color("e0b040"), Color("a070e0"), Color("5a9ae8"), Color("9aa0a8")]
 ## 装备品质的颜色：凡品灰白、良品蓝、精品金。QUALITY_INK 用在纸色底的面板上
 const QUALITY_COLORS: Array[Color] = [Color("c8c4b8"), Color("6aa8f0"), Color("e0b040")]
 const QUALITY_INK: Array[Color] = [Color("6a6458"), Color("2f63a8"), Color("a8741a")]
-## 职业底色：猛将蓝、武将红、射手绿、谋士紫、奇人青
+## 职业小标签上的单字
+const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
+## 卡面统一用墨色底、深色框，颜色只留给印章、名字、勾玉这些小标记
+const CARD_BG := Color("221d18")
+const CARD_FRAME := Color("4a3f33")
+## 职业底色（旧卡面用，新卡面统一墨色底）：猛将蓝、武将红、射手绿、谋士紫、奇人青
 const ROLE_COLORS: Array[Color] = [Color("34465f"), Color("5a3434"), Color("3d5634"), Color("4a3d5e"), Color("2f5252")]
 
 
@@ -92,6 +98,30 @@ static func rarity_color(data: UnitData) -> Color:
 		UnitData.Rarity.TIANGANG, UnitData.Rarity.DISHA:
 			return TIER_COLORS[data.tier]
 	return ENEMY
+
+
+## 品级对应几颗勾玉：甲 5、乙 4、丙 3、丁 2（也就是能升几次星）。
+static func tier_magatama(tier: int) -> int:
+	return 5 - tier
+
+
+## 职业小标签：深色小方块里一个字（猛、武、射、谋、奇）。
+static func role_tag(data: UnitData, font_size := 15) -> PanelContainer:
+	var tag := PanelContainer.new()
+	var style := box(Color(0, 0, 0, 0.55), Color("6a5c4a"), 1, 3)
+	style.set_content_margin_all(2)
+	style.content_margin_left = 5
+	style.content_margin_right = 5
+	tag.add_theme_stylebox_override("panel", style)
+	tag.add_child(label(ROLE_TAGS[data.role], font_size, Color("d8ccb4")))
+	tag.tooltip_text = ROLE_NAMES[data.role]
+	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return tag
+
+
+## 卡面：墨色底、深色框（被选中等状态时传 border 覆盖）。
+static func card_box(border := CARD_FRAME, width := 2) -> StyleBoxFlat:
+	return box(CARD_BG, border, width, 6)
 
 
 static func role_color(data: UnitData) -> Color:

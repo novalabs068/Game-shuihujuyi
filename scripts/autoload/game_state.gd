@@ -144,7 +144,10 @@ func recruit(count: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 
 
 func star_of(id: StringName) -> int:
-	return stars.get(id, 1)
+	var star: int = stars.get(id, 1)
+	# 旧存档按以前的上限（10/8/5/3 星）升过的，压到现在的上限
+	var hero := GameDB.hero(id)
+	return mini(star, Stars.max_stars(hero)) if hero != null else star
 
 
 func souls_of(id: StringName) -> int:

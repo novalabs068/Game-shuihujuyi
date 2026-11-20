@@ -46,6 +46,8 @@ const TERRAIN := {
 @export var exit_scene: String
 ## 这个场景的配乐（audio/music/ 下的曲名）
 @export var music: StringName = &"jieshi"
+## 在这个场景里打仗用哪张背景（art/story/<名字>）；空的就用所属地区的
+@export var battle_bg: StringName
 @export var exit_cell: Vector2i
 
 @export_group("像素图")

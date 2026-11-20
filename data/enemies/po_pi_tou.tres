@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="1_6lula"]
+[ext_resource type="Texture2D" path="res://art/busts/po_pi_tou.png" id="1_qy3us"]
+[ext_resource type="Texture2D" path="res://art/faces/po_pi_tou.png" id="2_5dok7"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_q0kbn"]
+[ext_resource type="Texture2D" path="res://art/portraits/po_pi_tou.png" id="4_7mo10"]
 
 [resource]
 script = ExtResource("2_q0kbn")
@@ -12,4 +15,7 @@ base_hp = 364
 base_atk = 78
 base_def = 18
 base_spd = 98
+portrait = ExtResource("4_7mo10")
+bust = ExtResource("1_qy3us")
+face = ExtResource("2_5dok7")
 map_sprite = ExtResource("1_6lula")

@@ -48,10 +48,15 @@ func _ready() -> void:
 			back_requested.emit())
 	top.add_child(_back)
 
-	var rates := PackedStringArray()
+	# 概率：每档画勾玉，后面跟百分比
+	var rates := HBoxContainer.new()
+	rates.add_theme_constant_override("separation", 6)
+	rates.add_child(UiKit.label("概率", 16, UiKit.TEXT_DIM))
 	for i in Gacha.RATES.size():
-		rates.append("%s %d%%" % [UiKit.TIER_NAMES[i], Gacha.RATES[i]])
-	v.add_child(UiKit.label("概率：%s。十连至少一个乙或以上；%d 抽内必出甲。重复的好汉变成将魂 +%d（升星用）。" % ["、".join(rates), Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 16, UiKit.TEXT_DIM))
+		rates.add_child(MagatamaRow.for_tier(i, 15))
+		rates.add_child(UiKit.label("%d%%　" % Gacha.RATES[i], 16, UiKit.TEXT_DIM))
+	v.add_child(rates)
+	v.add_child(UiKit.label("十连至少一个四玉或以上；%d 抽内必出五玉。重复的好汉变成将魂 +%d（升星用）。" % [Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 16, UiKit.TEXT_DIM))
 	_pity_label = UiKit.label("", 16, UiKit.TEXT_DIM)
 	v.add_child(_pity_label)
 
@@ -86,8 +91,8 @@ func _ready() -> void:
 func _refresh() -> void:
 	_tokens_label.text = "聚义令 %d" % GameState.tokens
 	var left := Gacha.PITY_JIA - GameState.pulls_since_jia
-	var first := "（第一次十连必出甲）" if not GameState.has_flag("first_ten_pull") else ""
-	_pity_label.text = "距保底甲还有 %d 抽　已招募 %d / %d 位好汉 %s" % [left, GameState.owned.size(), GameDB.heroes.size(), first]
+	var first := "（第一次十连必出五玉）" if not GameState.has_flag("first_ten_pull") else ""
+	_pity_label.text = "距保底五玉还有 %d 抽　已招募 %d / %d 位好汉 %s" % [left, GameState.owned.size(), GameDB.heroes.size(), first]
 	_single.disabled = _revealing or GameState.tokens < 1
 	_ten.disabled = _revealing or GameState.tokens < 10
 	_back.disabled = _revealing
@@ -126,16 +131,14 @@ func _make_card(hero: UnitData, is_new: bool) -> PanelContainer:
 	var card := PanelContainer.new()
 	card.custom_minimum_size = CARD_SIZE
 	var color := UiKit.TIER_COLORS[hero.tier]
-	card.add_theme_stylebox_override("panel", UiKit.box(UiKit.role_color(hero), color, 5 if hero.tier <= UnitData.Tier.YI else 3, 10))
+	# 甲级卡的框描一道金边，其余都是深色框
+	card.add_theme_stylebox_override("panel", UiKit.card_box(UiKit.GOLD if hero.tier == UnitData.Tier.JIA else UiKit.CARD_FRAME, 3 if hero.tier == UnitData.Tier.JIA else 2))
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 2)
 	card.add_child(v)
 	var head := HBoxContainer.new()
 	v.add_child(head)
-	var tier := UiKit.label(UiKit.TIER_NAMES[hero.tier], 30, color)
-	tier.add_theme_constant_override("outline_size", 6)
-	tier.add_theme_color_override("font_outline_color", Color.BLACK)
-	head.add_child(tier)
+	head.add_child(IdentitySeal.make(hero.rarity, 30))
 	var tag := UiKit.label("新！" if is_new else "将魂 +%d" % Gacha.DUPLICATE_SOULS, 18, UiKit.GOLD if is_new else UiKit.TEXT_DIM)
 	tag.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -143,10 +146,16 @@ func _make_card(hero: UnitData, is_new: bool) -> PanelContainer:
 	var bust := UiKit.unit_picture(hero, 108)
 	bust.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(bust)
-	var name := UiKit.label(hero.display_name, 26)
+	var name := UiKit.label(hero.display_name, 26, color)
 	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(name)
-	var sub := UiKit.label("%s · %s" % [hero.nickname, UiKit.RARITY_NAMES[hero.rarity]], 15, UiKit.TEXT_DIM)
+	var marks := HBoxContainer.new()
+	marks.alignment = BoxContainer.ALIGNMENT_CENTER
+	marks.add_theme_constant_override("separation", 6)
+	marks.add_child(MagatamaRow.for_tier(hero.tier, 21))
+	marks.add_child(UiKit.role_tag(hero, 13))
+	v.add_child(marks)
+	var sub := UiKit.label(hero.nickname, 15, UiKit.TEXT_DIM)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	UiKit.ignore_mouse(card)

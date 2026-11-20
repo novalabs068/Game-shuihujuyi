@@ -1,7 +1,8 @@
 class_name BattleView
 extends Control
 ## 横屏战斗画面：只负责显示和接收点击，规则全在 BattleModel。
-## 操作：点敌人卡片换目标（默认选好），点下方行动按钮出手。
+## 地区的水墨画做背景，两阵人马左右对峙；出手时有刀光、命中火花等像素特效（pixelfx）。
+## 操作：点敌人换目标（默认选好），点下方行动按钮出手。
 
 ## 撤退（算没打赢）
 signal exit_requested
@@ -10,14 +11,18 @@ signal retry_requested
 signal finished(won: bool)
 
 const AUTO_ACTION := -1
-const ROW_Y: Array[float] = [86.0, 234.0, 382.0]
-const ROW_INSET: Array[float] = [56.0, 104.0, 56.0]
+## 我方三个站位（左上角坐标）：1 号在前排偏上、2 号在后排、3 号在最前排偏下；敌方左右镜像
+const SLOTS: Array[Vector2] = [Vector2(196, 70), Vector2(18, 176), Vector2(330, 292)]
+## 特效放大倍数（pixelfx 按 24×38 的小人画的，我们的人物大得多）
+const FX_SCALE := 2.6
 const BOTTOM_BAR_HEIGHT := 150.0
 const ENEMY_THINK_DELAY := 0.2
 
 var stage: StageData
 var team: Array[UnitData] = []
 var hero_level := 1
+## 战场背景（地区的水墨画）；为空就用深色底
+var background: Texture2D
 var model: BattleModel
 
 signal _action_chosen(action: int)
@@ -48,6 +53,16 @@ func _ready() -> void:
 	bg.color = UiKit.BG
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if background != null:
+		var scene := TextureRect.new()
+		scene.texture = background
+		scene.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		scene.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		# 压暗一些，人物和数字才看得清
+		scene.modulate = Color(0.62, 0.6, 0.58)
+		scene.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(scene)
+		scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build_top_bar()
 	_build_center()
 	_build_bottom_bar()
@@ -144,20 +159,28 @@ func _play(events: Array[Dictionary]) -> void:
 				_shake_screen(10.0)
 				wait = 0.6
 			"damage":
+				var from_left := source == null or source.side == BattleUnit.Side.PLAYER
 				if source != null and source != unit:
 					await _cards[source].lunge(card.position)
+					FxSprite.spawn(self, "sword_slash", card.hit_point(), FX_SCALE, not from_left)
+				FxSprite.spawn(self, "crit_hit" if big else "hit_spark", card.hit_point(), FX_SCALE * (0.8 if big else 1.0), not from_left)
 				card.flash()
 				card.shake()
 				card.popup(popup, UiKit.DAMAGE, big)
 				if big:
-					_shake_screen(8.0)
+					_shake_screen(10.0)
 				wait = 0.16
 			"heal":
+				FxSprite.spawn(self, "heal", card.feet_point(), FX_SCALE)
 				card.popup(popup, UiKit.HEAL)
 			"death":
+				FxSprite.spawn(self, "poof", card.hit_point() + Vector2(0, 40), FX_SCALE)
 				card.popup(popup, UiKit.TEXT_DIM)
 				wait = 0.25
 			_:
+				# 加速、增攻、护盾这类增益：脚下升起一道光
+				if popup in ["加速", "增攻"] or popup.begins_with("护盾"):
+					FxSprite.spawn(self, "blessing", card.feet_point(), FX_SCALE * 0.9, false, 0)
 				if popup != "":
 					card.popup(popup, UiKit.TEXT)
 					wait = 0.15
@@ -306,7 +329,7 @@ func _refresh() -> void:
 	if _target != null:
 		var tc := _cards[_target]
 		# 敌人都在右边，箭头放在卡片左侧、指向它
-		_target_marker.position = tc.home_position + Vector2(-38, UnitCard.CARD_SIZE.y / 2 - 30)
+		_target_marker.position = tc.home_position + Vector2(-34, UnitCard.FIGURE_HEIGHT * 0.45)
 	_round_label.text = "第 %d 回合" % model.round_number()
 
 	var actor := model.current
@@ -319,13 +342,16 @@ func _refresh() -> void:
 	for b in [_attack_button, _skill_button, _guard_button, _combo_button]:
 		(b as Button).disabled = not input
 	if actor == null or actor.side != BattleUnit.Side.PLAYER:
-		_actor_label.text = "敌方行动中…" if actor != null else ""
+		_actor_label.text = "%s 出手…" % actor.display_name() if actor != null else ""
+		_hint_label.text = ("「%s」%s" % [actor.data.skill.display_name, actor.data.skill.description]) if actor != null and actor.data.skill != null else ""
 		_skill_button.text = "技能"
 		_combo_button.text = "组合技"
 		return
 
 	_actor_label.text = "轮到：%s　→ 目标：%s" % [actor.display_name(), _target.display_name() if _target != null else "无"]
 	var skill := actor.data.skill
+	if not input:
+		_hint_label.text = "「%s」%s" % [skill.display_name, skill.description]
 	if actor.skill_ready():
 		_skill_button.text = "技能\n%s" % skill.display_name
 		if input:
@@ -393,17 +419,22 @@ func _add_log(text: String) -> void:
 func _layout() -> void:
 	for u in _cards:
 		var card := _cards[u]
-		var y := ROW_Y[u.slot]
-		var inset := ROW_INSET[u.slot]
+		var p := SLOTS[u.slot]
 		if u.side == BattleUnit.Side.PLAYER:
-			card.place(Vector2(inset, y))
+			card.place(p)
 		else:
-			card.place(Vector2(size.x - inset - UnitCard.CARD_SIZE.x, y))
+			card.place(Vector2(size.x - p.x - UnitCard.CARD_SIZE.x, p.y))
 
 
 # --- 搭界面 ---
 
 func _build_top_bar() -> void:
+	var back := ColorRect.new()
+	back.color = Color(0.06, 0.05, 0.05, 0.7)
+	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(back)
+	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	back.offset_bottom = 66
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 16)
 	add_child(bar)
@@ -461,7 +492,9 @@ func _build_center() -> void:
 
 func _build_bottom_bar() -> void:
 	var panel := PanelContainer.new()
-	var panel_style := UiKit.box(UiKit.PANEL, UiKit.PANEL_LIGHT, 0, 0)
+	# 半透明的墨色底、上沿一道金线，透出后面的战场
+	var panel_style := UiKit.box(Color(0.07, 0.06, 0.05, 0.86), UiKit.GOLD, 0, 0)
+	panel_style.border_width_top = 2
 	panel_style.content_margin_left = 24
 	panel_style.content_margin_right = 24
 	panel.add_theme_stylebox_override("panel", panel_style)

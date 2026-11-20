@@ -1,8 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/ye_lang.png" id="1_4j53a"]
+[ext_resource type="Texture2D" path="res://art/busts/ye_lang.png" id="1_hta8e"]
+[ext_resource type="Texture2D" path="res://art/faces/ye_lang.png" id="2_1ykn1"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_oifg7"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_jwrk8"]
+[ext_resource type="Texture2D" path="res://art/portraits/ye_lang.png" id="4_ni7fe"]
 
 [sub_resource type="Resource" id="Resource_hta8e"]
 script = ExtResource("3_jwrk8")
@@ -19,5 +22,8 @@ base_hp = 300
 base_atk = 92
 base_def = 12
 base_spd = 118
+portrait = ExtResource("4_ni7fe")
+bust = ExtResource("1_hta8e")
+face = ExtResource("2_1ykn1")
 map_sprite = ExtResource("1_4j53a")
 skill = SubResource("Resource_hta8e")

@@ -105,13 +105,12 @@ func _make_row(hero: UnitData) -> PanelContainer:
 	h.add_theme_constant_override("separation", 10)
 	row.add_child(h)
 	h.add_child(UiKit.unit_picture(hero, ROW_HEIGHT - 8, false, true))
-	var name := UiKit.label(hero.display_name, 24)
+	h.add_child(IdentitySeal.make(hero.rarity, 26))
+	var name := UiKit.label(hero.display_name, 24, UiKit.ACCENT if _is_protagonist(hero) else UiKit.TIER_COLORS[hero.tier])
 	name.custom_minimum_size.x = 96
 	h.add_child(name)
-	if _is_protagonist(hero):
-		h.add_child(UiKit.label("主角", 20, UiKit.ACCENT))
-	else:
-		h.add_child(UiKit.label(UiKit.TIER_NAMES[hero.tier], 22, UiKit.TIER_COLORS[hero.tier]))
+	if not _is_protagonist(hero):
+		h.add_child(MagatamaRow.for_hero(hero, GameState.star_of(hero.id), 17))
 	var right := UiKit.label("", 18, UiKit.GOLD)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -143,12 +142,12 @@ func _refresh_list() -> void:
 		row.visible = owned or _show_all
 		row.modulate = Color.WHITE if owned else Color(0.5, 0.5, 0.5)
 		var picked := hero == _selected
-		row.add_theme_stylebox_override("panel", UiKit.box(UiKit.role_color(hero), UiKit.ACCENT if picked else UiKit.TIER_COLORS[hero.tier], 4 if picked else 1, 8))
+		row.add_theme_stylebox_override("panel", UiKit.card_box(UiKit.ACCENT if picked else UiKit.CARD_FRAME, 3 if picked else 1))
 		var right: Label = row.find_child("Right", true, false)
 		if _is_protagonist(hero):
 			right.text = ""
 		elif owned:
-			right.text = _star_text(GameState.star_of(hero.id), Stars.max_stars(hero)) + ("　可升星" if GameState.can_star_up(hero) else "")
+			right.text = "可升星" if GameState.can_star_up(hero) else ""
 		else:
 			right.text = "将魂 %d/%d" % [GameState.souls_of(hero.id), Stars.RECRUIT_SOULS]
 
@@ -176,20 +175,24 @@ func _show_detail() -> void:
 	var name_row := HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 12)
 	info.add_child(name_row)
-	name_row.add_child(UiKit.label(hero.display_name, 34))
-	name_row.add_child(UiKit.label(hero.nickname, 22, UiKit.rarity_color(hero)))
+	name_row.add_child(IdentitySeal.make(hero.rarity, 40))
+	name_row.add_child(UiKit.label(hero.display_name, 34, UiKit.ACCENT if protagonist else UiKit.TIER_COLORS[hero.tier]))
+	name_row.add_child(UiKit.label(hero.nickname, 22, UiKit.TEXT_DIM))
 	if protagonist:
 		info.add_child(UiKit.label("主角 · %s" % GameState.origin().display_name, 20, UiKit.ACCENT))
 	else:
-		info.add_child(UiKit.label("%s级 · %s · %s" % [UiKit.TIER_NAMES[hero.tier], UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 20, UiKit.TIER_COLORS[hero.tier]))
+		var marks := HBoxContainer.new()
+		marks.add_theme_constant_override("separation", 8)
+		marks.add_child(MagatamaRow.for_hero(hero, star, 24))
+		marks.add_child(UiKit.role_tag(hero, 15))
+		marks.add_child(UiKit.label("%s · %s" % [UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 18, UiKit.TEXT_DIM))
+		info.add_child(marks)
 	if owned:
-		if not protagonist:
-			info.add_child(UiKit.label(_star_text(star, Stars.max_stars(hero)), 26, UiKit.GOLD))
 		var lv := GameState.level
 		info.add_child(UiKit.label("%d 级　生命 %d　攻击 %d　防御 %d　速度 %d" % [lv, _at(effective.base_hp, lv), _at(effective.base_atk, lv), _at(effective.base_def, lv), _at(effective.base_spd, lv)], 20))
 		var bonus := PackedStringArray()
 		if star > 1 and not protagonist:
-			bonus.append("星级：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
+			bonus.append("勾玉：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
 		if not effective.gear_effects.is_empty():
 			bonus.append("特效：" + "、".join(effective.gear_effects.map(func(e: StringName) -> String: return EquipData.EFFECTS[e][0])))
 		if not bonus.is_empty():
@@ -214,7 +217,7 @@ func _show_detail() -> void:
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.add_child(desc)
 	if not protagonist and star < Stars.SKILL_UP_STAR and Stars.max_stars(hero) >= Stars.SKILL_UP_STAR:
-		_detail.add_child(UiKit.label("%d 星时强化：%s" % [Stars.SKILL_UP_STAR, Stars.upgrade_text(hero.skill)], 17, UiKit.TEXT_DIM))
+		_detail.add_child(UiKit.label("点亮 %d 颗勾玉时强化：%s" % [Stars.lit(Stars.SKILL_UP_STAR), Stars.upgrade_text(hero.skill)], 17, UiKit.TEXT_DIM))
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -237,7 +240,7 @@ func _show_detail() -> void:
 
 	var souls := GameState.souls_of(hero.id)
 	if owned:
-		var need := "已满星" if star >= Stars.max_stars(hero) else "升下一星需要 %d" % Stars.cost(star)
+		var need := "勾玉已全部点亮" if star >= Stars.max_stars(hero) else "点亮下一颗需要 %d" % Stars.cost(star)
 		_detail.add_child(UiKit.label("将魂 %d（%s）" % [souls, need], 20))
 	else:
 		_detail.add_child(UiKit.label("将魂 %d / %d，攒够了就能直接招募" % [souls, Stars.RECRUIT_SOULS], 20))
@@ -250,7 +253,7 @@ func _show_detail() -> void:
 		up.disabled = not GameState.can_star_up(hero)
 		up.pressed.connect(func() -> void:
 			if GameState.star_up(hero):
-				_done("%s 升到 %d 星！" % [hero.display_name, GameState.star_of(hero.id)]))
+				_done("%s 点亮了第 %d 颗勾玉！" % [hero.display_name, Stars.lit(GameState.star_of(hero.id))]))
 		buttons.add_child(up)
 	else:
 		var join := UiKit.button("招募", Vector2(150, 56), 24)
@@ -479,5 +482,4 @@ static func _at(base: int, level: int) -> int:
 	return roundi(base * pow(BattleUnit.LEVEL_GROWTH, level - 1))
 
 
-static func _star_text(star: int, max_star: int) -> String:
-	return "★".repeat(star) + "☆".repeat(max_star - star)
+

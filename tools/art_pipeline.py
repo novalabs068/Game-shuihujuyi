@@ -27,6 +27,10 @@ FACE_SIZE = 128
 # 立绘存成 128 色调色板 PNG：版画是平涂，看不出差别，文件从 1.5 MB 左右降到 250 KB 左右
 PORTRAIT_COLORS = 128
 BG_TOLERANCE = 30
+# 被线条完全围住的白色空隙（弓弦和弓背之间、胳膊和身子之间）也是背景：大于这么多像素、
+# 又几乎是纯白的连通块一起挖掉。小块的白（眼白、雪点、高光）留着
+ENCLOSED_MIN_PIXELS = 2500
+ENCLOSED_WHITE = 238
 SHEET_BG = (27, 29, 34)
 
 
@@ -58,11 +62,37 @@ def remove_background(img: Image.Image) -> Image.Image:
             if 0 <= nx < w and 0 <= ny < h and not seen[ny * w + nx]:
                 queue.append((nx, ny))
 
+    _clear_enclosed_white(px, m, w, h)
     # 收一圈边再羽化，去掉白边
     mask = mask.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(1))
     out = img.convert("RGBA")
     out.putalpha(mask)
     return out.crop(mask.getbbox())
+
+
+def _clear_enclosed_white(px, m, w: int, h: int) -> None:
+    """把还没挖掉的、大块的纯白连通区域也设成透明（见 ENCLOSED_MIN_PIXELS）。"""
+    seen = bytearray(w * h)
+    white = lambda c: c[0] >= ENCLOSED_WHITE and c[1] >= ENCLOSED_WHITE and c[2] >= ENCLOSED_WHITE
+    for sy in range(0, h, 2):
+        for sx in range(0, w, 2):
+            i = sy * w + sx
+            if seen[i] or m[sx, sy] == 0 or not white(px[sx, sy]):
+                continue
+            blob = []
+            queue = deque([(sx, sy)])
+            seen[i] = 1
+            while queue:
+                x, y = queue.popleft()
+                blob.append((x, y))
+                for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+                    j = ny * w + nx
+                    if 0 <= nx < w and 0 <= ny < h and not seen[j] and m[nx, ny] != 0 and white(px[nx, ny]):
+                        seen[j] = 1
+                        queue.append((nx, ny))
+            if len(blob) >= ENCLOSED_MIN_PIXELS:
+                for x, y in blob:
+                    m[x, y] = 0
 
 
 def find_head(alpha: Image.Image) -> tuple[float, float]:

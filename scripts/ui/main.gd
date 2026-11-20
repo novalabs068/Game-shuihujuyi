@@ -87,6 +87,7 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 	screen.stage = stage
 	screen.team = GameState.battle_team()
 	screen.hero_level = GameState.level
+	screen.background = _battle_background(story.location)
 	screen.retry_requested.connect(_start_story_battle.bind(stage, resume_at, story))
 	screen.exit_requested.connect(_show_map)
 	screen.finished.connect(func(won: bool) -> void:
@@ -99,6 +100,12 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 		GameState.save_game()
 		_start_story(story, resume_at))
 	_set_screen(screen)
+
+
+## 战场背景：这一带的水墨画（art/story/<地点>），还没画的用江湖大地图。
+func _battle_background(where: StringName) -> Texture2D:
+	var path := StoryScript.background_path(String(where))
+	return load(path) if path != "" else GameDB.maps[GameState.DEFAULT_MAP].texture
 
 
 ## 列传演完：发奖励、记标记，回大地图。
@@ -159,6 +166,11 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 	screen.stage = stage
 	screen.team = GameState.battle_team()
 	screen.hero_level = GameState.level
+	var where := destination if destination != &"" else GameState.location_id
+	if return_scene != "":
+		var sd: SceneData = GameDB.scenes[return_scene]
+		where = sd.battle_bg if sd.battle_bg != &"" else sd.region
+	screen.background = _battle_background(where)
 	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress, bonus, return_scene))
 	var leave := func(notice: String) -> void:
 		if return_scene != "":

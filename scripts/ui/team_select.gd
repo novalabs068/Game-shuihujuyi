@@ -120,14 +120,19 @@ func _make_tile(hero: UnitData) -> PanelContainer:
 	top.add_child(head)
 	var name_row := HBoxContainer.new()
 	head.add_child(name_row)
-	var name_label := UiKit.label(hero.display_name, 28)
+	var name_label := UiKit.label(hero.display_name, 28, UiKit.TIER_COLORS[hero.tier])
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(name_label)
 	var badge := UiKit.label("", 26, UiKit.ACCENT)
 	name_row.add_child(badge)
 	_badges[hero] = badge
-	head.add_child(UiKit.label(hero.nickname, 18, UiKit.rarity_color(hero)))
-	head.add_child(UiKit.label("%s级 · %s · %s" % [UiKit.TIER_NAMES[hero.tier], UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 16, UiKit.TIER_COLORS[hero.tier]))
+	head.add_child(UiKit.label(hero.nickname, 18, UiKit.TEXT_DIM))
+	var marks := HBoxContainer.new()
+	marks.add_theme_constant_override("separation", 6)
+	marks.add_child(IdentitySeal.make(hero.rarity, 24))
+	marks.add_child(MagatamaRow.for_hero(hero, GameState.star_of(hero.id), 16))
+	marks.add_child(UiKit.role_tag(hero, 13))
+	head.add_child(marks)
 	v.add_child(UiKit.label("「%s」" % hero.skill.display_name, 20))
 	var desc := UiKit.label(hero.skill.description, 16, UiKit.TEXT_DIM)
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -163,8 +168,7 @@ func _toggle(hero: UnitData) -> void:
 func _refresh() -> void:
 	for hero in _tiles:
 		var picked := hero in _selected
-		var border := UiKit.ACCENT if picked else UiKit.rarity_color(hero)
-		_tiles[hero].add_theme_stylebox_override("panel", UiKit.box(UiKit.role_color(hero), border, 5 if picked else 2))
+		_tiles[hero].add_theme_stylebox_override("panel", UiKit.card_box(UiKit.ACCENT if picked else UiKit.CARD_FRAME, 4 if picked else 2))
 		# 还没招募的好汉变暗，标「未招募」，不能选
 		var owned := GameState.owns(hero.id)
 		_tiles[hero].visible = owned or _show_all

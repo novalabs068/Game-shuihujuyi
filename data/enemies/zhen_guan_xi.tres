@@ -1,8 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/busts/zhen_guan_xi.png" id="1_cakc6"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="1_hu3t4"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_ivg48"]
+[ext_resource type="Texture2D" path="res://art/faces/zhen_guan_xi.png" id="2_k0mx8"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_gx1fd"]
+[ext_resource type="Texture2D" path="res://art/portraits/zhen_guan_xi.png" id="4_xg4op"]
 
 [sub_resource type="Resource" id="Resource_cakc6"]
 script = ExtResource("3_gx1fd")
@@ -19,6 +22,9 @@ base_hp = 1100
 base_atk = 190
 base_def = 30
 base_spd = 92
+portrait = ExtResource("4_xg4op")
+bust = ExtResource("1_cakc6")
+face = ExtResource("2_k0mx8")
 map_sprite = ExtResource("1_hu3t4")
 skill = SubResource("Resource_cakc6")
 is_boss = true

@@ -1,8 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/guan_bing_gong_shou.png" id="1_4nbpg"]
+[ext_resource type="Texture2D" path="res://art/busts/guan_bing_gong_shou.png" id="1_m1my6"]
+[ext_resource type="Texture2D" path="res://art/faces/guan_bing_gong_shou.png" id="2_7b5lf"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_101ae"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_wsdvu"]
+[ext_resource type="Texture2D" path="res://art/portraits/guan_bing_gong_shou.png" id="4_xd74o"]
 
 [sub_resource type="Resource" id="Resource_m1my6"]
 script = ExtResource("3_wsdvu")
@@ -20,5 +23,8 @@ base_hp = 308
 base_atk = 99
 base_def = 16
 base_spd = 105
+portrait = ExtResource("4_xd74o")
+bust = ExtResource("1_m1my6")
+face = ExtResource("2_7b5lf")
 map_sprite = ExtResource("1_4nbpg")
 skill = SubResource("Resource_m1my6")

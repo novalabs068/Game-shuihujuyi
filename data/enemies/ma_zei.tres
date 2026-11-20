@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/busts/ma_zei.png" id="1_08d0g"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_55vce"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/ma_zei.png" id="1_w8fdi"]
+[ext_resource type="Texture2D" path="res://art/faces/ma_zei.png" id="2_x71vx"]
+[ext_resource type="Texture2D" path="res://art/portraits/ma_zei.png" id="4_sb57a"]
 
 [resource]
 script = ExtResource("1_55vce")
@@ -12,4 +15,7 @@ base_hp = 336
 base_atk = 92
 base_def = 18
 base_spd = 115
+portrait = ExtResource("4_sb57a")
+bust = ExtResource("1_08d0g")
+face = ExtResource("2_x71vx")
 map_sprite = ExtResource("1_w8fdi")

@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/busts/gao_fu_jia_ding.png" id="1_8ww7q"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/tai_wei_jia_ding.png" id="1_vv8st"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_k1qpr"]
+[ext_resource type="Texture2D" path="res://art/faces/gao_fu_jia_ding.png" id="2_ooq7x"]
+[ext_resource type="Texture2D" path="res://art/portraits/gao_fu_jia_ding.png" id="4_q7r7s"]
 
 [resource]
 script = ExtResource("2_k1qpr")
@@ -12,4 +15,7 @@ base_hp = 300
 base_atk = 74
 base_def = 16
 base_spd = 96
+portrait = ExtResource("4_q7r7s")
+bust = ExtResource("1_8ww7q")
+face = ExtResource("2_ooq7x")
 map_sprite = ExtResource("1_vv8st")

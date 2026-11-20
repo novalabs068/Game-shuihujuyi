@@ -1,8 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/busts/lei_tai_jiao_tou.png" id="1_865ig"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/lei_tai_jiao_tou.png" id="1_hg244"]
+[ext_resource type="Texture2D" path="res://art/faces/lei_tai_jiao_tou.png" id="2_n8lpb"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_panwk"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_3hpbp"]
+[ext_resource type="Texture2D" path="res://art/portraits/lei_tai_jiao_tou.png" id="4_0nieo"]
 
 [sub_resource type="Resource" id="Resource_865ig"]
 script = ExtResource("3_3hpbp")
@@ -18,6 +21,9 @@ role = 1
 base_hp = 1300
 base_atk = 165
 base_def = 34
+portrait = ExtResource("4_0nieo")
+bust = ExtResource("1_865ig")
+face = ExtResource("2_n8lpb")
 map_sprite = ExtResource("1_hg244")
 skill = SubResource("Resource_865ig")
 is_boss = true

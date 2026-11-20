@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/busts/shui_kou.png" id="1_na4ds"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/shui_kou.png" id="1_sytoe"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_j6nm2"]
+[ext_resource type="Texture2D" path="res://art/faces/shui_kou.png" id="2_mn44m"]
+[ext_resource type="Texture2D" path="res://art/portraits/shui_kou.png" id="4_b5sx4"]
 
 [resource]
 script = ExtResource("2_j6nm2")
@@ -11,4 +14,7 @@ role = 1
 base_hp = 392
 base_atk = 95
 base_def = 22
+portrait = ExtResource("4_b5sx4")
+bust = ExtResource("1_na4ds")
+face = ExtResource("2_mn44m")
 map_sprite = ExtResource("1_sytoe")

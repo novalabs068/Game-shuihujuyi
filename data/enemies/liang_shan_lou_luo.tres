@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/busts/liang_shan_lou_luo.png" id="1_ndp85"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/lin_zhong_qiang_ren.png" id="1_qbf10"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_5o7m5"]
+[ext_resource type="Texture2D" path="res://art/faces/liang_shan_lou_luo.png" id="2_6hqke"]
+[ext_resource type="Texture2D" path="res://art/portraits/liang_shan_lou_luo.png" id="4_g6fyt"]
 
 [resource]
 script = ExtResource("2_5o7m5")
@@ -12,4 +15,7 @@ base_hp = 400
 base_atk = 96
 base_def = 24
 base_spd = 98
+portrait = ExtResource("4_g6fyt")
+bust = ExtResource("1_ndp85")
+face = ExtResource("2_6hqke")
 map_sprite = ExtResource("1_qbf10")
