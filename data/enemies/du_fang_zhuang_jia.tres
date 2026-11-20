@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/du_fang_da_shou.png" id="1_fad5i"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/du_fang_da_shou.png" id="1_nlkni"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_nlkni"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_lwpc8"]
 
@@ -22,6 +23,7 @@ base_atk = 124
 base_def = 28
 base_spd = 104
 map_sprite = ExtResource("1_fad5i")
+battle_sprite = ExtResource("1_nlkni")
 attack_style = &"throw"
 skill = SubResource("Resource_hrtm5")
 is_boss = true

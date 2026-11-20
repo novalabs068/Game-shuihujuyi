@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/ye_zhu.png" id="1_afucs"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/ye_zhu.png" id="1_eqsg6"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_afucs"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_tymdm"]
@@ -23,5 +24,6 @@ base_atk = 90
 base_def = 20
 base_spd = 98
 map_sprite = ExtResource("1_eqsg6")
+battle_sprite = ExtResource("1_afucs")
 attack_style = &"claw"
 skill = SubResource("Resource_fw6bm")

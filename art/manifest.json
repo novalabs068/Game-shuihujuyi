@@ -8193,6 +8193,2284 @@
         "url_or_tool": "pixelfx（MIT, patch-gg/pixelfx）",
         "date": "2026-11-20"
       }
+    },
+    {
+      "id": "pixel-yang_zhi",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/yang_zhi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-shi_jin",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/shi_jin.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-zhang_qing",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/zhang_qing.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-cao_zheng",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/cao_zheng.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-shi_en",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/shi_en.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-li_zhong",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/li_zhong.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-zhu_gui",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/zhu_gui.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-bai_sheng",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/bai_sheng.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-du_qian",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/du_qian.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-song_wan",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/song_wan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-yu_baosi",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/yu_baosi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-wang_dingliu",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/wang_dingliu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-an_daoquan",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/an_daoquan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes2.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-bai_sheng",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/bai_sheng.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-cao_zheng",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/cao_zheng.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-cha_bo",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/cha_bo.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_a.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_a.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-da_chong",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/da_chong.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_b.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_b.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-dao_mu_zei",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/dao_mu_zei.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-dong_chao",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/dong_chao.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_a.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_a.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-du_fang_da_shou",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/du_fang_da_shou.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_jianghu_people.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_jianghu_people.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-du_qian",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/du_qian.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-fu_an",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/fu_an.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_a.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_a.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-guan_bing_gong_shou",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/guan_bing_gong_shou.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-hero_biaoshi",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/hero_biaoshi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_protagonists.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_protagonists.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-hero_lieren",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/hero_lieren.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_protagonists.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_protagonists.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-hua_rong",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/hua_rong.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes2.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-huyan_zhuo",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/huyan_zhuo.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes3.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes3.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-jiang_men_shen",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/jiang_men_shen.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_b.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_b.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-lei_tai_jiao_tou",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/lei_tai_jiao_tou.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-li_kui",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/li_kui.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes3.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes3.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-li_si",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/li_si.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_characters.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_characters.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-li_zhong",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/li_zhong.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-lie_hu",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/lie_hu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_jianghu_people.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_jianghu_people.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-lin_chong",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/lin_chong.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_characters.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_characters.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-lin_zhong_qiang_ren",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/lin_zhong_qiang_ren.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-ling_zhen",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/ling_zhen.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes3.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes3.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-lu_qian",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/lu_qian.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_a.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_a.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-lu_zhishen",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/lu_zhishen.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_characters.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_characters.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-ma_zei",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/ma_zei.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-old_monk",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/old_monk.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_characters.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_characters.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-qiao_fu",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/qiao_fu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_jianghu_people.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_jianghu_people.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-qin_bing",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/qin_bing.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_b.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_b.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-qin_ming",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/qin_ming.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes3.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes3.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-shan_zei_tou_mu",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/shan_zei_tou_mu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-shi_en",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/shi_en.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-shi_jin",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/shi_jin.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-shi_qian",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/shi_qian.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes2.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-shui_kou",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/shui_kou.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-song_wan",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/song_wan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-sun_erniang",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/sun_erniang.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes2.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-tai_wei_jia_ding",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/tai_wei_jia_ding.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-wang_dingliu",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/wang_dingliu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-wang_lun",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/wang_lun.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_a.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_a.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-wu_song",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/wu_song.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes2.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-wu_yong",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/wu_yong.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes2.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-xi_men_qing",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/xi_men_qing.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_b.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_b.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-xue_ba",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/xue_ba.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_a.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_a.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-xun_jie_ya_yi",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/xun_jie_ya_yi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-yang_zhi",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/yang_zhi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-ye_lang",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/ye_lang.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-ye_zhu",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/ye_zhu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_jianghu_people.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_jianghu_people.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-ye_zhu_wang",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/ye_zhu_wang.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_jianghu_people.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_jianghu_people.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-yu_baosi",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/yu_baosi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-zhang_du_jian",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/zhang_du_jian.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_boss_b.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_boss_b.png；--same-scale --sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-zhang_qing",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/zhang_qing.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes4.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes4.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-zhang_san",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/zhang_san.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_characters.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_characters.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "battle-zhu_gui",
+      "role": "战斗小人（高清）",
+      "path": "art/pixel/battle/zhu_gui.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 96 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_heroes5.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_heroes5.png；--sharp --outline 处理；tools/battle_sprites.py 按 2 倍高度重切"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
     }
   ]
 }

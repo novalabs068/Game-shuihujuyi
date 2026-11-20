@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/wu_yong.png" id="1_2r81q"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/wu_yong.png" id="1_rxncs"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_y4tmg"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_fjwj3"]
 [ext_resource type="Texture2D" path="res://art/faces/wu_yong.png" id="2_rin8f"]
@@ -40,6 +41,7 @@ portrait = ExtResource("3_orvyx")
 bust = ExtResource("1_2r81q")
 face = ExtResource("2_rin8f")
 map_sprite = ExtResource("3_rin8f")
+battle_sprite = ExtResource("1_rxncs")
 attack_style = &"heavy"
 skill = SubResource("Resource_c2vee")
 talent = SubResource("Resource_rxncs")

@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/qin_ming.png" id="1_2osto"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/qin_ming.png" id="1_bui4s"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_pt5uq"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_lo46b"]
 [ext_resource type="Texture2D" path="res://art/faces/qin_ming.png" id="2_yvcqe"]
@@ -41,6 +42,7 @@ portrait = ExtResource("4_8g24v")
 bust = ExtResource("1_2osto")
 face = ExtResource("2_yvcqe")
 map_sprite = ExtResource("3_bui4s")
+battle_sprite = ExtResource("1_bui4s")
 attack_style = &"heavy"
 skill = SubResource("Resource_2osto")
 talent = SubResource("Resource_bui4s")

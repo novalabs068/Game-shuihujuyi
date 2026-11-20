@@ -1,8 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/zhang_qing.png" id="1_q3j60"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/zhang_qing.png" id="1_ttl6j"]
 [ext_resource type="Texture2D" path="res://art/faces/zhang_qing.png" id="2_ifwwf"]
 [ext_resource type="Texture2D" path="res://art/portraits/zhang_qing.png" id="3_7ts5u"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_qing.png" id="4_ayuqv"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_ttl6j"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_ayuqv"]
 [ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_ifwwf"]
@@ -37,6 +39,8 @@ base_spd = 90
 portrait = ExtResource("3_7ts5u")
 bust = ExtResource("1_q3j60")
 face = ExtResource("2_ifwwf")
+map_sprite = ExtResource("4_ayuqv")
+battle_sprite = ExtResource("1_ttl6j")
 attack_style = &"heavy"
 skill = SubResource("Resource_dkgdb")
 talent = SubResource("Resource_7ts5u")

@@ -56,7 +56,7 @@ func setup(p_unit: BattleUnit) -> void:
 	_facing = -1.0 if enemy else 1.0
 	_figure.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_figure)
-	var sprite := unit.data.map_sprite
+	var sprite := unit.data.battle_sprite if unit.data.battle_sprite != null else unit.data.map_sprite
 	if sprite != null:
 		# 像素小人按整数倍放大，底边中点对齐脚底
 		_figure.texture = sprite

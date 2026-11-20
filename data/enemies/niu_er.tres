@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://art/busts/niu_er.png" id="1_kbl28"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="1_mjptv"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/li_si.png" id="1_xb5y5"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_21yph"]
 [ext_resource type="Texture2D" path="res://art/faces/niu_er.png" id="2_xb5y5"]
 [ext_resource type="Texture2D" path="res://art/portraits/niu_er.png" id="4_dwb5o"]
@@ -19,6 +20,7 @@ portrait = ExtResource("4_dwb5o")
 bust = ExtResource("1_kbl28")
 face = ExtResource("2_xb5y5")
 map_sprite = ExtResource("1_mjptv")
+battle_sprite = ExtResource("1_xb5y5")
 attack_style = &"fist"
 is_boss = true
 enrage_name = "撒泼耍赖"

@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/li_si.png" id="1_5dok7"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="1_6lula"]
 [ext_resource type="Texture2D" path="res://art/busts/po_pi_tou.png" id="1_qy3us"]
 [ext_resource type="Texture2D" path="res://art/faces/po_pi_tou.png" id="2_5dok7"]
@@ -19,4 +20,5 @@ portrait = ExtResource("4_7mo10")
 bust = ExtResource("1_qy3us")
 face = ExtResource("2_5dok7")
 map_sprite = ExtResource("1_6lula")
+battle_sprite = ExtResource("1_5dok7")
 attack_style = &"heavy"

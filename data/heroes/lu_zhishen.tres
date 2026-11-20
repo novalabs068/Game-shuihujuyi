@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/lu_zhishen.png" id="1_0843t"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/lu_zhishen.png" id="1_gnh42"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_l7e01"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_a4odt"]
 [ext_resource type="Texture2D" path="res://art/faces/lu_zhishen.png" id="2_cfk01"]
@@ -40,6 +41,7 @@ portrait = ExtResource("3_m8dm8")
 bust = ExtResource("1_0843t")
 face = ExtResource("2_cfk01")
 map_sprite = ExtResource("3_cfk01")
+battle_sprite = ExtResource("1_gnh42")
 attack_style = &"heavy"
 skill = SubResource("Resource_sr7h7")
 talent = SubResource("Resource_gnh42")

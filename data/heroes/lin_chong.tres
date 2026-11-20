@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/lin_chong.png" id="1_0f42t"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/lin_chong.png" id="1_pqyly"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_yx64e"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_6s73u"]
 [ext_resource type="Texture2D" path="res://art/faces/lin_chong.png" id="2_8jxta"]
@@ -39,6 +40,7 @@ portrait = ExtResource("3_mqytj")
 bust = ExtResource("1_0f42t")
 face = ExtResource("2_8jxta")
 map_sprite = ExtResource("3_8jxta")
+battle_sprite = ExtResource("1_pqyly")
 attack_style = &"thrust"
 skill = SubResource("Resource_0wtma")
 talent = SubResource("Resource_pqyly")

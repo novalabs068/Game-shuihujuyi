@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_8efwv"]
 [ext_resource type="Texture2D" path="res://art/busts/an_daoquan.png" id="1_e70vg"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/an_daoquan.png" id="1_krymv"]
 [ext_resource type="Texture2D" path="res://art/faces/an_daoquan.png" id="2_3ll25"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_38bck"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/an_daoquan.png" id="3_3ll25"]
@@ -38,6 +39,7 @@ portrait = ExtResource("3_dpriw")
 bust = ExtResource("1_e70vg")
 face = ExtResource("2_3ll25")
 map_sprite = ExtResource("3_3ll25")
+battle_sprite = ExtResource("1_krymv")
 attack_style = &"throw"
 skill = SubResource("Resource_23d7t")
 talent = SubResource("Resource_krymv")

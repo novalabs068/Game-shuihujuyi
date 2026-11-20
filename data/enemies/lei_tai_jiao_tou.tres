@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://art/busts/lei_tai_jiao_tou.png" id="1_865ig"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/lei_tai_jiao_tou.png" id="1_hg244"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/lei_tai_jiao_tou.png" id="1_n8lpb"]
 [ext_resource type="Texture2D" path="res://art/faces/lei_tai_jiao_tou.png" id="2_n8lpb"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_panwk"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_3hpbp"]
@@ -25,6 +26,7 @@ portrait = ExtResource("4_0nieo")
 bust = ExtResource("1_865ig")
 face = ExtResource("2_n8lpb")
 map_sprite = ExtResource("1_hg244")
+battle_sprite = ExtResource("1_n8lpb")
 attack_style = &"fist"
 skill = SubResource("Resource_865ig")
 is_boss = true

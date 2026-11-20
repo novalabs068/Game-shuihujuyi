@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shui_kou.png" id="1_0atkr"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/shui_kou.png" id="1_4ukox"]
 [ext_resource type="Texture2D" path="res://art/busts/lang_li_jiao.png" id="1_ct8vg"]
 [ext_resource type="Texture2D" path="res://art/faces/lang_li_jiao.png" id="2_0atkr"]
@@ -26,6 +27,7 @@ portrait = ExtResource("4_ljew0")
 bust = ExtResource("1_ct8vg")
 face = ExtResource("2_0atkr")
 map_sprite = ExtResource("1_4ukox")
+battle_sprite = ExtResource("1_0atkr")
 attack_style = &"thrust"
 skill = SubResource("Resource_ct8vg")
 is_boss = true

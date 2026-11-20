@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_eebhq"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/li_kui.png" id="1_hpdip"]
 [ext_resource type="Texture2D" path="res://art/busts/li_kui.png" id="1_s1ctg"]
 [ext_resource type="Texture2D" path="res://art/faces/li_kui.png" id="2_3ghyi"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_f2fy6"]
@@ -41,6 +42,7 @@ portrait = ExtResource("4_ivfko")
 bust = ExtResource("1_s1ctg")
 face = ExtResource("2_3ghyi")
 map_sprite = ExtResource("3_hpdip")
+battle_sprite = ExtResource("1_hpdip")
 attack_style = &"heavy"
 skill = SubResource("Resource_s1ctg")
 talent = SubResource("Resource_hpdip")

@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/hua_rong.png" id="1_6y1fp"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_017rb"]
 [ext_resource type="Texture2D" path="res://art/busts/hua_rong.png" id="1_f5s86"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_5l5uw"]
@@ -38,6 +39,7 @@ portrait = ExtResource("3_rqoek")
 bust = ExtResource("1_f5s86")
 face = ExtResource("2_pjhaw")
 map_sprite = ExtResource("3_pjhaw")
+battle_sprite = ExtResource("1_6y1fp")
 attack_style = &"arrow"
 skill = SubResource("Resource_eu0yy")
 talent = SubResource("Resource_6y1fp")

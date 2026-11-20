@@ -29,6 +29,8 @@ enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 @export var face: Texture2D
 ## 俯视场景里的像素小人（全身、脸朝右），由 tools/pixel_pipeline.py 生成
 @export var map_sprite: Texture2D
+## 战斗里的高清小人（同一个人，按 2 倍高度切的，见 tools/battle_sprites.py）；没有就用 map_sprite
+@export var battle_sprite: Texture2D
 
 @export_group("技能")
 ## 普攻的样子（战斗里按这个放动作和特效）：slash 刀剑、thrust 枪矛、heavy 斧棒禅杖、fist 拳脚、claw 爪牙（野兽）、arrow 弓箭、throw 暗器飞石火炮

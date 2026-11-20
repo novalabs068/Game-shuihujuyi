@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/zhu_gui.png" id="1_dl6dm"]
 [ext_resource type="Texture2D" path="res://art/busts/zhu_gui.png" id="1_qr6lv"]
 [ext_resource type="Texture2D" path="res://art/faces/zhu_gui.png" id="2_0pa5l"]
 [ext_resource type="Texture2D" path="res://art/portraits/zhu_gui.png" id="3_yknvn"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_dl6dm"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhu_gui.png" id="4_w3ode"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_w3ode"]
 [ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_0pa5l"]
 
@@ -37,6 +39,8 @@ base_spd = 106
 portrait = ExtResource("3_yknvn")
 bust = ExtResource("1_qr6lv")
 face = ExtResource("2_0pa5l")
+map_sprite = ExtResource("4_w3ode")
+battle_sprite = ExtResource("1_dl6dm")
 attack_style = &"arrow"
 skill = SubResource("Resource_cmygp")
 talent = SubResource("Resource_yknvn")

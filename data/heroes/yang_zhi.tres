@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/yang_zhi.png" id="1_gwc1v"]
 [ext_resource type="Texture2D" path="res://art/busts/yang_zhi.png" id="1_o7gvf"]
 [ext_resource type="Texture2D" path="res://art/faces/yang_zhi.png" id="2_gdc2n"]
 [ext_resource type="Texture2D" path="res://art/portraits/yang_zhi.png" id="3_0e8y1"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_gwc1v"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/yang_zhi.png" id="4_rsyur"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_rsyur"]
 [ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_gdc2n"]
 
@@ -37,5 +39,7 @@ base_spd = 104
 portrait = ExtResource("3_0e8y1")
 bust = ExtResource("1_o7gvf")
 face = ExtResource("2_gdc2n")
+map_sprite = ExtResource("4_rsyur")
+battle_sprite = ExtResource("1_gwc1v")
 skill = SubResource("Resource_3b4n6")
 talent = SubResource("Resource_0e8y1")

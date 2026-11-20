@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_evewi"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/qin_bing.png" id="1_xq5ko"]
 [ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_wgcsb"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/qin_bing.png" id="3_wgcsb"]
 [ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_xq5ko"]
@@ -19,4 +20,5 @@ portrait = ExtResource("3_xq5ko")
 bust = ExtResource("1_evewi")
 face = ExtResource("2_wgcsb")
 map_sprite = ExtResource("3_wgcsb")
+battle_sprite = ExtResource("1_xq5ko")
 attack_style = &"thrust"

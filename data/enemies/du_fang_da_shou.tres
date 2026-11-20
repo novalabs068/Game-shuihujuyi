@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/du_fang_da_shou.png" id="1_dekhb"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/du_fang_da_shou.png" id="1_r7pry"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_dekhb"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_0dwo8"]
@@ -22,5 +23,6 @@ base_atk = 98
 base_def = 24
 base_spd = 96
 map_sprite = ExtResource("1_r7pry")
+battle_sprite = ExtResource("1_dekhb")
 attack_style = &"heavy"
 skill = SubResource("Resource_vtlut")

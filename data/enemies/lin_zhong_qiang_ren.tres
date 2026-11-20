@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/lin_zhong_qiang_ren.png" id="1_2uaxm"]
 [ext_resource type="Texture2D" path="res://art/busts/lin_zhong_qiang_ren.png" id="1_s70f7"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/lin_zhong_qiang_ren.png" id="1_saavn"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_kiyfo"]
 [ext_resource type="Texture2D" path="res://art/faces/lin_zhong_qiang_ren.png" id="2_saavn"]
 [ext_resource type="Texture2D" path="res://art/portraits/lin_zhong_qiang_ren.png" id="4_tl6sl"]
@@ -18,3 +19,4 @@ portrait = ExtResource("4_tl6sl")
 bust = ExtResource("1_s70f7")
 face = ExtResource("2_saavn")
 map_sprite = ExtResource("1_2uaxm")
+battle_sprite = ExtResource("1_saavn")

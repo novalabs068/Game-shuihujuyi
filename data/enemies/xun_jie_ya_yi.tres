@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/xun_jie_ya_yi.png" id="1_osgpp"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/xun_jie_ya_yi.png" id="1_pjiws"]
 [ext_resource type="Texture2D" path="res://art/busts/xun_jie_ya_yi.png" id="1_yvsur"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_7ehew"]
 [ext_resource type="Texture2D" path="res://art/faces/xun_jie_ya_yi.png" id="2_pjiws"]
@@ -28,5 +29,6 @@ portrait = ExtResource("4_xvap3")
 bust = ExtResource("1_yvsur")
 face = ExtResource("2_pjiws")
 map_sprite = ExtResource("1_osgpp")
+battle_sprite = ExtResource("1_pjiws")
 attack_style = &"heavy"
 skill = SubResource("Resource_yvsur")

@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/ye_zhu_wang.png" id="1_fap7x"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/ye_zhu_wang.png" id="1_qex26"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_fap7x"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_jl315"]
@@ -23,6 +24,7 @@ base_atk = 124
 base_def = 30
 base_spd = 96
 map_sprite = ExtResource("1_qex26")
+battle_sprite = ExtResource("1_fap7x")
 attack_style = &"claw"
 skill = SubResource("Resource_krngl")
 is_boss = true

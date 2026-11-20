@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://art/busts/zhen_guan_xi.png" id="1_cakc6"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="1_hu3t4"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shan_zei_tou_mu.png" id="1_k0mx8"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_ivg48"]
 [ext_resource type="Texture2D" path="res://art/faces/zhen_guan_xi.png" id="2_k0mx8"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_gx1fd"]
@@ -26,6 +27,7 @@ portrait = ExtResource("4_xg4op")
 bust = ExtResource("1_cakc6")
 face = ExtResource("2_k0mx8")
 map_sprite = ExtResource("1_hu3t4")
+battle_sprite = ExtResource("1_k0mx8")
 skill = SubResource("Resource_cakc6")
 is_boss = true
 enrage_name = "恼羞成怒"

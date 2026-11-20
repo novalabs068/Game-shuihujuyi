@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/wu_song.png" id="1_2mver"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/wu_song.png" id="1_08pxn"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_l8s1c"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_e2x3b"]
 [ext_resource type="Texture2D" path="res://art/faces/wu_song.png" id="2_vqh3j"]
@@ -39,5 +40,6 @@ portrait = ExtResource("3_jdagm")
 bust = ExtResource("1_2mver")
 face = ExtResource("2_vqh3j")
 map_sprite = ExtResource("3_vqh3j")
+battle_sprite = ExtResource("1_08pxn")
 skill = SubResource("Resource_4evxd")
 talent = SubResource("Resource_08pxn")

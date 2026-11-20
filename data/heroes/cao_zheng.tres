@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/cao_zheng.png" id="1_5vhth"]
 [ext_resource type="Texture2D" path="res://art/busts/cao_zheng.png" id="1_mejw8"]
 [ext_resource type="Texture2D" path="res://art/faces/cao_zheng.png" id="2_ve7l2"]
 [ext_resource type="Texture2D" path="res://art/portraits/cao_zheng.png" id="3_k7uo0"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_5vhth"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/cao_zheng.png" id="4_km01g"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_km01g"]
 [ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_ve7l2"]
 
@@ -39,5 +41,7 @@ base_spd = 106
 portrait = ExtResource("3_k7uo0")
 bust = ExtResource("1_mejw8")
 face = ExtResource("2_ve7l2")
+map_sprite = ExtResource("4_km01g")
+battle_sprite = ExtResource("1_5vhth")
 skill = SubResource("Resource_uel7h")
 talent = SubResource("Resource_k7uo0")

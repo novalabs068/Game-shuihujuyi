@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/du_qian.png" id="1_cuwwa"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/du_qian.png" id="1_fjkyk"]
 [ext_resource type="Texture2D" path="res://art/faces/du_qian.png" id="2_bdjsl"]
 [ext_resource type="Texture2D" path="res://art/portraits/du_qian.png" id="3_djps8"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_fjkyk"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/du_qian.png" id="4_k1f1m"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_k1f1m"]
 [ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_bdjsl"]
 
@@ -35,6 +37,8 @@ base_spd = 90
 portrait = ExtResource("3_djps8")
 bust = ExtResource("1_cuwwa")
 face = ExtResource("2_bdjsl")
+map_sprite = ExtResource("4_k1f1m")
+battle_sprite = ExtResource("1_fjkyk")
 attack_style = &"thrust"
 skill = SubResource("Resource_dnmna")
 talent = SubResource("Resource_djps8")

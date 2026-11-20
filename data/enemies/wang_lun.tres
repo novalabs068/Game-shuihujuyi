@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/wang_lun.png" id="1_7qej4"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/wang_lun.png" id="1_fxw6v"]
 [ext_resource type="Texture2D" path="res://art/faces/wang_lun.png" id="2_h7rmp"]
 [ext_resource type="Texture2D" path="res://art/portraits/wang_lun.png" id="3_fxw6v"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/wang_lun.png" id="3_h7rmp"]
@@ -28,6 +29,7 @@ portrait = ExtResource("3_fxw6v")
 bust = ExtResource("1_7qej4")
 face = ExtResource("2_h7rmp")
 map_sprite = ExtResource("3_h7rmp")
+battle_sprite = ExtResource("1_fxw6v")
 skill = SubResource("Resource_3ryin")
 is_boss = true
 enrage_name = "嫉贤妒能"

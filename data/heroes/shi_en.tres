@@ -1,8 +1,10 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shi_en.png" id="1_cyugf"]
 [ext_resource type="Texture2D" path="res://art/busts/shi_en.png" id="1_kliiw"]
 [ext_resource type="Texture2D" path="res://art/faces/shi_en.png" id="2_f8pgp"]
 [ext_resource type="Texture2D" path="res://art/portraits/shi_en.png" id="3_v6wb0"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/shi_en.png" id="4_2h0ht"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_cyugf"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_2h0ht"]
 [ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_f8pgp"]
@@ -39,5 +41,7 @@ base_spd = 108
 portrait = ExtResource("3_v6wb0")
 bust = ExtResource("1_kliiw")
 face = ExtResource("2_f8pgp")
+map_sprite = ExtResource("4_2h0ht")
+battle_sprite = ExtResource("1_cyugf")
 skill = SubResource("Resource_7t28l")
 talent = SubResource("Resource_v6wb0")

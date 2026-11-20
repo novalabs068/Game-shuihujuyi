@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/busts/zhang_du_jian.png" id="1_3ojwq"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/zhang_du_jian.png" id="1_fjf0q"]
 [ext_resource type="Texture2D" path="res://art/faces/zhang_du_jian.png" id="2_opixj"]
 [ext_resource type="Texture2D" path="res://art/portraits/zhang_du_jian.png" id="3_fjf0q"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_du_jian.png" id="3_opixj"]
@@ -30,6 +31,7 @@ portrait = ExtResource("3_fjf0q")
 bust = ExtResource("1_3ojwq")
 face = ExtResource("2_opixj")
 map_sprite = ExtResource("3_opixj")
+battle_sprite = ExtResource("1_fjf0q")
 skill = SubResource("Resource_mnqc8")
 is_boss = true
 enrage_name = "原形毕露"

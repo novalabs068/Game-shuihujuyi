@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/huyan_zhuo.png" id="1_0jnoo"]
 [ext_resource type="Texture2D" path="res://art/busts/huyan_zhuo.png" id="1_8viyb"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_s84ih"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_jgosu"]
@@ -42,6 +43,7 @@ portrait = ExtResource("4_b18tt")
 bust = ExtResource("1_8viyb")
 face = ExtResource("2_uy7e6")
 map_sprite = ExtResource("3_0jnoo")
+battle_sprite = ExtResource("1_0jnoo")
 attack_style = &"heavy"
 skill = SubResource("Resource_8viyb")
 talent = SubResource("Resource_0jnoo")

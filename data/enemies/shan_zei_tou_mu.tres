@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
 [ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="1_6snh3"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shan_zei_tou_mu.png" id="1_fagny"]
 [ext_resource type="Texture2D" path="res://art/busts/shan_zei_tou_mu.png" id="1_n5c4x"]
 [ext_resource type="Texture2D" path="res://art/faces/shan_zei_tou_mu.png" id="2_fagny"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_gkw5b"]
@@ -26,5 +27,6 @@ portrait = ExtResource("4_f7ap1")
 bust = ExtResource("1_n5c4x")
 face = ExtResource("2_fagny")
 map_sprite = ExtResource("1_6snh3")
+battle_sprite = ExtResource("1_fagny")
 attack_style = &"heavy"
 skill = SubResource("Resource_n5c4x")

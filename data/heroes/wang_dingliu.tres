@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="UnitData" format=3]
 
+[ext_resource type="Texture2D" path="res://art/pixel/battle/wang_dingliu.png" id="1_otxbb"]
 [ext_resource type="Texture2D" path="res://art/busts/wang_dingliu.png" id="1_tfsvx"]
 [ext_resource type="Texture2D" path="res://art/faces/wang_dingliu.png" id="2_kvesg"]
 [ext_resource type="Texture2D" path="res://art/portraits/wang_dingliu.png" id="3_ol3jo"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_otxbb"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/wang_dingliu.png" id="4_tqjco"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_tqjco"]
 [ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_kvesg"]
 
@@ -39,6 +41,8 @@ base_spd = 120
 portrait = ExtResource("3_ol3jo")
 bust = ExtResource("1_tfsvx")
 face = ExtResource("2_kvesg")
+map_sprite = ExtResource("4_tqjco")
+battle_sprite = ExtResource("1_otxbb")
 attack_style = &"heavy"
 skill = SubResource("Resource_2i3eo")
 talent = SubResource("Resource_ol3jo")
