@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/gao_fu_jia_ding.png" id="1_hiywj"]
+[ext_resource type="Texture2D" path="res://art/faces/gao_fu_jia_ding.png" id="2_jx4x4"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/tai_wei_jia_ding.png" id="3_fn51u"]
+[ext_resource type="Texture2D" path="res://art/portraits/gao_fu_jia_ding.png" id="4_40gyl"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="5_2lnsi"]
+
+[resource]
+script = ExtResource("5_2lnsi")
+id = &"xi_men_jia_ding"
+display_name = "西门府打手"
+role = 1
+base_hp = 440
+base_atk = 92
+base_def = 22
+base_spd = 96
+portrait = ExtResource("4_40gyl")
+bust = ExtResource("1_hiywj")
+face = ExtResource("2_jx4x4")
+map_sprite = ExtResource("3_fn51u")

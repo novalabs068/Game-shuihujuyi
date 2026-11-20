@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_vu4wq"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_afxii"]
+
+[sub_resource type="Resource" id="Resource_sc07c"]
+script = ExtResource("2_afxii")
+display_name = "玉环步鸳鸯脚"
+description = "虚晃一招再连环踢出，必中必暴击，170% 伤害。"
+effect = 3
+power = 1.7
+
+[resource]
+script = ExtResource("1_vu4wq")
+id = &"yu_huan_bu"
+display_name = "玉环步鸳鸯脚"
+flavor = "先把拳头虚晃一影，转身飞起左脚，再一个鸳鸯腿踢中额角。武松平生的真才实学。"
+source = "武松列传完结时，武松传授"
+skill = SubResource("Resource_sc07c")
+side_hp_pct = 0.08
+side_effects = Array[StringName]([&"armor_break"])

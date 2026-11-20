@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StoryData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/story_data.gd" id="1_2t830"]
+
+[resource]
+script = ExtResource("1_2t830")
+id = &"wu_song_1"
+hero = &"wu_song"
+title = "景阳冈打虎"
+location = &"jingyanggang"
+recommended_level = 12
+script_path = "res://data/stories/wu_song/1_jing_yang_gang.txt"
+tokens = 3
+silver = 40
+souls = 10

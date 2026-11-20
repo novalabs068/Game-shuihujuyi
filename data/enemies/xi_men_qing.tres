@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/xi_men_qing.png" id="1_bp1pe"]
+[ext_resource type="Texture2D" path="res://art/faces/xi_men_qing.png" id="2_geycm"]
+[ext_resource type="Texture2D" path="res://art/portraits/xi_men_qing.png" id="3_0n7gs"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_yptut"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_adhbn"]
+
+[sub_resource type="Resource" id="Resource_p6euy"]
+script = ExtResource("5_adhbn")
+display_name = "袖里藏刀"
+description = "无视嘲讽，打血量比例最低的人，200% 伤害。"
+effect = 9
+power = 2.0
+
+[resource]
+script = ExtResource("4_yptut")
+id = &"xi_men_qing"
+display_name = "西门庆"
+nickname = "Boss"
+role = 1
+base_hp = 1300
+base_atk = 112
+base_def = 30
+base_spd = 104
+portrait = ExtResource("3_0n7gs")
+bust = ExtResource("1_bp1pe")
+face = ExtResource("2_geycm")
+skill = SubResource("Resource_p6euy")
+is_boss = true
+enrage_name = "狗急跳墙"
+enrage_atk_bonus = 0.5

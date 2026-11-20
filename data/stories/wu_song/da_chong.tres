@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_6mm2y"]
+[ext_resource type="Resource" path="res://data/enemies/da_chong.tres" id="2_ctp8g"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_gcss6"]
+
+[resource]
+script = ExtResource("3_gcss6")
+id = "wu_song_da_chong"
+title = "景阳冈"
+enemies = Array[ExtResource("1_6mm2y")]([ExtResource("2_ctp8g")])
+enemy_level = 12
+recommended_level = 12

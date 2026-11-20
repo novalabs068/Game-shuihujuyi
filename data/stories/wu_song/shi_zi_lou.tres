@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_joc4j"]
+[ext_resource type="Resource" path="res://data/enemies/xi_men_jia_ding.tres" id="2_4548v"]
+[ext_resource type="Resource" path="res://data/enemies/xi_men_qing.tres" id="3_m1q8n"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_0ofbt"]
+
+[resource]
+script = ExtResource("4_0ofbt")
+id = "wu_song_shi_zi_lou"
+title = "狮子楼"
+enemies = Array[ExtResource("1_joc4j")]([ExtResource("2_4548v"), ExtResource("3_m1q8n"), ExtResource("2_4548v")])
+enemy_level = 14
+recommended_level = 14

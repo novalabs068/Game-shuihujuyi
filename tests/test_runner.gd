@@ -674,7 +674,7 @@ func test_story_script_parse() -> bool:
 func test_story_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var stories: Array = GameDB.load_dir("res://data/stories/")
-	check_eq(stories.size(), 4, "林冲列传 has 4 segments")
+	check_eq(stories.size(), 8, "林冲、武松列传各 4 段")
 	var map: WorldMapData = load("res://data/maps/ch1.tres")
 	for res in stories:
 		var story: StoryData = res
@@ -708,7 +708,7 @@ func test_story_data() -> bool:
 func test_martial_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var all: Array = GameDB.load_dir("res://data/martial/")
-	check_eq(all.size(), 5, "5 martial arts")
+	check_eq(all.size(), 6, "6 martial arts")
 	for res in all:
 		var m: MartialData = res
 		check(m.skill != null and m.skill.description != "", "%s has a described skill" % m.display_name)
@@ -721,6 +721,8 @@ func test_martial_data() -> bool:
 	var h := unit_data(&"h", [1000, 100, 50, 100])
 	var boosted := Equipment.apply(h, [lin.side_as_gear()] as Array[EquipData])
 	check_eq(boosted.base_atk, 108, "林家枪法 side: attack +8%")
+	var wu_song_4: StoryData = load("res://data/stories/wu_song_4.tres")
+	check(wu_song_4.martial != null and wu_song_4.martial.id == &"yu_huan_bu", "武松列传 ends by teaching 玉环步鸳鸯脚")
 	check(&"keen" in boosted.gear_effects, "林家枪法 side: keen")
 	var story: StoryData = load("res://data/stories/lin_chong_4.tres")
 	check(story.martial == lin, "林冲列传 finale teaches 林家枪法")

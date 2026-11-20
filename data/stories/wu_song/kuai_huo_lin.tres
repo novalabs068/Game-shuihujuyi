@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_sxyid"]
+[ext_resource type="Resource" path="res://data/enemies/jiang_men_tu_di.tres" id="2_5fgvr"]
+[ext_resource type="Resource" path="res://data/enemies/jiang_men_shen.tres" id="3_e11fo"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_u4lo1"]
+
+[resource]
+script = ExtResource("4_u4lo1")
+id = "wu_song_kuai_huo_lin"
+title = "快活林"
+enemies = Array[ExtResource("1_sxyid")]([ExtResource("2_5fgvr"), ExtResource("3_e11fo"), ExtResource("2_5fgvr")])
+enemy_level = 16
+recommended_level = 16

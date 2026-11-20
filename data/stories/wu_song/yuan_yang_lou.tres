@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_7poj3"]
+[ext_resource type="Resource" path="res://data/enemies/zhang_tuan_lian.tres" id="2_sdcj6"]
+[ext_resource type="Resource" path="res://data/enemies/zhang_du_jian.tres" id="3_l2lkf"]
+[ext_resource type="Resource" path="res://data/enemies/du_jian_qin_bing.tres" id="4_5j7va"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_lw5p0"]
+
+[resource]
+script = ExtResource("5_lw5p0")
+id = "wu_song_yuan_yang_lou"
+title = "鸳鸯楼"
+enemies = Array[ExtResource("1_7poj3")]([ExtResource("2_sdcj6"), ExtResource("3_l2lkf"), ExtResource("4_5j7va")])
+enemy_level = 20
+recommended_level = 20

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/lei_tai_jiao_tou.png" id="1_vslho"]
+[ext_resource type="Texture2D" path="res://art/faces/lei_tai_jiao_tou.png" id="2_y1rv2"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/lei_tai_jiao_tou.png" id="3_ml2yb"]
+[ext_resource type="Texture2D" path="res://art/portraits/lei_tai_jiao_tou.png" id="4_7do1a"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="5_whc5x"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="6_0x0nh"]
+
+[sub_resource type="Resource" id="Resource_6fb4m"]
+script = ExtResource("6_0x0nh")
+display_name = "团练刀法"
+description = "单体 170% 伤害。"
+power = 1.7
+
+[resource]
+script = ExtResource("5_whc5x")
+id = &"zhang_tuan_lian"
+display_name = "张团练"
+role = 1
+base_hp = 560
+base_atk = 142
+base_def = 24
+portrait = ExtResource("4_7do1a")
+bust = ExtResource("1_vslho")
+face = ExtResource("2_y1rv2")
+map_sprite = ExtResource("3_ml2yb")
+skill = SubResource("Resource_6fb4m")

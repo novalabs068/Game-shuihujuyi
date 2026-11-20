@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/da_chong.png" id="1_lmp43"]
+[ext_resource type="Texture2D" path="res://art/faces/da_chong.png" id="2_odart"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/ye_lang.png" id="3_jfcjd"]
+[ext_resource type="Texture2D" path="res://art/portraits/da_chong.png" id="4_2fhmf"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="5_gnf56"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="6_wrxmv"]
+
+[sub_resource type="Resource" id="Resource_v0o6f"]
+script = ExtResource("6_wrxmv")
+display_name = "一扑一掀一剪"
+description = "连扑 3 次，每次 85% 伤害。"
+effect = 2
+power = 0.85
+hits = 3
+
+[resource]
+script = ExtResource("5_gnf56")
+id = &"da_chong"
+display_name = "吊睛白额大虫"
+nickname = "Boss"
+role = 1
+base_hp = 2100
+base_atk = 128
+base_def = 30
+base_spd = 106
+portrait = ExtResource("4_2fhmf")
+bust = ExtResource("1_lmp43")
+face = ExtResource("2_odart")
+map_sprite = ExtResource("3_jfcjd")
+skill = SubResource("Resource_v0o6f")
+is_boss = true
+enrage_name = "负痛狂啸"
+enrage_atk_bonus = 0.5

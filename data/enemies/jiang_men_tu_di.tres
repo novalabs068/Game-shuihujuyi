@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/po_pi_tou.png" id="1_v48ms"]
+[ext_resource type="Texture2D" path="res://art/faces/po_pi_tou.png" id="2_ojwrd"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="3_03lbq"]
+[ext_resource type="Texture2D" path="res://art/portraits/po_pi_tou.png" id="4_q0qra"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="5_d48i2"]
+
+[resource]
+script = ExtResource("5_d48i2")
+id = &"jiang_men_tu_di"
+display_name = "蒋门神徒弟"
+role = 1
+base_hp = 400
+base_atk = 112
+base_def = 22
+base_spd = 98
+portrait = ExtResource("4_q0qra")
+bust = ExtResource("1_v48ms")
+face = ExtResource("2_ojwrd")
+map_sprite = ExtResource("3_03lbq")

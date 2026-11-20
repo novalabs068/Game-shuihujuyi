@@ -188,6 +188,10 @@ func set_intent(text: String, danger: bool) -> void:
 	_bubble.add_theme_stylebox_override("panel", UiKit.box(Color(0.55, 0.1, 0.08, 0.92) if danger else Color(0.08, 0.07, 0.06, 0.85), UiKit.DAMAGE if danger else UiKit.PANEL_LIGHT, 2, 8))
 	_bubble.reset_size()
 	_bubble.position = Vector2((CARD_SIZE.x - _bubble.size.x) / 2, FIGURE_HEIGHT - _bubble.size.y - 2)
+	# 站在屏幕边上的人，气泡往里挪，别露出屏幕外
+	var left := global_position.x + _bubble.position.x
+	var right := get_viewport_rect().size.x - (left + _bubble.size.x)
+	_bubble.position.x += maxf(4.0 - left, 0.0) - maxf(4.0 - right, 0.0)
 
 
 ## 命中点：胸口（特效、飘字都对着这里）。

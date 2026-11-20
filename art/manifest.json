@@ -3342,7 +3342,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_dongjing.txt；原图 art/inbox/story_dongjing.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_dongjing.txt"
       }
     },
@@ -3367,7 +3367,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_yezhulin.txt；原图 art/inbox/story_yezhulin.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_yezhulin.txt"
       }
     },
@@ -3392,7 +3392,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_cangzhou.txt；原图 art/inbox/story_cangzhou.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_cangzhou.txt"
       }
     },
@@ -3417,7 +3417,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_liangshan.txt；原图 art/inbox/story_liangshan.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_liangshan.txt"
       }
     },
@@ -6156,7 +6156,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_weizhou.txt；原图 art/inbox/story_weizhou.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_weizhou.txt"
       }
     },
@@ -6181,7 +6181,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_shizipo.txt；原图 art/inbox/story_shizipo.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_shizipo.txt"
       }
     },
@@ -6206,7 +6206,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_kuaihuolin.txt；原图 art/inbox/story_kuaihuolin.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_kuaihuolin.txt"
       }
     },
@@ -6231,7 +6231,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_huangnigang.txt；原图 art/inbox/story_huangnigang.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_huangnigang.txt"
       }
     },
@@ -6256,7 +6256,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_jingyanggang.txt；原图 art/inbox/story_jingyanggang.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_jingyanggang.txt"
       }
     },
@@ -6281,7 +6281,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_yanggu.txt；原图 art/inbox/story_yanggu.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_yanggu.txt"
       }
     },
@@ -6306,7 +6306,7 @@
         "created_at": "2026-11-18",
         "license": "待确认：Cursor 服务条款对生成图片的商用约定",
         "attribution": "",
-        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_or_source_record": "art/prompts/story_erlongshan.txt；原图 art/inbox/story_erlongshan.png，缩到 1280×720 存 jpg",
         "prompt_file": "art/prompts/story_erlongshan.txt"
       }
     },
@@ -6984,6 +6984,439 @@
         "kind": "code-generated",
         "url_or_tool": "pixelfx（MIT, patch-gg/pixelfx）",
         "date": "2026-11-20"
+      }
+    },
+    {
+      "id": "da_chong-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/da_chong.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/da_chong.txt + art/STYLE.md 提示词固定段；原图 art/inbox/da_chong.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "da_chong-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/da_chong.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/da_chong.txt + art/STYLE.md 提示词固定段；原图 art/inbox/da_chong.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "da_chong-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/da_chong.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/da_chong.txt + art/STYLE.md 提示词固定段；原图 art/inbox/da_chong.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "xi_men_qing-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/xi_men_qing.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/xi_men_qing.txt + art/STYLE.md 提示词固定段；原图 art/inbox/xi_men_qing.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "xi_men_qing-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/xi_men_qing.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/xi_men_qing.txt + art/STYLE.md 提示词固定段；原图 art/inbox/xi_men_qing.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "xi_men_qing-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/xi_men_qing.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/xi_men_qing.txt + art/STYLE.md 提示词固定段；原图 art/inbox/xi_men_qing.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "jiang_men_shen-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/jiang_men_shen.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/jiang_men_shen.txt + art/STYLE.md 提示词固定段；原图 art/inbox/jiang_men_shen.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "jiang_men_shen-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/jiang_men_shen.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/jiang_men_shen.txt + art/STYLE.md 提示词固定段；原图 art/inbox/jiang_men_shen.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "jiang_men_shen-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/jiang_men_shen.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/jiang_men_shen.txt + art/STYLE.md 提示词固定段；原图 art/inbox/jiang_men_shen.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhang_du_jian-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/zhang_du_jian.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhang_du_jian.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhang_du_jian.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhang_du_jian-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/zhang_du_jian.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhang_du_jian.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhang_du_jian.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhang_du_jian-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/zhang_du_jian.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhang_du_jian.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhang_du_jian.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "story-yuanyanglou",
+      "role": "列传背景（东京东岳庙）",
+      "path": "art/story/yuanyanglou.jpg",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "1280×720",
+        "alpha": false,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "ink-wash",
+        "palette"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/story_yuanyanglou.txt；原图 art/inbox/story_yuanyanglou.png，缩到 1280×720 存 jpg",
+        "prompt_file": "art/prompts/story_kuaihuolin.txt"
       }
     }
   ]

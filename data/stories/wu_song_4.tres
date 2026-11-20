@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StoryData" format=3]
+
+[ext_resource type="Resource" path="res://data/martial/yu_huan_bu.tres" id="1_iwokn"]
+[ext_resource type="Script" path="res://scripts/data/story_data.gd" id="2_qdou5"]
+
+[resource]
+script = ExtResource("2_qdou5")
+id = &"wu_song_4"
+hero = &"wu_song"
+order = 4
+title = "血溅鸳鸯楼"
+location = &"kuaihuolin"
+recommended_level = 20
+script_path = "res://data/stories/wu_song/4_yuan_yang_lou.txt"
+tokens = 6
+silver = 90
+souls = 20
+martial = ExtResource("1_iwokn")

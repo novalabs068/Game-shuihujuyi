@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StoryData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/story_data.gd" id="1_e3bcg"]
+
+[resource]
+script = ExtResource("1_e3bcg")
+id = &"wu_song_2"
+hero = &"wu_song"
+order = 2
+title = "斗杀西门庆"
+location = &"yanggu"
+recommended_level = 14
+script_path = "res://data/stories/wu_song/2_shi_zi_lou.txt"
+tokens = 3
+silver = 50
+souls = 10

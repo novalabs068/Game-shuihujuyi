@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/jiang_men_shen.png" id="1_mp200"]
+[ext_resource type="Texture2D" path="res://art/faces/jiang_men_shen.png" id="2_dpe1t"]
+[ext_resource type="Texture2D" path="res://art/portraits/jiang_men_shen.png" id="3_pnqx7"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_3vbpk"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_k31ut"]
+
+[sub_resource type="Resource" id="Resource_0e3yy"]
+script = ExtResource("5_k31ut")
+display_name = "泰岳争跤"
+description = "单体 190% 伤害。"
+power = 1.9
+
+[resource]
+script = ExtResource("4_3vbpk")
+id = &"jiang_men_shen"
+display_name = "蒋门神"
+nickname = "Boss"
+role = 1
+base_hp = 1300
+base_atk = 140
+base_def = 34
+base_spd = 88
+portrait = ExtResource("3_pnqx7")
+bust = ExtResource("1_mp200")
+face = ExtResource("2_dpe1t")
+skill = SubResource("Resource_0e3yy")
+is_boss = true
+enrage_name = "恼羞成怒"
+enrage_atk_bonus = 0.5
