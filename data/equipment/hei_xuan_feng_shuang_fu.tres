@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_4huvw"]
+
+[resource]
+script = ExtResource("1_4huvw")
+id = &"hei_xuan_feng_shuang_fu"
+display_name = "黑旋风双斧"
+quality = 3
+flavor = "黑旋风李逵的两把板斧，劫法场时杀出一条血路。"
+atk_pct = 0.15
+effects = Array[StringName]([&"armor_break"])
+owner = &"li_kui"
+source = "bounty_lang_li_jiao"
+source_text = "梁山泊悬赏「浪里蛟」"

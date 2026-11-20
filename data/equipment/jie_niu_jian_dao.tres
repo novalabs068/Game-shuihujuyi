@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_kn7wn"]
+
+[resource]
+script = ExtResource("1_kn7wn")
+id = &"jie_niu_jian_dao"
+display_name = "解牛尖刀"
+quality = 3
+flavor = "操刀鬼曹正屠户出身，一把尖刀解牛如庖丁。"
+atk_pct = 0.12
+effects = Array[StringName]([&"armor_break"])
+owner = &"cao_zheng"
+source = "bounty_lu_qian"
+source_text = "沧州悬赏「陆谦」"

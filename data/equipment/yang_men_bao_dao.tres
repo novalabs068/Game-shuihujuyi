@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_1wcd2"]
+
+[resource]
+script = ExtResource("1_1wcd2")
+id = &"yang_men_bao_dao"
+display_name = "杨门宝刀"
+quality = 3
+flavor = "杨家祖传宝刀：砍铜剁铁、吹毛断发、杀人不见血。"
+atk_pct = 0.12
+effects = Array[StringName]([&"keen"])
+owner = &"yang_zhi"
+source = "bounty_niu_er"
+source_text = "东京悬赏「泼皮牛二」"

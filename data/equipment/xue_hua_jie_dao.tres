@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_wrl3x"]
+
+[resource]
+script = ExtResource("1_wrl3x")
+id = &"xue_hua_jie_dao"
+display_name = "雪花镔铁戒刀"
+quality = 3
+flavor = "十字坡孙二娘赠给武行者的两口戒刀，夜里嗡嗡作响。"
+hp_pct = 0.05
+atk_pct = 0.15
+owner = &"wu_song"
+source = "story_wu_song_4"
+source_text = "武松列传完结"

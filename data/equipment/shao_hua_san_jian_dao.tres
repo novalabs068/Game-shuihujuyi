@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_jcx0k"]
+
+[resource]
+script = ExtResource("1_jcx0k")
+id = &"shao_hua_san_jian_dao"
+display_name = "少华三尖刀"
+quality = 3
+flavor = "九纹龙史进在少华山落草时使的三尖两刃刀。"
+atk_pct = 0.15
+owner = &"shi_jin"
+source = "bounty_ma_zei_tan_zi"
+source_text = "渭州悬赏「马贼探子」"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_3wwwx"]
+
+[resource]
+script = ExtResource("1_3wwwx")
+id = &"cai_yuan_tie_chu"
+display_name = "菜园铁锄"
+quality = 3
+flavor = "菜园子张青种菜的铁锄，也是他防身的家伙。"
+hp_pct = 0.08
+def_pct = 0.1
+owner = &"zhang_qing"
+source = "chest_xiangguosi_tree_corner"
+source_text = "相国寺菜园的宝箱"

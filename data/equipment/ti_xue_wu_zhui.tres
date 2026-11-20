@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_htvxu"]
+
+[resource]
+script = ExtResource("1_htvxu")
+id = &"ti_xue_wu_zhui"
+display_name = "踢雪乌骓"
+slot = 3
+quality = 3
+flavor = "呼延灼的坐骑，宋徽宗御赐，通体乌黑、四蹄雪白。"
+spd_pct = 0.05
+travel_speed = 0.5
+encounter_cut = 0.3
+owner = &"huyan_zhuo"
+source_text = "名单待确认，暂不投放"

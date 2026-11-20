@@ -232,6 +232,11 @@ func _show_detail() -> void:
 		var talent := UiKit.label("天赋「%s」：%s%s" % [hero.talent.display_name, hero.talent.describe(rank), note], 18, UiKit.TEXT if rank > 0 else UiKit.TEXT_DIM)
 		talent.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_detail.add_child(talent)
+	for e: EquipData in GameDB.equipment.values():
+		if e.quality == EquipData.Quality.MING and e.owner == hero.id:
+			var got := GameState.has_flag("mingqi_" + String(e.id))
+			var where := "已得到" if got else "出处：%s" % e.source_text
+			_detail.add_child(UiKit.label("%s「%s」：%s　%s" % [e.quality_name(), e.display_name, e.summary(), where], 17, UiKit.QUALITY_COLORS[EquipData.Quality.MING] if got else UiKit.TEXT_DIM))
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -387,7 +392,8 @@ func _slot_button(hero: UnitData, slot: EquipData.Slot) -> Button:
 		var data := GameState.item_data(it)
 		text = "%s：%s" % [EquipData.SLOT_NAMES[slot], data.display_name]
 		color = UiKit.QUALITY_COLORS[data.quality]
-	var button := UiKit.button(text, Vector2(220, 50), 19)
+	var button := UiKit.button(text, Vector2(176, 50), 18)
+	button.clip_text = true
 	button.add_theme_color_override("font_color", color)
 	button.pressed.connect(_open_picker.bind(hero, slot))
 	return button
@@ -429,7 +435,8 @@ func _open_picker(hero: UnitData, slot: EquipData.Slot) -> void:
 	var candidates := GameState.items.filter(func(it: Dictionary) -> bool: return GameState.item_data(it).slot == slot)
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return GameState.item_data(a).quality > GameState.item_data(b).quality)
 	if candidates.is_empty():
-		list.add_child(UiKit.label("还没有%s。路上遇敌、悬赏、宝箱会掉，东京、渭州、沧州的集市也有卖。" % EquipData.SLOT_NAMES[slot], 20, UiKit.TEXT_DIM))
+		var where := "集市有马卖；名马要去江湖里找。" if slot == EquipData.Slot.MOUNT else "路上遇敌、悬赏、宝箱会掉，东京、渭州、沧州的集市也有卖。"
+		list.add_child(UiKit.label("还没有%s。%s" % [EquipData.SLOT_NAMES[slot], where], 20, UiKit.TEXT_DIM))
 	var close := func() -> void:
 		overlay.queue_free()
 		_refresh_list()
@@ -448,13 +455,16 @@ func _open_picker(hero: UnitData, slot: EquipData.Slot) -> void:
 		name_row.add_theme_constant_override("separation", 10)
 		info.add_child(name_row)
 		name_row.add_child(UiKit.label(data.display_name, 24, UiKit.QUALITY_COLORS[data.quality]))
-		name_row.add_child(UiKit.label(EquipData.QUALITY_NAMES[data.quality], 17, UiKit.QUALITY_COLORS[data.quality]))
+		name_row.add_child(UiKit.label(data.quality_name(), 17, UiKit.QUALITY_COLORS[data.quality]))
 		name_row.add_child(UiKit.label(data.summary(), 18))
 		var holder: StringName = it["holder"]
 		if holder != &"" and holder != hero.id:
 			name_row.add_child(UiKit.label("（%s 穿着）" % _holder_name(holder), 17, UiKit.TEXT_DIM))
 		if not data.effects.is_empty():
 			info.add_child(UiKit.label(data.effects_text(), 16, UiKit.TEXT_DIM))
+		if data.owner != &"":
+			var mine := data.owner == hero.id
+			info.add_child(UiKit.label("%s的%s：装在他身上绝招再强化一次%s" % [GameDB.hero(data.owner).display_name, data.quality_name(), "（正是本人）" if mine else ""], 16, UiKit.GOLD if mine else UiKit.TEXT_DIM))
 		var wearing := holder == hero.id
 		var action := UiKit.button("卸下" if wearing else "穿上", Vector2(110, 48), 20)
 		action.pressed.connect(func() -> void:

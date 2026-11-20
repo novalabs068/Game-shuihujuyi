@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_augw8"]
+
+[resource]
+script = ExtResource("1_augw8")
+id = &"hao_ling_xiang_jian"
+display_name = "号令响箭"
+quality = 3
+flavor = "旱地忽律朱贵在梁山泊边射响箭叫船的箭。"
+atk_pct = 0.1
+spd_pct = 0.05
+owner = &"zhu_gui"
+source = "chest_kuaihuolin_khl_lin_shen"
+source_text = "快活林林子深处的宝箱"

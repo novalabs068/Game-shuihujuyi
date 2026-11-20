@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_7rqkx"]
+
+[resource]
+script = ExtResource("1_7rqkx")
+id = &"shuai_zi_da_qi"
+display_name = "帅字大旗"
+quality = 3
+flavor = "险道神郁保四身长一丈，梁山上掌帅字旗。"
+hp_pct = 0.1
+def_pct = 0.1
+owner = &"yu_baosi"
+source = "chest_jingyanggang_jyg_shi_xia"
+source_text = "景阳冈大石下的宝箱"

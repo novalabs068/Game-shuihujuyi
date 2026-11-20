@@ -76,7 +76,7 @@ func _refresh() -> void:
 		_list.remove_child(child)
 		child.queue_free()
 	if _selling:
-		var spare := GameState.items.filter(func(it: Dictionary) -> bool: return it["holder"] == &"")
+		var spare := GameState.items.filter(func(it: Dictionary) -> bool: return it["holder"] == &"" and GameState.item_data(it).can_sell())
 		if spare.is_empty():
 			_list.add_child(UiKit.label("背包里没有可卖的装备。穿在身上的要先在「好汉」页卸下。", 20, DIM))
 		for it: Dictionary in spare:
@@ -89,7 +89,7 @@ func _refresh() -> void:
 		var wares := GameDB.equipment.values().filter(func(e: EquipData) -> bool: return e.quality == EquipData.Quality.FAN)
 		wares.sort_custom(func(a: EquipData, b: EquipData) -> bool: return a.slot < b.slot)
 		for data: EquipData in wares:
-			_list.add_child(_row(data, "买 %d 两" % EquipData.BUY_PRICE, GameState.silver >= EquipData.BUY_PRICE, func() -> void:
+			_list.add_child(_row(data, "买 %d 两" % data.buy_price(), GameState.silver >= data.buy_price(), func() -> void:
 				GameState.buy_item(data)
 				_refresh()))
 
@@ -105,7 +105,7 @@ func _row(data: EquipData, action: String, enabled: bool, on_press: Callable) ->
 	name_row.add_theme_constant_override("separation", 10)
 	info.add_child(name_row)
 	name_row.add_child(UiKit.label(data.display_name, 24, INK))
-	name_row.add_child(UiKit.label("%s · %s" % [EquipData.SLOT_NAMES[data.slot], EquipData.QUALITY_NAMES[data.quality]], 18, UiKit.QUALITY_INK[data.quality]))
+	name_row.add_child(UiKit.label("%s · %s" % [EquipData.SLOT_NAMES[data.slot], data.quality_name()], 18, UiKit.QUALITY_INK[data.quality]))
 	name_row.add_child(UiKit.label(data.summary(), 18, RED))
 	var flavor := UiKit.label(data.flavor, 16, DIM)
 	flavor.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

@@ -109,7 +109,7 @@ func _ready() -> void:
 		var text := "（空）"
 		if not it.is_empty():
 			var data := GameState.item_data(it)
-			text = "%s · %s　%s" % [data.display_name, EquipData.QUALITY_NAMES[data.quality], data.summary()]
+			text = "%s · %s　%s" % [data.display_name, data.quality_name(), data.summary()]
 		right.add_child(_line(EquipData.SLOT_NAMES[slot], text))
 
 	# 江湖履历

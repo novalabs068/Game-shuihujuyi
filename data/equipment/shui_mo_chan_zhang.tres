@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_q3ibx"]
+
+[resource]
+script = ExtResource("1_q3ibx")
+id = &"shui_mo_chan_zhang"
+display_name = "六十二斤水磨禅杖"
+quality = 3
+flavor = "鲁智深在五台山下铁匠铺打的禅杖，六十二斤重。"
+hp_pct = 0.08
+atk_pct = 0.12
+owner = &"lu_zhishen"
+source = "bounty_zhen_guan_xi"
+source_text = "渭州悬赏「镇关西」"

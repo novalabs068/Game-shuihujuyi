@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_amvua"]
+
+[resource]
+script = ExtResource("1_amvua")
+id = &"zao_hong_ma"
+display_name = "枣红马"
+slot = 3
+flavor = "枣红色的走马，跑得稳当。"
+spd_pct = 0.04
+travel_speed = 0.15
+encounter_cut = 0.1

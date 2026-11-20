@@ -45,6 +45,7 @@ func _initialize() -> void:
 		"test_aoe_skill_effects",
 		"test_talents",
 		"test_bonds",
+		"test_mingqi",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
 		"test_simulated_win_rate",
@@ -482,6 +483,57 @@ func test_bonds() -> bool:
 	return true
 
 
+func test_mingqi() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var all: Array = GameDB.load_dir("res://data/equipment/")
+	var heroes: Array = GameDB.load_dir("res://data/heroes/")
+	var flags: Array[String] = []
+	for res in GameDB.load_dir("res://data/stories/"):
+		flags.append((res as StoryData).flag())
+	for res in GameDB.load_dir("res://data/bounties/"):
+		flags.append("bounty_" + String((res as BountyData).id))
+	for res in GameDB.load_dir("res://data/scenes/"):
+		var sd: SceneData = res
+		for c in sd.chests:
+			flags.append("chest_%s_%s" % [sd.id, c.id])
+	var weapons_of := {}
+	var sources: Array[String] = []
+	for res in all:
+		var e: EquipData = res
+		if e.quality != EquipData.Quality.MING:
+			continue
+		check(e.owner == &"" or heroes.any(func(h: UnitData) -> bool: return h.id == e.owner), "%s owner exists" % e.display_name)
+		if e.slot == EquipData.Slot.WEAPON:
+			weapons_of[e.owner] = weapons_of.get(e.owner, 0) + 1
+		if e.source == "":
+			continue
+		check(not e.source in sources, "%s source is not shared" % e.display_name)
+		sources.append(e.source)
+		if e.source.begins_with("arena:"):
+			check(int(e.source.get_slice(":", 1)) in range(1, 11), "%s arena round exists" % e.display_name)
+		else:
+			check(e.source in flags, "%s source %s exists" % [e.display_name, e.source])
+		check(e.source_text != "", "%s says where it comes from" % e.display_name)
+	for res in heroes:
+		check_eq(weapons_of.get((res as UnitData).id, 0), 1, "%s has one signature weapon" % (res as UnitData).display_name)
+	# 专属：只有原主人装着才强化绝招
+	var lin := unit_data(&"lin_chong", [1000, 100, 50, 100], skill(SkillData.Effect.DAMAGE, {power = 2.0}))
+	var other := unit_data(&"wu_song", [1000, 100, 50, 100], skill(SkillData.Effect.DAMAGE, {power = 2.0}))
+	var spear: EquipData = load("res://data/equipment/zhang_ba_she_mao.tres")
+	check(is_equal_approx(Equipment.apply(lin, [spear] as Array[EquipData]).skill.power, 2.5), "owner gets the exclusive boost")
+	check(is_equal_approx(Equipment.apply(other, [spear] as Array[EquipData]).skill.power, 2.0), "others only get stats")
+	check(not spear.can_sell(), "名器 can't be sold")
+	# 随机掉落不出名器和马
+	var rng := RandomNumberGenerator.new()
+	for i in 50:
+		var drop := Equipment.random_of(all, EquipData.Quality.FAN, rng)
+		check(drop.slot != EquipData.Slot.MOUNT, "random drops are never horses")
+	var horse: EquipData = load("res://data/equipment/huang_biao_ma.tres")
+	check_eq(horse.buy_price(), EquipData.MOUNT_PRICE, "horses cost more")
+	check(horse.summary().contains("赶路"), "horse summary mentions travel")
+	return true
+
+
 func test_steal_skips_debuffs() -> bool:
 	var m := battle([unit_data(&"thief", [500, 10, 10, 100], skill(SkillData.Effect.STEAL))], [unit_data(&"e", [500, 10, 10, 90])])
 	var e := by_id(m, &"e")
@@ -726,15 +778,19 @@ func test_stars() -> bool:
 func test_equipment() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var all: Array = GameDB.load_dir("res://data/equipment/")
-	check_eq(all.size(), 15, "15 equipment templates")
-	var per_quality := [0, 0, 0]
+	var per_quality := [0, 0, 0, 0]
+	var mounts := 0
 	for res in all:
 		var e: EquipData = res
 		per_quality[e.quality] += 1
-		check_eq(e.effects.size(), e.quality, "%s has %d effects" % [e.display_name, e.quality])
+		if e.slot == EquipData.Slot.MOUNT:
+			mounts += 1
+		elif e.quality != EquipData.Quality.MING:
+			check_eq(e.effects.size(), e.quality, "%s has %d effects" % [e.display_name, e.quality])
 		for fx in e.effects:
 			check(EquipData.EFFECTS.has(fx), "%s effect %s is known" % [e.display_name, fx])
-	check_eq(per_quality, [6, 6, 3], "6 凡品 6 良品 3 精品")
+	check_eq(per_quality, [9, 6, 3, 26], "9 凡品（含 3 匹马）6 良品 3 精品 26 名器")
+	check_eq(mounts, 5, "3 horses + 2 famous horses")
 	var h := unit_data(&"h", [1000, 100, 50, 100])
 	var sword := EquipData.new()
 	sword.atk_pct = 0.12

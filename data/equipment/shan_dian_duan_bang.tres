@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_q38jl"]
+
+[resource]
+script = ExtResource("1_q38jl")
+id = &"shan_dian_duan_bang"
+display_name = "闪电短棒"
+quality = 3
+flavor = "活闪婆王定六的短棒，人走得快，棒也快。"
+atk_pct = 0.06
+spd_pct = 0.12
+owner = &"wang_dingliu"
+source = "chest_dongjing_suburb_luan_gang"
+source_text = "东京城外乱坟岗的宝箱"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_t6osj"]
+
+[resource]
+script = ExtResource("1_t6osj")
+id = &"xing_dou_shuang_lian"
+display_name = "星斗双链"
+quality = 3
+flavor = "智多星吴用手提的两条铜链。"
+atk_pct = 0.08
+spd_pct = 0.08
+effects = Array[StringName]([&"nimble"])
+owner = &"wu_yong"
+source_text = "黄泥冈（待投放）"

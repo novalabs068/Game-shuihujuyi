@@ -362,7 +362,9 @@ func _travel(destination: StringName, from_progress: float, can_encounter: bool)
 	var stage: StageData = null
 	var event: EventData = null
 	if can_encounter:
-		if _rng.randf() < map.encounter_chance:
+		var mount := GameState.mount()
+		var cut := mount.encounter_cut if mount != null else 0.0
+		if _rng.randf() < map.encounter_chance * (1.0 - cut):
 			stage = Encounters.build(map.location(destination), GameState.level, _rng)
 			if stage == null and map.encounter_stage_id != "":
 				stage = GameDB.stages[map.encounter_stage_id]
@@ -388,7 +390,10 @@ func _walk(points: PackedVector2Array, from: float, to: float) -> void:
 	bob.tween_property(_avatar, "rotation", 0.08, 0.15)
 	bob.tween_property(_avatar, "rotation", -0.08, 0.15)
 	var walk := create_tween()
-	var duration := _length(points) * (to - from) / WALK_SPEED
+	# 主角骑着马赶路更快
+	var mount := GameState.mount()
+	var speed := WALK_SPEED * (1.0 + (mount.travel_speed if mount != null else 0.0))
+	var duration := _length(points) * (to - from) / speed
 	var started := Time.get_ticks_msec()
 	# 一边走一边一跳一跳：每 0.3 秒（左右各摆一次）跳一下
 	walk.tween_method(func(p: float) -> void:

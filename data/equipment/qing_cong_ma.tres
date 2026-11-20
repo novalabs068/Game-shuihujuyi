@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_g6giy"]
+
+[resource]
+script = ExtResource("1_g6giy")
+id = &"qing_cong_ma"
+display_name = "青骢马"
+slot = 3
+flavor = "青白杂毛的马，性子稳，走小路不惊。"
+spd_pct = 0.03
+travel_speed = 0.1
+encounter_cut = 0.2

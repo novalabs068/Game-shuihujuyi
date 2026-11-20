@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_qee0k"]
+
+[resource]
+script = ExtResource("1_qee0k")
+id = &"jin_yan_dao"
+display_name = "金眼刀"
+quality = 3
+flavor = "金眼彪施恩掌管快活林时佩的刀。"
+atk_pct = 0.1
+spd_pct = 0.05
+owner = &"shi_en"
+source = "bounty_du_fang_zhuang_jia"
+source_text = "快活林悬赏「赌坊庄家」"

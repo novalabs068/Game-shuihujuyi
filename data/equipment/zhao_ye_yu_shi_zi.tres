@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_asf8i"]
+
+[resource]
+script = ExtResource("1_asf8i")
+id = &"zhao_ye_yu_shi_zi"
+display_name = "照夜玉狮子"
+slot = 3
+quality = 3
+flavor = "金国王子的宝马，浑身雪白，日行千里；段景住盗来要献给宋江。"
+spd_pct = 0.05
+travel_speed = 0.5
+encounter_cut = 0.3
+source_text = "名单待确认，暂不投放"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_cha8v"]
+
+[resource]
+script = ExtResource("1_cha8v")
+id = &"zhang_ba_she_mao"
+display_name = "丈八蛇矛"
+quality = 3
+flavor = "八十万禁军教头林冲的长矛，风雪山神庙一矛刺死陆谦。"
+atk_pct = 0.15
+spd_pct = 0.05
+owner = &"lin_chong"
+source = "story_lin_chong_4"
+source_text = "林冲列传完结"

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_ggtfg"]
+
+[resource]
+script = ExtResource("1_ggtfg")
+id = &"jin_lun_pao"
+display_name = "金轮炮"
+quality = 3
+flavor = "轰天雷凌振造的金轮炮，天下第一炮手的手艺。"
+atk_pct = 0.15
+owner = &"ling_zhen"
+source = "chest_jingyanggang_jyg_gang_ding"
+source_text = "景阳冈冈顶的宝箱"

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_sidby"]
+
+[resource]
+script = ExtResource("1_sidby")
+id = &"pi_li_lang_ya_bang"
+display_name = "霹雳狼牙棒"
+quality = 3
+flavor = "霹雳火秦明的狼牙棒。"
+atk_pct = 0.15
+owner = &"qin_ming"
+source = "arena:8"
+source_text = "擂台第 8 关首次打赢"

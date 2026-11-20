@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_2cid3"]
+
+[resource]
+script = ExtResource("1_2cid3")
+id = &"chuan_yang_diao_gong"
+display_name = "穿杨宝雕弓"
+quality = 3
+flavor = "小李广花荣的雕弓，梁山上一箭射落天上的雁。"
+atk_pct = 0.12
+effects = Array[StringName]([&"keen"])
+owner = &"hua_rong"
+source = "arena:5"
+source_text = "擂台第 5 关首次打赢"

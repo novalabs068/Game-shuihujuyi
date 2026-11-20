@@ -32,12 +32,22 @@ static func apply(unit: UnitData, gear: Array[EquipData]) -> UnitData:
 	out.base_def = roundi(unit.base_def * def)
 	out.base_spd = roundi(unit.base_spd * spd)
 	out.gear_effects = effects
+	# 名器装在原主人身上：绝招再强化一次
+	if unit.skill != null and gear.any(func(g: EquipData) -> bool: return g.owner != &"" and g.owner == unit.id):
+		out.skill = exclusive_skill(out.skill)
 	return out
+
+
+## 名器专属强化：和点亮勾玉的强化一样（伤害 ×1.25、控制多 1 回合……），可以和它叠加。
+static func exclusive_skill(skill: SkillData) -> SkillData:
+	var s := Stars.upgraded_skill(skill)
+	s.description = "%s（名器专属：%s）" % [skill.description, Stars.upgrade_text(skill)]
+	return s
 
 
 ## 从 all（全部装备模板）里随机挑一件指定品质的。
 static func random_of(all: Array, quality: EquipData.Quality, rng: RandomNumberGenerator) -> EquipData:
-	var pool := all.filter(func(e: EquipData) -> bool: return e.quality == quality)
+	var pool := all.filter(func(e: EquipData) -> bool: return e.quality == quality and e.slot != EquipData.Slot.MOUNT)
 	if pool.is_empty():
 		return null
 	return pool[rng.randi_range(0, pool.size() - 1)]

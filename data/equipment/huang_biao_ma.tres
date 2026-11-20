@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_4em63"]
+
+[resource]
+script = ExtResource("1_4em63")
+id = &"huang_biao_ma"
+display_name = "黄骠马"
+slot = 3
+flavor = "一匹黄毛白点的骟马，脚程不错。"
+spd_pct = 0.03
+travel_speed = 0.25

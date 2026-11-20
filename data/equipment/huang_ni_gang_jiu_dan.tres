@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_87y6w"]
+
+[resource]
+script = ExtResource("1_87y6w")
+id = &"huang_ni_gang_jiu_dan"
+display_name = "黄泥冈酒担"
+quality = 3
+flavor = "白日鼠白胜在黄泥冈上挑着卖酒的担子。"
+hp_pct = 0.1
+spd_pct = 0.05
+owner = &"bai_sheng"
+source = "chest_kuaihuolin_khl_jiu_jiao"
+source_text = "快活林酒窖的宝箱"

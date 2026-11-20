@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_nvgc4"]
+
+[resource]
+script = ExtResource("1_nvgc4")
+id = &"da_hu_qiang_bang"
+display_name = "打虎枪棒"
+quality = 3
+flavor = "打虎将李忠走江湖卖艺使的枪棒。"
+atk_pct = 0.12
+def_pct = 0.05
+owner = &"li_zhong"
+source = "bounty_ye_zhu_wang"
+source_text = "景阳冈悬赏「野猪王」"

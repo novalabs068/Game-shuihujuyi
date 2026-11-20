@@ -123,6 +123,9 @@ func _finish_story(story: StoryData) -> void:
 	parts.append("与%s的羁绊 +%d" % [hero.display_name, Bonds.STORY_POINTS])
 	if bond_up != "":
 		parts.append(bond_up)
+	var mingqi := GameState.claim_mingqi()
+	if mingqi != "":
+		parts.append(mingqi)
 	var learned := Rewards.learn(story.martial)
 	if learned != "":
 		parts.append("%s传授了%s" % [hero.display_name, learned.trim_prefix("学会")])
@@ -204,6 +207,9 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			GameState.set_flag(bonus.get("flag", ""))
 			if bonus.has("arena_round"):
 				GameState.record["arena"] = maxi(Arena.best(), bonus["arena_round"])
+			var mingqi := GameState.claim_mingqi()
+			if mingqi != "":
+				parts.append(mingqi)
 			var job_text := OddJobs.on_battle_won(stage)
 			if job_text != "":
 				parts.append(job_text)

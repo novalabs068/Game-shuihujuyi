@@ -5,7 +5,7 @@ static func grant(tokens: int, silver: int, experience: int, equipment: EquipDat
 	var parts := PackedStringArray()
 	if equipment != null:
 		GameState.add_item(equipment.id)
-		parts.append("得到%s「%s」" % [EquipData.QUALITY_NAMES[equipment.quality], equipment.display_name])
+		parts.append("得到%s「%s」" % [equipment.quality_name(), equipment.display_name])
 	if tokens != 0:
 		GameState.tokens += tokens
 		parts.append("聚义令 %+d" % tokens)

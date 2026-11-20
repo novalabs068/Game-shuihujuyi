@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_gorxf"]
+
+[resource]
+script = ExtResource("1_gorxf")
+id = &"hui_chun_jin_zhen"
+display_name = "回春金针"
+quality = 3
+flavor = "建康神医安道全行针的一套金针。"
+hp_pct = 0.1
+effects = Array[StringName]([&"regen"])
+owner = &"an_daoquan"
+source = "chest_dongjing_suburb_tu_di_miao"
+source_text = "东京城外土地庙的宝箱"

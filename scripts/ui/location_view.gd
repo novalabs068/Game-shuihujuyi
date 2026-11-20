@@ -484,6 +484,9 @@ func _open_chest(chest: ChestData) -> void:
 		return
 	GameState.set_flag(flag)
 	var gained := Rewards.grant(chest.tokens, chest.silver, 0, chest.equipment)
+	var mingqi := GameState.claim_mingqi()
+	if mingqi != "":
+		gained = mingqi + "　" + gained
 	GameState.save_game()
 	_chest_actors[chest.cell].sprite = scene_data.chest_open
 	_chest_actors[chest.cell].set_glyph("空", Color("6e5a3a"))

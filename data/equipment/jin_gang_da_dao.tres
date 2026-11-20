@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_54qcx"]
+
+[resource]
+script = ExtResource("1_54qcx")
+id = &"jin_gang_da_dao"
+display_name = "金刚大刀"
+quality = 3
+flavor = "云里金刚宋万的大刀。"
+atk_pct = 0.1
+def_pct = 0.08
+owner = &"song_wan"
+source = "chest_shizipo_szp_fen_di"
+source_text = "十字坡坟地的宝箱"

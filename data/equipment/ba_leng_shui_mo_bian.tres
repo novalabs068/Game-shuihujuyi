@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_l3ii2"]
+
+[resource]
+script = ExtResource("1_l3ii2")
+id = &"ba_leng_shui_mo_bian"
+display_name = "八棱水磨鞭"
+quality = 3
+flavor = "双鞭呼延灼的两条水磨八棱钢鞭。"
+atk_pct = 0.12
+def_pct = 0.08
+owner = &"huyan_zhuo"
+source = "arena:10"
+source_text = "擂台第 10 关首次打赢"

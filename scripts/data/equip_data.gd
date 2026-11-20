@@ -2,14 +2,16 @@ class_name EquipData
 extends Resource
 ## 一件装备（模板）。属性加成是百分比，到后期也不失效；没有强化和打造，拿到什么就是什么。
 
-enum Slot { WEAPON, ARMOR, CHARM }
-enum Quality { FAN, LIANG, JING }
+enum Slot { WEAPON, ARMOR, CHARM, MOUNT }
+## 名器：出自原著、全游戏只有一件，不随机掉落、不能卖；装在原主人（owner）身上时绝招再强化一次
+enum Quality { FAN, LIANG, JING, MING }
 
-const SLOT_NAMES: Array[String] = ["兵器", "护具", "饰物"]
-const QUALITY_NAMES: Array[String] = ["凡品", "良品", "精品"]
-## 卖给集市的价钱；凡品也能在集市按 BUY_PRICE 买到
-const SELL_PRICES: Array[int] = [20, 60, 120]
+const SLOT_NAMES: Array[String] = ["兵器", "护具", "饰物", "坐骑"]
+const QUALITY_NAMES: Array[String] = ["凡品", "良品", "精品", "名器"]
+## 卖给集市的价钱；凡品也能在集市按 BUY_PRICE 买到（坐骑按 MOUNT_PRICE）
+const SELL_PRICES: Array[int] = [20, 60, 120, 0]
 const BUY_PRICE := 40
+const MOUNT_PRICE := 200
 ## 特效：名字和说明
 const EFFECTS := {
 	&"armor_break": ["破甲", "普攻打铁甲敌人不减半"],
@@ -30,6 +32,32 @@ const EFFECTS := {
 @export var spd_pct := 0.0
 @export var effects: Array[StringName] = []
 
+@export_group("坐骑")
+## 主角骑着它在江湖大地图上赶路快多少（0.3 = 快 30%）、路上遇敌的概率少多少（0.2 = 少两成）
+@export var travel_speed := 0.0
+@export var encounter_cut := 0.0
+
+@export_group("名器")
+## 原主人（好汉 id）：装在他身上时绝招再强化一次
+@export var owner: StringName
+## 从哪里得到：一个标记（列传 story_…、悬赏 bounty_…、宝箱 chest_<场景>_<宝箱>），或 arena:<关数>
+@export var source: String
+## 给玩家看的出处，比如「林冲列传完结」
+@export var source_text: String
+
+
+func buy_price() -> int:
+	return MOUNT_PRICE if slot == Slot.MOUNT else BUY_PRICE
+
+
+func can_sell() -> bool:
+	return quality != Quality.MING
+
+
+## 名马也算名器，只是叫法不同。
+func quality_name() -> String:
+	return "名马" if quality == Quality.MING and slot == Slot.MOUNT else QUALITY_NAMES[quality]
+
 
 func sell_price() -> int:
 	return SELL_PRICES[quality]
@@ -43,6 +71,10 @@ func summary() -> String:
 			parts.append("%s +%d%%" % [pair[0], roundi(pair[1] * 100)])
 	for e in effects:
 		parts.append(EFFECTS[e][0])
+	if travel_speed > 0.0:
+		parts.append("赶路 +%d%%" % roundi(travel_speed * 100))
+	if encounter_cut > 0.0:
+		parts.append("遇敌 -%d%%" % roundi(encounter_cut * 100))
 	return "　".join(parts)
 
 

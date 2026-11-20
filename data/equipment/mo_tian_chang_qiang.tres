@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_l42at"]
+
+[resource]
+script = ExtResource("1_l42at")
+id = &"mo_tian_chang_qiang"
+display_name = "摸天长枪"
+quality = 3
+flavor = "摸着天杜迁的长枪，人高枪也长。"
+hp_pct = 0.08
+atk_pct = 0.1
+owner = &"du_qian"
+source = "chest_shizipo_szp_lin_zi"
+source_text = "十字坡林子里的宝箱"

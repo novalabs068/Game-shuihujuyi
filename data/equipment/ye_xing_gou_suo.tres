@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_8jpeh"]
+
+[resource]
+script = ExtResource("1_8jpeh")
+id = &"ye_xing_gou_suo"
+display_name = "夜行钩索"
+quality = 3
+flavor = "鼓上蚤时迁飞檐走壁的钩索。"
+atk_pct = 0.08
+spd_pct = 0.1
+owner = &"shi_qian"
+source = "bounty_e_pu"
+source_text = "东京悬赏「太尉府恶仆」"

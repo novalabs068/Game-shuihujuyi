@@ -340,6 +340,34 @@ func story_progress(hero_id: StringName) -> Array[int]:
 
 # --- 装备 ---
 
+## 出处已经达成、还没拿到的名器发给玩家（列传完结、悬赏揭下、宝箱打开、擂台打到第几关）。
+## 每件只发一次（标记 mingqi_<id>）。返回提示，没有新的返回空。
+func claim_mingqi() -> String:
+	var parts := PackedStringArray()
+	for e: EquipData in GameDB.equipment.values():
+		if e.quality != EquipData.Quality.MING or e.source == "" or has_flag("mingqi_" + String(e.id)):
+			continue
+		if _source_done(e.source):
+			set_flag("mingqi_" + String(e.id))
+			add_item(e.id)
+			parts.append("得到%s「%s」" % [e.quality_name(), e.display_name])
+	return "　".join(parts)
+
+
+func _source_done(source: String) -> bool:
+	if source.begins_with("arena:"):
+		return Arena.best() >= int(source.get_slice(":", 1))
+	return has_flag(source)
+
+
+## 主角的坐骑（决定在大地图上赶路多快、遇敌多少），没有返回 null。
+func mount() -> EquipData:
+	for g in gear_of(PROTAGONIST_ID):
+		if g.slot == EquipData.Slot.MOUNT:
+			return g
+	return null
+
+
 ## 放进背包，返回这件的编号。
 func add_item(id: StringName) -> int:
 	var uid := _next_uid
@@ -401,6 +429,8 @@ func sell_item(uid: int) -> int:
 	var it := item(uid)
 	if it.is_empty():
 		return 0
+	if not item_data(it).can_sell():
+		return 0
 	var price := item_data(it).sell_price()
 	items.erase(it)
 	silver += price
@@ -409,9 +439,9 @@ func sell_item(uid: int) -> int:
 
 
 func buy_item(data: EquipData) -> bool:
-	if silver < EquipData.BUY_PRICE:
+	if silver < data.buy_price():
 		return false
-	silver -= EquipData.BUY_PRICE
+	silver -= data.buy_price()
 	add_item(data.id)
 	save_game()
 	return true
@@ -593,6 +623,8 @@ func load_game() -> void:
 			var uid := int(it["uid"])
 			items.append({"uid": uid, "id": StringName(it["id"]), "holder": StringName(it.get("holder", ""))})
 			_next_uid = maxi(_next_uid, uid + 1)
+	# 有名器之前的旧存档：已经打完的列传、揭下的悬赏、开过的宝箱，补发对应的名器
+	claim_mingqi()
 
 
 func _ids_to_json(values: Dictionary[StringName, int]) -> Dictionary:

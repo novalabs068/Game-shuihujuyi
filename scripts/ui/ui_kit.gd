@@ -22,9 +22,9 @@ const RARITY_NAMES: Array[String] = ["", "地煞", "天罡", "主角"]
 const TIER_NAMES: Array[String] = ["甲", "乙", "丙", "丁"]
 ## 品级的名字颜色：甲金、乙紫、丙蓝、丁灰（参考《三国志·战略版》名字按品质上色）
 const TIER_COLORS: Array[Color] = [Color("e0b040"), Color("a070e0"), Color("5a9ae8"), Color("9aa0a8")]
-## 装备品质的颜色：凡品灰白、良品蓝、精品金。QUALITY_INK 用在纸色底的面板上
-const QUALITY_COLORS: Array[Color] = [Color("c8c4b8"), Color("6aa8f0"), Color("e0b040")]
-const QUALITY_INK: Array[Color] = [Color("6a6458"), Color("2f63a8"), Color("a8741a")]
+## 装备品质的颜色：凡品灰白、良品蓝、精品金、名器朱红。QUALITY_INK 用在纸色底的面板上
+const QUALITY_COLORS: Array[Color] = [Color("c8c4b8"), Color("6aa8f0"), Color("e0b040"), Color("e8604a")]
+const QUALITY_INK: Array[Color] = [Color("6a6458"), Color("2f63a8"), Color("a8741a"), Color("b0301e")]
 ## 职业小标签上的单字
 const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
 ## 卡面统一用墨色底、深色框，颜色只留给印章、名字、勾玉这些小标记
