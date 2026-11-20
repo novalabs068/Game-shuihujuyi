@@ -314,7 +314,7 @@ func _open_chest(chest: ChestData) -> void:
 		_flash("箱子是空的")
 		return
 	GameState.set_flag(flag)
-	var gained := Rewards.grant(chest.tokens, chest.silver, 0)
+	var gained := Rewards.grant(chest.tokens, chest.silver, 0, chest.equipment)
 	GameState.save_game()
 	_chest_actors[chest.cell].sprite = scene_data.chest_open
 	_chest_actors[chest.cell].set_glyph("空", Color("6e5a3a"))

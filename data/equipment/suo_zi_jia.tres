@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_wchny"]
+
+[resource]
+script = ExtResource("1_wchny")
+id = &"suo_zi_jia"
+display_name = "锁子甲"
+slot = 1
+quality = 1
+flavor = "铁环一个扣一个，伤口在甲下也好得快些。"
+hp_pct = 0.06
+def_pct = 0.06
+effects = Array[StringName]([&"regen"])

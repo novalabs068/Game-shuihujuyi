@@ -32,6 +32,9 @@ var pulls_since_jia := 0
 ## 每位好汉的星数（没记的就是 1 星）、通用货币义气（将魂化来，可换指定好汉的将魂）
 var stars: Dictionary[StringName, int] = {}
 var yiqi := 0
+## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
+var items: Array[Dictionary] = []
+var _next_uid := 1
 
 var _protagonist: UnitData
 
@@ -168,12 +171,92 @@ func recruit_with_souls(hero: UnitData) -> bool:
 	return true
 
 
-## 战斗用的队伍：好汉带上星级加成。
+## 战斗用的队伍：好汉带上星级加成，所有人带上装备加成。
 func battle_team() -> Array[UnitData]:
 	var out: Array[UnitData] = []
 	for u in team():
-		out.append(Stars.apply(u, star_of(u.id)) if u.id != PROTAGONIST_ID else u)
+		var unit := Stars.apply(u, star_of(u.id)) if u.id != PROTAGONIST_ID else u
+		out.append(Equipment.apply(unit, gear_of(u.id)))
 	return out
+
+
+# --- 装备 ---
+
+## 放进背包，返回这件的编号。
+func add_item(id: StringName) -> int:
+	var uid := _next_uid
+	_next_uid += 1
+	items.append({"uid": uid, "id": id, "holder": &""})
+	return uid
+
+
+func item(uid: int) -> Dictionary:
+	for it in items:
+		if it["uid"] == uid:
+			return it
+	return {}
+
+
+static func item_data(it: Dictionary) -> EquipData:
+	return GameDB.equipment.get(it["id"])
+
+
+## 某人身上的装备（按栏位顺序）。
+func gear_of(holder: StringName) -> Array[EquipData]:
+	var out: Array[EquipData] = []
+	for it in items:
+		if it["holder"] == holder:
+			out.append(item_data(it))
+	out.sort_custom(func(a: EquipData, b: EquipData) -> bool: return a.slot < b.slot)
+	return out
+
+
+## 某人某个栏位上的那件（没有就返回空字典）。
+func equipped(holder: StringName, slot: EquipData.Slot) -> Dictionary:
+	for it in items:
+		if it["holder"] == holder and item_data(it).slot == slot:
+			return it
+	return {}
+
+
+## 给 holder 穿上这件：同一栏位原来那件卸下；这件原来在别人身上就从那人身上拿过来。
+func equip(holder: StringName, uid: int) -> void:
+	var it := item(uid)
+	if it.is_empty():
+		return
+	var old := equipped(holder, item_data(it).slot)
+	if not old.is_empty():
+		old["holder"] = &""
+	it["holder"] = holder
+	save_game()
+
+
+func unequip(uid: int) -> void:
+	var it := item(uid)
+	if not it.is_empty():
+		it["holder"] = &""
+		save_game()
+
+
+## 卖给集市，返回得到的银两。
+func sell_item(uid: int) -> int:
+	var it := item(uid)
+	if it.is_empty():
+		return 0
+	var price := item_data(it).sell_price()
+	items.erase(it)
+	silver += price
+	save_game()
+	return price
+
+
+func buy_item(data: EquipData) -> bool:
+	if silver < EquipData.BUY_PRICE:
+		return false
+	silver -= EquipData.BUY_PRICE
+	add_item(data.id)
+	save_game()
+	return true
 
 
 ## 出战队伍：主角在第一位，后面是随行好汉。
@@ -232,6 +315,8 @@ func reset() -> void:
 	pulls_since_jia = 0
 	stars.clear()
 	yiqi = 0
+	items.clear()
+	_next_uid = 1
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
 	level = 1
@@ -265,6 +350,7 @@ func save_game() -> void:
 		"pulls_since_jia": pulls_since_jia,
 		"stars": _ids_to_json(stars),
 		"yiqi": yiqi,
+		"items": items.map(func(it: Dictionary) -> Dictionary: return {"uid": it["uid"], "id": String(it["id"]), "holder": String(it["holder"])}),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -312,6 +398,12 @@ func load_game() -> void:
 	for id: String in saved_stars:
 		stars[StringName(id)] = int(saved_stars[id])
 	yiqi = data.get("yiqi", 0)
+	var saved_items: Array = data.get("items", [])
+	for it: Dictionary in saved_items:
+		if GameDB.equipment.has(StringName(it.get("id", ""))):
+			var uid := int(it["uid"])
+			items.append({"uid": uid, "id": StringName(it["id"]), "holder": StringName(it.get("holder", ""))})
+			_next_uid = maxi(_next_uid, uid + 1)
 
 
 func _ids_to_json(values: Dictionary[StringName, int]) -> Dictionary:

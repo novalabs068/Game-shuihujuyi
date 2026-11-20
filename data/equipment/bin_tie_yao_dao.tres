@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_kdhsy"]
+
+[resource]
+script = ExtResource("1_kdhsy")
+id = &"bin_tie_yao_dao"
+display_name = "镔铁腰刀"
+flavor = "铁匠铺里最常见的腰刀，用镔铁打成，结实耐用。"
+atk_pct = 0.05

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_tvacy"]
+
+[resource]
+script = ExtResource("1_tvacy")
+id = &"wu_jin_ruan_jia"
+display_name = "乌金软甲"
+slot = 1
+quality = 2
+flavor = "乌金丝织成，贴身穿着，刀枪难入。"
+hp_pct = 0.1
+def_pct = 0.1
+effects = Array[StringName]([&"regen", &"nimble"])

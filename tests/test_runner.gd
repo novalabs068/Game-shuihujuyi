@@ -34,6 +34,8 @@ func _initialize() -> void:
 		"test_bounties_and_events_data",
 		"test_gacha",
 		"test_stars",
+		"test_equipment",
+		"test_gear_effects",
 		"test_new_skill_effects",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
@@ -519,6 +521,72 @@ func test_stars() -> bool:
 	check_eq(Stars.max_stars(h), 5, "丙 caps at 5 stars")
 	check_eq(Stars.cost(1) + Stars.cost(2) + Stars.cost(3) + Stars.cost(4), 100, "1→5 stars costs 100 souls")
 	check_eq(Stars.soul_price(h), 2, "丙 souls cost 2 义气")
+	return true
+
+
+func test_equipment() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var all: Array = GameDB.load_dir("res://data/equipment/")
+	check_eq(all.size(), 15, "15 equipment templates")
+	var per_quality := [0, 0, 0]
+	for res in all:
+		var e: EquipData = res
+		per_quality[e.quality] += 1
+		check_eq(e.effects.size(), e.quality, "%s has %d effects" % [e.display_name, e.quality])
+		for fx in e.effects:
+			check(EquipData.EFFECTS.has(fx), "%s effect %s is known" % [e.display_name, fx])
+	check_eq(per_quality, [6, 6, 3], "6 凡品 6 良品 3 精品")
+	var h := unit_data(&"h", [1000, 100, 50, 100])
+	var sword := EquipData.new()
+	sword.atk_pct = 0.12
+	sword.effects.assign([&"keen"])
+	var boots := EquipData.new()
+	boots.spd_pct = 0.08
+	boots.effects.assign([&"swift", &"keen"])
+	var geared := Equipment.apply(h, [sword, boots] as Array[EquipData])
+	check_eq(geared.base_atk, 112, "weapon adds attack %")
+	check_eq(geared.base_spd, 108, "charm adds speed %")
+	check_eq(geared.gear_effects.size(), 2, "effects are merged without duplicates")
+	check(h.gear_effects.is_empty(), "original data untouched")
+	check(Equipment.apply(h, [] as Array[EquipData]) == h, "no gear returns the original")
+	return true
+
+
+func test_gear_effects() -> bool:
+	var geared := func(id: StringName, effects: Array, stats := [1000, 100, 10, 100]) -> UnitData:
+		var u := unit_data(id, stats)
+		u.gear_effects.assign(effects)
+		return u
+	var m := battle([geared.call(&"p", [&"swift"])], [unit_data(&"e", [5000, 10, 10, 10])])
+	var p := by_id(m, &"p")
+	check(is_equal_approx(p.spd(), 120.0), "swift speeds up at the start")
+	# 机变：冷却少 1 回合
+	var quick: UnitData = geared.call(&"q", [&"nimble"], [1000, 10, 10, 200])
+	quick.skill = skill(SkillData.Effect.DAMAGE, {power = 1.0, cooldown = 3})
+	m = battle([quick], [unit_data(&"e", [5000, 10, 10, 10])])
+	advance_to(m, &"q")
+	m.act(BattleModel.Action.SKILL, by_id(m, &"e"))
+	check_eq(by_id(m, &"q").skill_cooldown, 2, "nimble shortens cooldown by one")
+	# 回春：轮到自己时回血
+	m = battle([geared.call(&"p", [&"regen"], [1000, 10, 10, 200])], [unit_data(&"e", [5000, 10, 10, 10])])
+	p = by_id(m, &"p")
+	p.hp = 500
+	advance_to(m, &"p")
+	check_eq(p.hp, 520, "regen heals 2% at turn start")
+	# 破甲：普攻打铁甲不减半
+	var iron := unit_data(&"e", [5000, 10, 0, 10])
+	iron.elite_trait = &"iron"
+	m = battle([geared.call(&"p", [&"armor_break"], [1000, 100, 10, 200]), unit_data(&"q", [1000, 100, 10, 199])], [iron])
+	m.rng.seed = 3
+	advance_to(m, &"p")
+	var e := by_id(m, &"e")
+	m.act(BattleModel.Action.ATTACK, e)
+	var with_break := e.max_hp - e.hp
+	advance_to(m, &"q")
+	var before := e.hp
+	m.act(BattleModel.Action.ATTACK, e)
+	var without := before - e.hp
+	check(with_break > without * 1.6, "armor break ignores iron halving (%d vs %d)" % [with_break, without])
 	return true
 
 

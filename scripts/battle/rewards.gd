@@ -1,8 +1,11 @@
 class_name Rewards
 ## 把奖励加进存档，返回给玩家看的一句话（比如「聚义令 +3　银两 +20」）。
 
-static func grant(tokens: int, silver: int, experience: int) -> String:
+static func grant(tokens: int, silver: int, experience: int, equipment: EquipData = null) -> String:
 	var parts := PackedStringArray()
+	if equipment != null:
+		GameState.add_item(equipment.id)
+		parts.append("得到%s「%s」" % [EquipData.QUALITY_NAMES[equipment.quality], equipment.display_name])
 	if tokens != 0:
 		GameState.tokens += tokens
 		parts.append("聚义令 %+d" % tokens)

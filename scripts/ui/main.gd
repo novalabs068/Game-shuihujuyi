@@ -93,7 +93,13 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			var parts := PackedStringArray()
 			if bonus.has("text"):
 				parts.append(String(bonus["text"]).replace("{name}", GameState.player_name))
-			var extra := Rewards.grant(bonus.get("tokens", 0), bonus.get("silver", 0), bonus.get("experience", 0))
+			# 悬赏给指定品质的装备；普通遇敌有机会掉一件凡品
+			var drop: EquipData = null
+			if bonus.has("equip_quality"):
+				drop = Equipment.random_of(GameDB.equipment.values(), bonus["equip_quality"], screen.model.rng)
+			elif bonus.is_empty() and screen.model.rng.randf() < Equipment.ENCOUNTER_DROP_CHANCE:
+				drop = Equipment.random_of(GameDB.equipment.values(), EquipData.Quality.FAN, screen.model.rng)
+			var extra := Rewards.grant(bonus.get("tokens", 0), bonus.get("silver", 0), bonus.get("experience", 0), drop)
 			if extra != "":
 				parts.append(extra)
 			GameState.set_flag(bonus.get("flag", ""))

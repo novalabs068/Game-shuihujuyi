@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_inkah"]
+
+[resource]
+script = ExtResource("1_inkah")
+id = &"tong_ling"
+display_name = "铜铃腰坠"
+slot = 2
+flavor = "走起路来叮当作响，提醒自己脚下别慢。"
+spd_pct = 0.03

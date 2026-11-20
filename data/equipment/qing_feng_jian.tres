@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_siucw"]
+
+[resource]
+script = ExtResource("1_siucw")
+id = &"qing_feng_jian"
+display_name = "青锋剑"
+quality = 1
+flavor = "剑身泛着青光，出手又快又准。"
+atk_pct = 0.06
+effects = Array[StringName]([&"keen"])

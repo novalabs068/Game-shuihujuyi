@@ -7,3 +7,5 @@ extends Resource
 @export var reward_text: String
 @export var tokens := 0
 @export var silver := 0
+## 宝箱里的一件装备（可以没有）
+@export var equipment: EquipData

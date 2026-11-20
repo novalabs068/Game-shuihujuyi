@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_wiwok"]
+
+[resource]
+script = ExtResource("1_wiwok")
+id = &"hu_fu_yu_pei"
+display_name = "虎符玉佩"
+slot = 2
+quality = 2
+flavor = "白玉雕成虎形，佩着它的人号令三军一般威风。"
+hp_pct = 0.05
+spd_pct = 0.05
+effects = Array[StringName]([&"swift", &"nimble"])

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_i7437"]
+
+[resource]
+script = ExtResource("1_i7437")
+id = &"ping_an_fu"
+display_name = "平安符"
+slot = 2
+flavor = "庙里求来的黄纸符，缝在贴身的布袋里。"
+hp_pct = 0.04
+def_pct = 0.02

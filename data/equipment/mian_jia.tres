@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_txbpy"]
+
+[resource]
+script = ExtResource("1_txbpy")
+id = &"mian_jia"
+display_name = "厚棉甲"
+slot = 1
+flavor = "絮了厚棉的软甲，穿着暖和，也卸得掉力道。"
+hp_pct = 0.08
+def_pct = 0.02

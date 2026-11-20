@@ -103,6 +103,10 @@ func spd() -> float:
 	return _spd * maxf(1.0 + bonus, MIN_STAT_RATIO)
 
 
+func has_gear(effect: StringName) -> bool:
+	return effect in data.gear_effects
+
+
 func is_taunting() -> bool:
 	return taunt_turns >= 0
 

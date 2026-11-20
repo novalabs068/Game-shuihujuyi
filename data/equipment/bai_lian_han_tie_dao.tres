@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_g5q0j"]
+
+[resource]
+script = ExtResource("1_g5q0j")
+id = &"bai_lian_han_tie_dao"
+display_name = "百炼寒铁刀"
+quality = 2
+flavor = "寒铁百炼而成，吹毛断发，削铁如泥。"
+atk_pct = 0.1
+effects = Array[StringName]([&"armor_break", &"keen"])

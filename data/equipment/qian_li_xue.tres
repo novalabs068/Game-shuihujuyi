@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_b6lvi"]
+
+[resource]
+script = ExtResource("1_b6lvi")
+id = &"qian_li_xue"
+display_name = "千里快靴"
+slot = 2
+quality = 1
+flavor = "鞋底纳了七层，据说是神行太保那一路的做法。"
+spd_pct = 0.03
+effects = Array[StringName]([&"swift"])

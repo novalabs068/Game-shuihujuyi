@@ -20,5 +20,10 @@ func tokens() -> int:
 	return GRADE_TOKENS[grade]
 
 
+## 悬赏给的装备品质：丙、乙等给良品，甲等给精品。
+func equip_quality() -> EquipData.Quality:
+	return EquipData.Quality.JING if grade == Grade.JIA else EquipData.Quality.LIANG
+
+
 func grade_name() -> String:
 	return GRADE_NAMES[grade]

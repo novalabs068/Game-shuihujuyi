@@ -9,6 +9,7 @@ const SCENES_DIR := "res://data/scenes/"
 const ORIGINS_DIR := "res://data/origins/"
 const BOUNTIES_DIR := "res://data/bounties/"
 const EVENTS_DIR := "res://data/events/"
+const EQUIPMENT_DIR := "res://data/equipment/"
 
 var heroes: Array[UnitData] = []
 var combos: Array[ComboData] = []
@@ -19,9 +20,13 @@ var origins: Dictionary[StringName, OriginData] = {}
 var bounties: Array[BountyData] = []
 ## 赶路时可能发生的奇遇（支线事件挂在 NPC 上，不在这里）
 var events: Array[EventData] = []
+var equipment: Dictionary[StringName, EquipData] = {}
 
 
 func _ready() -> void:
+	for res in load_dir(EQUIPMENT_DIR):
+		var item := res as EquipData
+		equipment[item.id] = item
 	for res in load_dir(HEROES_DIR):
 		heroes.append(res as UnitData)
 	heroes.sort_custom(func(a: UnitData, b: UnitData) -> bool: return a.sort_order < b.sort_order)

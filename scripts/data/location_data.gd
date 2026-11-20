@@ -24,5 +24,7 @@ extends Resource
 @export var stage_id: String
 ## 可以进入的横版场景（第 2 步再做）
 @export var scene_id: String
+## 有集市：能买凡品装备、卖掉不要的装备
+@export var has_market := false
 ## 去下一个地点的道路折线，从本地点开始、到下一个地点结束；最后一个地点留空
 @export var road_to_next: PackedVector2Array

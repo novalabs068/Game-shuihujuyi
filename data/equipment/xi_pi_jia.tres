@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_veri0"]
+
+[resource]
+script = ExtResource("1_veri0")
+id = &"xi_pi_jia"
+display_name = "犀皮甲"
+slot = 1
+quality = 1
+flavor = "犀牛皮制成，穿上它的人一上阵就杀气腾腾。"
+hp_pct = 0.06
+def_pct = 0.06
+effects = Array[StringName]([&"nimble"])

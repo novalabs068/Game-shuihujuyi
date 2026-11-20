@@ -1,6 +1,7 @@
 class_name HeroesView
 extends Control
-## 好汉：左边是名单，右边是选中好汉的详情；在这里升星、把将魂化成义气、用义气换将魂、用将魂招募。
+## 好汉：左边是名单（主角在最上面），右边是选中的人的详情；在这里换装备、升星、
+## 把将魂化成义气、用义气换将魂、用将魂招募。
 
 signal back_requested
 
@@ -89,9 +90,10 @@ func _ready() -> void:
 		if a.tier != b.tier:
 			return a.tier < b.tier
 		return a.sort_order < b.sort_order)
+	heroes.push_front(GameState.protagonist())
 	for hero: UnitData in heroes:
 		_list.add_child(_make_row(hero))
-	_selected = heroes[0] if not heroes.is_empty() and GameState.owns(heroes[0].id) else null
+	_selected = heroes[0]
 	_refresh_list()
 	_show_detail()
 
@@ -106,7 +108,10 @@ func _make_row(hero: UnitData) -> PanelContainer:
 	var name := UiKit.label(hero.display_name, 24)
 	name.custom_minimum_size.x = 96
 	h.add_child(name)
-	h.add_child(UiKit.label(UiKit.TIER_NAMES[hero.tier], 22, UiKit.TIER_COLORS[hero.tier]))
+	if _is_protagonist(hero):
+		h.add_child(UiKit.label("主角", 20, UiKit.ACCENT))
+	else:
+		h.add_child(UiKit.label(UiKit.TIER_NAMES[hero.tier], 22, UiKit.TIER_COLORS[hero.tier]))
 	var right := UiKit.label("", 18, UiKit.GOLD)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -134,13 +139,15 @@ func _refresh_list() -> void:
 	_yiqi_label.text = "义气 %d" % GameState.yiqi
 	for hero in _rows:
 		var row := _rows[hero]
-		var owned := GameState.owns(hero.id)
+		var owned := _owned(hero)
 		row.visible = owned or _show_all
 		row.modulate = Color.WHITE if owned else Color(0.5, 0.5, 0.5)
 		var picked := hero == _selected
 		row.add_theme_stylebox_override("panel", UiKit.box(UiKit.role_color(hero), UiKit.ACCENT if picked else UiKit.TIER_COLORS[hero.tier], 4 if picked else 1, 8))
 		var right: Label = row.find_child("Right", true, false)
-		if owned:
+		if _is_protagonist(hero):
+			right.text = ""
+		elif owned:
 			right.text = _star_text(GameState.star_of(hero.id), Stars.max_stars(hero)) + ("　可升星" if GameState.can_star_up(hero) else "")
 		else:
 			right.text = "将魂 %d/%d" % [GameState.souls_of(hero.id), Stars.RECRUIT_SOULS]
@@ -154,9 +161,10 @@ func _show_detail() -> void:
 		_detail.add_child(UiKit.label("还没有招募到好汉。去大地图点「招募」，用聚义令到聚义厅招人。", 22, UiKit.TEXT_DIM))
 		return
 	var hero := _selected
-	var owned := GameState.owns(hero.id)
+	var protagonist := _is_protagonist(hero)
+	var owned := _owned(hero)
 	var star := GameState.star_of(hero.id)
-	var effective := Stars.apply(hero, star)
+	var effective := Equipment.apply(hero if protagonist else Stars.apply(hero, star), GameState.gear_of(hero.id))
 
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 16)
@@ -170,13 +178,22 @@ func _show_detail() -> void:
 	info.add_child(name_row)
 	name_row.add_child(UiKit.label(hero.display_name, 34))
 	name_row.add_child(UiKit.label(hero.nickname, 22, UiKit.rarity_color(hero)))
-	info.add_child(UiKit.label("%s级 · %s · %s" % [UiKit.TIER_NAMES[hero.tier], UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 20, UiKit.TIER_COLORS[hero.tier]))
+	if protagonist:
+		info.add_child(UiKit.label("主角 · %s" % GameState.origin().display_name, 20, UiKit.ACCENT))
+	else:
+		info.add_child(UiKit.label("%s级 · %s · %s" % [UiKit.TIER_NAMES[hero.tier], UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 20, UiKit.TIER_COLORS[hero.tier]))
 	if owned:
-		info.add_child(UiKit.label(_star_text(star, Stars.max_stars(hero)), 26, UiKit.GOLD))
+		if not protagonist:
+			info.add_child(UiKit.label(_star_text(star, Stars.max_stars(hero)), 26, UiKit.GOLD))
 		var lv := GameState.level
 		info.add_child(UiKit.label("%d 级　生命 %d　攻击 %d　防御 %d　速度 %d" % [lv, _at(effective.base_hp, lv), _at(effective.base_atk, lv), _at(effective.base_def, lv), _at(effective.base_spd, lv)], 20))
-		if star > 1:
-			info.add_child(UiKit.label("星级加成：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100), 17, UiKit.TEXT_DIM))
+		var bonus := PackedStringArray()
+		if star > 1 and not protagonist:
+			bonus.append("星级：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
+		if not effective.gear_effects.is_empty():
+			bonus.append("装备特效：" + "、".join(effective.gear_effects.map(func(e: StringName) -> String: return EquipData.EFFECTS[e][0])))
+		if not bonus.is_empty():
+			info.add_child(UiKit.label("　".join(bonus), 17, UiKit.TEXT_DIM))
 	else:
 		info.add_child(UiKit.label("未招募", 26, UiKit.TEXT_DIM))
 
@@ -184,12 +201,21 @@ func _show_detail() -> void:
 	var desc := UiKit.label(effective.skill.description, 18, UiKit.TEXT_DIM)
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.add_child(desc)
-	if star < Stars.SKILL_UP_STAR and Stars.max_stars(hero) >= Stars.SKILL_UP_STAR:
+	if not protagonist and star < Stars.SKILL_UP_STAR and Stars.max_stars(hero) >= Stars.SKILL_UP_STAR:
 		_detail.add_child(UiKit.label("%d 星时强化：%s" % [Stars.SKILL_UP_STAR, Stars.upgrade_text(hero.skill)], 17, UiKit.TEXT_DIM))
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_detail.add_child(spacer)
+
+	if owned:
+		var gear_row := HBoxContainer.new()
+		gear_row.add_theme_constant_override("separation", 10)
+		_detail.add_child(gear_row)
+		for slot in EquipData.Slot.values():
+			gear_row.add_child(_slot_button(hero, slot))
+	if protagonist:
+		return
 
 	var souls := GameState.souls_of(hero.id)
 	if owned:
@@ -228,6 +254,113 @@ func _show_detail() -> void:
 		if GameState.souls_to_yiqi(hero.id, SOUL_STEP):
 			_done("%d 个将魂化成了 %d 点义气" % [SOUL_STEP, SOUL_STEP * Stars.YIQI_PER_SOUL]))
 	buttons.add_child(melt)
+
+
+## 一个装备栏位：显示穿着的那件，点开挑别的。
+func _slot_button(hero: UnitData, slot: EquipData.Slot) -> Button:
+	var it := GameState.equipped(hero.id, slot)
+	var text := "%s：空" % EquipData.SLOT_NAMES[slot]
+	var color := UiKit.TEXT_DIM
+	if not it.is_empty():
+		var data := GameState.item_data(it)
+		text = "%s：%s" % [EquipData.SLOT_NAMES[slot], data.display_name]
+		color = UiKit.QUALITY_COLORS[data.quality]
+	var button := UiKit.button(text, Vector2(220, 50), 19)
+	button.add_theme_color_override("font_color", color)
+	button.pressed.connect(_open_picker.bind(hero, slot))
+	return button
+
+
+## 挑装备：列出这个栏位的所有装备，品质高的在前；点「穿上」换上，点「卸下」脱掉。
+func _open_picker(hero: UnitData, slot: EquipData.Slot) -> void:
+	var overlay := Control.new()
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.6)
+	overlay.add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	overlay.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(820, 520)
+	panel.add_theme_stylebox_override("panel", UiKit.box(UiKit.PANEL, UiKit.GOLD, 2, 10))
+	center.add_child(panel)
+	var pad := MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 16)
+	panel.add_child(pad)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	pad.add_child(v)
+	v.add_child(UiKit.label("给%s挑%s" % [hero.display_name, EquipData.SLOT_NAMES[slot]], 28, UiKit.GOLD))
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 8)
+	scroll.add_child(list)
+	var candidates := GameState.items.filter(func(it: Dictionary) -> bool: return GameState.item_data(it).slot == slot)
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return GameState.item_data(a).quality > GameState.item_data(b).quality)
+	if candidates.is_empty():
+		list.add_child(UiKit.label("还没有%s。路上遇敌、悬赏、宝箱会掉，东京、渭州、沧州的集市也有卖。" % EquipData.SLOT_NAMES[slot], 20, UiKit.TEXT_DIM))
+	var close := func() -> void:
+		overlay.queue_free()
+		_refresh_list()
+		_show_detail()
+	for it: Dictionary in candidates:
+		var data := GameState.item_data(it)
+		var uid: int = it["uid"]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		list.add_child(row)
+		var info := VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_theme_constant_override("separation", 0)
+		row.add_child(info)
+		var name_row := HBoxContainer.new()
+		name_row.add_theme_constant_override("separation", 10)
+		info.add_child(name_row)
+		name_row.add_child(UiKit.label(data.display_name, 24, UiKit.QUALITY_COLORS[data.quality]))
+		name_row.add_child(UiKit.label(EquipData.QUALITY_NAMES[data.quality], 17, UiKit.QUALITY_COLORS[data.quality]))
+		name_row.add_child(UiKit.label(data.summary(), 18))
+		var holder: StringName = it["holder"]
+		if holder != &"" and holder != hero.id:
+			name_row.add_child(UiKit.label("（%s 穿着）" % _holder_name(holder), 17, UiKit.TEXT_DIM))
+		if not data.effects.is_empty():
+			info.add_child(UiKit.label(data.effects_text(), 16, UiKit.TEXT_DIM))
+		var wearing := holder == hero.id
+		var action := UiKit.button("卸下" if wearing else "穿上", Vector2(110, 48), 20)
+		action.pressed.connect(func() -> void:
+			if wearing:
+				GameState.unequip(uid)
+			else:
+				GameState.equip(hero.id, uid)
+			close.call())
+		row.add_child(action)
+	var back := UiKit.button("返回", Vector2(160, 50), 22)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	back.pressed.connect(close)
+	v.add_child(back)
+
+
+func _holder_name(id: StringName) -> String:
+	if id == GameState.PROTAGONIST_ID:
+		return GameState.player_name
+	var h := GameDB.hero(id)
+	return h.display_name if h != null else String(id)
+
+
+func _is_protagonist(hero: UnitData) -> bool:
+	return hero.id == GameState.PROTAGONIST_ID
+
+
+func _owned(hero: UnitData) -> bool:
+	return _is_protagonist(hero) or GameState.owns(hero.id)
 
 
 func _done(text: String) -> void:

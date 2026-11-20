@@ -21,6 +21,9 @@ const RARITY_NAMES: Array[String] = ["", "地煞", "天罡", "主角"]
 const TIER_NAMES: Array[String] = ["甲", "乙", "丙", "丁"]
 ## 卡框颜色按品级：甲金、乙紫、丙蓝、丁灰
 const TIER_COLORS: Array[Color] = [Color("e0b040"), Color("a070e0"), Color("5a9ae8"), Color("9aa0a8")]
+## 装备品质的颜色：凡品灰白、良品蓝、精品金。QUALITY_INK 用在纸色底的面板上
+const QUALITY_COLORS: Array[Color] = [Color("c8c4b8"), Color("6aa8f0"), Color("e0b040")]
+const QUALITY_INK: Array[Color] = [Color("6a6458"), Color("2f63a8"), Color("a8741a")]
 ## 职业底色：猛将蓝、武将红、射手绿、谋士紫、奇人青
 const ROLE_COLORS: Array[Color] = [Color("34465f"), Color("5a3434"), Color("3d5634"), Color("4a3d5e"), Color("2f5252")]
 

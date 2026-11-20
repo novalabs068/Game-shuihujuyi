@@ -53,6 +53,7 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 	for i in stage.enemies.size():
 		units.append(BattleUnit.new(stage.enemies[i], BattleUnit.Side.ENEMY, i, stage.enemy_level))
 	for u in units:
+		_apply_opening_gear(u)
 		u.next_time = TIME_PER_ACTION / u.spd()
 	for e in alive(BattleUnit.Side.ENEMY):
 		_plan_intent(e)
@@ -129,6 +130,10 @@ func start_next_turn() -> Array[Dictionary]:
 	var actor: BattleUnit = turn_order_preview()[0]
 	time = actor.next_time
 	actor.tick_turn_start()
+	if actor.has_gear(&"regen") and actor.hp < actor.max_hp:
+		var amount := mini(roundi(actor.max_hp * Equipment.REGEN_RATIO), actor.max_hp - actor.hp)
+		actor.hp += amount
+		_emit("heal", actor, "+%d" % amount, "%s 回春，回复 %d 生命" % [actor.display_name(), amount])
 	if actor.stun_turns > 0:
 		actor.stun_turns -= 1
 		_emit("info", actor, "眩晕", "%s 被眩晕，跳过本回合" % actor.display_name())
@@ -218,7 +223,8 @@ func _do_attack(actor: BattleUnit, wanted: BattleUnit) -> void:
 
 func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
 	var s := actor.data.skill
-	actor.skill_cooldown = s.cooldown
+	# 机变：冷却少 1 回合，最少 1 回合
+	actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
 	_emit("skill", actor, s.display_name, "%s 使用「%s」" % [actor.display_name(), s.display_name])
 	match s.effect:
 		SkillData.Effect.DAMAGE:
@@ -354,7 +360,8 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_crit := false, basic := false, pierce := false) -> int:
 	if target == null or not target.is_alive():
 		return 0
-	var crit := force_crit or rng.randf() < CRIT_CHANCE
+	var crit_chance := CRIT_CHANCE + (Equipment.KEEN_CRIT if attacker.has_gear(&"keen") else 0.0)
+	var crit := force_crit or rng.randf() < crit_chance
 	var def := 0.0 if pierce else target.def()
 	var raw := attacker.atk() * multiplier * 100.0 / (100.0 + def) * rng.randf_range(0.95, 1.05)
 	if crit:
@@ -363,7 +370,7 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 		raw *= 1.0 - GUARD_REDUCTION
 	if target.reduction_turns >= 0:
 		raw *= 1.0 - target.reduction
-	if basic and target.data.elite_trait == &"iron":
+	if basic and target.data.elite_trait == &"iron" and not attacker.has_gear(&"armor_break"):
 		raw *= IRON_BASIC_MULTIPLIER
 	var amount := maxi(1, roundi(raw))
 	var absorbed := mini(target.shield, amount)
@@ -383,6 +390,12 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 
 
 # --- 内部工具 ---
+
+## 装备的开战效果：疾风加速。
+func _apply_opening_gear(u: BattleUnit) -> void:
+	if u.has_gear(&"swift"):
+		u.buffs.append(BattleUnit.Buff.new("疾风", 0.0, Equipment.SWIFT_BONUS, Equipment.SWIFT_TURNS))
+
 
 func _finish_turn(actor: BattleUnit) -> void:
 	if not _extra_action:

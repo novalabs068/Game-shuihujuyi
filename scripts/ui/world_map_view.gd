@@ -366,9 +366,22 @@ func _show_panel(loc: LocationData) -> void:
 		var board := UiKit.button("悬赏告示（%d）" % open.size(), Vector2(200, 52), 22)
 		board.pressed.connect(_open_board.bind(loc))
 		_panel_buttons.add_child(board)
+	if loc.has_market:
+		var market := UiKit.button("集市", Vector2(120, 52), 22)
+		market.pressed.connect(_open_market)
+		_panel_buttons.add_child(market)
 	if _panel_buttons.get_child_count() == 0:
 		_panel_buttons.add_child(UiKit.label("点地图上的地名前往别处。", 17, UiKit.TEXT_DIM))
 	_layout()
+
+
+func _open_market() -> void:
+	var market := MarketPanel.new()
+	add_child(market)
+	market.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	market.closed.connect(func() -> void:
+		market.queue_free()
+		_refresh_status())
 
 
 func _open_board(loc: LocationData) -> void:
@@ -378,7 +391,7 @@ func _open_board(loc: LocationData) -> void:
 	board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	board.closed.connect(board.queue_free)
 	board.accepted.connect(func(b: BountyData) -> void:
-		battle_requested.emit(b.stage, &"", 0.0, {"tokens": b.tokens(), "flag": "bounty_" + String(b.id),
+		battle_requested.emit(b.stage, &"", 0.0, {"tokens": b.tokens(), "equip_quality": b.equip_quality(), "flag": "bounty_" + String(b.id),
 			"text": "揭下了「%s」的悬赏。" % b.target}))
 
 

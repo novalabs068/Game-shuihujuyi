@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_ua6od"]
+
+[resource]
+script = ExtResource("1_ua6od")
+id = &"niu_pi_jia"
+display_name = "牛皮护甲"
+slot = 1
+flavor = "几层熟牛皮缝成的护甲，挡得住寻常刀剑。"
+hp_pct = 0.05
+def_pct = 0.05

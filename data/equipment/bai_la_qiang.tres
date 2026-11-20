@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_m4hy0"]
+
+[resource]
+script = ExtResource("1_m4hy0")
+id = &"bai_la_qiang"
+display_name = "白蜡杆枪"
+flavor = "白蜡木做杆，又韧又轻，江湖上使枪的多用它。"
+atk_pct = 0.04
+spd_pct = 0.02

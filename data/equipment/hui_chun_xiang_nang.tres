@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_muex7"]
+
+[resource]
+script = ExtResource("1_muex7")
+id = &"hui_chun_xiang_nang"
+display_name = "回春香囊"
+slot = 2
+quality = 1
+flavor = "装着安神止血的药草，香气不散。"
+hp_pct = 0.05
+effects = Array[StringName]([&"regen"])

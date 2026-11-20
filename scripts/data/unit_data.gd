@@ -33,6 +33,10 @@ enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 @export_group("技能")
 @export var skill: SkillData
 
+@export_group("装备")
+## 身上装备带来的特效（EquipData.EFFECTS 的键）。由 Equipment.apply 在出战前设置
+@export var gear_effects: Array[StringName] = []
+
 @export_group("精英")
 ## 精英特性：&"iron" 铁甲（普攻伤害减半）、&"berserk" 狂暴（血量低于 30% 时攻击翻倍）。由遭遇战生成时设置
 @export var elite_trait: StringName
