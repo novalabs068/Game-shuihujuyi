@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_mxsoa"]
+[ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_qbf2t"]
+[ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_fguen"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_te3vh"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_jdhxq"]
+
+[sub_resource type="Resource" id="Resource_nalra"]
+script = ExtResource("5_jdhxq")
+display_name = "背后下黑手"
+description = "无视嘲讽，打血量比例最低的人，160% 伤害。"
+effect = 9
+power = 1.6
+
+[resource]
+script = ExtResource("4_te3vh")
+id = &"xue_ba"
+display_name = "薛霸"
+role = 1
+base_hp = 900
+base_atk = 132
+base_def = 28
+base_spd = 98
+portrait = ExtResource("3_fguen")
+bust = ExtResource("1_mxsoa")
+face = ExtResource("2_qbf2t")
+skill = SubResource("Resource_nalra")

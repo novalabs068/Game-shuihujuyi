@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StoryData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/story_data.gd" id="1_q7n6j"]
+
+[resource]
+script = ExtResource("1_q7n6j")
+id = &"lin_chong_3"
+hero = &"lin_chong"
+order = 3
+title = "风雪山神庙"
+location = &"cangzhou"
+recommended_level = 14
+script_path = "res://data/stories/lin_chong/3_shan_shen_miao.txt"
+tokens = 4
+silver = 50
+souls = 10

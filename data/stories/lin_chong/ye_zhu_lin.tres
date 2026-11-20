@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_rcd6t"]
+[ext_resource type="Resource" path="res://data/enemies/dong_chao.tres" id="2_t1u0h"]
+[ext_resource type="Resource" path="res://data/enemies/xue_ba.tres" id="3_kmr05"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_8yra4"]
+
+[resource]
+script = ExtResource("4_8yra4")
+id = "lin_chong_ye_zhu_lin"
+title = "野猪林"
+enemies = Array[ExtResource("1_rcd6t")]([ExtResource("2_t1u0h"), ExtResource("3_kmr05")])
+enemy_level = 10
+recommended_level = 10

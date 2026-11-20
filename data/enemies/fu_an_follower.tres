@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_xusab"]
+[ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_fxp5b"]
+[ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_vnf03"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_rrovu"]
+
+[resource]
+script = ExtResource("4_rrovu")
+id = &"fu_an_follower"
+display_name = "富安"
+role = 1
+base_hp = 520
+base_atk = 108
+base_def = 24
+base_spd = 92
+portrait = ExtResource("3_vnf03")
+bust = ExtResource("1_xusab")
+face = ExtResource("2_fxp5b")
+enrage_name = "狗仗人势"
+enrage_atk_bonus = 0.5

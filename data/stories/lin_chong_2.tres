@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StoryData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/story_data.gd" id="1_5hui2"]
+
+[resource]
+script = ExtResource("1_5hui2")
+id = &"lin_chong_2"
+hero = &"lin_chong"
+order = 2
+title = "大闹野猪林"
+location = &"yezhulin"
+recommended_level = 10
+script_path = "res://data/stories/lin_chong/2_ye_zhu_lin.txt"
+tokens = 3
+silver = 40
+souls = 10

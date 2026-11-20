@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_aa80l"]
+[ext_resource type="Resource" path="res://data/enemies/liang_shan_lou_luo.tres" id="2_8sbgx"]
+[ext_resource type="Resource" path="res://data/enemies/wang_lun.tres" id="3_r7wnp"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_u2pqv"]
+
+[resource]
+script = ExtResource("4_u2pqv")
+id = "lin_chong_huo_bing"
+title = "火并王伦"
+enemies = Array[ExtResource("1_aa80l")]([ExtResource("2_8sbgx"), ExtResource("3_r7wnp"), ExtResource("2_8sbgx")])
+enemy_level = 18
+recommended_level = 18

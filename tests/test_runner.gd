@@ -35,6 +35,8 @@ func _initialize() -> void:
 		"test_gacha",
 		"test_stars",
 		"test_equipment",
+		"test_story_script_parse",
+		"test_story_data",
 		"test_gear_effects",
 		"test_new_skill_effects",
 		"test_steal_skips_debuffs",
@@ -587,6 +589,50 @@ func test_gear_effects() -> bool:
 	m.act(BattleModel.Action.ATTACK, e)
 	var without := before - e.hp
 	check(with_break > without * 1.6, "armor break ignores iron halving (%d vs %d)" % [with_break, without])
+	return true
+
+
+func test_story_script_parse() -> bool:
+	var ops := StoryScript.parse("# 注释\n@bg dongjing\n@show left lin_chong\n林冲：台词\n旁白一句\n? 甲 > a\n? 乙 > b\n* a\n@goto end\n* b\n@battle x\n* end")
+	check_eq(ops.size(), 10, "comments skipped, choice options grouped")
+	check_eq(ops[2]["speaker"], "林冲", "speaker parsed")
+	check_eq(ops[3]["speaker"], "", "narration has no speaker")
+	check_eq((ops[4]["options"] as Array).size(), 2, "two options in one choice")
+	check_eq(StoryScript.find_label(ops, "end"), 9, "label found")
+	return true
+
+
+func test_story_data() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var stories: Array = GameDB.load_dir("res://data/stories/")
+	check_eq(stories.size(), 4, "林冲列传 has 4 segments")
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	for res in stories:
+		var story: StoryData = res
+		check(FileAccess.file_exists(story.script_path), "%s script exists" % story.title)
+		check(ResourceLoader.exists("res://data/heroes/%s.tres" % story.hero), "%s hero exists" % story.title)
+		check(map.location(story.location) != null, "%s location exists" % story.title)
+		var ops := StoryScript.load_file(story.script_path)
+		var battles := 0
+		for op in ops:
+			match op["op"]:
+				"bg":
+					check(StoryScript.background_path(op["key"]) != "", "%s: background %s has art" % [story.title, op["key"]])
+				"show":
+					var id: String = op["id"]
+					check(id in ["me", "none"] or ResourceLoader.exists("res://data/heroes/%s.tres" % id) or ResourceLoader.exists("res://data/enemies/%s.tres" % id), "%s: unit %s exists" % [story.title, id])
+					check(op["side"] in ["left", "right"], "%s: side %s" % [story.title, op["side"]])
+				"battle":
+					battles += 1
+					var path := story.script_path.get_base_dir().path_join(op["stage"] + ".tres")
+					check(ResourceLoader.exists(path), "%s: stage %s exists" % [story.title, op["stage"]])
+				"choice":
+					check((op["options"] as Array).size() <= 3, "%s: at most 3 options" % story.title)
+					for option: Dictionary in op["options"]:
+						check(StoryScript.find_label(ops, option["label"]) >= 0, "%s: label %s exists" % [story.title, option["label"]])
+				"goto":
+					check(StoryScript.find_label(ops, op["label"]) >= 0, "%s: goto %s exists" % [story.title, op["label"]])
+		check_eq(battles, 1, "%s has one battle" % story.title)
 	return true
 
 

@@ -197,6 +197,18 @@ func _show_detail() -> void:
 	else:
 		info.add_child(UiKit.label("未招募", 26, UiKit.TEXT_DIM))
 
+	if not protagonist:
+		var progress := GameState.story_progress(hero.id)
+		if progress[1] > 0:
+			var tip := "列传 %d / %d 段" % progress
+			if not owned:
+				tip += "（招到他才能玩）"
+			elif progress[0] < progress[1]:
+				var next := GameDB.stories.filter(func(s: StoryData) -> bool: return s.hero == hero.id and not GameState.story_done(s))[0] as StoryData
+				tip += "　下一段「%s」在%s，推荐 %d 级" % [next.title, GameDB.maps[GameState.DEFAULT_MAP].location(next.location).display_name, next.recommended_level]
+			else:
+				tip += "　已完结"
+			info.add_child(UiKit.label(tip, 17, UiKit.GOLD))
 	_detail.add_child(UiKit.label("「%s」" % effective.skill.display_name, 24))
 	var desc := UiKit.label(effective.skill.description, 18, UiKit.TEXT_DIM)
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

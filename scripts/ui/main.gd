@@ -36,7 +36,53 @@ func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, not
 	screen.scene_requested.connect(_show_scene)
 	screen.recruit_requested.connect(_show_recruit)
 	screen.heroes_requested.connect(_show_heroes)
+	screen.story_requested.connect(_start_story)
 	_set_screen(screen)
+
+
+## 演一段列传。start_at 非 0 表示打完仗回来，接着往下演。
+func _start_story(story: StoryData, start_at := 0) -> void:
+	var screen := StoryView.new()
+	screen.story = story
+	screen.start_at = start_at
+	screen.quit_requested.connect(_show_map)
+	screen.battle_requested.connect(_start_story_battle.bind(story))
+	screen.finished.connect(_finish_story.bind(story))
+	_set_screen(screen)
+
+
+## 列传里的一仗：赢了拿普通战斗的经验银两，接着演；输了回大地图，这一段下次从头来。
+func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> void:
+	var screen := BattleView.new()
+	screen.stage = stage
+	screen.team = GameState.battle_team()
+	screen.hero_level = GameState.level
+	screen.retry_requested.connect(_start_story_battle.bind(stage, resume_at, story))
+	screen.exit_requested.connect(_show_map)
+	screen.finished.connect(func(won: bool) -> void:
+		if not won:
+			_show_map(&"", 0.0, "「%s」没能打赢，下次从这一段开头再来。" % story.title)
+			return
+		var r: Dictionary = Encounters.rewards(screen.model)
+		GameState.add_rewards(r["exp"], r["silver"])
+		GameState.save_game()
+		_start_story(story, resume_at))
+	_set_screen(screen)
+
+
+## 列传演完：发奖励、记标记，回大地图。
+func _finish_story(story: StoryData) -> void:
+	GameState.set_flag(story.flag())
+	var hero := GameDB.hero(story.hero)
+	var parts := PackedStringArray(["「%s列传·%s」完成。" % [hero.display_name, story.title]])
+	var gained := Rewards.grant(story.tokens, story.silver, 0)
+	if gained != "":
+		parts.append(gained)
+	if story.souls > 0:
+		GameState.souls[story.hero] = GameState.souls_of(story.hero) + story.souls
+		parts.append("%s将魂 +%d" % [hero.display_name, story.souls])
+	GameState.save_game()
+	_show_map(&"", 0.0, "　".join(parts))
 
 
 func _show_heroes() -> void:

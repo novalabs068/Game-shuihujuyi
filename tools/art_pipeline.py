@@ -146,7 +146,7 @@ def contact_sheet(ids: list[str], path: Path) -> None:
     draw = ImageDraw.Draw(sheet)
     for i, hero_id in enumerate(ids):
         x0 = 10 + i * col
-        portrait = Image.open(ART / "portraits" / f"{hero_id}.png")
+        portrait = Image.open(ART / "portraits" / f"{hero_id}.png").convert("RGBA")
         portrait = portrait.resize((round(portrait.width * fig_h / portrait.height), fig_h), Image.LANCZOS)
         sheet.paste(portrait, (x0 + (col - portrait.width) // 2, 10), portrait)
         bust = Image.open(ART / "busts" / f"{hero_id}.png").resize((BUST_SIZE // 2,) * 2)

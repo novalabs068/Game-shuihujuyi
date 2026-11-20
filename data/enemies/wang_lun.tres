@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/wang_lun.png" id="1_7qej4"]
+[ext_resource type="Texture2D" path="res://art/faces/wang_lun.png" id="2_h7rmp"]
+[ext_resource type="Texture2D" path="res://art/portraits/wang_lun.png" id="3_fxw6v"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_ncg6o"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_i6seb"]
+
+[sub_resource type="Resource" id="Resource_3ryin"]
+script = ExtResource("5_i6seb")
+display_name = "白衣暗算"
+description = "无视嘲讽，打血量比例最低的人，220% 伤害。"
+effect = 9
+power = 2.2
+
+[resource]
+script = ExtResource("4_ncg6o")
+id = &"wang_lun"
+display_name = "王伦"
+nickname = "Boss"
+role = 1
+base_hp = 1200
+base_atk = 160
+base_def = 30
+base_spd = 96
+portrait = ExtResource("3_fxw6v")
+bust = ExtResource("1_7qej4")
+face = ExtResource("2_h7rmp")
+skill = SubResource("Resource_3ryin")
+is_boss = true
+enrage_name = "嫉贤妒能"
+enrage_atk_bonus = 0.5

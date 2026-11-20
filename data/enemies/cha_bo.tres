@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_opsmy"]
+[ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_vtylx"]
+[ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_hkcdp"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_bsyho"]
+
+[resource]
+script = ExtResource("4_bsyho")
+id = &"cha_bo"
+display_name = "差拨"
+role = 1
+base_hp = 440
+base_atk = 100
+base_def = 24
+base_spd = 94
+portrait = ExtResource("3_hkcdp")
+bust = ExtResource("1_opsmy")
+face = ExtResource("2_vtylx")

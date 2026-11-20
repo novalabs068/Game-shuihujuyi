@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_ye8x6"]
+[ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_bsxdm"]
+[ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_5eud7"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_nqdbj"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_fpgo2"]
+
+[sub_resource type="Resource" id="Resource_u4tfv"]
+script = ExtResource("5_fpgo2")
+display_name = "水火棍"
+description = "单体 160% 伤害。"
+power = 1.6
+
+[resource]
+script = ExtResource("4_nqdbj")
+id = &"dong_chao"
+display_name = "董超"
+role = 1
+base_hp = 980
+base_atk = 140
+base_def = 30
+base_spd = 90
+portrait = ExtResource("3_5eud7")
+bust = ExtResource("1_ye8x6")
+face = ExtResource("2_bsxdm")
+skill = SubResource("Resource_u4tfv")

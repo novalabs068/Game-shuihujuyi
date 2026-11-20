@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_san.png" id="1_vv8st"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_k1qpr"]
+
+[resource]
+script = ExtResource("2_k1qpr")
+id = &"gao_fu_jia_ding"
+display_name = "高府家丁"
+role = 1
+base_hp = 300
+base_atk = 74
+base_def = 16
+base_spd = 96
+map_sprite = ExtResource("1_vv8st")

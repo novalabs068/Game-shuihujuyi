@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/lin_zhong_qiang_ren.png" id="1_qbf10"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_5o7m5"]
+
+[resource]
+script = ExtResource("2_5o7m5")
+id = &"liang_shan_lou_luo"
+display_name = "梁山喽啰"
+role = 1
+base_hp = 400
+base_atk = 96
+base_def = 24
+base_spd = 98
+map_sprite = ExtResource("1_qbf10")

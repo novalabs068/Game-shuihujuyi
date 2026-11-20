@@ -180,6 +180,34 @@ func battle_team() -> Array[UnitData]:
 	return out
 
 
+# --- 列传 ---
+
+func story_done(story: StoryData) -> bool:
+	return has_flag(story.flag())
+
+
+## 能玩的列传：招到了这位好汉、前一段打完了、这一段还没打。
+func story_available(story: StoryData) -> bool:
+	if not owns(story.hero) or story_done(story):
+		return false
+	for s in GameDB.stories:
+		if s.hero == story.hero and s.order < story.order and not story_done(s):
+			return false
+	return true
+
+
+## 某位好汉的列传：[已完成段数, 总段数]
+func story_progress(hero_id: StringName) -> Array[int]:
+	var done := 0
+	var total := 0
+	for s in GameDB.stories:
+		if s.hero == hero_id:
+			total += 1
+			if story_done(s):
+				done += 1
+	return [done, total]
+
+
 # --- 装备 ---
 
 ## 放进背包，返回这件的编号。

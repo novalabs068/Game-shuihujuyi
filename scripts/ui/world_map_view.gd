@@ -9,6 +9,7 @@ signal team_requested
 signal scene_requested(scene_id: String)
 signal recruit_requested
 signal heroes_requested
+signal story_requested(story: StoryData)
 
 const MAP_SIZE := Vector2(1280, 720)
 const WALK_SPEED := 260.0
@@ -366,6 +367,16 @@ func _show_panel(loc: LocationData) -> void:
 		var board := UiKit.button("悬赏告示（%d）" % open.size(), Vector2(200, 52), 22)
 		board.pressed.connect(_open_board.bind(loc))
 		_panel_buttons.add_child(board)
+	for story in GameDB.stories:
+		if story.location == loc.id and GameState.story_available(story):
+			var hero := GameDB.hero(story.hero)
+			var button := UiKit.button("%s列传·%s" % [hero.display_name, story.title], Vector2(220, 52), 22)
+			button.add_theme_color_override("font_color", UiKit.GOLD)
+			button.tooltip_text = "推荐 %d 级" % story.recommended_level
+			button.pressed.connect(func() -> void:
+				if not _walking:
+					story_requested.emit(story))
+			_panel_buttons.add_child(button)
 	if loc.has_market:
 		var market := UiKit.button("集市", Vector2(120, 52), 22)
 		market.pressed.connect(_open_market)
