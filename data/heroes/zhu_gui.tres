@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/zhu_gui.png" id="1_qr6lv"]
+[ext_resource type="Texture2D" path="res://art/faces/zhu_gui.png" id="2_0pa5l"]
+[ext_resource type="Texture2D" path="res://art/portraits/zhu_gui.png" id="3_yknvn"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_dl6dm"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_w3ode"]
+
+[sub_resource type="Resource" id="Resource_cmygp"]
+script = ExtResource("5_w3ode")
+display_name = "旱地伏击"
+description = "敌方全体各受 80% 伤害。"
+effect = 12
+power = 0.8
+
+[resource]
+script = ExtResource("4_dl6dm")
+id = &"zhu_gui"
+display_name = "朱贵"
+nickname = "旱地忽律"
+rarity = 1
+role = 2
+tier = 2
+sort_order = 15
+base_hp = 360
+base_atk = 68
+base_def = 22
+base_spd = 106
+portrait = ExtResource("3_yknvn")
+bust = ExtResource("1_qr6lv")
+face = ExtResource("2_0pa5l")
+skill = SubResource("Resource_cmygp")

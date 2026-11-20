@@ -4,7 +4,8 @@ extends Control
 
 signal back_requested
 
-const CARD_SIZE := Vector2(190, 236)
+## 十连两排卡片要和按钮一起放进 720 高的屏幕
+const CARD_SIZE := Vector2(190, 206)
 const REVEAL_DELAY := 0.18
 
 var _rng := RandomNumberGenerator.new()
@@ -26,11 +27,11 @@ func _ready() -> void:
 
 	var margin := MarginContainer.new()
 	for side: String in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 28)
+		margin.add_theme_constant_override("margin_" + side, 20)
 	add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 14)
+	v.add_theme_constant_override("separation", 8)
 	margin.add_child(v)
 
 	var top := HBoxContainer.new()
@@ -50,27 +51,33 @@ func _ready() -> void:
 	var rates := PackedStringArray()
 	for i in Gacha.RATES.size():
 		rates.append("%s %d%%" % [UiKit.TIER_NAMES[i], Gacha.RATES[i]])
-	v.add_child(UiKit.label("概率：%s。十连至少一个乙或以上；%d 抽内必出甲。重复的好汉变成将魂 +%d（升星用）。" % ["、".join(rates), Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 17, UiKit.TEXT_DIM))
-	_pity_label = UiKit.label("", 17, UiKit.TEXT_DIM)
+	v.add_child(UiKit.label("概率：%s。十连至少一个乙或以上；%d 抽内必出甲。重复的好汉变成将魂 +%d（升星用）。" % ["、".join(rates), Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 16, UiKit.TEXT_DIM))
+	_pity_label = UiKit.label("", 16, UiKit.TEXT_DIM)
 	v.add_child(_pity_label)
 
+	# 屏幕再矮也能滑动看到全部卡片，按钮固定在底部
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(scroll)
 	var stage := CenterContainer.new()
+	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	v.add_child(stage)
+	scroll.add_child(stage)
 	_cards = GridContainer.new()
 	_cards.columns = 5
 	_cards.add_theme_constant_override("h_separation", 14)
-	_cards.add_theme_constant_override("v_separation", 14)
+	_cards.add_theme_constant_override("v_separation", 10)
 	stage.add_child(_cards)
 
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 30)
 	v.add_child(buttons)
-	_single = UiKit.button("单抽（1 枚）", Vector2(240, 70), 26)
+	_single = UiKit.button("单抽（1 枚）", Vector2(240, 60), 26)
 	_single.pressed.connect(_recruit.bind(1))
 	buttons.add_child(_single)
-	_ten = UiKit.button("十连（10 枚）", Vector2(240, 70), 26)
+	_ten = UiKit.button("十连（10 枚）", Vector2(240, 60), 26)
 	_ten.pressed.connect(_recruit.bind(10))
 	buttons.add_child(_ten)
 	_refresh()
@@ -133,7 +140,7 @@ func _make_card(hero: UnitData, is_new: bool) -> PanelContainer:
 	tag.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	head.add_child(tag)
-	var bust := UiKit.unit_picture(hero, 128)
+	var bust := UiKit.unit_picture(hero, 108)
 	bust.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(bust)
 	var name := UiKit.label(hero.display_name, 26)

@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/shi_jin.png" id="1_x3u85"]
+[ext_resource type="Texture2D" path="res://art/faces/shi_jin.png" id="2_ntqga"]
+[ext_resource type="Texture2D" path="res://art/portraits/shi_jin.png" id="3_7fky8"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_q4n4r"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_bsw56"]
+
+[sub_resource type="Resource" id="Resource_tccbb"]
+script = ExtResource("5_bsw56")
+display_name = "九纹龙腾"
+description = "敌方全体各受 90% 伤害。"
+effect = 12
+power = 0.9
+
+[resource]
+script = ExtResource("4_q4n4r")
+id = &"shi_jin"
+display_name = "史进"
+nickname = "九纹龙"
+rarity = 2
+role = 1
+tier = 1
+sort_order = 10
+base_hp = 440
+base_atk = 74
+base_def = 30
+base_spd = 110
+portrait = ExtResource("3_7fky8")
+bust = ExtResource("1_x3u85")
+face = ExtResource("2_ntqga")
+skill = SubResource("Resource_tccbb")

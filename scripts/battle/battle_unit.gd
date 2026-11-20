@@ -12,6 +12,8 @@ const LEVEL_GROWTH := 1.1
 const RAGE_MAX := 100
 const BERSERK_THRESHOLD := 0.3
 const BERSERK_BONUS := 1.0
+## 减益叠得再多，攻击和速度也不低于原来的这么多
+const MIN_STAT_RATIO := 0.3
 
 
 class Buff:
@@ -87,7 +89,7 @@ func atk() -> float:
 		bonus += b.atk_bonus
 	if data.elite_trait == &"berserk" and hp_ratio() < BERSERK_THRESHOLD:
 		bonus += BERSERK_BONUS
-	return _atk * (1.0 + bonus)
+	return _atk * maxf(1.0 + bonus, MIN_STAT_RATIO)
 
 
 func def() -> float:
@@ -98,7 +100,7 @@ func spd() -> float:
 	var bonus := 0.0
 	for b in buffs:
 		bonus += b.spd_bonus
-	return _spd * (1.0 + bonus)
+	return _spd * maxf(1.0 + bonus, MIN_STAT_RATIO)
 
 
 func is_taunting() -> bool:

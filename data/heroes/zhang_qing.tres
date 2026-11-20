@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/zhang_qing.png" id="1_q3j60"]
+[ext_resource type="Texture2D" path="res://art/faces/zhang_qing.png" id="2_ifwwf"]
+[ext_resource type="Texture2D" path="res://art/portraits/zhang_qing.png" id="3_7ts5u"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_ttl6j"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_ayuqv"]
+
+[sub_resource type="Resource" id="Resource_dkgdb"]
+script = ExtResource("5_ayuqv")
+display_name = "十字坡伏"
+description = "嘲讽全体敌人 2 回合，自身减伤 30%。"
+effect = 4
+turns = 2
+amount = 0.3
+
+[resource]
+script = ExtResource("4_ttl6j")
+id = &"zhang_qing"
+display_name = "张青"
+nickname = "菜园子"
+rarity = 1
+tier = 2
+sort_order = 11
+base_hp = 520
+base_atk = 50
+base_def = 40
+base_spd = 90
+portrait = ExtResource("3_7ts5u")
+bust = ExtResource("1_q3j60")
+face = ExtResource("2_ifwwf")
+skill = SubResource("Resource_dkgdb")

@@ -174,7 +174,7 @@ func act_ai() -> Array[Dictionary]:
 	var weakest := _weakest(foes)
 	if available_combo(actor) != null:
 		return act(Action.COMBO, weakest)
-	if is_threatened(actor) and not (actor.skill_ready() and actor.data.skill.effect in [SkillData.Effect.STUN, SkillData.Effect.HEAL]):
+	if is_threatened(actor) and not (actor.skill_ready() and actor.data.skill.effect in [SkillData.Effect.STUN, SkillData.Effect.STUN_ALL, SkillData.Effect.HEAL]):
 		return act(Action.GUARD)
 	if actor.skill_ready() and _skill_worth_using(actor, foes):
 		return act(Action.SKILL, _skill_target(actor, foes, weakest))
@@ -256,10 +256,13 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
 			_emit("info", target, "眩晕", "%s 被放倒了" % target.display_name())
 		SkillData.Effect.STEAL:
 			var target := _pick_foe(actor, wanted)
-			if target.buffs.is_empty():
+			# 只偷增益，减益（减攻、减速）不偷
+			var gains := target.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.atk_bonus >= 0.0 and b.spd_bonus >= 0.0)
+			if gains.is_empty():
 				_emit("info", target, "空手", "%s 身上没什么可偷的" % target.display_name())
 			else:
-				var b: BattleUnit.Buff = target.buffs.pop_back()
+				var b: BattleUnit.Buff = gains.back()
+				target.buffs.erase(b)
 				actor.buffs.append(b)
 				_emit("info", actor, "偷到 " + b.name, "%s 偷走了 %s 的「%s」" % [actor.display_name(), target.display_name(), b.name])
 			_extra_action = true
@@ -277,6 +280,32 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
 			for ally in allies_of(actor):
 				ally.shield += shield
 				_emit("info", ally, "护盾 +%d" % shield, "")
+		SkillData.Effect.PIERCE:
+			_deal(actor, _pick_foe(actor, wanted), s.power, false, false, true)
+		SkillData.Effect.ALL_FOES:
+			for foe in foes_of(actor):
+				_deal(actor, foe, s.power)
+		SkillData.Effect.CRIPPLE:
+			var target := _pick_foe(actor, wanted)
+			_deal(actor, target, s.power)
+			if target.is_alive():
+				target.buffs.append(BattleUnit.Buff.new("断筋", 0.0, -s.amount, s.turns))
+				_emit("info", target, "减速", "%s 行动变慢了" % target.display_name())
+		SkillData.Effect.WEAKEN_ALL:
+			for foe in foes_of(actor):
+				foe.buffs.append(BattleUnit.Buff.new("醉", -s.amount, 0.0, s.turns))
+				_emit("info", foe, "减攻", "")
+			_emit("info", actor, "", "敌方全体攻击下降")
+		SkillData.Effect.TEAM_ATK:
+			for ally in allies_of(actor):
+				ally.buffs.append(BattleUnit.Buff.new(s.display_name, s.amount, 0.0, s.turns))
+				_emit("info", ally, "增攻", "")
+			_emit("info", actor, "", "全队攻击提升")
+		SkillData.Effect.STUN_ALL:
+			for foe in foes_of(actor):
+				foe.stun_turns = maxi(foe.stun_turns, s.turns)
+				_emit("info", foe, "昏睡", "")
+			_emit("info", actor, "", "敌方全体被麻翻了")
 		SkillData.Effect.BACKSTAB:
 			# 绕过嘲讽，打预告里的目标（预告时血量比例最低的人）
 			var target := wanted if wanted != null and wanted.is_alive() else _weakest(foes_of(actor))
@@ -322,11 +351,12 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 
 
 ## 按设计文档的公式结算一次伤害，返回造成的伤害（含被护盾吸收的部分）。basic 表示普攻（「铁甲」只减普攻）。
-func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_crit := false, basic := false) -> int:
+func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_crit := false, basic := false, pierce := false) -> int:
 	if target == null or not target.is_alive():
 		return 0
 	var crit := force_crit or rng.randf() < CRIT_CHANCE
-	var raw := attacker.atk() * multiplier * 100.0 / (100.0 + target.def()) * rng.randf_range(0.95, 1.05)
+	var def := 0.0 if pierce else target.def()
+	var raw := attacker.atk() * multiplier * 100.0 / (100.0 + def) * rng.randf_range(0.95, 1.05)
 	if crit:
 		raw *= CRIT_MULTIPLIER
 	if target.guarding:
@@ -416,8 +446,10 @@ func _skill_worth_using(actor: BattleUnit, foes: Array[BattleUnit]) -> bool:
 			return allies_of(actor).any(func(u: BattleUnit) -> bool: return u.hp_ratio() < AI_HEAL_THRESHOLD)
 		SkillData.Effect.TAUNT:
 			return not actor.is_taunting()
-		SkillData.Effect.STUN:
+		SkillData.Effect.STUN, SkillData.Effect.STUN_ALL:
 			return foes.any(func(u: BattleUnit) -> bool: return u.stun_turns == 0)
+		SkillData.Effect.ALL_FOES:
+			return foes.size() >= 2 or foes[0].hp_ratio() > 0.5
 	return true
 
 

@@ -9,12 +9,11 @@
 
 [sub_resource type="Resource" id="Resource_c2vee"]
 script = ExtResource("2_fjwj3")
-display_name = "运筹帷幄"
-description = "全队速度 +30%、怒气 +20，持续 2 回合。"
-effect = 5
-turns = 2
-amount = 0.3
-rage_gain = 20
+display_name = "黄泥冈计"
+description = "敌方全体昏睡 1 回合（冷却 5 回合）。"
+effect = 16
+turns = 1
+cooldown = 5
 
 [resource]
 script = ExtResource("1_y4tmg")

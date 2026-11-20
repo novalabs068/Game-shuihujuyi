@@ -33,6 +33,9 @@ func _initialize() -> void:
 		"test_rewards",
 		"test_bounties_and_events_data",
 		"test_gacha",
+		"test_new_skill_effects",
+		"test_steal_skips_debuffs",
+		"test_hero_pool_tiers",
 		"test_simulated_win_rate",
 	]:
 		if call(t) != true:
@@ -107,7 +110,7 @@ func advance_to(model: BattleModel, id: StringName) -> void:
 
 func test_data_loads() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
-	check_eq(GameDB.load_dir("res://data/heroes/").size(), 8, "8 heroes")
+	check_eq(GameDB.load_dir("res://data/heroes/").size(), 20, "20 heroes")
 	check_eq(GameDB.load_dir("res://data/combos/").size(), 3, "3 combos")
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
@@ -247,6 +250,71 @@ func test_steal_grants_extra_action() -> bool:
 	check_eq(by_id(m, &"thief").buffs.size(), 1, "thief has the buff")
 	m.start_next_turn()
 	check(m.current != null and m.current.data.id == &"thief", "thief acts again immediately")
+	return true
+
+
+func test_new_skill_effects() -> bool:
+	# 无视防御：同样的攻击，打高防目标比普通伤害高得多
+	var m := battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.PIERCE, {power = 1.0}))], [unit_data(&"e", [5000, 10, 300, 10])])
+	m.rng.seed = 1
+	advance_to(m, &"p")
+	var e := by_id(m, &"e")
+	m.act(BattleModel.Action.SKILL, e)
+	check(e.max_hp - e.hp >= 95, "pierce ignores defense (dealt %d)" % (e.max_hp - e.hp))
+	# 全体伤害
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.ALL_FOES, {power = 1.0}))], [unit_data(&"a", [5000, 10, 10, 10]), unit_data(&"b", [5000, 10, 10, 10])])
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.SKILL)
+	check(by_id(m, &"a").hp < 5000 and by_id(m, &"b").hp < 5000, "all-foes hits everyone")
+	# 断筋减速
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.CRIPPLE, {power = 1.0, amount = 0.3, turns = 2}))], [unit_data(&"e", [5000, 10, 10, 100])])
+	advance_to(m, &"p")
+	e = by_id(m, &"e")
+	m.act(BattleModel.Action.SKILL, e)
+	check(is_equal_approx(e.spd(), e._spd * 0.7), "cripple slows the target")
+	# 敌全体减攻、全队增攻
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.WEAKEN_ALL, {amount = 0.25, turns = 2})), unit_data(&"q", [500, 100, 10, 10], skill(SkillData.Effect.TEAM_ATK, {amount = 0.25, turns = 2}))], [unit_data(&"e", [5000, 100, 10, 50])])
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.SKILL)
+	e = by_id(m, &"e")
+	check(is_equal_approx(e.atk(), e._atk * 0.75), "weaken lowers enemy attack")
+	advance_to(m, &"q")
+	m.act(BattleModel.Action.SKILL)
+	check(is_equal_approx(by_id(m, &"p").atk(), by_id(m, &"p")._atk * 1.25), "team attack buff")
+	# 减益再多，攻击也不低于三成
+	for i in 10:
+		e.buffs.append(BattleUnit.Buff.new("醉", -0.25, 0.0, 3))
+	check(is_equal_approx(e.atk(), e._atk * BattleUnit.MIN_STAT_RATIO), "attack has a floor")
+	# 敌全体昏睡
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.STUN_ALL, {turns = 1}))], [unit_data(&"a", [5000, 10, 10, 10]), unit_data(&"b", [5000, 10, 10, 10])])
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.SKILL)
+	check(by_id(m, &"a").stun_turns == 1 and by_id(m, &"b").stun_turns == 1, "stun-all stuns everyone")
+	return true
+
+
+func test_steal_skips_debuffs() -> bool:
+	var m := battle([unit_data(&"thief", [500, 10, 10, 100], skill(SkillData.Effect.STEAL))], [unit_data(&"e", [500, 10, 10, 90])])
+	var e := by_id(m, &"e")
+	e.buffs.append(BattleUnit.Buff.new("狗仗人势", 0.5, 0.0, 3))
+	e.buffs.append(BattleUnit.Buff.new("醉", -0.25, 0.0, 3))
+	advance_to(m, &"thief")
+	m.act(BattleModel.Action.SKILL, e)
+	check_eq(by_id(m, &"thief").buffs.size(), 1, "thief took one buff")
+	check_eq(by_id(m, &"thief").buffs[0].name, "狗仗人势", "thief took the gain, not the debuff")
+	check_eq(e.buffs.size(), 1, "enemy keeps its debuff")
+	return true
+
+
+func test_hero_pool_tiers() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var counts := [0, 0, 0, 0]
+	for res in GameDB.load_dir("res://data/heroes/"):
+		var h: UnitData = res
+		counts[h.tier] += 1
+		check(h.skill != null and h.skill.description != "", "%s has a described skill" % h.display_name)
+		check(h.portrait != null and h.bust != null and h.face != null, "%s has art" % h.display_name)
+	check_eq(counts, [4, 5, 6, 5], "tier spread 甲4 乙5 丙6 丁5")
 	return true
 
 

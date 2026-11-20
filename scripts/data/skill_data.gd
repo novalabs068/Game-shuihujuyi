@@ -14,6 +14,12 @@ enum Effect {
 	HEAL,        ## 全队恢复 amount 比例的生命，并解除眩晕
 	BACKSTAB,    ## 敌人用：无视嘲讽，打血量比例最低的好汉，power 倍
 	GUARD_STRIKE, ## 单体 power 倍伤害，同时全队获得施放者 amount 比例生命的护盾
+	PIERCE,      ## 单体 power 倍伤害，无视防御
+	ALL_FOES,    ## 敌方全体各受 power 倍伤害
+	CRIPPLE,     ## 单体 power 倍伤害，目标速度 -amount，持续 turns 回合
+	WEAKEN_ALL,  ## 敌方全体攻击 -amount，持续 turns 回合
+	TEAM_ATK,    ## 全队攻击 +amount，持续 turns 回合
+	STUN_ALL,    ## 敌方全体眩晕 turns 回合
 }
 
 @export var display_name: String
@@ -29,4 +35,4 @@ enum Effect {
 
 ## 出手前是否需要玩家选一个敌人。
 func needs_enemy_target() -> bool:
-	return effect in [Effect.DAMAGE, Effect.EXECUTE, Effect.MULTI_HIT, Effect.SURE_CRIT, Effect.STUN, Effect.STEAL, Effect.GUARD_STRIKE]
+	return effect in [Effect.DAMAGE, Effect.EXECUTE, Effect.MULTI_HIT, Effect.SURE_CRIT, Effect.STUN, Effect.STEAL, Effect.GUARD_STRIKE, Effect.PIERCE, Effect.CRIPPLE]

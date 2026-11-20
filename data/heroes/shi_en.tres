@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/shi_en.png" id="1_kliiw"]
+[ext_resource type="Texture2D" path="res://art/faces/shi_en.png" id="2_f8pgp"]
+[ext_resource type="Texture2D" path="res://art/portraits/shi_en.png" id="3_v6wb0"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_cyugf"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_2h0ht"]
+
+[sub_resource type="Resource" id="Resource_7t28l"]
+script = ExtResource("5_2h0ht")
+display_name = "快活林宴"
+description = "全队怒气 +30，速度 +10%，持续 2 回合。"
+effect = 5
+turns = 2
+amount = 0.1
+rage_gain = 30
+
+[resource]
+script = ExtResource("4_cyugf")
+id = &"shi_en"
+display_name = "施恩"
+nickname = "金眼彪"
+rarity = 1
+role = 3
+tier = 2
+sort_order = 13
+base_hp = 380
+base_atk = 52
+base_def = 26
+base_spd = 108
+portrait = ExtResource("3_v6wb0")
+bust = ExtResource("1_kliiw")
+face = ExtResource("2_f8pgp")
+skill = SubResource("Resource_7t28l")

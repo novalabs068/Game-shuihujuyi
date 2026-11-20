@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/cao_zheng.png" id="1_mejw8"]
+[ext_resource type="Texture2D" path="res://art/faces/cao_zheng.png" id="2_ve7l2"]
+[ext_resource type="Texture2D" path="res://art/portraits/cao_zheng.png" id="3_k7uo0"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_5vhth"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_km01g"]
+
+[sub_resource type="Resource" id="Resource_uel7h"]
+script = ExtResource("5_km01g")
+display_name = "操刀断筋"
+description = "单体 160% 伤害，目标速度 -30%，持续 2 回合。"
+effect = 13
+power = 1.6
+turns = 2
+amount = 0.3
+
+[resource]
+script = ExtResource("4_5vhth")
+id = &"cao_zheng"
+display_name = "曹正"
+nickname = "操刀鬼"
+rarity = 1
+role = 1
+tier = 2
+sort_order = 12
+base_hp = 400
+base_atk = 66
+base_def = 28
+base_spd = 106
+portrait = ExtResource("3_k7uo0")
+bust = ExtResource("1_mejw8")
+face = ExtResource("2_ve7l2")
+skill = SubResource("Resource_uel7h")

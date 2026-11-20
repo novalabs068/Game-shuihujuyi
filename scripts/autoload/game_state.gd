@@ -79,7 +79,7 @@ func owns(id: StringName) -> bool:
 
 
 ## 用聚义令招募 count 次（1 或 10）。返回每一抽的结果 [{hero, is_new}]；聚义令不够时返回空。
-## 新招到的好汉在队伍没满时自动随行；第一次十连保证出一个甲。
+## 队伍没满时，新招到的好汉按品级从高到低自动补进去；第一次十连保证出一个甲。
 func recruit(count: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	if tokens < count:
@@ -92,15 +92,19 @@ func recruit(count: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	pulls_since_jia = outcome["pulls_since_jia"]
 	var drawn: Array[UnitData] = []
 	drawn.assign(outcome["heroes"])
+	var newcomers: Array[UnitData] = []
 	for hero in drawn:
 		var is_new := not owns(hero.id)
 		if is_new:
 			owned.append(hero.id)
-			if team_ids.size() < MAX_HEROES:
-				team_ids.append(hero.id)
+			newcomers.append(hero)
 		else:
 			souls[hero.id] = souls.get(hero.id, 0) + Gacha.DUPLICATE_SOULS
 		results.append({"hero": hero, "is_new": is_new})
+	newcomers.sort_custom(func(a: UnitData, b: UnitData) -> bool: return a.tier < b.tier)
+	for hero in newcomers:
+		if team_ids.size() < MAX_HEROES:
+			team_ids.append(hero.id)
 	save_game()
 	return results
 

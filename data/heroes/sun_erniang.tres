@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_qtstr"]
 script = ExtResource("2_e72y8")
-display_name = "蒙汗药"
+display_name = "蒙汗药酒"
 description = "单体眩晕 1 回合。"
 effect = 6
 turns = 1

@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_4evxd"]
 script = ExtResource("2_e2x3b")
-display_name = "醉拳"
+display_name = "景阳伏虎拳"
 description = "连击 3 次，每次 110% 伤害。"
 effect = 2
 power = 1.1

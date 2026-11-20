@@ -1994,6 +1994,1230 @@
         "technical_checks_passed": true,
         "approved_by": ""
       }
+    },
+    {
+      "id": "yang_zhi-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/yang_zhi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/yang_zhi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/yang_zhi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "yang_zhi-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/yang_zhi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/yang_zhi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/yang_zhi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "yang_zhi-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/yang_zhi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/yang_zhi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/yang_zhi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "shi_jin-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/shi_jin.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/shi_jin.txt + art/STYLE.md 提示词固定段；原图 art/inbox/shi_jin.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "shi_jin-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/shi_jin.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/shi_jin.txt + art/STYLE.md 提示词固定段；原图 art/inbox/shi_jin.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "shi_jin-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/shi_jin.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/shi_jin.txt + art/STYLE.md 提示词固定段；原图 art/inbox/shi_jin.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhang_qing-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/zhang_qing.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhang_qing.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhang_qing.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhang_qing-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/zhang_qing.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhang_qing.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhang_qing.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhang_qing-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/zhang_qing.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhang_qing.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhang_qing.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "cao_zheng-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/cao_zheng.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/cao_zheng.txt + art/STYLE.md 提示词固定段；原图 art/inbox/cao_zheng.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "cao_zheng-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/cao_zheng.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/cao_zheng.txt + art/STYLE.md 提示词固定段；原图 art/inbox/cao_zheng.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "cao_zheng-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/cao_zheng.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/cao_zheng.txt + art/STYLE.md 提示词固定段；原图 art/inbox/cao_zheng.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "shi_en-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/shi_en.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/shi_en.txt + art/STYLE.md 提示词固定段；原图 art/inbox/shi_en.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "shi_en-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/shi_en.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/shi_en.txt + art/STYLE.md 提示词固定段；原图 art/inbox/shi_en.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "shi_en-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/shi_en.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/shi_en.txt + art/STYLE.md 提示词固定段；原图 art/inbox/shi_en.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "li_zhong-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/li_zhong.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/li_zhong.txt + art/STYLE.md 提示词固定段；原图 art/inbox/li_zhong.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "li_zhong-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/li_zhong.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/li_zhong.txt + art/STYLE.md 提示词固定段；原图 art/inbox/li_zhong.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "li_zhong-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/li_zhong.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/li_zhong.txt + art/STYLE.md 提示词固定段；原图 art/inbox/li_zhong.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhu_gui-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/zhu_gui.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhu_gui.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhu_gui.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhu_gui-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/zhu_gui.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhu_gui.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhu_gui.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "zhu_gui-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/zhu_gui.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/zhu_gui.txt + art/STYLE.md 提示词固定段；原图 art/inbox/zhu_gui.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "bai_sheng-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/bai_sheng.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/bai_sheng.txt + art/STYLE.md 提示词固定段；原图 art/inbox/bai_sheng.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "bai_sheng-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/bai_sheng.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/bai_sheng.txt + art/STYLE.md 提示词固定段；原图 art/inbox/bai_sheng.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "bai_sheng-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/bai_sheng.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/bai_sheng.txt + art/STYLE.md 提示词固定段；原图 art/inbox/bai_sheng.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "du_qian-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/du_qian.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/du_qian.txt + art/STYLE.md 提示词固定段；原图 art/inbox/du_qian.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "du_qian-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/du_qian.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/du_qian.txt + art/STYLE.md 提示词固定段；原图 art/inbox/du_qian.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "du_qian-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/du_qian.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/du_qian.txt + art/STYLE.md 提示词固定段；原图 art/inbox/du_qian.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "song_wan-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/song_wan.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/song_wan.txt + art/STYLE.md 提示词固定段；原图 art/inbox/song_wan.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "song_wan-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/song_wan.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/song_wan.txt + art/STYLE.md 提示词固定段；原图 art/inbox/song_wan.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "song_wan-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/song_wan.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/song_wan.txt + art/STYLE.md 提示词固定段；原图 art/inbox/song_wan.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "yu_baosi-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/yu_baosi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/yu_baosi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/yu_baosi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "yu_baosi-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/yu_baosi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/yu_baosi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/yu_baosi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "yu_baosi-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/yu_baosi.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/yu_baosi.txt + art/STYLE.md 提示词固定段；原图 art/inbox/yu_baosi.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "wang_dingliu-portrait",
+      "role": "人物立绘",
+      "path": "art/portraits/wang_dingliu.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "高 1024",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/wang_dingliu.txt + art/STYLE.md 提示词固定段；原图 art/inbox/wang_dingliu.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "wang_dingliu-bust",
+      "role": "卡片半身像",
+      "path": "art/busts/wang_dingliu.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256x256",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/wang_dingliu.txt + art/STYLE.md 提示词固定段；原图 art/inbox/wang_dingliu.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "wang_dingliu-face",
+      "role": "出手顺序头像",
+      "path": "art/faces/wang_dingliu.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128x128",
+        "alpha": true,
+        "facing": "right",
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette",
+        "line-weight",
+        "print-grain",
+        "proportions",
+        "facing"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/wang_dingliu.txt + art/STYLE.md 提示词固定段；原图 art/inbox/wang_dingliu.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
     }
   ]
 }
