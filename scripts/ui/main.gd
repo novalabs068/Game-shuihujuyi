@@ -81,6 +81,9 @@ func _finish_story(story: StoryData) -> void:
 	if story.souls > 0:
 		GameState.souls[story.hero] = GameState.souls_of(story.hero) + story.souls
 		parts.append("%s将魂 +%d" % [hero.display_name, story.souls])
+	var learned := Rewards.learn(story.martial)
+	if learned != "":
+		parts.append("%s传授了%s" % [hero.display_name, learned.trim_prefix("学会")])
 	GameState.save_game()
 	_show_map(&"", 0.0, "　".join(parts))
 

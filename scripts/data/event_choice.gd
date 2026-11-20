@@ -15,3 +15,5 @@ extends Resource
 ## 打一仗时，只有打赢才给上面的 tokens/silver/experience
 ## 选了之后设置的剧情标记，比如支线完成
 @export var flag: String
+## 选了这个选项学到的武学（已经会了就只给经验）
+@export var martial: MartialData

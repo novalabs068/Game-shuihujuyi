@@ -164,7 +164,7 @@ func _show_detail() -> void:
 	var protagonist := _is_protagonist(hero)
 	var owned := _owned(hero)
 	var star := GameState.star_of(hero.id)
-	var effective := Equipment.apply(hero if protagonist else Stars.apply(hero, star), GameState.gear_of(hero.id))
+	var effective := Equipment.apply(hero if protagonist else Stars.apply(hero, star), GameState.effective_gear(hero.id))
 
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 16)
@@ -191,7 +191,7 @@ func _show_detail() -> void:
 		if star > 1 and not protagonist:
 			bonus.append("星级：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
 		if not effective.gear_effects.is_empty():
-			bonus.append("装备特效：" + "、".join(effective.gear_effects.map(func(e: StringName) -> String: return EquipData.EFFECTS[e][0])))
+			bonus.append("特效：" + "、".join(effective.gear_effects.map(func(e: StringName) -> String: return EquipData.EFFECTS[e][0])))
 		if not bonus.is_empty():
 			info.add_child(UiKit.label("　".join(bonus), 17, UiKit.TEXT_DIM))
 	else:
@@ -220,6 +220,12 @@ func _show_detail() -> void:
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_detail.add_child(spacer)
 
+	if protagonist:
+		var martial_row := HBoxContainer.new()
+		martial_row.add_theme_constant_override("separation", 10)
+		_detail.add_child(martial_row)
+		martial_row.add_child(_martial_button(true))
+		martial_row.add_child(_martial_button(false))
 	if owned:
 		var gear_row := HBoxContainer.new()
 		gear_row.add_theme_constant_override("separation", 10)
@@ -266,6 +272,93 @@ func _show_detail() -> void:
 		if GameState.souls_to_yiqi(hero.id, SOUL_STEP):
 			_done("%d 个将魂化成了 %d 点义气" % [SOUL_STEP, SOUL_STEP * Stars.YIQI_PER_SOUL]))
 	buttons.add_child(melt)
+
+
+## 主修 / 副修按钮：显示现在练的那门，点开换。
+func _martial_button(main: bool) -> Button:
+	var m := GameState.martial(GameState.martial_main if main else GameState.martial_side)
+	var text := "%s：%s" % ["主修" if main else "副修", m.display_name if m != null else "空"]
+	var button := UiKit.button(text, Vector2(220, 50), 19)
+	button.add_theme_color_override("font_color", UiKit.ACCENT if m != null else UiKit.TEXT_DIM)
+	button.pressed.connect(_open_martials)
+	return button
+
+
+## 武学：列出学会的每一门，主修时是什么技能、副修时加什么，点按钮换。
+func _open_martials() -> void:
+	var overlay := Control.new()
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.6)
+	overlay.add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	overlay.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(900, 560)
+	panel.add_theme_stylebox_override("panel", UiKit.box(UiKit.PANEL, UiKit.ACCENT, 2, 10))
+	center.add_child(panel)
+	var pad := MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 16)
+	panel.add_child(pad)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	pad.add_child(v)
+	v.add_child(UiKit.label("武学：主修的是战斗里放的技能，副修的只给被动加成", 24, UiKit.ACCENT))
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 12)
+	scroll.add_child(list)
+	var close := func() -> void:
+		overlay.queue_free()
+		_refresh_list()
+		_show_detail()
+	for id in GameState.martials:
+		var m := GameState.martial(id)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		list.add_child(row)
+		var info := VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_theme_constant_override("separation", 0)
+		row.add_child(info)
+		var name_row := HBoxContainer.new()
+		name_row.add_theme_constant_override("separation", 10)
+		info.add_child(name_row)
+		name_row.add_child(UiKit.label(m.display_name, 24))
+		var state := "主修中" if id == GameState.martial_main else ("副修中" if id == GameState.martial_side else "")
+		name_row.add_child(UiKit.label(state, 18, UiKit.ACCENT))
+		name_row.add_child(UiKit.label(m.source, 16, UiKit.TEXT_DIM))
+		var main_text := UiKit.label("主修：%s" % m.skill.description, 17)
+		main_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		info.add_child(main_text)
+		info.add_child(UiKit.label("副修：%s" % m.side_summary(), 17, UiKit.TEXT_DIM))
+		var as_main := UiKit.button("主修", Vector2(90, 46), 20)
+		as_main.disabled = id == GameState.martial_main
+		as_main.pressed.connect(func() -> void:
+			GameState.set_martial_main(id)
+			close.call())
+		row.add_child(as_main)
+		var as_side := UiKit.button("副修", Vector2(90, 46), 20)
+		as_side.disabled = id == GameState.martial_side
+		as_side.pressed.connect(func() -> void:
+			GameState.set_martial_side(id)
+			close.call())
+		row.add_child(as_side)
+	if GameState.martials.size() < 2:
+		list.add_child(UiKit.label("武学从奇遇和好汉列传里学：比如路上遇到的卖艺汉子、落难书生，林冲列传完结时林冲也会传授枪法。", 18, UiKit.TEXT_DIM))
+	var back := UiKit.button("返回", Vector2(160, 50), 22)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	back.pressed.connect(close)
+	v.add_child(back)
 
 
 ## 一个装备栏位：显示穿着的那件，点开挑别的。

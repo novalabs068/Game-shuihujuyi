@@ -1,14 +1,16 @@
 [gd_resource type="Resource" script_class="EventData" format=3]
 
 [ext_resource type="Script" path="res://scripts/data/event_choice.gd" id="1_buq7o"]
+[ext_resource type="Resource" path="res://data/martial/zong_heng_zhi_shu.tres" id="2_60pp1"]
 [ext_resource type="Script" path="res://scripts/data/event_data.gd" id="2_533w4"]
 
 [sub_resource type="Resource" id="Resource_60pp1"]
 script = ExtResource("1_buq7o")
 label = "送他盘缠"
 cost_silver = 20
-result_text = "书生千恩万谢，说日后若有出头之日，定报此恩。临别塞给你两枚聚义令，说是一位江湖朋友托他转交给有缘人的。"
+result_text = "书生千恩万谢，临别塞给你两枚聚义令，又把随身一卷手抄的兵书送给了你：「纵横之术，愿君用得上。」"
 tokens = 2
+martial = ExtResource("2_60pp1")
 
 [sub_resource type="Resource" id="Resource_0tljx"]
 script = ExtResource("1_buq7o")

@@ -37,6 +37,7 @@ func _initialize() -> void:
 		"test_equipment",
 		"test_story_script_parse",
 		"test_story_data",
+		"test_martial_data",
 		"test_gear_effects",
 		"test_new_skill_effects",
 		"test_steal_skips_debuffs",
@@ -633,6 +634,28 @@ func test_story_data() -> bool:
 				"goto":
 					check(StoryScript.find_label(ops, op["label"]) >= 0, "%s: goto %s exists" % [story.title, op["label"]])
 		check_eq(battles, 1, "%s has one battle" % story.title)
+	return true
+
+
+func test_martial_data() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var all: Array = GameDB.load_dir("res://data/martial/")
+	check_eq(all.size(), 5, "5 martial arts")
+	for res in all:
+		var m: MartialData = res
+		check(m.skill != null and m.skill.description != "", "%s has a described skill" % m.display_name)
+		check(m.side_summary() != "", "%s has a side bonus" % m.display_name)
+		check(m.source != "", "%s says where it is learned" % m.display_name)
+	for res in GameDB.load_dir("res://data/origins/"):
+		var o: OriginData = res
+		check(o.martial != null, "origin %s starts with a martial art" % o.display_name)
+	var lin: MartialData = load("res://data/martial/lin_jia_qiang_fa.tres")
+	var h := unit_data(&"h", [1000, 100, 50, 100])
+	var boosted := Equipment.apply(h, [lin.side_as_gear()] as Array[EquipData])
+	check_eq(boosted.base_atk, 108, "林家枪法 side: attack +8%")
+	check(&"keen" in boosted.gear_effects, "林家枪法 side: keen")
+	var story: StoryData = load("res://data/stories/lin_chong_4.tres")
+	check(story.martial == lin, "林冲列传 finale teaches 林家枪法")
 	return true
 
 

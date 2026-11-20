@@ -49,6 +49,8 @@ func ask(event: EventData) -> EventChoice:
 		var label := c.label
 		if c.cost_silver > 0:
 			label += "（花 %d 两）" % c.cost_silver
+		if c.martial != null and c.martial.id in GameState.martials:
+			label += "（已学会）"
 		var b := UiKit.button(label, Vector2(680, 56), 22)
 		b.disabled = not Rewards.affordable(c)
 		b.pressed.connect(func() -> void: _picked.emit(i))

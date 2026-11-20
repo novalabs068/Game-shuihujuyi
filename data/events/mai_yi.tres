@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/data/event_choice.gd" id="1_esler"]
 [ext_resource type="Script" path="res://scripts/data/event_data.gd" id="2_0edh1"]
+[ext_resource type="Resource" path="res://data/martial/lian_huan_tui.tres" id="2_i7s41"]
 
 [sub_resource type="Resource" id="Resource_i7s41"]
 script = ExtResource("1_esler")
@@ -9,6 +10,14 @@ label = "打赏"
 cost_silver = 10
 result_text = "汉子抱拳道谢，顺手指点了你两招。"
 experience = 40
+
+[sub_resource type="Resource" id="Resource_h2unh"]
+script = ExtResource("1_esler")
+label = "拜他为师"
+cost_silver = 60
+result_text = "汉子见你诚心，收了束脩，把压箱底的一路腿法一招一式教给了你。"
+experience = 20
+martial = ExtResource("2_i7s41")
 
 [sub_resource type="Resource" id="Resource_wk7ym"]
 script = ExtResource("1_esler")
@@ -20,4 +29,4 @@ script = ExtResource("2_0edh1")
 id = &"mai_yi"
 title = "卖艺汉子"
 text = "街口一个汉子在使枪棒卖艺，使得虎虎生风，围观的人却没几个肯掏钱。"
-choices = Array[ExtResource("1_esler")]([SubResource("Resource_i7s41"), SubResource("Resource_wk7ym")])
+choices = Array[ExtResource("1_esler")]([SubResource("Resource_i7s41"), SubResource("Resource_h2unh"), SubResource("Resource_wk7ym")])

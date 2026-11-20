@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_5wqtv"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_jecpf"]
+
+[sub_resource type="Resource" id="Resource_d1krk"]
+script = ExtResource("2_jecpf")
+display_name = "押镖横刀"
+description = "单体 200% 伤害，同时全队获得自身 12% 生命的护盾。"
+effect = 10
+power = 2.0
+amount = 0.12
+
+[resource]
+script = ExtResource("1_5wqtv")
+id = &"ya_biao_heng_dao"
+display_name = "押镖横刀"
+flavor = "走镖的人练的刀法，一刀砍出去，先护住身后的车马。"
+source = "镖师出身"
+skill = SubResource("Resource_d1krk")
+side_hp_pct = 0.05
+side_def_pct = 0.1

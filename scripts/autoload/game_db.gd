@@ -11,6 +11,7 @@ const BOUNTIES_DIR := "res://data/bounties/"
 const EVENTS_DIR := "res://data/events/"
 const EQUIPMENT_DIR := "res://data/equipment/"
 const STORIES_DIR := "res://data/stories/"
+const MARTIAL_DIR := "res://data/martial/"
 
 var heroes: Array[UnitData] = []
 var combos: Array[ComboData] = []
@@ -24,9 +25,13 @@ var events: Array[EventData] = []
 var equipment: Dictionary[StringName, EquipData] = {}
 ## 好汉列传，按好汉、段数排好
 var stories: Array[StoryData] = []
+var martials: Dictionary[StringName, MartialData] = {}
 
 
 func _ready() -> void:
+	for res in load_dir(MARTIAL_DIR):
+		var m := res as MartialData
+		martials[m.id] = m
 	for res in load_dir(STORIES_DIR):
 		stories.append(res as StoryData)
 	stories.sort_custom(func(a: StoryData, b: StoryData) -> bool: return [a.hero, a.order] < [b.hero, b.order])

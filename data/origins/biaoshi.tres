@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="OriginData" format=3]
 
 [ext_resource type="Script" path="res://scripts/data/origin_data.gd" id="1_jdeac"]
+[ext_resource type="Resource" path="res://data/martial/ya_biao_heng_dao.tres" id="1_qf3mf"]
 [ext_resource type="Texture2D" path="res://art/busts/hero_biaoshi.png" id="2_qf3mf"]
 [ext_resource type="Texture2D" path="res://art/faces/hero_biaoshi.png" id="3_jx0uc"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/hero_biaoshi.png" id="4_3axxw"]
@@ -39,3 +40,4 @@ description = "在东京一家镖局走镖多年，刀法扎实，最懂得护�
 sort_order = 1
 unit = SubResource("Resource_66qdh")
 start_location = &"dongjing"
+martial = ExtResource("1_qf3mf")

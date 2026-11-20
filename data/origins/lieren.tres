@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="OriginData" format=3]
 
+[ext_resource type="Resource" path="res://data/martial/chuan_lin_zhui_hun_jian.tres" id="1_fx6um"]
 [ext_resource type="Script" path="res://scripts/data/origin_data.gd" id="1_jtk5r"]
 [ext_resource type="Texture2D" path="res://art/busts/hero_lieren.png" id="2_fx6um"]
 [ext_resource type="Texture2D" path="res://art/faces/hero_lieren.png" id="3_red7e"]
@@ -39,3 +40,4 @@ description = "在野猪林外的山里打猎长大，眼尖手快，箭无虚�
 sort_order = 2
 unit = SubResource("Resource_6qvw8")
 start_location = &"yezhulin"
+martial = ExtResource("1_fx6um")

@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="StoryData" format=3]
 
+[ext_resource type="Resource" path="res://data/martial/lin_jia_qiang_fa.tres" id="1_2pfqv"]
 [ext_resource type="Script" path="res://scripts/data/story_data.gd" id="1_c5o7p"]
 
 [resource]
@@ -14,3 +15,4 @@ script_path = "res://data/stories/lin_chong/4_shang_liang_shan.txt"
 tokens = 6
 silver = 80
 souls = 20
+martial = ExtResource("1_2pfqv")

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_xj3um"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_y2tme"]
+
+[sub_resource type="Resource" id="Resource_dq2ro"]
+script = ExtResource("2_y2tme")
+display_name = "纵横之术"
+description = "全队速度 +15%、怒气 +25，持续 2 回合。"
+effect = 5
+turns = 2
+amount = 0.15
+rage_gain = 25
+
+[resource]
+script = ExtResource("1_xj3um")
+id = &"zong_heng_zhi_shu"
+display_name = "纵横之术"
+flavor = "书生抄给你的一卷兵书，讲的是怎样调度人马、抢占先机。"
+source = "奇遇「落难书生」，资助盘缠后书生相赠"
+skill = SubResource("Resource_dq2ro")
+side_effects = Array[StringName]([&"nimble"])

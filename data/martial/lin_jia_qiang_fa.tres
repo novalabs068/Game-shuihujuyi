@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_ue1ja"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_mkjt6"]
+
+[sub_resource type="Resource" id="Resource_2olli"]
+script = ExtResource("2_mkjt6")
+display_name = "林家枪法"
+description = "连刺 3 枪，每枪 95% 伤害。"
+effect = 2
+power = 0.95
+hits = 3
+
+[resource]
+script = ExtResource("1_ue1ja")
+id = &"lin_jia_qiang_fa"
+display_name = "林家枪法"
+flavor = "八十万禁军教头的家传枪法，一枪快过一枪。"
+source = "林冲列传完结时，林冲传授"
+skill = SubResource("Resource_2olli")
+side_atk_pct = 0.08
+side_effects = Array[StringName]([&"keen"])

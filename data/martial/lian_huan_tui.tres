@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_5rt0x"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_lnqbm"]
+
+[sub_resource type="Resource" id="Resource_tvsaj"]
+script = ExtResource("2_lnqbm")
+display_name = "连环腿"
+description = "连击 2 次，每次 120% 伤害。"
+effect = 2
+power = 1.2
+hits = 2
+
+[resource]
+script = ExtResource("1_5rt0x")
+id = &"lian_huan_tui"
+display_name = "连环腿"
+flavor = "江湖卖艺人压箱底的腿法，左右开弓，连踢两腿。"
+source = "奇遇「卖艺汉子」，拜师学艺"
+skill = SubResource("Resource_tvsaj")
+side_spd_pct = 0.05

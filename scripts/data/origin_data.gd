@@ -9,3 +9,5 @@ extends Resource
 ## 主角的属性、绝招和美术。开局时复制一份，名字换成玩家起的名字
 @export var unit: UnitData
 @export var start_location: StringName
+## 出身自带的武学（开局主修）
+@export var martial: MartialData

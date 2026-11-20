@@ -17,6 +17,8 @@ extends Resource
 @export var silver := 0
 ## 这位好汉的将魂
 @export var souls := 0
+## 打完这一段，好汉传授给主角的武学
+@export var martial: MartialData
 
 
 func flag() -> String:

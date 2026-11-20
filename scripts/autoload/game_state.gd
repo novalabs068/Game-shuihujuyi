@@ -34,6 +34,10 @@ var stars: Dictionary[StringName, int] = {}
 var yiqi := 0
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
+## 主角学会的武学、主修（战斗里放的技能）、副修（被动加成，可以空着）
+var martials: Array[StringName] = []
+var martial_main: StringName = &""
+var martial_side: StringName = &""
 var _next_uid := 1
 
 var _protagonist: UnitData
@@ -50,6 +54,7 @@ func new_game(p_name: String, origin: OriginData) -> void:
 	origin_id = origin.id
 	location_id = origin.start_location
 	tokens = STARTING_TOKENS
+	_learn_origin_martial()
 	_protagonist = null
 	save_game()
 
@@ -68,6 +73,9 @@ func protagonist() -> UnitData:
 		_protagonist.id = PROTAGONIST_ID
 		_protagonist.display_name = player_name
 		_protagonist.rarity = UnitData.Rarity.PROTAGONIST
+		var main := martial(martial_main)
+		if main != null:
+			_protagonist.skill = main.skill
 	return _protagonist
 
 
@@ -171,13 +179,72 @@ func recruit_with_souls(hero: UnitData) -> bool:
 	return true
 
 
-## 战斗用的队伍：好汉带上星级加成，所有人带上装备加成。
+## 战斗用的队伍：好汉带上星级加成，所有人带上装备加成，主角再加上副修武学的加成。
 func battle_team() -> Array[UnitData]:
 	var out: Array[UnitData] = []
 	for u in team():
 		var unit := Stars.apply(u, star_of(u.id)) if u.id != PROTAGONIST_ID else u
-		out.append(Equipment.apply(unit, gear_of(u.id)))
+		out.append(Equipment.apply(unit, effective_gear(u.id)))
 	return out
+
+
+## 算属性时用的「装备」：身上的装备，主角再加副修武学。
+func effective_gear(holder: StringName) -> Array[EquipData]:
+	var gear := gear_of(holder)
+	if holder == PROTAGONIST_ID and martial(martial_side) != null:
+		gear.append(martial(martial_side).side_as_gear())
+	return gear
+
+
+# --- 武学 ---
+
+func martial(id: StringName) -> MartialData:
+	return GameDB.martials.get(id)
+
+
+## 学会一门武学，已经会了返回 false。学会的第一门直接主修，第二门直接副修。
+func learn_martial(m: MartialData) -> bool:
+	if m == null or m.id in martials:
+		return false
+	martials.append(m.id)
+	if martial_main == &"":
+		martial_main = m.id
+		_protagonist = null
+	elif martial_side == &"":
+		martial_side = m.id
+	save_game()
+	return true
+
+
+## 换主修；原来副修这门的话，两门对调。
+func set_martial_main(id: StringName) -> void:
+	if not id in martials or id == martial_main:
+		return
+	if id == martial_side:
+		martial_side = martial_main
+	martial_main = id
+	_protagonist = null
+	save_game()
+
+
+## 换副修；原来主修这门的话，两门对调。
+func set_martial_side(id: StringName) -> void:
+	if not id in martials or id == martial_side:
+		return
+	if id == martial_main:
+		martial_main = martial_side
+		_protagonist = null
+	martial_side = id
+	save_game()
+
+
+func _learn_origin_martial() -> void:
+	var o := origin()
+	if o != null and o.martial != null and not o.martial.id in martials:
+		martials.append(o.martial.id)
+		if martial_main == &"":
+			martial_main = o.martial.id
+		_protagonist = null
 
 
 # --- 列传 ---
@@ -345,6 +412,9 @@ func reset() -> void:
 	yiqi = 0
 	items.clear()
 	_next_uid = 1
+	martials.clear()
+	martial_main = &""
+	martial_side = &""
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
 	level = 1
@@ -378,6 +448,9 @@ func save_game() -> void:
 		"pulls_since_jia": pulls_since_jia,
 		"stars": _ids_to_json(stars),
 		"yiqi": yiqi,
+		"martials": martials.map(func(id: StringName) -> String: return String(id)),
+		"martial_main": String(martial_main),
+		"martial_side": String(martial_side),
 		"items": items.map(func(it: Dictionary) -> Dictionary: return {"uid": it["uid"], "id": String(it["id"]), "holder": String(it["holder"])}),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -426,6 +499,18 @@ func load_game() -> void:
 	for id: String in saved_stars:
 		stars[StringName(id)] = int(saved_stars[id])
 	yiqi = data.get("yiqi", 0)
+	var saved_martials: Array = data.get("martials", [])
+	for id: String in saved_martials:
+		if GameDB.martials.has(StringName(id)):
+			martials.append(StringName(id))
+	martial_main = StringName(data.get("martial_main", ""))
+	martial_side = StringName(data.get("martial_side", ""))
+	if not martial_main in martials:
+		martial_main = &""
+	if not martial_side in martials:
+		martial_side = &""
+	# 有武学之前的旧存档：补上出身自带的那门
+	_learn_origin_martial()
 	var saved_items: Array = data.get("items", [])
 	for it: Dictionary in saved_items:
 		if GameDB.equipment.has(StringName(it.get("id", ""))):
