@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/du_fang_da_shou.png" id="1_r7pry"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_dekhb"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_0dwo8"]
+
+[sub_resource type="Resource" id="Resource_vtlut"]
+script = ExtResource("3_0dwo8")
+display_name = "闷棍"
+description = "单体眩晕 1 回合。"
+effect = 6
+turns = 1
+cooldown = 4
+
+[resource]
+script = ExtResource("2_dekhb")
+id = &"du_fang_da_shou"
+display_name = "赌坊打手"
+role = 1
+base_hp = 400
+base_atk = 98
+base_def = 24
+base_spd = 96
+map_sprite = ExtResource("1_r7pry")
+skill = SubResource("Resource_vtlut")

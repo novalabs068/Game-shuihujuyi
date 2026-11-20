@@ -1,0 +1,201 @@
+[gd_resource type="Resource" script_class="SceneData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/props/chest_closed.png" id="1_hev5i"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/chest_open.png" id="2_0s7i4"]
+[ext_resource type="Script" path="res://scripts/data/chest_data.gd" id="3_oowh7"]
+[ext_resource type="Resource" path="res://data/equipment/xi_pi_jia.tres" id="4_u3l8m"]
+[ext_resource type="Script" path="res://scripts/data/npc_data.gd" id="5_da31b"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/jiu_bao.png" id="6_57xjs"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/gao_shi_lan.png" id="7_vxwnx"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/lie_hu.png" id="8_q1v0b"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/qiao_fu.png" id="9_eh6ac"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/fence.png" id="10_ovusb"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/willow.png" id="11_r6l5b"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/well.png" id="12_hfcts"]
+[ext_resource type="Script" path="res://scripts/data/prop_data.gd" id="13_nbtco"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/jiu_dian.png" id="14_8dd7c"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/shan_yan.png" id="15_fx2by"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/shan_shen_miao.png" id="16_c8rx7"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/song_shu.png" id="17_a6lyf"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="18_wpryp"]
+[ext_resource type="Resource" path="res://data/encounters/ye_lang_qun.tres" id="19_kbhx2"]
+[ext_resource type="Resource" path="res://data/encounters/ye_zhu_chu_mo.tres" id="20_cwdrf"]
+[ext_resource type="Resource" path="res://data/encounters/lang_zhu_hun_dou.tres" id="21_vclf5"]
+[ext_resource type="Resource" path="res://data/encounters/lang_yu_zei.tres" id="22_gglra"]
+[ext_resource type="Script" path="res://scripts/data/scene_data.gd" id="23_rhc7l"]
+[ext_resource type="Texture2D" path="res://art/tiles/xiangguosi.png" id="24_qvmlg"]
+
+[sub_resource type="Resource" id="Resource_wj6jb"]
+script = ExtResource("3_oowh7")
+id = &"jyg_shi_xia"
+cell = Vector2i(9, 32)
+reward_text = "聚义令 ×2"
+tokens = 2
+silver = 50
+equipment = ExtResource("4_u3l8m")
+
+[sub_resource type="Resource" id="Resource_0kw2v"]
+script = ExtResource("3_oowh7")
+id = &"jyg_gang_ding"
+cell = Vector2i(39, 3)
+reward_text = "聚义令 ×2"
+tokens = 2
+silver = 60
+
+[sub_resource type="Resource" id="Resource_4eamn"]
+script = ExtResource("5_da31b")
+id = &"jiu_jia"
+display_name = "酒家"
+sprite = ExtResource("6_57xjs")
+cell = Vector2i(26, 41)
+lines = PackedStringArray("客官，小店的酒叫「出门倒」，三碗不过冈。", "如今冈上的大虫是没了，野猪野狼倒越发多了，往上走越凶，客官小心。")
+
+[sub_resource type="Resource" id="Resource_ws1fs"]
+script = ExtResource("5_da31b")
+id = &"gao_shi_lan"
+display_name = "告示栏"
+sprite = ExtResource("7_vxwnx")
+cell = Vector2i(32, 38)
+lines = PackedStringArray("阳谷县衙的告示：冈上野猪伤人，有能捉的，官府给赏。")
+action = &"bounties"
+still = true
+
+[sub_resource type="Resource" id="Resource_4n3ch"]
+script = ExtResource("5_da31b")
+id = &"lie_hu"
+display_name = "猎户"
+sprite = ExtResource("8_q1v0b")
+cell = Vector2i(40, 23)
+lines = PackedStringArray("前些日子打虎的那位好汉，我们几个披着虎皮在冈上埋伏，倒被他吓了一跳。", "山神庙后头那片空地，野猪最多；冈顶上那几窝，连我们猎户都不敢去。")
+
+[sub_resource type="Resource" id="Resource_0qk6q"]
+script = ExtResource("5_da31b")
+id = &"qiao_fu"
+display_name = "樵夫"
+sprite = ExtResource("9_eh6ac")
+cell = Vector2i(18, 11)
+lines = PackedStringArray("我在这冈上砍了三十年柴，西边那块大石头底下，好像有人埋过东西。")
+
+[sub_resource type="Resource" id="Resource_s324p"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("14_8dd7c")
+cell = Vector2i(22, 40)
+
+[sub_resource type="Resource" id="Resource_enpiu"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("15_fx2by")
+cell = Vector2i(30, 15)
+
+[sub_resource type="Resource" id="Resource_olio4"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("15_fx2by")
+cell = Vector2i(48, 12)
+
+[sub_resource type="Resource" id="Resource_bbnik"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("15_fx2by")
+cell = Vector2i(8, 30)
+
+[sub_resource type="Resource" id="Resource_3no3f"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("15_fx2by")
+cell = Vector2i(36, 28)
+
+[sub_resource type="Resource" id="Resource_nd1y7"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("15_fx2by")
+cell = Vector2i(52, 26)
+
+[sub_resource type="Resource" id="Resource_r6sfu"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("16_c8rx7")
+cell = Vector2i(22, 21)
+
+[sub_resource type="Resource" id="Resource_cxbi7"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("17_a6lyf")
+cell = Vector2i(10, 40)
+
+[sub_resource type="Resource" id="Resource_raptx"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("17_a6lyf")
+cell = Vector2i(48, 40)
+
+[sub_resource type="Resource" id="Resource_t1bpb"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("17_a6lyf")
+cell = Vector2i(54, 8)
+
+[sub_resource type="Resource" id="Resource_vkrsr"]
+script = ExtResource("13_nbtco")
+texture = ExtResource("17_a6lyf")
+cell = Vector2i(4, 6)
+
+[resource]
+script = ExtResource("23_rhc7l")
+id = "jingyanggang"
+title = "景阳冈"
+tileset_texture = ExtResource("24_qvmlg")
+tile_block = 4
+layout = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+T..T..T...T......T......T...T..T......TT.....T....T.T......T
+TT....T.....TT......T..T...T....................T......TT..T
+T.T....T.T......T.T....T.....TT....................T......TT
+T.T..T......TT.....T....T.T....................T......T..T.T
+TT......T......T...T..T......TT...................T.T....T.T
+T..hh......T..T...T......T.....................T.....T....TT
+T......T.T....T.....TT......T..T.................T...T..T..T
+T..TT.....T....T,,,,,,,,,,,,,,,,,,,,,,,,,....T..T...Thh....T
+T.....T...T..T..,,,,,,,,,,,,,,,,,,,,,,,,,T.T....T.....TT...T
+T.T..T..........,,.....T...T..T......TT.....T.............TT
+T....T..........,,.T..T...T......T......T...T.........TT...T
+TT.............T,,....T.....TT......T..T...T...hh........T.T
+TT..T...........,,T....T.T........T....T.............T..T..T
+T...............,,T..T.............T....T.T................T
+T.TT............,,.................T..T......T...........T.T
+T...............,,.TT....................T.................T
+T.TT............,,.....T............TT......T.............TT
+T....T..........,,.TT...................T.T................T
+TT..T...T......T,,....T.............TT.....T.............T.T
+T...T.....TT....,,T..hhh...............T...T...............T
+T....T.T......T.,,...hhh...........T..T...T......T......T..T
+T..T......TT....,,,,,,,,,,,,,,,,,,,,,,,,,,,,,T......T..T...T
+T.....T......T..,,,,,,,,,,,,,,,,,,,,,,,,,,,,,...T.T....T...T
+TTT....T.T..T.T.T.T..T.T......T...T..T.....,,T..........T.TT
+T....T.T....T.T.T.TT.T....T..T...T......T..,,..T...........T
+TTTT...TT....TTT.....TT.TT...T.............,,.T....hh....T.T
+TT..T..TT..TT.T...TT.T.T.T....T.T........T.,,.T............T
+T..T..........T......T...T..T......hh.....T,,..T.T......T.TT
+T..T..........T..T.TTT..T......T..........T,,T......TT.....T
+T...T..hh....TTT.T..TT....TT......T..T...T.,,...T......T...T
+T.T.T.........TTT....T.T..T...T.T....T.....,,......T..T...TT
+T.T..T.T....TTT.T..T.T..T.TT.....T....T.T..,,..T.T....T....T
+T......T...T..T......TT....................,,..............T
+T......T.T....T.....TT......,,,,,,,,,,,,,,,,,..............T
+T......T......T...T..T......,,,,,,,,,,,,,,,,,..............T
+T....T.T......T.T....T......,,,.........T......T..T...T....T
+T..T...T......T......T...T..,,,..........T...T......T......T
+TT.....T....T.T......T.T....,,,............T......T...T..T.T
+T......T..T...T.....hhhh....,,,..........T...T..T......TT..T
+T......TThh...T....Thhhh....,,,...............Thh....T....TT
+T.....TT......T..T...T......,,,.............T....T.T......TT
+T...T..T......TT.....T....T.,,,.........T.T......T.T....T..T
+T.T....T.....TT......T..T...,,,.........T.T....T.....TT....T
+T......T...T..T......TT.....,,,.............TT......T..T...T
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTEEETTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+spawn_cell = Vector2i(29, 43)
+npcs = Array[ExtResource("5_da31b")]([SubResource("Resource_4eamn"), SubResource("Resource_ws1fs"), SubResource("Resource_4n3ch"), SubResource("Resource_0qk6q")])
+chests = Array[ExtResource("3_oowh7")]([SubResource("Resource_wj6jb"), SubResource("Resource_0kw2v")])
+region = &"jingyanggang"
+roam_spots = Array[Vector2i]([Vector2i(36, 34), Vector2i(44, 28), Vector2i(30, 22), Vector2i(50, 17), Vector2i(10, 14), Vector2i(17, 15), Vector2i(28, 18), Vector2i(36, 4), Vector2i(42, 6), Vector2i(26, 8)])
+roam_groups = Array[ExtResource("18_wpryp")]([ExtResource("19_kbhx2"), ExtResource("20_cwdrf"), ExtResource("21_vclf5"), ExtResource("22_gglra")])
+roam_bonus = Array[int]([0, 0, 1, 1, 2, 2, 2, 3, 4, 3])
+music = &"jiaoye"
+overlays = Dictionary[String, Texture2D]({
+"=": ExtResource("10_ovusb"),
+"T": ExtResource("11_r6l5b"),
+"W": ExtResource("12_hfcts")
+})
+props = Array[ExtResource("13_nbtco")]([SubResource("Resource_s324p"), SubResource("Resource_enpiu"), SubResource("Resource_olio4"), SubResource("Resource_bbnik"), SubResource("Resource_3no3f"), SubResource("Resource_nd1y7"), SubResource("Resource_r6sfu"), SubResource("Resource_cxbi7"), SubResource("Resource_raptx"), SubResource("Resource_t1bpb"), SubResource("Resource_vkrsr")])
+chest_closed = ExtResource("1_hev5i")
+chest_open = ExtResource("2_0s7i4")

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_ancky"]
+[ext_resource type="Resource" path="res://data/enemies/jiang_men_tu_di.tres" id="2_cdijt"]
+[ext_resource type="Resource" path="res://data/enemies/du_fang_da_shou.tres" id="3_78l3j"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_ovh2o"]
+
+[resource]
+script = ExtResource("4_ovh2o")
+id = "tu_di_ba_shi"
+title = "蒋门神徒弟"
+enemies = Array[ExtResource("1_ancky")]([ExtResource("2_cdijt"), ExtResource("3_78l3j")])

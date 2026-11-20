@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_nc78a"]
+[ext_resource type="Resource" path="res://data/enemies/ye_zhu.tres" id="2_dqaw8"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_dxrk2"]
+
+[resource]
+script = ExtResource("3_dxrk2")
+id = "ye_zhu_chu_mo"
+title = "野猪出没"
+enemies = Array[ExtResource("1_nc78a")]([ExtResource("2_dqaw8"), ExtResource("2_dqaw8")])

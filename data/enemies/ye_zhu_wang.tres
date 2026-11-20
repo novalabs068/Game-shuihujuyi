@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/ye_zhu_wang.png" id="1_qex26"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_fap7x"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_jl315"]
+
+[sub_resource type="Resource" id="Resource_krngl"]
+script = ExtResource("3_jl315")
+display_name = "横冲直撞"
+description = "敌方全体各受 90% 伤害。"
+effect = 12
+power = 0.9
+cooldown = 4
+
+[resource]
+script = ExtResource("2_fap7x")
+id = &"ye_zhu_wang"
+display_name = "野猪王"
+nickname = "Boss"
+role = 1
+base_hp = 1000
+base_atk = 124
+base_def = 30
+base_spd = 96
+map_sprite = ExtResource("1_qex26")
+skill = SubResource("Resource_krngl")
+is_boss = true
+enrage_name = "红了眼"
+enrage_atk_bonus = 0.5

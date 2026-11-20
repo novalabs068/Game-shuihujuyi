@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_3nmhb"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_f1eeg"]
+[ext_resource type="Resource" path="res://data/enemies/du_fang_da_shou.tres" id="3_6xkn2"]
+[ext_resource type="Resource" path="res://data/enemies/du_fang_zhuang_jia.tres" id="4_ode2s"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_tdpej"]
+
+[sub_resource type="Resource" id="Resource_8ajgh"]
+script = ExtResource("5_tdpej")
+id = "bounty_du_fang_zhuang_jia"
+title = "悬赏：赌坊庄家"
+enemies = Array[ExtResource("2_f1eeg")]([ExtResource("3_6xkn2"), ExtResource("4_ode2s"), ExtResource("3_6xkn2")])
+enemy_level = 15
+recommended_level = 15
+
+[resource]
+script = ExtResource("1_3nmhb")
+id = &"du_fang_zhuang_jia"
+location = &"kuaihuolin"
+grade = 1
+target = "赌坊庄家"
+description = "快活林赌坊的庄家出老千、放印子钱，逼得好几户人家卖儿卖女。施恩出钱悬赏，要人砸了他的场子。"
+stage = SubResource("Resource_8ajgh")

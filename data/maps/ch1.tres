@@ -46,6 +46,7 @@ danger = 2
 level_min = 9
 level_max = 13
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("7_680is"), ExtResource("6_g0lbk")])
+scene_id = "shizipo"
 
 [sub_resource type="Resource" id="Resource_08vw3"]
 script = ExtResource("1_juigf")
@@ -58,6 +59,7 @@ danger = 3
 level_min = 12
 level_max = 16
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("7_08vw3"), ExtResource("8_bor2l")])
+scene_id = "kuaihuolin"
 has_market = true
 
 [sub_resource type="Resource" id="Resource_ibthg"]
@@ -108,6 +110,7 @@ danger = 3
 level_min = 13
 level_max = 17
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("14_4shyt"), ExtResource("15_q6bkc")])
+scene_id = "jingyanggang"
 
 [sub_resource type="Resource" id="Resource_q6bkc"]
 script = ExtResource("1_juigf")

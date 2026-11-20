@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/du_fang_da_shou.png" id="1_fad5i"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_nlkni"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_lwpc8"]
+
+[sub_resource type="Resource" id="Resource_hrtm5"]
+script = ExtResource("3_lwpc8")
+display_name = "掷骰暗器"
+description = "无视嘲讽，打血量比例最低的人，190% 伤害。"
+effect = 9
+power = 1.9
+
+[resource]
+script = ExtResource("2_nlkni")
+id = &"du_fang_zhuang_jia"
+display_name = "赌坊庄家"
+nickname = "Boss"
+role = 1
+base_hp = 950
+base_atk = 124
+base_def = 28
+base_spd = 104
+map_sprite = ExtResource("1_fad5i")
+skill = SubResource("Resource_hrtm5")
+is_boss = true
+enrage_name = "输红了眼"
+enrage_atk_bonus = 0.5

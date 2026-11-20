@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_ujq06"]
+[ext_resource type="Resource" path="res://data/enemies/ye_lang.tres" id="2_nvk5e"]
+[ext_resource type="Resource" path="res://data/enemies/ye_zhu.tres" id="3_qi8pf"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_kt0n7"]
+
+[resource]
+script = ExtResource("4_kt0n7")
+id = "lang_zhu_hun_dou"
+title = "狼和野猪"
+enemies = Array[ExtResource("1_ujq06")]([ExtResource("2_nvk5e"), ExtResource("3_qi8pf")])

@@ -434,24 +434,36 @@ func test_map_routes() -> bool:
 
 
 func test_scene_layout() -> bool:
-	var scene: SceneData = load("res://data/scenes/xiangguosi.tres")
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	for res in GameDB.load_dir("res://data/scenes/"):
+		_check_scene_layout(res as SceneData)
+	return true
+
+
+func _check_scene_layout(scene: SceneData) -> void:
 	var rows := scene.rows()
 	var width := rows[0].length()
 	for r in rows:
-		check_eq(r.length(), width, "layout row width")
+		check_eq(r.length(), width, "%s layout row width" % scene.id)
 	for y in rows.size():
 		for x in width:
-			check(SceneData.TERRAIN.has(rows[y][x]), "known terrain '%s' at %d,%d" % [rows[y][x], x, y])
-	check(scene.is_walkable(scene.spawn_cell), "spawn is walkable")
-	check(scene.layout.contains("E"), "scene has an exit")
-	# 从出生点能走到出口，也能走到每个人物和宝箱旁边
+			check(SceneData.TERRAIN.has(rows[y][x]), "%s known terrain '%s' at %d,%d" % [scene.id, rows[y][x], x, y])
+	check(scene.is_walkable(scene.spawn_cell), "%s spawn is walkable" % scene.id)
+	check(scene.layout.contains("E") or scene.layout.contains("D"), "%s has a way out" % scene.id)
+	# 从出生点能走到出口、每个小怪出生点，也能走到每个人物和宝箱旁边
 	var astar := AStarGrid2D.new()
 	astar.region = Rect2i(Vector2i.ZERO, scene.size())
 	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
 	astar.update()
+	var exits: Array[Vector2i] = []
 	for y in rows.size():
 		for x in width:
 			astar.set_point_solid(Vector2i(x, y), not scene.is_walkable(Vector2i(x, y)))
+			if rows[y][x] in ["E", "D"]:
+				exits.append(Vector2i(x, y))
+	check(exits.any(func(c: Vector2i) -> bool: return not astar.get_id_path(scene.spawn_cell, c).is_empty()), "%s exit reachable from spawn" % scene.id)
+	for spot in scene.roam_spots:
+		check(not astar.get_id_path(scene.spawn_cell, spot).is_empty(), "%s roam spot %s reachable" % [scene.id, spot])
 	var targets: Array[Vector2i] = []
 	for npc in scene.npcs:
 		targets.append(npc.cell)
@@ -465,8 +477,7 @@ func test_scene_layout() -> bool:
 			var spot: Vector2i = t + d
 			if astar.is_in_boundsv(spot) and not astar.is_point_solid(spot) and not astar.get_id_path(scene.spawn_cell, spot).is_empty():
 				reachable = true
-		check(reachable, "object at %s reachable from spawn" % t)
-	return true
+		check(reachable, "%s object at %s reachable from spawn" % [scene.id, t])
 
 
 func test_guard_strike_shields_team() -> bool:
@@ -553,7 +564,7 @@ func test_rewards() -> bool:
 func test_bounties_and_events_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var bounties: Array[Resource] = GameDB.load_dir("res://data/bounties/")
-	check_eq(bounties.size(), 6, "six bounties")
+	check_eq(bounties.size(), 9, "nine bounties")
 	var map: WorldMapData = load("res://data/maps/ch1.tres")
 	for res in bounties:
 		var b := res as BountyData

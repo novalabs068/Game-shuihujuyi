@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_astvq"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_7e3uc"]
+[ext_resource type="Resource" path="res://data/enemies/ye_zhu.tres" id="3_h3ogs"]
+[ext_resource type="Resource" path="res://data/enemies/ye_zhu_wang.tres" id="4_fxd5u"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_l87al"]
+
+[sub_resource type="Resource" id="Resource_ge7el"]
+script = ExtResource("5_l87al")
+id = "bounty_ye_zhu_wang"
+title = "悬赏：野猪王"
+enemies = Array[ExtResource("2_7e3uc")]([ExtResource("3_h3ogs"), ExtResource("4_fxd5u"), ExtResource("3_h3ogs")])
+enemy_level = 16
+recommended_level = 16
+
+[resource]
+script = ExtResource("1_astvq")
+id = &"ye_zhu_wang"
+location = &"jingyanggang"
+grade = 1
+target = "野猪王"
+description = "景阳冈上一头野猪王带着猪群拱坏了山下的庄稼，还撞伤了两个猎户。阳谷县悬赏捉拿。"
+stage = SubResource("Resource_ge7el")
