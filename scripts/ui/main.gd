@@ -25,9 +25,10 @@ func _show_character_create() -> void:
 	_set_screen(screen)
 
 
-func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, notice := "") -> void:
+func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, notice := "", focus_location: StringName = &"") -> void:
 	var screen := WorldMapView.new()
 	screen.notice = notice
+	screen.focus_location = focus_location
 	screen.map = GameDB.maps[GameState.DEFAULT_MAP]
 	screen.resume_destination = resume_destination
 	screen.resume_progress = resume_progress
@@ -37,6 +38,23 @@ func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, not
 	screen.recruit_requested.connect(_show_recruit)
 	screen.heroes_requested.connect(_show_heroes)
 	screen.story_requested.connect(_start_story)
+	screen.jianghu_requested.connect(_show_jianghu)
+	screen.profile_requested.connect(_show_profile)
+	_set_screen(screen)
+
+
+func _show_profile() -> void:
+	var screen := ProfileView.new()
+	screen.back_requested.connect(_show_map)
+	screen.heroes_requested.connect(_show_heroes)
+	_set_screen(screen)
+
+
+func _show_jianghu() -> void:
+	var screen := JiangHuView.new()
+	screen.back_requested.connect(_show_map)
+	screen.heroes_requested.connect(_show_heroes)
+	screen.travel_requested.connect(func(id: StringName) -> void: _show_map(&"", 0.0, "", id))
 	_set_screen(screen)
 
 
@@ -65,6 +83,7 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 			return
 		var r: Dictionary = Encounters.rewards(screen.model)
 		GameState.add_rewards(r["exp"], r["silver"])
+		GameState.record_win()
 		GameState.save_game()
 		_start_story(story, resume_at))
 	_set_screen(screen)
@@ -105,6 +124,7 @@ func _show_scene(scene_id: String, notice := "") -> void:
 	screen.scene_data = GameDB.scenes[scene_id]
 	screen.notice = notice
 	screen.exit_requested.connect(_show_map)
+	screen.scene_requested.connect(_show_scene)
 	screen.battle_requested.connect(func(stage: StageData, bonus: Dictionary) -> void:
 		_start_battle(stage, &"", 0.0, bonus, scene_id))
 	_set_screen(screen)
@@ -135,6 +155,9 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			_show_map(&"", 0.0, notice)
 	screen.exit_requested.connect(leave.bind(""))
 	screen.finished.connect(func(won: bool) -> void:
+		GameState.finish_roamer(won)
+		if won:
+			GameState.record_win()
 		var notice := ""
 		if won:
 			var r: Dictionary = Encounters.rewards(screen.model)
@@ -152,6 +175,11 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			if extra != "":
 				parts.append(extra)
 			GameState.set_flag(bonus.get("flag", ""))
+			if bonus.has("arena_round"):
+				GameState.record["arena"] = maxi(Arena.best(), bonus["arena_round"])
+			var job_text := OddJobs.on_battle_won(stage)
+			if job_text != "":
+				parts.append(job_text)
 			if ups > 0:
 				parts.append("升到 %d 级！" % GameState.level)
 			notice = "　".join(parts)

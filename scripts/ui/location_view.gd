@@ -6,6 +6,8 @@ extends Control
 signal exit_requested
 ## 支线事件里选了要打一仗；bonus 见 main.gd 的 _start_battle()
 signal battle_requested(stage: StageData, bonus: Dictionary)
+## 走进门里，换到另一个场景
+signal scene_requested(scene_id: String)
 
 ## 像素瓦片放大倍数：16 像素的瓦片在画面上是 48 像素一格
 const PIXEL_SCALE := 3
@@ -31,6 +33,10 @@ var _marker: Node2D
 var _dialogue: DialogueBox
 var _event_panel: EventPanel
 var _toast: Label
+var _roamers: Array[SceneRoamer] = []
+## 刚从战斗回来的几秒里小怪不追人，免得一回来又被碰上
+var _grace := 0.0
+const RETURN_GRACE := 2.5
 
 
 func _ready() -> void:
@@ -62,6 +68,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_step_player(delta)
+	_step_roamers(delta)
 	_center_camera(false)
 
 
@@ -126,11 +133,11 @@ func _spawn_objects() -> void:
 			continue
 		var actor := MapActor.new()
 		actor.sprite = npc.sprite if npc.sprite != null else (npc.unit.map_sprite if npc.unit != null else null)
-		actor.sprite_scale = MapActor.CHARACTER_SCALE
+		actor.sprite_scale = MapActor.PIXEL_SCALE if npc.still else MapActor.CHARACTER_SCALE
 		var face: Texture2D = npc.unit.face if npc.unit != null else null
 		actor.setup(face, npc.display_name.right(1), Color("6b4f8a"), npc.display_name)
 		actor.position = _feet(npc.cell)
-		actor.facing_left = true
+		actor.facing_left = not npc.still
 		_actors.add_child(actor)
 		_npc_at[npc.cell] = npc
 		_astar.set_point_solid(npc.cell, true)
@@ -149,8 +156,16 @@ func _spawn_objects() -> void:
 	_player.sprite = team[0].map_sprite if not team.is_empty() else null
 	_player.sprite_scale = MapActor.CHARACTER_SCALE
 	_player.setup(team[0].face if not team.is_empty() else null, "我", UiKit.ACCENT, "")
-	_player.position = _feet(scene_data.spawn_cell)
+	# 打完仗回来：站回原来的位置
+	var memory := GameState.scene_state(scene_data.id)
+	var back: Variant = memory["cell"]
+	_player.position = _feet(back if back != null else scene_data.spawn_cell)
+	if back != null:
+		_grace = RETURN_GRACE
+	memory["cell"] = null
+	GameState.pending_roamer = []
 	_actors.add_child(_player)
+	_spawn_roamers(memory["cleared"])
 
 
 func _build_ui() -> void:
@@ -164,13 +179,13 @@ func _build_ui() -> void:
 	bar.add_child(row)
 	var title := UiKit.label(scene_data.title, 26, UiKit.GOLD)
 	row.add_child(title)
-	var hint := UiKit.label("点地面走动，点人物对话，走到山门离开", 17, UiKit.TEXT_DIM)
+	var hint := UiKit.label("点地面走动，点人物对话；碰到游荡的小怪就开打", 17, UiKit.TEXT_DIM)
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(hint)
 	var leave := UiKit.button("离开", Vector2(100, 40), 20)
 	leave.pressed.connect(func() -> void:
 		if not _busy:
-			exit_requested.emit())
+			_leave())
 	row.add_child(leave)
 
 	_toast = UiKit.label("", 28, UiKit.GOLD)
@@ -284,8 +299,124 @@ func _arrived() -> void:
 		var action := _on_arrive
 		_on_arrive = Callable()
 		action.call()
-	elif scene_data.terrain_at(_cell_at(_player.position)) == "E":
-		exit_requested.emit()
+	else:
+		var here := _cell_at(_player.position)
+		if scene_data.doors.has(here):
+			_go_to_scene(scene_data.doors[here], null)
+		elif scene_data.terrain_at(here) == "E":
+			if scene_data.exit_scene != "":
+				_go_to_scene(scene_data.exit_scene, scene_data.exit_cell)
+			else:
+				_leave()
+
+
+## 离开场景回大地图；小怪下次进来重新出现。
+func _leave() -> void:
+	GameState.scene_memory.erase(scene_data.id)
+	exit_requested.emit()
+
+
+## 走进另一个场景；cell 为空就站在那个场景的出生点。
+func _go_to_scene(scene_id: String, cell: Variant) -> void:
+	GameState.scene_memory.erase(scene_data.id)
+	if cell != null:
+		GameState.scene_state(scene_id)["cell"] = cell
+	scene_requested.emit(scene_id)
+
+
+# --- 场景小怪 ---
+
+func _spawn_roamers(cleared: Array) -> void:
+	if scene_data.region == &"" or scene_data.roam_spots.is_empty():
+		return
+	var loc: LocationData = GameDB.maps[GameState.DEFAULT_MAP].location(scene_data.region)
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	for i in scene_data.roam_spots.size():
+		if i in cleared:
+			continue
+		var groups := scene_data.roam_groups if not scene_data.roam_groups.is_empty() else loc.encounter_groups
+		var bonus := scene_data.roam_bonus[i] if i < scene_data.roam_bonus.size() else 0
+		var stage := Encounters.build_from(groups, loc.level_min, loc.level_max, GameState.level, rng, bonus)
+		var lead: UnitData = stage.enemies[0]
+		var actor := MapActor.new()
+		for e in stage.enemies:
+			if e.map_sprite != null:
+				actor.sprite = e.map_sprite
+				break
+		actor.sprite_scale = MapActor.CHARACTER_SCALE
+		var elite := lead.elite_trait != &""
+		actor.setup(lead.face, lead.display_name.left(1), UiKit.ENEMY, "%s %d级" % [lead.display_name, stage.enemy_level])
+		actor.caption_color = UiKit.BOSS if elite else Color("ffb0a0")
+		actor.position = _feet(scene_data.roam_spots[i])
+		_actors.add_child(actor)
+		_roamers.append(SceneRoamer.new(i, stage, actor, scene_data.roam_spots[i]))
+
+
+func _step_roamers(delta: float) -> void:
+	if _busy:
+		for r in _roamers:
+			r.actor.moving = false
+		return
+	_grace = maxf(_grace - delta, 0.0)
+	for r in _roamers:
+		var dist := r.actor.position.distance_to(_player.position) / _tile
+		if _grace <= 0.0 and dist < SceneRoamer.CONTACT_CELLS:
+			_fight(r)
+			return
+		if _grace <= 0.0 and (dist < SceneRoamer.AGGRO_CELLS or (r.chasing and dist < SceneRoamer.GIVE_UP_CELLS)):
+			if not r.chasing:
+				r.chasing = true
+				r.actor.alert(true)
+			r.repath -= delta
+			if r.repath <= 0.0:
+				r.repath = SceneRoamer.REPATH_SECONDS
+				r.path = _path_between(_cell_at(r.actor.position), _cell_at(_player.position))
+				# 最后一步直接扑向主角站的位置
+				r.path.append(_player.position)
+		else:
+			if r.chasing:
+				r.chasing = false
+				r.actor.alert(false)
+				r.path.clear()
+			if r.path.is_empty():
+				r.wait -= delta
+				if r.wait <= 0.0:
+					r.wait = randf_range(1.0, 3.0)
+					r.path = _path_between(_cell_at(r.actor.position), _wander_target(r.home))
+		r.walk(delta)
+
+
+## 出生点附近随便挑一个能走到的格子。
+func _wander_target(home: Vector2i) -> Vector2i:
+	for attempt in 8:
+		var cell := home + Vector2i(randi_range(-SceneRoamer.WANDER_RADIUS, SceneRoamer.WANDER_RADIUS), randi_range(-SceneRoamer.WANDER_RADIUS, SceneRoamer.WANDER_RADIUS))
+		if _astar.is_in_boundsv(cell) and not _astar.is_point_solid(cell):
+			return cell
+	return home
+
+
+func _path_between(from: Vector2i, to: Vector2i) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if not _astar.is_in_boundsv(from) or not _astar.is_in_boundsv(to):
+		return out
+	var ids := _astar.get_id_path(from, to)
+	for i in range(1, ids.size()):
+		out.append(_feet(ids[i]))
+	return out
+
+
+## 碰上小怪：记下主角站的位置，开打；打赢后 main 会把它记成已打败。
+func _fight(r: SceneRoamer) -> void:
+	_busy = true
+	_path.clear()
+	_player.moving = false
+	var memory := GameState.scene_state(scene_data.id)
+	memory["cell"] = _cell_at(_player.position)
+	GameState.pending_roamer = [scene_data.id, r.index]
+	_flash("%s 冲了上来！" % r.stage.enemies[0].display_name)
+	await get_tree().create_timer(0.5).timeout
+	battle_requested.emit(r.stage, {})
 
 
 # --- 互动 ---
@@ -305,6 +436,44 @@ func _talk(npc: NpcData) -> void:
 		var gained := Rewards.apply_choice(choice)
 		GameState.save_game()
 		await _event_panel.show_result(choice.result_text, gained)
+	match npc.action:
+		&"market":
+			var market := MarketPanel.new()
+			add_child(market)
+			market.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			await market.closed
+			market.queue_free()
+		&"arena":
+			var arena := ArenaPanel.new()
+			add_child(arena)
+			arena.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			var picked_round := [0]
+			arena.accepted.connect(func(n: int) -> void:
+				picked_round[0] = n
+				arena.closed.emit())
+			await arena.closed
+			arena.queue_free()
+			if picked_round[0] > 0:
+				GameState.scene_state(scene_data.id)["cell"] = _cell_at(_player.position)
+				battle_requested.emit(Arena.stage(picked_round[0]), Arena.battle_bonus(picked_round[0]))
+				return
+		&"bounties":
+			var board := BountyBoard.new()
+			board.bounties = GameDB.open_bounties(scene_data.region)
+			board.region = scene_data.region
+			add_child(board)
+			board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			var picked: Array = [null]
+			board.accepted.connect(func(b: BountyData) -> void:
+				picked[0] = b
+				board.closed.emit())
+			await board.closed
+			board.queue_free()
+			if picked[0] != null:
+				var b: BountyData = picked[0]
+				GameState.scene_state(scene_data.id)["cell"] = _cell_at(_player.position)
+				battle_requested.emit(b.stage, b.battle_bonus())
+				return
 	_busy = false
 
 

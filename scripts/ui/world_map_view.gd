@@ -10,14 +10,23 @@ signal scene_requested(scene_id: String)
 signal recruit_requested
 signal heroes_requested
 signal story_requested(story: StoryData)
+signal jianghu_requested
+signal profile_requested
 
-const MAP_SIZE := Vector2(1280, 720)
+## 拖动地图时，手指移动超过这么多像素才算拖（不算点击）
+const DRAG_SLOP := 10.0
+## 赶路时镜头跟随主角的快慢
+const CAMERA_FOLLOW := 6.0
+const ROAD_DASH := 12.0
+const ROAD_GAP := 9.0
 const WALK_SPEED := 260.0
 const ENCOUNTER_AT := 0.5
 ## 一程路上没遇敌时，碰上奇遇的概率
 const EVENT_CHANCE := 0.3
 ## 第一次到一个地点给的聚义令
 const FIRST_VISIT_TOKENS := 3
+## 地图上走路时头像每一步跳起的高度
+const AVATAR_HOP := 7.0
 const PAPER := Color("efe7d4")
 const INK := Color("1e1c1a")
 const CINNABAR := Color("be3226")
@@ -28,6 +37,8 @@ var resume_destination: StringName = &""
 var resume_progress := 0.0
 ## 打开地图时先提示一句，比如升级
 var notice := ""
+## 从江湖榜点「前往」：一进地图就走向这个地点
+var focus_location: StringName = &""
 
 var _layer: Control
 var _avatar: Control
@@ -42,6 +53,10 @@ var _event_panel: EventPanel
 var _status: Label
 var _walking := false
 var _rng := RandomNumberGenerator.new()
+## 地图拖到哪了：底图左上角在屏幕上的位置
+var _pan := Vector2.ZERO
+var _drag_from := Vector2.INF
+var _dragging := false
 
 
 func _ready() -> void:
@@ -52,14 +67,21 @@ func _ready() -> void:
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	_layer = Control.new()
-	_layer.size = MAP_SIZE
+	_layer.size = map.size
 	add_child(_layer)
 	var tex := TextureRect.new()
 	tex.texture = map.texture
-	tex.size = MAP_SIZE
+	tex.size = map.size
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# 按住底图拖动地图
+	tex.mouse_filter = Control.MOUSE_FILTER_STOP
+	tex.gui_input.connect(_on_drag_input)
 	_layer.add_child(tex)
+	var roads := Control.new()
+	roads.size = map.size
+	roads.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	roads.draw.connect(_draw_roads.bind(roads))
+	_layer.add_child(roads)
 
 	for loc in map.locations:
 		_build_location(loc)
@@ -78,11 +100,13 @@ func _ready() -> void:
 	add_child(_toast)
 
 	resized.connect(_layout)
-	_layout()
 	_refresh_locks()
 	_place_avatar(map.location(GameState.location_id).map_position)
+	_layout()
 	if resume_destination != &"":
 		_travel(resume_destination, resume_progress, false)
+	elif focus_location != &"" and focus_location != GameState.location_id:
+		_travel(focus_location, 0.0, true)
 	else:
 		_show_panel(map.location(GameState.location_id))
 	if notice != "":
@@ -178,13 +202,29 @@ func _build_top_bar() -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 16)
 	bar.add_child(row)
-	var title := UiKit.label(map.title, 26, PAPER)
-	row.add_child(title)
+	# 左上角是主角：头像 + 名字，点了进主角页
+	var me := GameState.protagonist()
+	var profile := UiKit.button(me.display_name if me != null else map.title, Vector2(150, 44), 22)
+	if me != null and me.face != null:
+		profile.icon = me.face
+		profile.expand_icon = true
+		profile.add_theme_constant_override("icon_max_width", 36)
+	profile.add_theme_color_override("font_color", PAPER)
+	profile.pressed.connect(func() -> void:
+		if not _walking:
+			profile_requested.emit())
+	row.add_child(profile)
 	_status = UiKit.label("", 20, UiKit.GOLD)
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.add_child(_status)
 	_refresh_status()
+	var jianghu_button := UiKit.button("江湖榜", Vector2(100, 40), 20)
+	jianghu_button.add_theme_color_override("font_color", UiKit.GOLD)
+	jianghu_button.pressed.connect(func() -> void:
+		if not _walking:
+			jianghu_requested.emit())
+	row.add_child(jianghu_button)
 	var recruit_button := UiKit.button("招募", Vector2(100, 40), 20)
 	recruit_button.pressed.connect(func() -> void:
 		if not _walking:
@@ -225,11 +265,75 @@ func _build_panel() -> void:
 
 
 func _layout() -> void:
-	_layer.position = ((size - MAP_SIZE) / 2).floor()
+	_center_on(_avatar.position + Vector2(36, 96), true)
 	_panel.reset_size()
 	_panel.position = Vector2((size.x - _panel.size.x) / 2, size.y - _panel.size.y - 14)
 	_toast.size = Vector2(size.x, 60)
 	_toast.position = Vector2(0, size.y * 0.42)
+
+
+# --- 拖动和镜头 ---
+
+func _process(delta: float) -> void:
+	if _walking and not _dragging:
+		var target := _clamp_pan(size / 2 - (_avatar.position + Vector2(36, 96)))
+		_set_pan(_pan.lerp(target, clampf(CAMERA_FOLLOW * delta, 0.0, 1.0)))
+
+
+## 把地图上的 point 放到屏幕中间（地图比屏幕小的方向就居中）。
+func _center_on(point: Vector2, snap: bool) -> void:
+	var target := _clamp_pan(size / 2 - point)
+	_set_pan(target if snap else _pan.lerp(target, 0.2))
+
+
+func _clamp_pan(p: Vector2) -> Vector2:
+	for axis in 2:
+		if map.size[axis] <= size[axis]:
+			p[axis] = (size[axis] - map.size[axis]) / 2
+		else:
+			p[axis] = clampf(p[axis], size[axis] - map.size[axis], 0.0)
+	return p
+
+
+func _set_pan(p: Vector2) -> void:
+	_pan = p
+	_layer.position = p.round()
+
+
+func _on_drag_input(event: InputEvent) -> void:
+	var click := event as InputEventMouseButton
+	if click != null and click.button_index == MOUSE_BUTTON_LEFT:
+		if click.pressed:
+			_drag_from = click.global_position
+			_dragging = false
+		else:
+			_drag_from = Vector2.INF
+			_dragging = false
+		return
+	var motion := event as InputEventMouseMotion
+	if motion == null or _drag_from == Vector2.INF:
+		return
+	if not _dragging and motion.global_position.distance_to(_drag_from) > DRAG_SLOP:
+		_dragging = true
+	if _dragging:
+		_set_pan(_clamp_pan(_pan + motion.relative))
+
+
+## 道路：墨色虚线，下面垫一道淡淡的宽线。
+func _draw_roads(canvas: Control) -> void:
+	for road in map.roads:
+		canvas.draw_polyline(road.points, Color(INK, 0.12), 9.0, true)
+		var pts := road.points
+		for i in range(1, pts.size()):
+			var a := pts[i - 1]
+			var b := pts[i]
+			var length := a.distance_to(b)
+			var dir := (b - a) / maxf(length, 0.001)
+			var t := 0.0
+			while t < length:
+				var e := minf(t + ROAD_DASH, length)
+				canvas.draw_line(a + dir * t, a + dir * e, Color(INK, 0.6), 3.0, true)
+				t = e + ROAD_GAP
 
 
 # --- 交互 ---
@@ -285,7 +389,11 @@ func _walk(points: PackedVector2Array, from: float, to: float) -> void:
 	bob.tween_property(_avatar, "rotation", -0.08, 0.15)
 	var walk := create_tween()
 	var duration := _length(points) * (to - from) / WALK_SPEED
-	walk.tween_method(func(p: float) -> void: _place_avatar(_sample(points, p)), from, to, maxf(duration, 0.1))
+	var started := Time.get_ticks_msec()
+	# 一边走一边一跳一跳：每 0.3 秒（左右各摆一次）跳一下
+	walk.tween_method(func(p: float) -> void:
+		var t := (Time.get_ticks_msec() - started) / 1000.0
+		_place_avatar(_sample(points, p) - Vector2(0, absf(sin(t * PI / 0.3)) * AVATAR_HOP)), from, to, maxf(duration, 0.1))
 	await walk.finished
 	bob.kill()
 	_avatar.rotation = 0.0
@@ -398,16 +506,16 @@ func _open_market() -> void:
 func _open_board(loc: LocationData) -> void:
 	var board := BountyBoard.new()
 	board.bounties = GameDB.open_bounties(loc.id)
+	board.region = loc.id
 	add_child(board)
 	board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	board.closed.connect(board.queue_free)
 	board.accepted.connect(func(b: BountyData) -> void:
-		battle_requested.emit(b.stage, &"", 0.0, {"tokens": b.tokens(), "equip_quality": b.equip_quality(), "flag": "bounty_" + String(b.id),
-			"text": "揭下了「%s」的悬赏。" % b.target}))
+		battle_requested.emit(b.stage, &"", 0.0, b.battle_bonus()))
 
 
 func _refresh_status() -> void:
-	_status.text = "%s　Lv%d　经验 %d/%d　银两 %d　聚义令 %d" % [GameState.player_name, GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver, GameState.tokens]
+	_status.text = "Lv%d　经验 %d/%d　银两 %d　聚义令 %d" % [GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver, GameState.tokens]
 
 
 func _refresh_locks() -> void:

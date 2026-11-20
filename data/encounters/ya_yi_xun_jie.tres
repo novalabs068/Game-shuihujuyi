@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_j80he"]
+[ext_resource type="Resource" path="res://data/enemies/xun_jie_ya_yi.tres" id="2_t6e80"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="3_fhj8s"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_fifgp"]
+
+[resource]
+script = ExtResource("4_fifgp")
+id = "ya_yi_xun_jie"
+title = "衙役巡街"
+enemies = Array[ExtResource("1_j80he")]([ExtResource("2_t6e80"), ExtResource("3_fhj8s")])

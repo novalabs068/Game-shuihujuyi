@@ -175,6 +175,10 @@ layout = "########################################
 spawn_cell = Vector2i(20, 16)
 npcs = Array[ExtResource("2_4tth7")]([SubResource("Resource_vyxfh"), SubResource("Resource_dgu0q"), SubResource("Resource_s2na7"), SubResource("Resource_arty7"), SubResource("Resource_kb5ui")])
 chests = Array[ExtResource("1_kwhtk")]([SubResource("Resource_3rb5v")])
+region = &"dongjing"
+roam_spots = Array[Vector2i]([Vector2i(2, 2), Vector2i(22, 2), Vector2i(11, 18), Vector2i(37, 18)])
+exit_scene = "dongjing_street"
+exit_cell = Vector2i(45, 13)
 overlays = Dictionary[String, Texture2D]({
 "=": ExtResource("10_15oec"),
 "T": ExtResource("9_5krpj"),

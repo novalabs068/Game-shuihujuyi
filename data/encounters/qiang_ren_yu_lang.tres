@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_8fcq6"]
+[ext_resource type="Resource" path="res://data/enemies/lin_zhong_qiang_ren.tres" id="2_hy5j1"]
+[ext_resource type="Resource" path="res://data/enemies/ye_lang.tres" id="3_vw3ka"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_kdlns"]
+
+[resource]
+script = ExtResource("4_kdlns")
+id = "qiang_ren_yu_lang"
+title = "强人带狼"
+enemies = Array[ExtResource("1_8fcq6")]([ExtResource("2_hy5j1"), ExtResource("3_vw3ka")])

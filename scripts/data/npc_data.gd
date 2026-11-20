@@ -15,3 +15,7 @@ extends Resource
 @export var event: EventData
 ## 这个标记出现后，人物不再出现在场景里（比如支线结束后泼皮掉进了粪窖）
 @export var hide_flag: String
+## 说完话之后做的事：&"market" 打开集市，&"bounties" 打开这个地区的悬赏告示
+@export var action: StringName
+## 不是人而是物件（比如告示栏）：按瓦片的倍数放大，不呼吸、不转身
+@export var still := false

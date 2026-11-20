@@ -12,14 +12,20 @@ const SILVER_PER_LEVEL := 3
 
 ## 按地点的遭遇组合生成一场战斗：随机挑一个组合，敌人等级在地区区间内贴近队伍等级，偶尔把一个敌人换成精英。
 static func build(loc: LocationData, party_level: int, rng: RandomNumberGenerator) -> StageData:
-	if loc.encounter_groups.is_empty():
+	return build_from(loc.encounter_groups, loc.level_min, loc.level_max, party_level, rng)
+
+
+## 从 groups 里挑一个组合生成一场战斗。bonus 是额外加的等级（场景深处的小怪更强），
+## 加上之后可以超出地区的等级上限。
+static func build_from(groups: Array[StageData], level_min: int, level_max: int, party_level: int, rng: RandomNumberGenerator, bonus := 0) -> StageData:
+	if groups.is_empty():
 		return null
-	var template: StageData = loc.encounter_groups[rng.randi_range(0, loc.encounter_groups.size() - 1)]
+	var template: StageData = groups[rng.randi_range(0, groups.size() - 1)]
 	var stage := StageData.new()
 	stage.id = "encounter_%s" % template.id
 	stage.title = template.title
 	stage.star_round_limit = template.star_round_limit
-	stage.enemy_level = clampi(clampi(party_level, loc.level_min, loc.level_max) + rng.randi_range(0, 1), loc.level_min, loc.level_max)
+	stage.enemy_level = clampi(clampi(party_level, level_min, level_max) + rng.randi_range(0, 1), level_min, level_max) + bonus
 	stage.recommended_level = stage.enemy_level
 	var enemies: Array[UnitData] = template.enemies.duplicate()
 	if rng.randf() < ELITE_CHANCE:

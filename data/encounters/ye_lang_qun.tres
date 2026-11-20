@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_7nc61"]
+[ext_resource type="Resource" path="res://data/enemies/ye_lang.tres" id="2_dnoxv"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_61buy"]
+
+[resource]
+script = ExtResource("3_61buy")
+id = "ye_lang_qun"
+title = "野狼群"
+enemies = Array[ExtResource("1_7nc61")]([ExtResource("2_dnoxv"), ExtResource("2_dnoxv")])

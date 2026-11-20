@@ -38,6 +38,8 @@ func _initialize() -> void:
 		"test_story_script_parse",
 		"test_story_data",
 		"test_martial_data",
+		"test_scene_links",
+		"test_world_roads",
 		"test_gear_effects",
 		"test_new_skill_effects",
 		"test_steal_skips_debuffs",
@@ -355,7 +357,7 @@ func test_ai_guards_when_threatened() -> bool:
 
 func test_map_routes() -> bool:
 	var map: WorldMapData = load("res://data/maps/ch1.tres")
-	check_eq(map.locations.size(), 5, "chapter 1 has 5 locations")
+	check_eq(map.locations.size(), 11, "the world map has 11 locations")
 	var forward := map.route(&"dongjing", &"cangzhou")
 	check_eq(forward[0], map.location(&"dongjing").map_position, "route starts at the origin")
 	check_eq(forward[forward.size() - 1], map.location(&"cangzhou").map_position, "route ends at the destination")
@@ -656,6 +658,50 @@ func test_martial_data() -> bool:
 	check(&"keen" in boosted.gear_effects, "林家枪法 side: keen")
 	var story: StoryData = load("res://data/stories/lin_chong_4.tres")
 	check(story.martial == lin, "林冲列传 finale teaches 林家枪法")
+	return true
+
+
+func test_scene_links() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	var ids: Array[String] = []
+	var scenes: Array = GameDB.load_dir("res://data/scenes/")
+	for res in scenes:
+		ids.append((res as SceneData).id)
+	for res in scenes:
+		var sd: SceneData = res
+		check(sd.is_walkable(sd.spawn_cell), "%s spawn is walkable" % sd.id)
+		for spot in sd.roam_spots:
+			check(sd.is_walkable(spot), "%s roam spot %s is walkable" % [sd.id, spot])
+		if not sd.roam_spots.is_empty():
+			check(map.location(sd.region) != null, "%s region %s exists" % [sd.id, sd.region])
+		for cell in sd.doors:
+			check(sd.terrain_at(cell) == "D", "%s door %s sits on a D cell" % [sd.id, cell])
+			check(sd.doors[cell] in ids, "%s door leads to an existing scene" % sd.id)
+		if sd.exit_scene != "":
+			check(sd.exit_scene in ids, "%s exit leads to an existing scene" % sd.id)
+			var target: SceneData = scenes.filter(func(r: Resource) -> bool: return (r as SceneData).id == sd.exit_scene)[0]
+			check(target.is_walkable(sd.exit_cell), "%s exit cell is walkable in %s" % [sd.id, sd.exit_scene])
+		for npc in sd.npcs:
+			check(not sd.is_walkable(npc.cell) or sd.terrain_at(npc.cell) in [".", ",", "_"], "%s npc %s stands on open ground" % [sd.id, npc.display_name])
+	for loc in map.locations:
+		if loc.scene_id != "":
+			check(loc.scene_id in ids, "%s scene %s exists" % [loc.display_name, loc.scene_id])
+	return true
+
+
+func test_world_roads() -> bool:
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	for loc in map.locations:
+		if loc.id == map.start_location:
+			continue
+		var pts := map.route(map.start_location, loc.id)
+		check(pts.size() >= 2, "%s is reachable by road" % loc.display_name)
+		check(pts[0].distance_to(map.location(map.start_location).map_position) < 1.0, "route to %s starts at the start" % loc.display_name)
+		check(pts[pts.size() - 1].distance_to(loc.map_position) < 1.0, "route to %s ends at %s" % [loc.display_name, loc.display_name])
+		check(Rect2(Vector2.ZERO, map.size).has_point(loc.map_position), "%s is on the map" % loc.display_name)
+	for road in map.roads:
+		check(map.location(road.a) != null and map.location(road.b) != null, "road %s-%s joins real places" % [road.a, road.b])
 	return true
 
 

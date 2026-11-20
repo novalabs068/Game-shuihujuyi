@@ -6,6 +6,8 @@ signal accepted(bounty: BountyData)
 signal closed
 
 var bounties: Array[BountyData] = []
+## 哪个地区的告示栏：下面还贴着这里的小悬赏（OddJobs）
+var region: StringName = &""
 
 
 func _ready() -> void:
@@ -52,6 +54,18 @@ func _ready() -> void:
 		var take := UiKit.button("接下", Vector2(120, 56), 22)
 		take.pressed.connect(func() -> void: accepted.emit(b))
 		row.add_child(take)
+	if region != &"":
+		var jobs := OddJobs.jobs_for(region)
+		if not jobs.is_empty():
+			v.add_child(UiKit.label("小悬赏（不用接，打赢了就算；做完马上换新的）", 22, Color("be3226")))
+			for job: Dictionary in jobs:
+				var row := HBoxContainer.new()
+				row.add_theme_constant_override("separation", 14)
+				v.add_child(row)
+				var text := UiKit.label(OddJobs.describe(job), 20, ink)
+				text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				row.add_child(text)
+				row.add_child(UiKit.label("赏：" + OddJobs.reward_text(job), 17, Color("be3226")))
 	var close := UiKit.button("离开", Vector2(160, 52), 22)
 	close.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void: closed.emit())

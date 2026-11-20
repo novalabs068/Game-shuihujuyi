@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_nr10l"]
+[ext_resource type="Resource" path="res://data/enemies/gao_fu_jia_ding.tres" id="2_sxgit"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_ux3ea"]
+
+[resource]
+script = ExtResource("3_ux3ea")
+id = "jia_ding_heng_xing"
+title = "家丁横行"
+enemies = Array[ExtResource("1_nr10l")]([ExtResource("2_sxgit"), ExtResource("2_sxgit")])

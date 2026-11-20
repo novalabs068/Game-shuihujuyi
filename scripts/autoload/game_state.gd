@@ -38,13 +38,33 @@ var items: Array[Dictionary] = []
 var martials: Array[StringName] = []
 var martial_main: StringName = &""
 var martial_side: StringName = &""
+## 江湖履历：打赢几场、其中游荡小怪几只、闯荡了多少秒（主角页显示）
+var record: Dictionary = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0}
+## 小悬赏：{地区 id: [{enemy, name, need, have, silver, exp, tokens}, ...]}，见 OddJobs
+var jobs: Dictionary = {}
 var _next_uid := 1
+
+## 场景里的临时状态（不存档）：{场景 id: {"cleared": 打败的小怪序号, "cell": 打完仗回来站的格子}}。
+## 离开场景就清掉，再进来小怪会重新出现
+var scene_memory: Dictionary = {}
+## 正在打的场景小怪 [场景 id, 序号]；打赢了记进 scene_memory
+var pending_roamer: Array = []
 
 var _protagonist: UnitData
 
 
 func _ready() -> void:
 	load_game()
+
+
+func _process(delta: float) -> void:
+	if player_name != "":
+		record["play_seconds"] += delta
+
+
+## 打赢一场就记一笔（main 在战斗结算时调用）。
+func record_win() -> void:
+	record["wins"] += 1
 
 
 ## 开新档：起名、选出身，从出身的开局地点出发。
@@ -247,6 +267,22 @@ func _learn_origin_martial() -> void:
 		_protagonist = null
 
 
+# --- 场景小怪 ---
+
+func scene_state(scene_id: String) -> Dictionary:
+	if not scene_memory.has(scene_id):
+		scene_memory[scene_id] = {"cleared": [], "cell": null}
+	return scene_memory[scene_id]
+
+
+## 一场仗打完：如果是场景小怪，赢了就记下它已被打败。
+func finish_roamer(won: bool) -> void:
+	if won and pending_roamer.size() == 2:
+		scene_state(pending_roamer[0])["cleared"].append(pending_roamer[1])
+		record["roamers"] += 1
+	pending_roamer = []
+
+
 # --- 列传 ---
 
 func story_done(story: StoryData) -> bool:
@@ -415,6 +451,8 @@ func reset() -> void:
 	martials.clear()
 	martial_main = &""
 	martial_side = &""
+	record = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0}
+	jobs = {}
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
 	level = 1
@@ -448,6 +486,8 @@ func save_game() -> void:
 		"pulls_since_jia": pulls_since_jia,
 		"stars": _ids_to_json(stars),
 		"yiqi": yiqi,
+		"record": record,
+		"jobs": jobs,
 		"martials": martials.map(func(id: StringName) -> String: return String(id)),
 		"martial_main": String(martial_main),
 		"martial_side": String(martial_side),
@@ -499,6 +539,10 @@ func load_game() -> void:
 	for id: String in saved_stars:
 		stars[StringName(id)] = int(saved_stars[id])
 	yiqi = data.get("yiqi", 0)
+	var saved_record: Dictionary = data.get("record", {})
+	for key in record:
+		record[key] = saved_record.get(key, record[key])
+	jobs = data.get("jobs", {})
 	var saved_martials: Array = data.get("martials", [])
 	for id: String in saved_martials:
 		if GameDB.martials.has(StringName(id)):

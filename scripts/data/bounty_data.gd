@@ -25,5 +25,10 @@ func equip_quality() -> EquipData.Quality:
 	return EquipData.Quality.JING if grade == Grade.JIA else EquipData.Quality.LIANG
 
 
+## 接下悬赏开打时交给 main 的额外奖励。
+func battle_bonus() -> Dictionary:
+	return {"tokens": tokens(), "equip_quality": equip_quality(), "flag": "bounty_" + String(id), "text": "揭下了「%s」的悬赏。" % target}
+
+
 func grade_name() -> String:
 	return GRADE_NAMES[grade]

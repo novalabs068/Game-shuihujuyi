@@ -16,6 +16,8 @@ const TERRAIN := {
 	"W": {"tile": 9, "walk": false},  # 水井
 	"P": {"tile": 10, "walk": false}, # 粪窖
 	"H": {"tile": 11, "walk": false}, # 建筑占地（上面摆 PropData 的建筑图）
+	"D": {"tile": 8, "walk": true},   # 门：走到这里进 doors 里写的另一个场景
+	"h": {"tile": 0, "walk": false},  # 小物件占地（摊子、木桶等）：地面还是草地，只是不能走
 }
 
 @export var id: String
@@ -30,6 +32,19 @@ const TERRAIN := {
 @export var spawn_cell: Vector2i
 @export var npcs: Array[NpcData] = []
 @export var chests: Array[ChestData] = []
+## 所属地区（大地图上的地点 id）：小怪按这里的遇敌表和等级生成，告示栏揭这里的悬赏
+@export var region: StringName
+## 小怪的出生点，每个一只；空的就没有小怪
+@export var roam_spots: Array[Vector2i] = []
+## 这个场景自己的小怪组合；空的就用所属地区的遇敌表
+@export var roam_groups: Array[StageData] = []
+## 每个出生点额外加几级（和 roam_spots 一一对应，缺的算 0）：场景越深处越强
+@export var roam_bonus: Array[int] = []
+## 门格子（地形 D）→ 进哪个场景（出现在那个场景的 spawn_cell）
+@export var doors: Dictionary[Vector2i, String] = {}
+## 走到出口（地形 E）去哪个场景、出现在哪一格；为空就回江湖大地图
+@export var exit_scene: String
+@export var exit_cell: Vector2i
 
 @export_group("像素图")
 ## 画在某种地形格子上的物件图，比如 "T" → 树、"W" → 水井；图的底边中点对齐格子底边中点

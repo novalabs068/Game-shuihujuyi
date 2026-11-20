@@ -3420,6 +3420,1013 @@
         "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
         "prompt_file": "art/prompts/story_liangshan.txt"
       }
+    },
+    {
+      "id": "pixel-xiao_fan",
+      "role": "像素小人（货郎）",
+      "path": "art/pixel/characters/xiao_fan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_people.txt；原图 art/inbox/pixel_dongjing_people.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-jiu_bao",
+      "role": "像素小人（酒保）",
+      "path": "art/pixel/characters/jiu_bao.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_people.txt；原图 art/inbox/pixel_dongjing_people.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-tie_jiang",
+      "role": "像素小人（铁匠）",
+      "path": "art/pixel/characters/tie_jiang.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_people.txt；原图 art/inbox/pixel_dongjing_people.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-shuo_shu",
+      "role": "像素小人（说书先生）",
+      "path": "art/pixel/characters/shuo_shu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_people.txt；原图 art/inbox/pixel_dongjing_people.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-mai_hua",
+      "role": "像素小人（卖花姑娘）",
+      "path": "art/pixel/characters/mai_hua.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_people.txt；原图 art/inbox/pixel_dongjing_people.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-jiu_lou",
+      "role": "像素建筑（酒楼）",
+      "path": "art/pixel/buildings/jiu_lou.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_buildings_a.txt；原图 art/inbox/pixel_dongjing_buildings_a.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-ke_zhan",
+      "role": "像素建筑（客栈）",
+      "path": "art/pixel/buildings/ke_zhan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_buildings_a.txt；原图 art/inbox/pixel_dongjing_buildings_a.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-tie_jiang_pu",
+      "role": "像素建筑（铁匠铺）",
+      "path": "art/pixel/buildings/tie_jiang_pu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_buildings_b.txt；原图 art/inbox/pixel_dongjing_buildings_b.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-min_zhai_a",
+      "role": "像素建筑（民宅）",
+      "path": "art/pixel/buildings/min_zhai_a.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_buildings_b.txt；原图 art/inbox/pixel_dongjing_buildings_b.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-min_zhai_b",
+      "role": "像素建筑（民宅）",
+      "path": "art/pixel/buildings/min_zhai_b.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_buildings_b.txt；原图 art/inbox/pixel_dongjing_buildings_b.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-cheng_men",
+      "role": "像素建筑（城门）",
+      "path": "art/pixel/buildings/cheng_men.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_gate.txt；原图 art/inbox/pixel_dongjing_gate.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-gao_shi_lan",
+      "role": "像素物件（告示栏）",
+      "path": "art/pixel/props/gao_shi_lan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_props.txt；原图 art/inbox/pixel_dongjing_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-shui_guo_tan",
+      "role": "像素物件（水果摊）",
+      "path": "art/pixel/props/shui_guo_tan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_props.txt；原图 art/inbox/pixel_dongjing_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-bu_pi_tan",
+      "role": "像素物件（布匹摊）",
+      "path": "art/pixel/props/bu_pi_tan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_props.txt；原图 art/inbox/pixel_dongjing_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-mu_tong",
+      "role": "像素物件（木桶）",
+      "path": "art/pixel/props/mu_tong.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_props.txt；原图 art/inbox/pixel_dongjing_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-tui_che",
+      "role": "像素物件（推车）",
+      "path": "art/pixel/props/tui_che.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_props.txt；原图 art/inbox/pixel_dongjing_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-shi_shi",
+      "role": "像素物件（石狮）",
+      "path": "art/pixel/props/shi_shi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_dongjing_props.txt；原图 art/inbox/pixel_dongjing_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "fx-step-dust",
+      "role": "走路扬土特效（序列帧）",
+      "path": "art/fx/step_dust.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "32×16 × 13 帧（每行 3 帧）",
+        "alpha": true,
+        "filtering": "nearest"
+      },
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "pixelfx（MIT, patch-gg/pixelfx）的渲染工具，特效源码 tools/pixelfx/step-dust.js 为本项目自写",
+        "date": "2026-11-19"
+      }
+    },
+    {
+      "id": "pixel-ye_lang",
+      "role": "像素小人（野狼）",
+      "path": "art/pixel/characters/ye_lang.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-dao_mu_zei",
+      "role": "像素小人（盗墓贼）",
+      "path": "art/pixel/characters/dao_mu_zei.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-tai_wei_jia_ding",
+      "role": "像素小人（太尉府家丁）",
+      "path": "art/pixel/characters/tai_wei_jia_ding.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-xun_jie_ya_yi",
+      "role": "像素小人（巡街衙役）",
+      "path": "art/pixel/characters/xun_jie_ya_yi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-lei_tai_jiao_tou",
+      "role": "像素小人（擂台教头）",
+      "path": "art/pixel/characters/lei_tai_jiao_tou.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "2x",
+        "height": "约 48 像素",
+        "outline": "1 像素深墨色"
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_enemies.txt；原图 art/inbox/pixel_wild_enemies.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-nong_she",
+      "role": "像素物件（茅草农舍）",
+      "path": "art/pixel/props/nong_she.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_props.txt；原图 art/inbox/pixel_wild_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-tu_di_miao",
+      "role": "像素物件（土地庙）",
+      "path": "art/pixel/props/tu_di_miao.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_props.txt；原图 art/inbox/pixel_wild_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-fen_dui",
+      "role": "像素物件（坟堆）",
+      "path": "art/pixel/props/fen_dui.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_props.txt；原图 art/inbox/pixel_wild_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-mu_bei",
+      "role": "像素物件（墓碑）",
+      "path": "art/pixel/props/mu_bei.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_props.txt；原图 art/inbox/pixel_wild_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-song_shu",
+      "role": "像素物件（松树）",
+      "path": "art/pixel/props/song_shu.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_props.txt；原图 art/inbox/pixel_wild_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-da_shi",
+      "role": "像素物件（大石头）",
+      "path": "art/pixel/props/da_shi.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_wild_props.txt；原图 art/inbox/pixel_wild_props.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-lei_tai",
+      "role": "像素建筑（擂台）",
+      "path": "art/pixel/buildings/lei_tai.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-19",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_arena.txt；原图 art/inbox/pixel_arena.png"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "map-jianghu",
+      "role": "江湖大地图（11 个地点）",
+      "path": "art/maps/jianghu.jpg",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "2048×1152（原图 1280×720 放大）",
+        "alpha": false,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "ink-wash"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-18",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/sun_erniang.txt + art/STYLE.md 提示词固定段；原图 art/inbox/sun_erniang.png",
+        "prompt_file": "art/prompts/world_map_2.txt"
+      }
     }
   ]
 }

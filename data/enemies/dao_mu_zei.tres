@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/dao_mu_zei.png" id="1_3siul"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_xr6dr"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="3_katwj"]
+
+[sub_resource type="Resource" id="Resource_w8f3h"]
+script = ExtResource("3_katwj")
+display_name = "阴风暗刺"
+description = "无视嘲讽，打血量比例最低的人，150% 伤害。"
+effect = 9
+power = 1.5
+
+[resource]
+script = ExtResource("2_xr6dr")
+id = &"dao_mu_zei"
+display_name = "盗墓贼"
+role = 1
+base_hp = 330
+base_atk = 86
+base_def = 14
+base_spd = 110
+map_sprite = ExtResource("1_3siul")
+skill = SubResource("Resource_w8f3h")

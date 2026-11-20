@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_8xkmq"]
+[ext_resource type="Resource" path="res://data/enemies/ye_lang.tres" id="2_f2f1y"]
+[ext_resource type="Resource" path="res://data/enemies/dao_mu_zei.tres" id="3_sxoeo"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_fgag2"]
+
+[resource]
+script = ExtResource("4_fgag2")
+id = "lang_yu_zei"
+title = "狼和贼"
+enemies = Array[ExtResource("1_8xkmq")]([ExtResource("2_f2f1y"), ExtResource("3_sxoeo")])

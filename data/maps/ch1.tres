@@ -3,25 +3,31 @@
 [ext_resource type="Script" path="res://scripts/data/location_data.gd" id="1_juigf"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="2_cfjxm"]
 [ext_resource type="Script" path="res://scripts/data/world_map_data.gd" id="2_nn1cj"]
-[ext_resource type="Texture2D" path="res://art/maps/ch1.png" id="3_hoelj"]
 [ext_resource type="Resource" path="res://data/encounters/ma_zei_jie_lue.tres" id="3_hsiqv"]
 [ext_resource type="Resource" path="res://data/encounters/ma_zei_tou_ling.tres" id="4_3xsx7"]
 [ext_resource type="Resource" path="res://data/encounters/jie_tou_po_pi.tres" id="5_5ofri"]
 [ext_resource type="Resource" path="res://data/encounters/po_pi_xun_xin.tres" id="6_573kp"]
+[ext_resource type="Resource" path="res://data/encounters/qiang_ren_yu_lang.tres" id="6_g0lbk"]
+[ext_resource type="Resource" path="res://data/encounters/jia_ding_heng_xing.tres" id="7_08vw3"]
 [ext_resource type="Resource" path="res://data/encounters/lin_zhong_jie_dao.tres" id="7_680is"]
+[ext_resource type="Resource" path="res://data/encounters/ya_yi_xun_jie.tres" id="8_bor2l"]
 [ext_resource type="Resource" path="res://data/encounters/shan_zhai_xun_shan.tres" id="8_g0lbk"]
 [ext_resource type="Resource" path="res://data/encounters/guan_bing_pan_cha.tres" id="9_08vw3"]
 [ext_resource type="Resource" path="res://data/encounters/gong_shou_mai_fu.tres" id="10_bor2l"]
 [ext_resource type="Resource" path="res://data/encounters/shui_kou_jie_jiang.tres" id="11_4shyt"]
 [ext_resource type="Resource" path="res://data/encounters/shui_zhai_tou_ling.tres" id="12_q6bkc"]
+[ext_resource type="Resource" path="res://data/encounters/ye_lang_qun.tres" id="14_4shyt"]
+[ext_resource type="Resource" path="res://data/encounters/lang_yu_zei.tres" id="15_q6bkc"]
+[ext_resource type="Script" path="res://scripts/data/road_data.gd" id="18_0brh0"]
+[ext_resource type="Texture2D" path="res://art/maps/jianghu.jpg" id="20_rc4vw"]
 
 [sub_resource type="Resource" id="Resource_2yr8w"]
 script = ExtResource("1_juigf")
 id = &"weizhou"
 display_name = "渭州"
 description = "西北边城。城外常有马贼出没，鲁提辖当年就在这里三拳打死了镇关西。"
-map_position = Vector2(150, 370)
-label_position = Vector2(110, 250)
+map_position = Vector2(288, 224)
+label_position = Vector2(348, 74)
 danger = 2
 level_min = 8
 level_max = 12
@@ -29,38 +35,100 @@ encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("3_hsiqv"), ExtRes
 has_market = true
 road_to_next = PackedVector2Array(150, 370, 200, 420, 260, 455, 330, 470, 400, 455, 440, 445)
 
+[sub_resource type="Resource" id="Resource_g0lbk"]
+script = ExtResource("1_juigf")
+id = &"shizipo"
+display_name = "十字坡"
+description = "大树十字坡，客人谁敢那里过？坡上孤零零一家酒店，听说包子馅的来路不太对。"
+map_position = Vector2(152, 528)
+label_position = Vector2(212, 378)
+danger = 2
+level_min = 9
+level_max = 13
+encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("7_680is"), ExtResource("6_g0lbk")])
+
+[sub_resource type="Resource" id="Resource_08vw3"]
+script = ExtResource("1_juigf")
+id = &"kuaihuolin"
+display_name = "快活林"
+description = "孟州城东的快活林，酒肆赌坊林立，如今被蒋门神强占了去。"
+map_position = Vector2(304, 960)
+label_position = Vector2(364, 810)
+danger = 3
+level_min = 12
+level_max = 16
+encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("7_08vw3"), ExtResource("8_bor2l")])
+has_market = true
+
 [sub_resource type="Resource" id="Resource_ibthg"]
 script = ExtResource("1_juigf")
 id = &"dongjing"
 display_name = "东京"
 description = "汴梁城，天下第一繁华之地。城里泼皮不少，大相国寺的菜园也在这里。"
-map_position = Vector2(440, 445)
-label_position = Vector2(440, 170)
+map_position = Vector2(704, 576)
+label_position = Vector2(764, 426)
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("5_5ofri"), ExtResource("6_573kp")])
-scene_id = "xiangguosi"
+scene_id = "dongjing_street"
 has_market = true
 road_to_next = PackedVector2Array(440, 445, 520, 425, 580, 430, 640, 455, 690, 470)
+
+[sub_resource type="Resource" id="Resource_bor2l"]
+script = ExtResource("1_juigf")
+id = &"huangnigang"
+display_name = "黄泥冈"
+description = "光秃秃的黄土冈，押运财物的车队最怕在这里歇脚。"
+map_position = Vector2(768, 960)
+label_position = Vector2(828, 810)
+danger = 2
+level_min = 10
+level_max = 14
+encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("9_08vw3"), ExtResource("10_bor2l")])
 
 [sub_resource type="Resource" id="Resource_f4jke"]
 script = ExtResource("1_juigf")
 id = &"yezhulin"
 display_name = "野猪林"
 description = "东京去沧州的必经之路，林深路暗，常有强人劫道。"
-map_position = Vector2(690, 470)
-label_position = Vector2(680, 220)
+map_position = Vector2(1152, 304)
+label_position = Vector2(1212, 154)
 danger = 2
 level_min = 8
 level_max = 12
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("7_680is"), ExtResource("8_g0lbk")])
 road_to_next = PackedVector2Array(690, 470, 760, 470, 830, 470, 905, 495)
 
+[sub_resource type="Resource" id="Resource_4shyt"]
+script = ExtResource("1_juigf")
+id = &"jingyanggang"
+display_name = "景阳冈"
+description = "冈上有吊睛白额大虫伤人，山下酒店挂着「三碗不过冈」的招子。"
+map_position = Vector2(1192, 752)
+label_position = Vector2(1252, 602)
+danger = 3
+level_min = 13
+level_max = 17
+encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("14_4shyt"), ExtResource("15_q6bkc")])
+
+[sub_resource type="Resource" id="Resource_q6bkc"]
+script = ExtResource("1_juigf")
+id = &"yanggu"
+display_name = "阳谷县"
+description = "小小县城，街上卖炊饼的武大郎老实巴交，街坊都说他的媳妇不简单。"
+map_position = Vector2(1448, 832)
+label_position = Vector2(1508, 682)
+danger = 2
+level_min = 10
+level_max = 14
+encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("6_573kp"), ExtResource("8_bor2l")])
+has_market = true
+
 [sub_resource type="Resource" id="Resource_62d41"]
 script = ExtResource("1_juigf")
 id = &"cangzhou"
 display_name = "沧州"
 description = "大雪漫天的边地。草料场、山神庙一带官兵盘查得紧。"
-map_position = Vector2(905, 495)
-label_position = Vector2(890, 295)
+map_position = Vector2(1680, 288)
+label_position = Vector2(1740, 138)
 danger = 3
 level_min = 12
 level_max = 16
@@ -73,19 +141,123 @@ script = ExtResource("1_juigf")
 id = &"liangshan"
 display_name = "梁山泊"
 description = "八百里水泊，水寇出没。山上那座山寨，据说收留天下好汉。"
-map_position = Vector2(1120, 445)
-label_position = Vector2(1150, 250)
+map_position = Vector2(1720, 512)
+label_position = Vector2(1780, 362)
 danger = 4
 level_min = 16
 level_max = 20
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("11_4shyt"), ExtResource("12_q6bkc")])
 
+[sub_resource type="Resource" id="Resource_0brh0"]
+script = ExtResource("1_juigf")
+id = &"erlongshan"
+display_name = "二龙山"
+description = "青州地面的险峰，山腰的宝珠寺被强人占了，只有一条路上得去。"
+map_position = Vector2(1896, 896)
+label_position = Vector2(1956, 746)
+danger = 4
+level_min = 17
+level_max = 21
+encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("8_g0lbk"), ExtResource("4_3xsx7")])
+
+[sub_resource type="Resource" id="Resource_rc4vw"]
+script = ExtResource("18_0brh0")
+a = &"weizhou"
+b = &"shizipo"
+points = PackedVector2Array(288, 224, 282.63358, 267.2045, 275.49603, 309.61664, 265.08594, 350.56476, 250.4, 389.6, 231.08594, 426.56476, 207.49605, 461.61664, 180.63358, 495.2045, 152, 528)
+
+[sub_resource type="Resource" id="Resource_o5koo"]
+script = ExtResource("18_0brh0")
+a = &"weizhou"
+b = &"dongjing"
+points = PackedVector2Array(288, 224, 323.83545, 287.10355, 362.1318, 347.29877, 404.97534, 402.12006, 453.76, 449.91998, 508.97534, 490.12006, 570.13184, 523.29877, 635.83545, 551.1036, 704, 576)
+
+[sub_resource type="Resource" id="Resource_ygxqh"]
+script = ExtResource("18_0brh0")
+a = &"shizipo"
+b = &"dongjing"
+points = PackedVector2Array(152, 528, 222.4695, 517.1007, 292.7153, 508.77417, 362.5477, 505.20148, 431.84, 507.84, 500.5477, 517.2015, 568.7153, 532.7742, 636.4695, 553.1007, 704, 576)
+
+[sub_resource type="Resource" id="Resource_ovval"]
+script = ExtResource("18_0brh0")
+a = &"shizipo"
+b = &"kuaihuolin"
+points = PackedVector2Array(152, 528, 154.46808, 587.8168, 159.45299, 646.74805, 169.08841, 704.04297, 184.8, 759.2, 207.08841, 812.04297, 235.45299, 862.74805, 268.46808, 911.8168, 304, 960)
+
+[sub_resource type="Resource" id="Resource_c6jw2"]
+script = ExtResource("18_0brh0")
+a = &"kuaihuolin"
+b = &"huangnigang"
+points = PackedVector2Array(304, 960, 362, 938.6922, 420, 920.6283, 478, 908.5584, 536, 904.32, 594, 908.5584, 652, 920.6283, 710, 938.6922, 768, 960)
+
+[sub_resource type="Resource" id="Resource_bqji4"]
+script = ExtResource("18_0brh0")
+a = &"dongjing"
+b = &"huangnigang"
+points = PackedVector2Array(704, 576, 697.30493, 626.44916, 692.8471, 676.5255, 692.523, 725.91284, 697.6, 774.4, 708.523, 821.91284, 724.8471, 868.5255, 745.30493, 914.44916, 768, 960)
+
+[sub_resource type="Resource" id="Resource_iiwp1"]
+script = ExtResource("18_0brh0")
+a = &"dongjing"
+b = &"yezhulin"
+points = PackedVector2Array(704, 576, 747.5092, 521.42694, 792.92004, 469.98593, 841.8446, 424.33224, 895.36, 386.24, 953.8446, 356.33224, 1016.92004, 333.98593, 1083.5092, 317.42694, 1152, 304)
+
+[sub_resource type="Resource" id="Resource_mog7q"]
+script = ExtResource("18_0brh0")
+a = &"yezhulin"
+b = &"cangzhou"
+points = PackedVector2Array(1152, 304, 1218.4899, 318.16455, 1284.9052, 329.8682, 1351.1826, 337.02466, 1417.28, 338.24, 1483.1826, 333.02466, 1548.9052, 321.8682, 1614.4899, 306.16455, 1680, 288)
+
+[sub_resource type="Resource" id="Resource_lgc55"]
+script = ExtResource("18_0brh0")
+a = &"dongjing"
+b = &"jingyanggang"
+points = PackedVector2Array(704, 576, 769.04114, 586.79504, 833.46704, 599.2959, 896.75616, 614.9488, 958.56, 634.72, 1018.75616, 658.9488, 1077.467, 687.2959, 1135.0411, 718.79504, 1192, 752)
+
+[sub_resource type="Resource" id="Resource_ueuv3"]
+script = ExtResource("18_0brh0")
+a = &"huangnigang"
+b = &"jingyanggang"
+points = PackedVector2Array(768, 960, 828.95984, 950.22577, 888.7078, 937.9813, 946.2167, 921.1725, 1000.8, 898.4, 1052.2167, 869.1725, 1100.7078, 833.9813, 1146.9598, 794.22577, 1192, 752)
+
+[sub_resource type="Resource" id="Resource_0cb0y"]
+script = ExtResource("18_0brh0")
+a = &"jingyanggang"
+b = &"yanggu"
+points = PackedVector2Array(1192, 752, 1227.0615, 752.2033, 1261.6569, 753.8981, 1295.391, 758.3487, 1328, 766.4, 1359.391, 778.3487, 1389.6569, 793.8981, 1419.0615, 812.2033, 1448, 832)
+
+[sub_resource type="Resource" id="Resource_roaax"]
+script = ExtResource("18_0brh0")
+a = &"yanggu"
+b = &"liangshan"
+points = PackedVector2Array(1448, 832, 1496.6951, 804.4908, 1543.153, 775.07996, 1585.4769, 742.1554, 1622.4, 704.64, 1653.4769, 662.1554, 1679.153, 615.07996, 1700.6951, 564.4908, 1720, 512)
+
+[sub_resource type="Resource" id="Resource_xelko"]
+script = ExtResource("18_0brh0")
+a = &"cangzhou"
+b = &"liangshan"
+points = PackedVector2Array(1680, 288, 1697.8582, 313.7039, 1713.7588, 339.75735, 1726.0424, 366.45673, 1733.6, 394, 1736.0424, 422.45673, 1733.7588, 451.75735, 1727.8582, 481.7039, 1720, 512)
+
+[sub_resource type="Resource" id="Resource_upn4m"]
+script = ExtResource("18_0brh0")
+a = &"liangshan"
+b = &"erlongshan"
+points = PackedVector2Array(1720, 512, 1727.3049, 566.7352, 1736.847, 620.44507, 1750.5231, 672.26025, 1769.6, 721.6, 1794.5231, 768.26025, 1824.847, 812.44507, 1859.3049, 854.7352, 1896, 896)
+
+[sub_resource type="Resource" id="Resource_atlvm"]
+script = ExtResource("18_0brh0")
+a = &"yanggu"
+b = &"erlongshan"
+points = PackedVector2Array(1448, 832, 1506.939, 819.42694, 1565.4305, 809.98596, 1623.0953, 806.3322, 1679.68, 810.24, 1735.0953, 822.3322, 1789.4305, 841.98596, 1842.939, 867.42694, 1896, 896)
+
 [resource]
 script = ExtResource("2_nn1cj")
 id = "ch1"
 title = "江湖"
-texture = ExtResource("3_hoelj")
-locations = Array[ExtResource("1_juigf")]([SubResource("Resource_2yr8w"), SubResource("Resource_ibthg"), SubResource("Resource_f4jke"), SubResource("Resource_62d41"), SubResource("Resource_wch8f")])
+texture = ExtResource("20_rc4vw")
+size = Vector2(2048, 1152)
+roads = Array[ExtResource("18_0brh0")]([SubResource("Resource_rc4vw"), SubResource("Resource_o5koo"), SubResource("Resource_ygxqh"), SubResource("Resource_ovval"), SubResource("Resource_c6jw2"), SubResource("Resource_bqji4"), SubResource("Resource_iiwp1"), SubResource("Resource_mog7q"), SubResource("Resource_lgc55"), SubResource("Resource_ueuv3"), SubResource("Resource_0cb0y"), SubResource("Resource_roaax"), SubResource("Resource_xelko"), SubResource("Resource_upn4m"), SubResource("Resource_atlvm")])
+locations = Array[ExtResource("1_juigf")]([SubResource("Resource_2yr8w"), SubResource("Resource_g0lbk"), SubResource("Resource_08vw3"), SubResource("Resource_ibthg"), SubResource("Resource_bor2l"), SubResource("Resource_f4jke"), SubResource("Resource_4shyt"), SubResource("Resource_q6bkc"), SubResource("Resource_62d41"), SubResource("Resource_wch8f"), SubResource("Resource_0brh0")])
 start_location = &"dongjing"
 encounter_chance = 0.35
 encounter_stage_id = "road_guards"
