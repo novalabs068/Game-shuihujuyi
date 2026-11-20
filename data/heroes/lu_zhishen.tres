@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://art/faces/lu_zhishen.png" id="2_cfk01"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/lu_zhishen.png" id="3_cfk01"]
 [ext_resource type="Texture2D" path="res://art/portraits/lu_zhishen.png" id="3_m8dm8"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_m8dm8"]
 
 [sub_resource type="Resource" id="Resource_sr7h7"]
 script = ExtResource("2_a4odt")
@@ -15,6 +16,13 @@ effect = 4
 turns = 2
 amount = 0.4
 cooldown = 4
+
+[sub_resource type="Resource" id="Resource_gnh42"]
+script = ExtResource("7_m8dm8")
+display_name = "金刚之躯"
+kind = &"tough"
+amount = 0.15
+text = "受到的伤害 -{x}"
 
 [resource]
 script = ExtResource("1_l7e01")
@@ -33,3 +41,4 @@ bust = ExtResource("1_0843t")
 face = ExtResource("2_cfk01")
 map_sprite = ExtResource("3_cfk01")
 skill = SubResource("Resource_sr7h7")
+talent = SubResource("Resource_gnh42")

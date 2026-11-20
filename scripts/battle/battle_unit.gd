@@ -49,6 +49,10 @@ var enraged := false
 ## 灼烧：每次轮到自己时掉 burn_damage 血，还剩 burn_turns 次
 var burn_damage := 0
 var burn_turns := 0
+## 别人的天赋给的特效（比如安道全让全队回春），和 data.gear_effects 一起算
+var extra_effects: Array[StringName] = []
+## 「首击必暴」天赋：还没出过手
+var first_crit_ready := false
 ## 敌人预告的下一步：用技能还是普攻、打谁。只有敌人有，见 BattleModel.intent_target_of()
 var intent_skill := false
 var intent_target: BattleUnit
@@ -68,6 +72,7 @@ func _init(p_data: UnitData, p_side: BattleUnit.Side, p_slot: int, p_level: int)
 	_atk = _scaled(data.base_atk)
 	_def = _scaled(data.base_def)
 	_spd = data.base_spd  # 速度不随等级成长，出手顺序只由好汉本身决定
+	first_crit_ready = has_talent(&"first_crit")
 
 
 func _scaled(base: int) -> int:
@@ -92,6 +97,8 @@ func atk() -> float:
 		bonus += b.atk_bonus
 	if data.elite_trait == &"berserk" and hp_ratio() < BERSERK_THRESHOLD:
 		bonus += BERSERK_BONUS
+	if hp_ratio() < 0.5:
+		bonus += talent(&"bloodlust")
 	return _atk * maxf(1.0 + bonus, MIN_STAT_RATIO)
 
 
@@ -107,7 +114,16 @@ func spd() -> float:
 
 
 func has_gear(effect: StringName) -> bool:
-	return effect in data.gear_effects
+	return effect in data.gear_effects or effect in extra_effects
+
+
+func has_talent(kind: StringName) -> bool:
+	return data.talent != null and data.talent_rank > 0 and data.talent.kind == kind
+
+
+## 这种天赋的当前数值；没有这个天赋时为 0。
+func talent(kind: StringName) -> float:
+	return data.talent.value(data.talent_rank) if has_talent(kind) else 0.0
 
 
 func is_taunting() -> bool:

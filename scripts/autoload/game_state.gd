@@ -32,6 +32,8 @@ var pulls_since_jia := 0
 ## 每位好汉的星数（没记的就是 1 星）、通用货币义气（将魂化来，可换指定好汉的将魂）
 var stars: Dictionary[StringName, int] = {}
 var yiqi := 0
+## 主角和每位好汉的羁绊点数（见 Bonds）
+var bonds: Dictionary[StringName, int] = {}
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
 ## 主角学会的武学、主修（战斗里放的技能）、副修（被动加成，可以空着）
@@ -62,9 +64,31 @@ func _process(delta: float) -> void:
 		record["play_seconds"] += delta
 
 
-## 打赢一场就记一笔（main 在战斗结算时调用）。
-func record_win() -> void:
+## 打赢一场就记一笔，同场的好汉羁绊各涨一点（main 在战斗结算时调用）。返回羁绊升级的提示。
+func record_win() -> String:
 	record["wins"] += 1
+	var parts := PackedStringArray()
+	for id in team_ids:
+		var up := add_bond(id, Bonds.BATTLE_POINTS)
+		if up != "":
+			parts.append(up)
+	return "　".join(parts)
+
+
+func bond_of(id: StringName) -> int:
+	return bonds.get(id, 0)
+
+
+## 涨羁绊；升了一级时返回「与林冲的羁绊升到了相熟」，否则返回空。
+func add_bond(id: StringName, points: int) -> String:
+	if id == PROTAGONIST_ID or not owns(id):
+		return ""
+	var before := Bonds.level(bond_of(id))
+	bonds[id] = bond_of(id) + points
+	var after := Bonds.level(bond_of(id))
+	if after == before:
+		return ""
+	return "与%s的羁绊升到了「%s」" % [GameDB.hero(id).display_name, Bonds.NAMES[after]]
 
 
 ## 开新档：起名、选出身，从出身的开局地点出发。
@@ -206,7 +230,7 @@ func recruit_with_souls(hero: UnitData) -> bool:
 func battle_team() -> Array[UnitData]:
 	var out: Array[UnitData] = []
 	for u in team():
-		var unit := Stars.apply(u, star_of(u.id)) if u.id != PROTAGONIST_ID else u
+		var unit := Bonds.apply(Stars.apply(u, star_of(u.id)), bond_of(u.id)) if u.id != PROTAGONIST_ID else u
 		out.append(Equipment.apply(unit, effective_gear(u.id)))
 	return out
 
@@ -449,6 +473,7 @@ func reset() -> void:
 	pulls_since_jia = 0
 	stars.clear()
 	yiqi = 0
+	bonds.clear()
 	items.clear()
 	_next_uid = 1
 	martials.clear()
@@ -488,6 +513,7 @@ func save_game() -> void:
 		"souls": _ids_to_json(souls),
 		"pulls_since_jia": pulls_since_jia,
 		"stars": _ids_to_json(stars),
+		"bonds": _ids_to_json(bonds),
 		"yiqi": yiqi,
 		"record": record,
 		"jobs": jobs,
@@ -541,6 +567,9 @@ func load_game() -> void:
 	var saved_stars: Dictionary = data.get("stars", {})
 	for id: String in saved_stars:
 		stars[StringName(id)] = int(saved_stars[id])
+	var saved_bonds: Dictionary = data.get("bonds", {})
+	for id: String in saved_bonds:
+		bonds[StringName(id)] = int(saved_bonds[id])
 	yiqi = data.get("yiqi", 0)
 	var saved_record: Dictionary = data.get("record", {})
 	for key in record:

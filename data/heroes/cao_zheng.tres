@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/cao_zheng.png" id="3_k7uo0"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_5vhth"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_km01g"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_ve7l2"]
 
 [sub_resource type="Resource" id="Resource_uel7h"]
 script = ExtResource("5_km01g")
@@ -14,6 +15,13 @@ effect = 13
 power = 1.6
 turns = 2
 amount = 0.3
+
+[sub_resource type="Resource" id="Resource_k7uo0"]
+script = ExtResource("6_ve7l2")
+display_name = "庖丁解牛"
+kind = &"effect"
+effect = &"armor_break"
+text = "普攻打铁甲敌人不减半"
 
 [resource]
 script = ExtResource("4_5vhth")
@@ -32,3 +40,4 @@ portrait = ExtResource("3_k7uo0")
 bust = ExtResource("1_mejw8")
 face = ExtResource("2_ve7l2")
 skill = SubResource("Resource_uel7h")
+talent = SubResource("Resource_k7uo0")

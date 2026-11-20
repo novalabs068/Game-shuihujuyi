@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://art/faces/qin_ming.png" id="2_yvcqe"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/qin_ming.png" id="3_bui4s"]
 [ext_resource type="Texture2D" path="res://art/portraits/qin_ming.png" id="4_8g24v"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_yvcqe"]
 
 [sub_resource type="Resource" id="Resource_2osto"]
 script = ExtResource("2_lo46b")
@@ -15,6 +16,13 @@ effect = 18
 power = 0.7
 amount = 1.0
 cooldown = 4
+
+[sub_resource type="Resource" id="Resource_bui4s"]
+script = ExtResource("7_yvcqe")
+display_name = "性如烈火"
+kind = &"rage_start"
+amount = 30.0
+text = "开战时怒气 +{x}"
 
 [resource]
 script = ExtResource("1_pt5uq")
@@ -34,3 +42,4 @@ bust = ExtResource("1_2osto")
 face = ExtResource("2_yvcqe")
 map_sprite = ExtResource("3_bui4s")
 skill = SubResource("Resource_2osto")
+talent = SubResource("Resource_bui4s")

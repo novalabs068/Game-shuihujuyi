@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/yu_baosi.png" id="3_b3diu"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_0elod"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_g7bec"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_mcfmp"]
 
 [sub_resource type="Resource" id="Resource_s8s2a"]
 script = ExtResource("5_g7bec")
@@ -13,6 +14,14 @@ description = "全队攻击 +25%，持续 2 回合。"
 effect = 15
 turns = 2
 amount = 0.25
+
+[sub_resource type="Resource" id="Resource_b3diu"]
+script = ExtResource("6_mcfmp")
+display_name = "险道神"
+kind = &"stat"
+amount = 0.08
+stats = Array[StringName]([&"hp", &"def"])
+text = "生命、防御 +{x}"
 
 [resource]
 script = ExtResource("4_0elod")
@@ -30,3 +39,4 @@ portrait = ExtResource("3_b3diu")
 bust = ExtResource("1_qfty3")
 face = ExtResource("2_mcfmp")
 skill = SubResource("Resource_s8s2a")
+talent = SubResource("Resource_b3diu")

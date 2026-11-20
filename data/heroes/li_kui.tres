@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_f2fy6"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/li_kui.png" id="3_hpdip"]
 [ext_resource type="Texture2D" path="res://art/portraits/li_kui.png" id="4_ivfko"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_3ghyi"]
 
 [sub_resource type="Resource" id="Resource_s1ctg"]
 script = ExtResource("2_f2fy6")
@@ -15,6 +16,13 @@ effect = 20
 power = 0.5
 hits = 2
 cooldown = 4
+
+[sub_resource type="Resource" id="Resource_hpdip"]
+script = ExtResource("7_3ghyi")
+display_name = "天杀星"
+kind = &"bloodlust"
+amount = 0.4
+text = "生命低于一半时攻击 +{x}"
 
 [resource]
 script = ExtResource("1_eebhq")
@@ -34,3 +42,4 @@ bust = ExtResource("1_s1ctg")
 face = ExtResource("2_3ghyi")
 map_sprite = ExtResource("3_hpdip")
 skill = SubResource("Resource_s1ctg")
+talent = SubResource("Resource_hpdip")

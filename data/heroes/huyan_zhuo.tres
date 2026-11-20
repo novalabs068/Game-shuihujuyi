@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://art/faces/huyan_zhuo.png" id="2_uy7e6"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/huyan_zhuo.png" id="3_0jnoo"]
 [ext_resource type="Texture2D" path="res://art/portraits/huyan_zhuo.png" id="4_b18tt"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_uy7e6"]
 
 [sub_resource type="Resource" id="Resource_8viyb"]
 script = ExtResource("2_jgosu")
@@ -16,6 +17,14 @@ power = 0.8
 turns = 2
 amount = 0.3
 cooldown = 4
+
+[sub_resource type="Resource" id="Resource_0jnoo"]
+script = ExtResource("7_uy7e6")
+display_name = "将门之后"
+kind = &"stat"
+amount = 0.1
+stats = Array[StringName]([&"hp", &"def"])
+text = "生命、防御 +{x}"
 
 [resource]
 script = ExtResource("1_s84ih")
@@ -34,3 +43,4 @@ bust = ExtResource("1_8viyb")
 face = ExtResource("2_uy7e6")
 map_sprite = ExtResource("3_0jnoo")
 skill = SubResource("Resource_8viyb")
+talent = SubResource("Resource_0jnoo")

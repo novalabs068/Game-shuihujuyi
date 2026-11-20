@@ -5,12 +5,21 @@
 [ext_resource type="Texture2D" path="res://art/portraits/du_qian.png" id="3_djps8"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_fjkyk"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_k1f1m"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_bdjsl"]
 
 [sub_resource type="Resource" id="Resource_dnmna"]
 script = ExtResource("5_k1f1m")
 display_name = "摸天一击"
 description = "单体 180% 伤害。"
 power = 1.8
+
+[sub_resource type="Resource" id="Resource_djps8"]
+script = ExtResource("6_bdjsl")
+display_name = "摸着天"
+kind = &"stat"
+amount = 0.12
+stats = Array[StringName]([&"hp"])
+text = "生命 +{x}"
 
 [resource]
 script = ExtResource("4_fjkyk")
@@ -27,3 +36,4 @@ portrait = ExtResource("3_djps8")
 bust = ExtResource("1_cuwwa")
 face = ExtResource("2_bdjsl")
 skill = SubResource("Resource_dnmna")
+talent = SubResource("Resource_djps8")

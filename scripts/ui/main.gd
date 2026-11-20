@@ -119,6 +119,10 @@ func _finish_story(story: StoryData) -> void:
 	if story.souls > 0:
 		GameState.souls[story.hero] = GameState.souls_of(story.hero) + story.souls
 		parts.append("%s将魂 +%d" % [hero.display_name, story.souls])
+	var bond_up := GameState.add_bond(story.hero, Bonds.STORY_POINTS)
+	parts.append("与%s的羁绊 +%d" % [hero.display_name, Bonds.STORY_POINTS])
+	if bond_up != "":
+		parts.append(bond_up)
 	var learned := Rewards.learn(story.martial)
 	if learned != "":
 		parts.append("%s传授了%s" % [hero.display_name, learned.trim_prefix("学会")])
@@ -180,8 +184,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 	screen.exit_requested.connect(leave.bind(""))
 	screen.finished.connect(func(won: bool) -> void:
 		GameState.finish_roamer(won)
-		if won:
-			GameState.record_win()
+		var bond_text := GameState.record_win() if won else ""
 		var notice := ""
 		if won:
 			var r: Dictionary = Encounters.rewards(screen.model)
@@ -206,6 +209,8 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 				parts.append(job_text)
 			if ups > 0:
 				parts.append("升到 %d 级！" % GameState.level)
+			if bond_text != "":
+				parts.append(bond_text)
 			notice = "　".join(parts)
 			GameState.save_game()
 		if won and destination != &"":

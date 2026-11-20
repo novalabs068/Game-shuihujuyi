@@ -18,7 +18,7 @@ static func apply(unit: UnitData, gear: Array[EquipData]) -> UnitData:
 	var atk := 1.0
 	var def := 1.0
 	var spd := 1.0
-	var effects: Array[StringName] = []
+	var effects: Array[StringName] = unit.gear_effects.duplicate()
 	for g in gear:
 		hp += g.hp_pct
 		atk += g.atk_pct

@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_38bck"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/an_daoquan.png" id="3_3ll25"]
 [ext_resource type="Texture2D" path="res://art/portraits/an_daoquan.png" id="3_dpriw"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_dpriw"]
 
 [sub_resource type="Resource" id="Resource_23d7t"]
 script = ExtResource("2_38bck")
@@ -13,6 +14,12 @@ display_name = "妙手回春"
 description = "恢复全队 25% 生命，解除负面状态。"
 effect = 8
 amount = 0.25
+
+[sub_resource type="Resource" id="Resource_krymv"]
+script = ExtResource("7_dpriw")
+display_name = "神医"
+kind = &"team_regen"
+text = "全队每次轮到自己回复 2% 生命"
 
 [resource]
 script = ExtResource("1_8efwv")
@@ -32,3 +39,4 @@ bust = ExtResource("1_e70vg")
 face = ExtResource("2_3ll25")
 map_sprite = ExtResource("3_3ll25")
 skill = SubResource("Resource_23d7t")
+talent = SubResource("Resource_krymv")

@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/song_wan.png" id="3_3gqrb"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_w7dsk"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_6eq45"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_vj47p"]
 
 [sub_resource type="Resource" id="Resource_axhwx"]
 script = ExtResource("5_6eq45")
@@ -13,6 +14,14 @@ description = "嘲讽全体敌人 2 回合，自身减伤 30%。"
 effect = 4
 turns = 2
 amount = 0.3
+
+[sub_resource type="Resource" id="Resource_3gqrb"]
+script = ExtResource("6_vj47p")
+display_name = "云里金刚"
+kind = &"stat"
+amount = 0.15
+stats = Array[StringName]([&"def"])
+text = "防御 +{x}"
 
 [resource]
 script = ExtResource("4_w7dsk")
@@ -29,3 +38,4 @@ portrait = ExtResource("3_3gqrb")
 bust = ExtResource("1_xnyls")
 face = ExtResource("2_vj47p")
 skill = SubResource("Resource_axhwx")
+talent = SubResource("Resource_3gqrb")

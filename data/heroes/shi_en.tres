@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/shi_en.png" id="3_v6wb0"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_cyugf"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_2h0ht"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_f8pgp"]
 
 [sub_resource type="Resource" id="Resource_7t28l"]
 script = ExtResource("5_2h0ht")
@@ -14,6 +15,13 @@ effect = 5
 turns = 2
 amount = 0.1
 rage_gain = 30
+
+[sub_resource type="Resource" id="Resource_v6wb0"]
+script = ExtResource("6_f8pgp")
+display_name = "仗义疏财"
+kind = &"team_rage_start"
+amount = 15.0
+text = "开战时全队怒气 +{x}"
 
 [resource]
 script = ExtResource("4_cyugf")
@@ -32,3 +40,4 @@ portrait = ExtResource("3_v6wb0")
 bust = ExtResource("1_kliiw")
 face = ExtResource("2_f8pgp")
 skill = SubResource("Resource_7t28l")
+talent = SubResource("Resource_v6wb0")

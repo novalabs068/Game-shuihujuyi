@@ -32,9 +32,13 @@ enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 
 @export_group("技能")
 @export var skill: SkillData
+## 好汉的天赋（被动），点亮第 1 颗勾玉时解锁
+@export var talent: TalentData
+## 天赋现在的档次：0 未解锁、1 解锁、2 勾玉全亮强化。由 Stars.apply 在出战前设置
+@export var talent_rank := 0
 
 @export_group("装备")
-## 身上装备带来的特效（EquipData.EFFECTS 的键）。由 Equipment.apply 在出战前设置
+## 身上装备（和「特效」类天赋）带来的特效（EquipData.EFFECTS 的键）。由 Stars.apply、Equipment.apply 在出战前设置
 @export var gear_effects: Array[StringName] = []
 
 @export_group("精英")

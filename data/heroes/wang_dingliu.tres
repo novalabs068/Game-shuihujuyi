@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/wang_dingliu.png" id="3_ol3jo"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_otxbb"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_tqjco"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_kvesg"]
 
 [sub_resource type="Resource" id="Resource_2i3eo"]
 script = ExtResource("5_tqjco")
@@ -14,6 +15,14 @@ effect = 5
 turns = 2
 amount = 0.25
 rage_gain = 10
+
+[sub_resource type="Resource" id="Resource_ol3jo"]
+script = ExtResource("6_kvesg")
+display_name = "活闪婆"
+kind = &"stat"
+amount = 0.1
+stats = Array[StringName]([&"spd"])
+text = "速度 +{x}"
 
 [resource]
 script = ExtResource("4_otxbb")
@@ -31,3 +40,4 @@ portrait = ExtResource("3_ol3jo")
 bust = ExtResource("1_tfsvx")
 face = ExtResource("2_kvesg")
 skill = SubResource("Resource_2i3eo")
+talent = SubResource("Resource_ol3jo")

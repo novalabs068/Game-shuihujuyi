@@ -163,7 +163,7 @@ func _show_detail() -> void:
 	var protagonist := _is_protagonist(hero)
 	var owned := _owned(hero)
 	var star := GameState.star_of(hero.id)
-	var effective := Equipment.apply(hero if protagonist else Stars.apply(hero, star), GameState.effective_gear(hero.id))
+	var effective := Equipment.apply(hero if protagonist else Bonds.apply(Stars.apply(hero, star), GameState.bond_of(hero.id)), GameState.effective_gear(hero.id))
 
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 16)
@@ -193,6 +193,8 @@ func _show_detail() -> void:
 		var bonus := PackedStringArray()
 		if star > 1 and not protagonist:
 			bonus.append("勾玉：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
+		if Bonds.level(GameState.bond_of(hero.id)) > 0 and not protagonist:
+			bonus.append("羁绊：+%d%%" % roundi(Bonds.STAT_BONUS * Bonds.level(GameState.bond_of(hero.id)) * 100))
 		if not effective.gear_effects.is_empty():
 			bonus.append("特效：" + "、".join(effective.gear_effects.map(func(e: StringName) -> String: return EquipData.EFFECTS[e][0])))
 		if not bonus.is_empty():
@@ -200,6 +202,8 @@ func _show_detail() -> void:
 	else:
 		info.add_child(UiKit.label("未招募", 26, UiKit.TEXT_DIM))
 
+	if owned and not protagonist:
+		info.add_child(UiKit.label("羁绊　%s　（带他打赢一场 +%d，打完他的一段列传 +%d）" % [Bonds.progress_text(GameState.bond_of(hero.id)), Bonds.BATTLE_POINTS, Bonds.STORY_POINTS], 17, UiKit.GOLD))
 	if not protagonist:
 		var progress := GameState.story_progress(hero.id)
 		if progress[1] > 0:
@@ -218,6 +222,16 @@ func _show_detail() -> void:
 	_detail.add_child(desc)
 	if not protagonist and star < Stars.SKILL_UP_STAR and Stars.max_stars(hero) >= Stars.SKILL_UP_STAR:
 		_detail.add_child(UiKit.label("点亮 %d 颗勾玉时强化：%s" % [Stars.lit(Stars.SKILL_UP_STAR), Stars.upgrade_text(hero.skill)], 17, UiKit.TEXT_DIM))
+	if hero.talent != null:
+		var rank := Stars.talent_rank(hero, star) if owned else 0
+		var note := ""
+		if rank == 0:
+			note = "（点亮第 1 颗勾玉解锁）"
+		elif rank == 1:
+			note = "（勾玉全亮时再强化）"
+		var talent := UiKit.label("天赋「%s」：%s%s" % [hero.talent.display_name, hero.talent.describe(rank), note], 18, UiKit.TEXT if rank > 0 else UiKit.TEXT_DIM)
+		talent.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_detail.add_child(talent)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL

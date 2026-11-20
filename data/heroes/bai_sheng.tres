@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/bai_sheng.png" id="3_xf2rv"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_pv6if"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_i42m8"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_1od8b"]
 
 [sub_resource type="Resource" id="Resource_7asai"]
 script = ExtResource("5_i42m8")
@@ -13,6 +14,13 @@ description = "敌方全体攻击 -25%，持续 2 回合。"
 effect = 14
 turns = 2
 amount = 0.25
+
+[sub_resource type="Resource" id="Resource_xf2rv"]
+script = ExtResource("6_1od8b")
+display_name = "白日鼠"
+kind = &"effect"
+effect = &"regen"
+text = "每次轮到自己回复 2% 生命"
 
 [resource]
 script = ExtResource("4_pv6if")
@@ -30,3 +38,4 @@ portrait = ExtResource("3_xf2rv")
 bust = ExtResource("1_0rkm6")
 face = ExtResource("2_1od8b")
 skill = SubResource("Resource_7asai")
+talent = SubResource("Resource_xf2rv")

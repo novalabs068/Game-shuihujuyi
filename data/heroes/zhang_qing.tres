@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/zhang_qing.png" id="3_7ts5u"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_ttl6j"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_ayuqv"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_ifwwf"]
 
 [sub_resource type="Resource" id="Resource_dkgdb"]
 script = ExtResource("5_ayuqv")
@@ -13,6 +14,13 @@ description = "嘲讽全体敌人 2 回合，自身减伤 30%。"
 effect = 4
 turns = 2
 amount = 0.3
+
+[sub_resource type="Resource" id="Resource_7ts5u"]
+script = ExtResource("6_ifwwf")
+display_name = "菜园子"
+kind = &"tough"
+amount = 0.1
+text = "受到的伤害 -{x}"
 
 [resource]
 script = ExtResource("4_ttl6j")
@@ -30,3 +38,4 @@ portrait = ExtResource("3_7ts5u")
 bust = ExtResource("1_q3j60")
 face = ExtResource("2_ifwwf")
 skill = SubResource("Resource_dkgdb")
+talent = SubResource("Resource_7ts5u")

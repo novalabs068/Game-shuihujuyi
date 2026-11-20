@@ -43,6 +43,8 @@ func _initialize() -> void:
 		"test_gear_effects",
 		"test_new_skill_effects",
 		"test_aoe_skill_effects",
+		"test_talents",
+		"test_bonds",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
 		"test_simulated_win_rate",
@@ -362,6 +364,121 @@ func test_aoe_skill_effects() -> bool:
 	var events := m.act(BattleModel.Action.SKILL)
 	var hits := events.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage")
 	check(hits.size() == 2 and hits.all(func(e: Dictionary) -> bool: return e["fx"] == "explosion"), "burn hits carry the explosion fx")
+	return true
+
+
+func talent(kind: StringName, amount := 0.0, extra := {}) -> TalentData:
+	var t := TalentData.new()
+	t.display_name = "天赋"
+	t.kind = kind
+	t.amount = amount
+	for key: String in extra:
+		if extra[key] is Array:
+			(t.get(key) as Array).assign(extra[key])
+		else:
+			t.set(key, extra[key])
+	return t
+
+
+## 带一个已解锁天赋的单位（rank 1）。
+func with_talent(u: UnitData, t: TalentData, rank := 1) -> UnitData:
+	u.talent = t
+	u.talent_rank = rank
+	return u
+
+
+func test_talents() -> bool:
+	# 档次：一颗没亮未解锁，亮了解锁，全亮强化；强化后数值 ×1.5
+	var h := unit_data(&"h", [1000, 100, 100, 100], skill(SkillData.Effect.DAMAGE, {power = 2.0}))
+	h.tier = UnitData.Tier.DING
+	h.talent = talent(&"stat", 0.1, {stats = [&"atk"]})
+	check_eq(Stars.talent_rank(h, 1), 0, "no lit magatama: talent locked")
+	check_eq(Stars.talent_rank(h, 2), 1, "1 lit: talent unlocked")
+	check_eq(Stars.talent_rank(h, Stars.max_stars(h)), 2, "all lit: talent enhanced")
+	check_eq(Stars.apply(h, 2).base_atk, roundi(roundi(100 * 1.1) * 1.1), "stat talent adds attack on top of the star bonus")
+	check_eq(Stars.apply(h, 3).base_atk, roundi(roundi(100 * 1.2) * 1.15), "enhanced stat talent is x1.5")
+	# 特效类天赋和装备特效合在一起
+	h.talent = talent(&"effect", 0.0, {effect = &"keen"})
+	var gear := EquipData.new()
+	gear.effects = [&"swift"]
+	var geared := Equipment.apply(Stars.apply(h, 2), [gear] as Array[EquipData])
+	check(&"keen" in geared.gear_effects and &"swift" in geared.gear_effects, "talent effect survives equipment")
+	check_eq(Stars.apply(h, 3).base_atk, roundi(roundi(100 * 1.2) * 1.1), "enhanced effect talent gives +10% attack")
+	h.talent = talent(&"skill_power", 0.15)
+	check(is_equal_approx(Stars.apply(h, 2).skill.power, 2.0 * 1.15), "skill-power talent")
+	check(is_equal_approx(h.skill.power, 2.0), "original skill untouched")
+
+	# 首击必暴；打头目加伤；受伤减免
+	var archer := with_talent(unit_data(&"a", [500, 100, 0, 200]), talent(&"first_crit"))
+	var boss := unit_data(&"boss", [50000, 1, 0, 1])
+	boss.is_boss = true
+	var m := battle([archer], [boss])
+	advance_to(m, &"a")
+	var events := m.act(BattleModel.Action.ATTACK, by_id(m, &"boss"))
+	check(events.any(func(e: Dictionary) -> bool: return e["kind"] == "damage" and e["big"]), "first attack crits")
+	check(not by_id(m, &"a").first_crit_ready, "only the first attack")
+	m = battle([unit_data(&"p", [500, 100, 0, 200])], [boss])
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.ATTACK, by_id(m, &"boss"))
+	var plain := 50000 - by_id(m, &"boss").hp
+	m = battle([with_talent(unit_data(&"p", [500, 100, 0, 200]), talent(&"boss_slayer", 0.3))], [boss])
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.ATTACK, by_id(m, &"boss"))
+	check(50000 - by_id(m, &"boss").hp > plain * 1.2, "boss slayer hits bosses harder")
+	var tank := with_talent(unit_data(&"t", [50000, 1, 0, 1]), talent(&"tough", 0.5))
+	m = battle([tank], [unit_data(&"e", [500, 100, 0, 200])])
+	advance_to(m, &"e")
+	m.act(BattleModel.Action.ATTACK, by_id(m, &"t"))
+	check(50000 - by_id(m, &"t").hp <= 55, "tough halves damage taken")
+
+	# 残血加攻；暴击加速叠 3 层
+	var berserker := with_talent(unit_data(&"k", [1000, 100, 0, 100]), talent(&"bloodlust", 0.4))
+	m = battle([berserker], [unit_data(&"e", [500, 1, 0, 1])])
+	var k := by_id(m, &"k")
+	check(is_equal_approx(k.atk(), 100.0), "bloodlust off at full hp")
+	k.hp = 400
+	check(is_equal_approx(k.atk(), 140.0), "bloodlust on below half")
+	var leopard := with_talent(unit_data(&"l", [1000, 100, 0, 100]), talent(&"crit_haste", 0.1))
+	m = battle([leopard], [unit_data(&"e", [500000, 1, 0, 1])])
+	advance_to(m, &"l")
+	for i in 5:
+		m._deal(by_id(m, &"l"), by_id(m, &"e"), 1.0, true)
+	check(is_equal_approx(by_id(m, &"l").spd(), 130.0), "crit haste stacks to 3")
+
+	# 开战时：怒气、全队怒气、全队攻击、全队加速、全队回春
+	var team: Array[UnitData] = [
+		with_talent(unit_data(&"qin", [500, 10, 0, 100]), talent(&"rage_start", 30.0)),
+		with_talent(unit_data(&"shi", [500, 10, 0, 100]), talent(&"team_rage_start", 15.0)),
+		with_talent(unit_data(&"wu", [500, 100, 0, 100]), talent(&"team_atk", 0.08)),
+	]
+	m = battle(team, [unit_data(&"e", [500, 1, 0, 1])])
+	check_eq(by_id(m, &"qin").rage, 45, "rage start: own 30 + team 15")
+	check_eq(by_id(m, &"wu").rage, 15, "team rage start")
+	check(is_equal_approx(by_id(m, &"qin").atk(), 10 * 1.08), "team attack aura")
+	team = [with_talent(unit_data(&"zhu", [500, 10, 0, 100]), talent(&"team_haste_open", 0.15), 2), with_talent(unit_data(&"an", [500, 10, 0, 100]), talent(&"team_regen"))]
+	m = battle(team, [unit_data(&"e", [500, 1, 0, 1])])
+	check(is_equal_approx(by_id(m, &"an").spd(), 100 * 1.225), "enhanced team haste")
+	check(by_id(m, &"zhu").has_gear(&"regen"), "team regen")
+	# 卡池里每个好汉都有天赋
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	for res in GameDB.load_dir("res://data/heroes/"):
+		var hero: UnitData = res
+		check(hero.talent != null and hero.talent.kind in TalentData.KINDS and hero.talent.describe(1) != "", "%s has a talent" % hero.display_name)
+		check(not hero.talent.describe(1).contains("{x}"), "%s talent text filled" % hero.display_name)
+	return true
+
+
+func test_bonds() -> bool:
+	check_eq(Bonds.level(0), 0, "相识 at 0")
+	check_eq(Bonds.level(29), 0, "still 相识 at 29")
+	check_eq(Bonds.level(30), 1, "相熟 at 30")
+	check_eq(Bonds.level(500), 3, "知己 caps")
+	check_eq(Bonds.progress_text(45), "相熟（45 / 80）", "progress text")
+	check_eq(Bonds.progress_text(200), "知己", "max progress text")
+	var h := unit_data(&"h", [1000, 100, 100, 100])
+	check(Bonds.apply(h, 0) == h, "no bonus at 相识")
+	check_eq(Bonds.apply(h, 80).base_atk, 106, "相知 gives +6%")
+	check_eq(Bonds.apply(h, 80).base_spd, 100, "speed untouched")
 	return true
 
 

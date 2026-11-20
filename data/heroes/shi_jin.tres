@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/shi_jin.png" id="3_7fky8"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_q4n4r"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_bsw56"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_ntqga"]
 
 [sub_resource type="Resource" id="Resource_tccbb"]
 script = ExtResource("5_bsw56")
@@ -12,6 +13,14 @@ display_name = "九纹龙腾"
 description = "敌方全体各受 90% 伤害。"
 effect = 12
 power = 0.9
+
+[sub_resource type="Resource" id="Resource_7fky8"]
+script = ExtResource("6_ntqga")
+display_name = "王进亲传"
+kind = &"stat"
+amount = 0.08
+stats = Array[StringName]([&"atk", &"def"])
+text = "攻击、防御 +{x}"
 
 [resource]
 script = ExtResource("4_q4n4r")
@@ -30,3 +39,4 @@ portrait = ExtResource("3_7fky8")
 bust = ExtResource("1_x3u85")
 face = ExtResource("2_ntqga")
 skill = SubResource("Resource_tccbb")
+talent = SubResource("Resource_7fky8")

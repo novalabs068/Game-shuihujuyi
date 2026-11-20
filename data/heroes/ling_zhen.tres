@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://art/faces/ling_zhen.png" id="2_65r65"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/ling_zhen.png" id="3_ycvgd"]
 [ext_resource type="Texture2D" path="res://art/portraits/ling_zhen.png" id="4_gsykq"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_65r65"]
 
 [sub_resource type="Resource" id="Resource_sjr6a"]
 script = ExtResource("2_4fyqs")
@@ -16,6 +17,13 @@ power = 0.7
 turns = 2
 amount = 0.4
 cooldown = 4
+
+[sub_resource type="Resource" id="Resource_ycvgd"]
+script = ExtResource("7_65r65")
+display_name = "风火炮"
+kind = &"skill_power"
+amount = 0.15
+text = "绝招伤害 +{x}"
 
 [resource]
 script = ExtResource("1_kna12")
@@ -35,3 +43,4 @@ bust = ExtResource("1_sjr6a")
 face = ExtResource("2_65r65")
 map_sprite = ExtResource("3_ycvgd")
 skill = SubResource("Resource_sjr6a")
+talent = SubResource("Resource_ycvgd")

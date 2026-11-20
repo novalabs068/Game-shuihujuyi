@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/zhu_gui.png" id="3_yknvn"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_dl6dm"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_w3ode"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_0pa5l"]
 
 [sub_resource type="Resource" id="Resource_cmygp"]
 script = ExtResource("5_w3ode")
@@ -12,6 +13,13 @@ display_name = "旱地伏击"
 description = "敌方全体各受 80% 伤害。"
 effect = 12
 power = 0.8
+
+[sub_resource type="Resource" id="Resource_yknvn"]
+script = ExtResource("6_0pa5l")
+display_name = "酒店眼线"
+kind = &"team_haste_open"
+amount = 0.15
+text = "开战时全队速度 +{x}，持续 2 回合"
 
 [resource]
 script = ExtResource("4_dl6dm")
@@ -30,3 +38,4 @@ portrait = ExtResource("3_yknvn")
 bust = ExtResource("1_qr6lv")
 face = ExtResource("2_0pa5l")
 skill = SubResource("Resource_cmygp")
+talent = SubResource("Resource_yknvn")

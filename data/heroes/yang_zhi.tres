@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" path="res://art/portraits/yang_zhi.png" id="3_0e8y1"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_gwc1v"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_rsyur"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="6_gdc2n"]
 
 [sub_resource type="Resource" id="Resource_3b4n6"]
 script = ExtResource("5_rsyur")
@@ -12,6 +13,13 @@ display_name = "吹毛断发"
 description = "单体 210% 伤害，无视防御。"
 effect = 11
 power = 2.1
+
+[sub_resource type="Resource" id="Resource_0e8y1"]
+script = ExtResource("6_gdc2n")
+display_name = "青面兽"
+kind = &"effect"
+effect = &"keen"
+text = "暴击率 +15%"
 
 [resource]
 script = ExtResource("4_gwc1v")
@@ -30,3 +38,4 @@ portrait = ExtResource("3_0e8y1")
 bust = ExtResource("1_o7gvf")
 face = ExtResource("2_gdc2n")
 skill = SubResource("Resource_3b4n6")
+talent = SubResource("Resource_0e8y1")

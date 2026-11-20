@@ -27,6 +27,8 @@ const ENRAGE_THRESHOLD := 0.5
 const TURN_PREVIEW_COUNT := 6
 ## 自动战斗时，有队友血量低于这个比例才用治疗技能
 const AI_HEAL_THRESHOLD := 0.6
+## 整场有效的增益用这么多回合表示
+const WHOLE_BATTLE := 999
 ## 群攻技能命中时播的特效（art/fx），没列的用默认的刀光
 const SKILL_FX := {
 	SkillData.Effect.ALL_FOES_SLOW: "ground_slam",
@@ -63,6 +65,8 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 		units.append(BattleUnit.new(stage.enemies[i], BattleUnit.Side.ENEMY, i, stage.enemy_level))
 	for u in units:
 		_apply_opening_gear(u)
+		_apply_opening_talent(u)
+	for u in units:
 		u.next_time = TIME_PER_ACTION / u.spd()
 	for e in alive(BattleUnit.Side.ENEMY):
 		_plan_intent(e)
@@ -405,7 +409,8 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	if target == null or not target.is_alive():
 		return 0
 	var crit_chance := CRIT_CHANCE + (Equipment.KEEN_CRIT if attacker.has_gear(&"keen") else 0.0)
-	var crit := force_crit or rng.randf() < crit_chance
+	var crit := force_crit or attacker.first_crit_ready or rng.randf() < crit_chance
+	attacker.first_crit_ready = false
 	var def := 0.0 if pierce else target.def()
 	var raw := attacker.atk() * multiplier * 100.0 / (100.0 + def) * rng.randf_range(0.95, 1.05)
 	if crit:
@@ -416,12 +421,20 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 		raw *= 1.0 - target.reduction
 	if basic and target.data.elite_trait == &"iron" and not attacker.has_gear(&"armor_break"):
 		raw *= IRON_BASIC_MULTIPLIER
+	if target.data.is_boss:
+		raw *= 1.0 + attacker.talent(&"boss_slayer")
+	raw *= 1.0 - target.talent(&"tough")
 	var amount := maxi(1, roundi(raw))
 	var absorbed := mini(target.shield, amount)
 	target.shield -= absorbed
 	target.hp = maxi(target.hp - (amount - absorbed), 0)
 	var popup := ("暴击 -%d" if crit else "-%d") % amount
 	_emit("damage", target, popup, "%s 对 %s 造成 %d 伤害" % [attacker.display_name(), target.display_name(), amount], crit, attacker)
+	if crit and attacker.has_talent(&"crit_haste"):
+		var t := attacker.data.talent
+		if attacker.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.name == t.display_name).size() < TalentData.CRIT_HASTE_STACKS:
+			attacker.buffs.append(BattleUnit.Buff.new(t.display_name, 0.0, attacker.talent(&"crit_haste"), WHOLE_BATTLE))
+			_emit("info", attacker, "加速", "%s「%s」，越打越快" % [attacker.display_name(), t.display_name])
 	if not target.is_alive():
 		_on_death(target)
 	elif target.data.is_boss and not target.enraged and target.hp_ratio() < ENRAGE_THRESHOLD:
@@ -445,6 +458,31 @@ func _on_death(unit: BattleUnit) -> void:
 func _apply_opening_gear(u: BattleUnit) -> void:
 	if u.has_gear(&"swift"):
 		u.buffs.append(BattleUnit.Buff.new("疾风", 0.0, Equipment.SWIFT_BONUS, Equipment.SWIFT_TURNS))
+
+
+## 开战时生效的天赋：自己或全队加怒气、加攻、加速、回春。
+func _apply_opening_talent(u: BattleUnit) -> void:
+	if u.data.talent == null or u.data.talent_rank <= 0:
+		return
+	var t := u.data.talent
+	var v := t.value(u.data.talent_rank)
+	var allies := allies_of(u)
+	match t.kind:
+		&"rage_start":
+			u.add_rage(roundi(v))
+		&"team_rage_start":
+			for a in allies:
+				a.add_rage(roundi(v))
+		&"team_atk":
+			for a in allies:
+				a.buffs.append(BattleUnit.Buff.new(t.display_name, v, 0.0, WHOLE_BATTLE))
+		&"team_haste_open":
+			for a in allies:
+				a.buffs.append(BattleUnit.Buff.new(t.display_name, 0.0, v, 2))
+		&"team_regen":
+			for a in allies:
+				if not &"regen" in a.extra_effects:
+					a.extra_effects.append(&"regen")
 
 
 func _finish_turn(actor: BattleUnit) -> void:

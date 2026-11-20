@@ -30,7 +30,14 @@ static func cost(star: int) -> int:
 	return 20 * star
 
 
-## 带上星级加成的战斗数据：star 为 1 时原样返回，否则返回一份复制。
+## 天赋档次：一颗勾玉都没点亮时 0（未解锁），点亮了 1，全部点亮 2（强化）。
+static func talent_rank(hero: UnitData, star: int) -> int:
+	if hero.talent == null or lit(star) < 1:
+		return 0
+	return 2 if star >= max_stars(hero) else 1
+
+
+## 带上星级和天赋加成的战斗数据：star 为 1 时原样返回，否则返回一份复制。
 static func apply(hero: UnitData, star: int) -> UnitData:
 	if star <= 1:
 		return hero
@@ -41,7 +48,30 @@ static func apply(hero: UnitData, star: int) -> UnitData:
 	out.base_def = roundi(hero.base_def * k)
 	if star >= SKILL_UP_STAR and hero.skill != null:
 		out.skill = upgraded_skill(hero.skill)
+	out.talent_rank = talent_rank(hero, star)
+	if out.talent_rank > 0:
+		_apply_talent(out)
 	return out
+
+
+## 改数据就能生效的天赋（属性、特效、绝招伤害）在这里算；战斗里才起作用的由 BattleModel 结算。
+static func _apply_talent(out: UnitData) -> void:
+	var t := out.talent
+	var v := t.value(out.talent_rank)
+	match t.kind:
+		&"stat":
+			for stat in t.stats:
+				var key := "base_" + String(stat)
+				out.set(key, roundi(out.get(key) * (1.0 + v)))
+		&"effect":
+			if not t.effect in out.gear_effects:
+				out.gear_effects.append(t.effect)
+		&"skill_power":
+			if out.skill != null:
+				out.skill = out.skill.duplicate()
+				out.skill.power *= 1.0 + v
+	if out.talent_rank >= 2 and t.kind in TalentData.FLAT_KINDS:
+		out.base_atk = roundi(out.base_atk * (1.0 + TalentData.FLAT_ENHANCE_ATK))
 
 
 ## 3 星强化后的主动技：伤害类加倍率，控制和增益类多 1 回合，治疗加量，偷东西减冷却。

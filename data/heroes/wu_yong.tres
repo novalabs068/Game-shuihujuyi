@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://art/faces/wu_yong.png" id="2_rin8f"]
 [ext_resource type="Texture2D" path="res://art/portraits/wu_yong.png" id="3_orvyx"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/wu_yong.png" id="3_rin8f"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_orvyx"]
 
 [sub_resource type="Resource" id="Resource_c2vee"]
 script = ExtResource("2_fjwj3")
@@ -14,6 +15,13 @@ description = "敌方全体昏睡 1 回合（冷却 5 回合）。"
 effect = 16
 turns = 1
 cooldown = 5
+
+[sub_resource type="Resource" id="Resource_rxncs"]
+script = ExtResource("7_orvyx")
+display_name = "智多星"
+kind = &"team_atk"
+amount = 0.08
+text = "全队攻击 +{x}，整场有效"
 
 [resource]
 script = ExtResource("1_y4tmg")
@@ -33,3 +41,4 @@ bust = ExtResource("1_2r81q")
 face = ExtResource("2_rin8f")
 map_sprite = ExtResource("3_rin8f")
 skill = SubResource("Resource_c2vee")
+talent = SubResource("Resource_rxncs")
