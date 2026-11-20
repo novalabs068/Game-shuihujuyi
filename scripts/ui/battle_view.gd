@@ -160,9 +160,17 @@ func _play(events: Array[Dictionary]) -> void:
 				wait = 0.6
 			"damage":
 				var from_left := source == null or source.side == BattleUnit.Side.PLAYER
+				var fx: String = e.get("fx", "")
 				if source != null and source != unit:
 					await _cards[source].lunge(card.position)
-					FxSprite.spawn(self, "sword_slash", card.hit_point(), FX_SCALE, not from_left)
+					if fx == "":
+						FxSprite.spawn(self, "sword_slash", card.hit_point(), FX_SCALE, not from_left)
+				# 群攻技能各有各的特效：爆炸、震地落在脚下，重劈对着胸口
+				if fx == "heavy_cleave":
+					FxSprite.spawn(self, fx, card.hit_point(), FX_SCALE * 0.8, not from_left)
+				elif fx != "":
+					FxSprite.spawn(self, fx, card.feet_point(), 1.1, not from_left)
+					_shake_screen(6.0)
 				FxSprite.spawn(self, "crit_hit" if big else "hit_spark", card.hit_point(), FX_SCALE * (0.8 if big else 1.0), not from_left)
 				card.flash()
 				card.shake()

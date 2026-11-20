@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_kna12"]
+[ext_resource type="Texture2D" path="res://art/busts/ling_zhen.png" id="1_sjr6a"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_4fyqs"]
+[ext_resource type="Texture2D" path="res://art/faces/ling_zhen.png" id="2_65r65"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/ling_zhen.png" id="3_ycvgd"]
+[ext_resource type="Texture2D" path="res://art/portraits/ling_zhen.png" id="4_gsykq"]
+
+[sub_resource type="Resource" id="Resource_sjr6a"]
+script = ExtResource("2_4fyqs")
+display_name = "轰天雷火"
+description = "敌方全体各受 70% 伤害，并灼烧 2 回合（每回合掉凌振攻击 40% 的血，无视防御）。"
+effect = 19
+power = 0.7
+turns = 2
+amount = 0.4
+cooldown = 4
+
+[resource]
+script = ExtResource("1_kna12")
+id = &"ling_zhen"
+display_name = "凌振"
+nickname = "轰天雷"
+rarity = 1
+role = 2
+tier = 2
+sort_order = 24
+base_hp = 340
+base_atk = 62
+base_def = 22
+base_spd = 96
+portrait = ExtResource("4_gsykq")
+bust = ExtResource("1_sjr6a")
+face = ExtResource("2_65r65")
+map_sprite = ExtResource("3_ycvgd")
+skill = SubResource("Resource_sjr6a")

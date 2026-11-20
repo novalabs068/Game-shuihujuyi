@@ -42,6 +42,7 @@ func _initialize() -> void:
 		"test_world_roads",
 		"test_gear_effects",
 		"test_new_skill_effects",
+		"test_aoe_skill_effects",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
 		"test_simulated_win_rate",
@@ -118,7 +119,7 @@ func advance_to(model: BattleModel, id: StringName) -> void:
 
 func test_data_loads() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
-	check_eq(GameDB.load_dir("res://data/heroes/").size(), 20, "20 heroes")
+	check_eq(GameDB.load_dir("res://data/heroes/").size(), 24, "24 heroes")
 	check_eq(GameDB.load_dir("res://data/combos/").size(), 3, "3 combos")
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
@@ -301,6 +302,69 @@ func test_new_skill_effects() -> bool:
 	return true
 
 
+func test_aoe_skill_effects() -> bool:
+	var foes: Array[UnitData] = [unit_data(&"a", [5000, 10, 100, 100]), unit_data(&"b", [5000, 10, 100, 100])]
+	# 连环马：全体挨打并减速
+	var m := battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.ALL_FOES_SLOW, {power = 1.0, amount = 0.3, turns = 2}))], foes)
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.SKILL)
+	for id: StringName in [&"a", &"b"]:
+		var u := by_id(m, id)
+		check(u.hp < 5000 and is_equal_approx(u.spd(), 70.0), "slow-all hits and slows %s" % id)
+	# 烈火燎原：怒气越高越疼，满怒时翻倍，不消耗怒气
+	var blaze := skill(SkillData.Effect.ALL_FOES_RAGE, {power = 1.0, amount = 1.0})
+	m = battle([unit_data(&"p", [500, 100, 10, 200], blaze)], [unit_data(&"e", [50000, 10, 0, 10])])
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.SKILL)
+	var calm := 50000 - by_id(m, &"e").hp
+	m = battle([unit_data(&"p", [500, 100, 10, 200], blaze)], [unit_data(&"e", [50000, 10, 0, 10])])
+	advance_to(m, &"p")
+	m.current.rage = BattleUnit.RAGE_MAX
+	m.act(BattleModel.Action.SKILL)
+	check(50000 - by_id(m, &"e").hp > calm * 1.8, "rage-all nearly doubles at full rage")
+	check_eq(by_id(m, &"p").rage, BattleUnit.RAGE_MAX, "rage-all keeps the rage")
+	# 轰天雷：全体灼烧，轮到时掉血（无视防御），烧完就停
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.ALL_FOES_BURN, {power = 1.0, amount = 0.4, turns = 2}))], foes)
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.SKILL)
+	var a := by_id(m, &"a")
+	check_eq(a.burn_turns, 2, "burn lasts 2 turns")
+	check(a.status_tags().has("灼烧"), "burn shows as a status")
+	var before := a.hp
+	advance_to(m, &"a")
+	check_eq(before - a.hp, 40, "burn deals 40% of the caster's attack")
+	m.act(BattleModel.Action.GUARD)
+	advance_to(m, &"a")
+	m.act(BattleModel.Action.GUARD)
+	before = a.hp
+	advance_to(m, &"a")
+	check_eq(a.hp, before, "burn stops after its turns")
+	# 灼烧烧死最后一个敌人：直接赢
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.ALL_FOES_BURN, {power = 0.01, amount = 0.4, turns = 2}))], [unit_data(&"e", [5000, 10, 10, 100])])
+	advance_to(m, &"p")
+	m.act(BattleModel.Action.SKILL)
+	by_id(m, &"e").hp = 10
+	for i in 6:
+		m.start_next_turn()
+		if m.result != BattleModel.Result.ONGOING:
+			break
+		if m.current != null:
+			m.act(BattleModel.Action.GUARD)
+	check_eq(m.result, BattleModel.Result.WIN, "burning to death wins the fight")
+	# 旋风卷地：全体连打两轮
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.ALL_FOES_MULTI, {power = 0.5, hits = 2}))], foes)
+	advance_to(m, &"p")
+	var hits_on_b := m.act(BattleModel.Action.SKILL).filter(func(e: Dictionary) -> bool: return e["kind"] == "damage" and e["unit"] == by_id(m, &"b"))
+	check_eq(hits_on_b.size(), 2, "multi-all hits each foe twice")
+	# 群攻技能的命中带上各自的特效
+	m = battle([unit_data(&"p", [500, 100, 10, 200], skill(SkillData.Effect.ALL_FOES_BURN, {power = 1.0, amount = 0.4, turns = 2}))], foes)
+	advance_to(m, &"p")
+	var events := m.act(BattleModel.Action.SKILL)
+	var hits := events.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage")
+	check(hits.size() == 2 and hits.all(func(e: Dictionary) -> bool: return e["fx"] == "explosion"), "burn hits carry the explosion fx")
+	return true
+
+
 func test_steal_skips_debuffs() -> bool:
 	var m := battle([unit_data(&"thief", [500, 10, 10, 100], skill(SkillData.Effect.STEAL))], [unit_data(&"e", [500, 10, 10, 90])])
 	var e := by_id(m, &"e")
@@ -322,7 +386,7 @@ func test_hero_pool_tiers() -> bool:
 		counts[h.tier] += 1
 		check(h.skill != null and h.skill.description != "", "%s has a described skill" % h.display_name)
 		check(h.portrait != null and h.bust != null and h.face != null, "%s has art" % h.display_name)
-	check_eq(counts, [4, 5, 6, 5], "tier spread 甲4 乙5 丙6 丁5")
+	check_eq(counts, [7, 5, 7, 5], "tier spread 甲7 乙5 丙7 丁5")
 	return true
 
 

@@ -20,6 +20,10 @@ enum Effect {
 	WEAKEN_ALL,  ## 敌方全体攻击 -amount，持续 turns 回合
 	TEAM_ATK,    ## 全队攻击 +amount，持续 turns 回合
 	STUN_ALL,    ## 敌方全体眩晕 turns 回合
+	ALL_FOES_SLOW,  ## 敌方全体各受 power 倍伤害，速度 -amount，持续 turns 回合
+	ALL_FOES_RAGE,  ## 敌方全体各受 power 倍伤害；自己怒气越高越疼，满怒时 ×(1+amount)。不消耗怒气
+	ALL_FOES_BURN,  ## 敌方全体各受 power 倍伤害，并灼烧 turns 回合：每次轮到时掉施放者攻击 amount 倍的血（无视防御）
+	ALL_FOES_MULTI, ## 敌方全体连打 hits 轮，每轮各受 power 倍伤害
 }
 
 @export var display_name: String

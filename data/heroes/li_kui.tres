@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_eebhq"]
+[ext_resource type="Texture2D" path="res://art/busts/li_kui.png" id="1_s1ctg"]
+[ext_resource type="Texture2D" path="res://art/faces/li_kui.png" id="2_3ghyi"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_f2fy6"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/li_kui.png" id="3_hpdip"]
+[ext_resource type="Texture2D" path="res://art/portraits/li_kui.png" id="4_ivfko"]
+
+[sub_resource type="Resource" id="Resource_s1ctg"]
+script = ExtResource("2_f2fy6")
+display_name = "旋风卷地"
+description = "双斧抡开，敌方全体连砍两轮，每轮各受 50% 伤害。"
+effect = 20
+power = 0.5
+hits = 2
+cooldown = 4
+
+[resource]
+script = ExtResource("1_eebhq")
+id = &"li_kui"
+display_name = "李逵"
+nickname = "黑旋风"
+rarity = 2
+role = 1
+tier = 0
+sort_order = 21
+base_hp = 560
+base_atk = 80
+base_def = 32
+base_spd = 98
+portrait = ExtResource("4_ivfko")
+bust = ExtResource("1_s1ctg")
+face = ExtResource("2_3ghyi")
+map_sprite = ExtResource("3_hpdip")
+skill = SubResource("Resource_s1ctg")

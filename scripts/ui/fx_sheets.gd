@@ -10,4 +10,8 @@ const SHEETS := {
 	"poof": [112, 92, 7, 49, 30, false, 56, 80],
 	"cursed": [64, 84, 10, 72, 30, true, 32, 76],
 	"stunned": [60, 64, 8, 60, 30, true, 30, 56],
+	"explosion": [300, 240, 12, 66, 30, false, 150, 196],
+	"ground_slam": [288, 208, 9, 64, 30, false, 144, 164],
+	"heavy_cleave": [208, 116, 6, 58, 30, false, 68, 96],
+	"burning": [80, 124, 12, 90, 30, true, 40, 94],
 }

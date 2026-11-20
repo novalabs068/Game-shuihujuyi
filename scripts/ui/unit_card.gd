@@ -121,6 +121,7 @@ func refresh() -> void:
 	_sync_overlay("stunned", not dead and unit.stun_turns > 0, Vector2(FEET.x, 40), 2.2)
 	var weakened := unit.buffs.any(func(b: BattleUnit.Buff) -> bool: return b.atk_bonus < 0.0 or b.spd_bonus < 0.0)
 	_sync_overlay("cursed", not dead and weakened, FEET, 2.4)
+	_sync_overlay("burning", not dead and unit.burn_turns > 0, FEET + Vector2(0, -10), 1.6)
 	queue_redraw()
 
 

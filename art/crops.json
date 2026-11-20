@@ -11,5 +11,13 @@
 	"lin_zhong_qiang_ren": {
 		"dx": -0.12,
 		"dy": 0.04
+	},
+	"qin_ming": {
+		"dx": 0.12,
+		"dy": 0.17
+	},
+	"li_kui": {
+		"dx": 0.21,
+		"dy": 0.12
 	}
 }

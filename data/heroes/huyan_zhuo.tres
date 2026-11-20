@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/huyan_zhuo.png" id="1_8viyb"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_s84ih"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_jgosu"]
+[ext_resource type="Texture2D" path="res://art/faces/huyan_zhuo.png" id="2_uy7e6"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/huyan_zhuo.png" id="3_0jnoo"]
+[ext_resource type="Texture2D" path="res://art/portraits/huyan_zhuo.png" id="4_b18tt"]
+
+[sub_resource type="Resource" id="Resource_8viyb"]
+script = ExtResource("2_jgosu")
+display_name = "连环马阵"
+description = "敌方全体各受 80% 伤害，速度 -30%，持续 2 回合。"
+effect = 17
+power = 0.8
+turns = 2
+amount = 0.3
+cooldown = 4
+
+[resource]
+script = ExtResource("1_s84ih")
+id = &"huyan_zhuo"
+display_name = "呼延灼"
+nickname = "双鞭"
+rarity = 2
+tier = 0
+sort_order = 22
+base_hp = 620
+base_atk = 68
+base_def = 46
+base_spd = 92
+portrait = ExtResource("4_b18tt")
+bust = ExtResource("1_8viyb")
+face = ExtResource("2_uy7e6")
+map_sprite = ExtResource("3_0jnoo")
+skill = SubResource("Resource_8viyb")

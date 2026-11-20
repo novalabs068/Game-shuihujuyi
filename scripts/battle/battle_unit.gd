@@ -46,6 +46,9 @@ var reduction_turns := -1
 var buffs: Array[Buff] = []
 var next_time := 0.0
 var enraged := false
+## 灼烧：每次轮到自己时掉 burn_damage 血，还剩 burn_turns 次
+var burn_damage := 0
+var burn_turns := 0
 ## 敌人预告的下一步：用技能还是普攻、打谁。只有敌人有，见 BattleModel.intent_target_of()
 var intent_skill := false
 var intent_target: BattleUnit
@@ -152,6 +155,8 @@ func status_tags() -> PackedStringArray:
 		tags.append("防御")
 	if stun_turns > 0:
 		tags.append("眩晕")
+	if burn_turns > 0:
+		tags.append("灼烧")
 	if shield > 0:
 		tags.append("盾%d" % shield)
 	for b in buffs:

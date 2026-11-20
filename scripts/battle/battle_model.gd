@@ -27,6 +27,13 @@ const ENRAGE_THRESHOLD := 0.5
 const TURN_PREVIEW_COUNT := 6
 ## 自动战斗时，有队友血量低于这个比例才用治疗技能
 const AI_HEAL_THRESHOLD := 0.6
+## 群攻技能命中时播的特效（art/fx），没列的用默认的刀光
+const SKILL_FX := {
+	SkillData.Effect.ALL_FOES_SLOW: "ground_slam",
+	SkillData.Effect.ALL_FOES_RAGE: "ground_slam",
+	SkillData.Effect.ALL_FOES_BURN: "explosion",
+	SkillData.Effect.ALL_FOES_MULTI: "heavy_cleave",
+}
 
 var stage: StageData
 var units: Array[BattleUnit] = []
@@ -39,6 +46,8 @@ var rng := RandomNumberGenerator.new()
 
 var _events: Array[Dictionary] = []
 var _extra_action := false
+## 这次技能命中时播的特效（群攻技能各有各的），写进 damage 事件的 fx
+var _hit_fx := ""
 
 
 func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1) -> void:
@@ -134,6 +143,15 @@ func start_next_turn() -> Array[Dictionary]:
 		var amount := mini(roundi(actor.max_hp * Equipment.REGEN_RATIO), actor.max_hp - actor.hp)
 		actor.hp += amount
 		_emit("heal", actor, "+%d" % amount, "%s 回春，回复 %d 生命" % [actor.display_name(), amount])
+	if actor.burn_turns > 0:
+		actor.burn_turns -= 1
+		var burn := mini(actor.burn_damage, actor.hp)
+		actor.hp -= burn
+		_emit("damage", actor, "灼烧 -%d" % burn, "%s 被火烧，损失 %d 生命" % [actor.display_name(), burn])
+		if not actor.is_alive():
+			_on_death(actor)
+			_finish_turn(actor)
+			return _events
 	if actor.stun_turns > 0:
 		actor.stun_turns -= 1
 		_emit("info", actor, "眩晕", "%s 被眩晕，跳过本回合" % actor.display_name())
@@ -226,6 +244,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
 	# 机变：冷却少 1 回合，最少 1 回合
 	actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
 	_emit("skill", actor, s.display_name, "%s 使用「%s」" % [actor.display_name(), s.display_name])
+	_hit_fx = SKILL_FX.get(s.effect, "")
 	match s.effect:
 		SkillData.Effect.DAMAGE:
 			_deal(actor, _pick_foe(actor, wanted), s.power)
@@ -291,6 +310,30 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
 		SkillData.Effect.ALL_FOES:
 			for foe in foes_of(actor):
 				_deal(actor, foe, s.power)
+		SkillData.Effect.ALL_FOES_SLOW:
+			for foe in foes_of(actor):
+				_deal(actor, foe, s.power)
+				if foe.is_alive():
+					foe.buffs.append(BattleUnit.Buff.new("踩踏", 0.0, -s.amount, s.turns))
+					_emit("info", foe, "减速", "")
+		SkillData.Effect.ALL_FOES_RAGE:
+			var k := 1.0 + s.amount * actor.rage / BattleUnit.RAGE_MAX
+			if actor.rage >= BattleUnit.RAGE_MAX / 2:
+				_emit("info", actor, "怒火", "%s 怒火正盛，伤害 ×%.1f" % [actor.display_name(), k])
+			for foe in foes_of(actor):
+				_deal(actor, foe, s.power * k)
+		SkillData.Effect.ALL_FOES_BURN:
+			var burn := maxi(1, roundi(actor.atk() * s.amount))
+			for foe in foes_of(actor):
+				_deal(actor, foe, s.power)
+				if foe.is_alive():
+					foe.burn_damage = maxi(foe.burn_damage if foe.burn_turns > 0 else 0, burn)
+					foe.burn_turns = maxi(foe.burn_turns, s.turns)
+					_emit("info", foe, "灼烧", "")
+		SkillData.Effect.ALL_FOES_MULTI:
+			for i in s.hits:
+				for foe in foes_of(actor):
+					_deal(actor, foe, s.power)
 		SkillData.Effect.CRIPPLE:
 			var target := _pick_foe(actor, wanted)
 			_deal(actor, target, s.power)
@@ -316,6 +359,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
 			# 绕过嘲讽，打预告里的目标（预告时血量比例最低的人）
 			var target := wanted if wanted != null and wanted.is_alive() else _weakest(foes_of(actor))
 			_deal(actor, target, s.power)
+	_hit_fx = ""
 	actor.add_rage(RAGE_ON_SKILL)
 
 
@@ -379,9 +423,7 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	var popup := ("暴击 -%d" if crit else "-%d") % amount
 	_emit("damage", target, popup, "%s 对 %s 造成 %d 伤害" % [attacker.display_name(), target.display_name(), amount], crit, attacker)
 	if not target.is_alive():
-		if target.side == BattleUnit.Side.PLAYER:
-			player_deaths += 1
-		_emit("death", target, "倒下", "%s 倒下了" % target.display_name())
+		_on_death(target)
 	elif target.data.is_boss and not target.enraged and target.hp_ratio() < ENRAGE_THRESHOLD:
 		target.enraged = true
 		target.buffs.append(BattleUnit.Buff.new(target.data.enrage_name, target.data.enrage_atk_bonus, 0.0, target.data.enrage_turns))
@@ -390,6 +432,14 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 
 
 # --- 内部工具 ---
+
+func _on_death(unit: BattleUnit) -> void:
+	if unit.side == BattleUnit.Side.PLAYER:
+		player_deaths += 1
+	unit.burn_turns = 0
+	_emit("death", unit, "倒下", "%s 倒下了" % unit.display_name())
+
+
 
 ## 装备的开战效果：疾风加速。
 func _apply_opening_gear(u: BattleUnit) -> void:
@@ -461,7 +511,7 @@ func _skill_worth_using(actor: BattleUnit, foes: Array[BattleUnit]) -> bool:
 			return not actor.is_taunting()
 		SkillData.Effect.STUN, SkillData.Effect.STUN_ALL:
 			return foes.any(func(u: BattleUnit) -> bool: return u.stun_turns == 0)
-		SkillData.Effect.ALL_FOES:
+		SkillData.Effect.ALL_FOES, SkillData.Effect.ALL_FOES_SLOW, SkillData.Effect.ALL_FOES_RAGE, SkillData.Effect.ALL_FOES_BURN, SkillData.Effect.ALL_FOES_MULTI:
 			return foes.size() >= 2 or foes[0].hp_ratio() > 0.5
 	return true
 
@@ -485,4 +535,4 @@ func _acts_before(a: BattleUnit, a_time: float, b: BattleUnit, b_time: float) ->
 
 
 func _emit(kind: String, unit: BattleUnit, popup: String, log_text: String, big := false, source: BattleUnit = null) -> void:
-	_events.append({"kind": kind, "unit": unit, "popup": popup, "log": log_text, "big": big, "source": source})
+	_events.append({"kind": kind, "unit": unit, "popup": popup, "log": log_text, "big": big, "source": source, "fx": _hit_fx if kind == "damage" else ""})
