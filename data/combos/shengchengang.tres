@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_lrhnj"]
+
+[resource]
+script = ExtResource("1_lrhnj")
+id = &"shengchengang"
+display_name = "智取生辰纲"
+description = "全体敌人昏睡 1 回合，吴用对单体连击 2 次，每次 120% 伤害。"
+hero_a = &"bai_sheng"
+hero_b = &"wu_yong"
+effect = 1
+power = 1.2
+hits = 2

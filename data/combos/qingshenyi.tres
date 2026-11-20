@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_fxo8p"]
+
+[resource]
+script = ExtResource("1_fxo8p")
+id = &"qingshenyi"
+display_name = "星夜请神医"
+description = "全队回复 35% 生命并解除眩晕，怒气 +20。"
+hero_a = &"wang_dingliu"
+hero_b = &"an_daoquan"
+effect = 4
+amount = 0.35
+rage_gain = 20

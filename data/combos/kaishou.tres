@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_b4bdd"]
+
+[resource]
+script = ExtResource("1_b4bdd")
+id = &"kaishou"
+display_name = "开手师父"
+description = "史进对敌方全体各造成 140% 伤害。"
+hero_a = &"li_zhong"
+hero_b = &"shi_jin"
+effect = 3
+power = 1.4

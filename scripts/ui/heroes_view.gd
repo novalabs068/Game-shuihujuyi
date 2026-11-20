@@ -15,6 +15,7 @@ var _selected: UnitData
 var _list: VBoxContainer
 var _rows: Dictionary[UnitData, PanelContainer] = {}
 var _detail: VBoxContainer
+var _bottom: VBoxContainer
 var _yiqi_label: Label
 var _notice: Label
 
@@ -76,9 +77,24 @@ func _ready() -> void:
 	for side: String in ["left", "right", "top", "bottom"]:
 		detail_margin.add_theme_constant_override("margin_" + side, 16)
 	panel.add_child(detail_margin)
+	# 内容多了（绝招、天赋、名器、组合技）可以上下滑
+	var detail_scroll := ScrollContainer.new()
+	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	detail_margin.add_child(detail_scroll)
+	var detail_box := VBoxContainer.new()
+	detail_box.add_theme_constant_override("separation", 8)
+	detail_margin.remove_child(detail_scroll)
+	detail_margin.add_child(detail_box)
+	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_box.add_child(detail_scroll)
 	_detail = VBoxContainer.new()
 	_detail.add_theme_constant_override("separation", 8)
-	detail_margin.add_child(_detail)
+	_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_scroll.add_child(_detail)
+	# 装备栏和按钮固定在底下，不跟着滑
+	_bottom = VBoxContainer.new()
+	_bottom.add_theme_constant_override("separation", 8)
+	detail_box.add_child(_bottom)
 
 	_notice = UiKit.label("", 20, UiKit.GOLD)
 	v.add_child(_notice)
@@ -153,9 +169,10 @@ func _refresh_list() -> void:
 
 
 func _show_detail() -> void:
-	for child in _detail.get_children():
-		_detail.remove_child(child)
-		child.queue_free()
+	for box: VBoxContainer in [_detail, _bottom]:
+		for child in box.get_children():
+			box.remove_child(child)
+			child.queue_free()
 	if _selected == null:
 		_detail.add_child(UiKit.label("还没有招募到好汉。去大地图点「招募」，用聚义令到聚义厅招人。", 22, UiKit.TEXT_DIM))
 		return
@@ -237,21 +254,30 @@ func _show_detail() -> void:
 			var got := GameState.has_flag("mingqi_" + String(e.id))
 			var where := "已得到" if got else "出处：%s" % e.source_text
 			_detail.add_child(UiKit.label("%s「%s」：%s　%s" % [e.quality_name(), e.display_name, e.summary(), where], 17, UiKit.QUALITY_COLORS[EquipData.Quality.MING] if got else UiKit.TEXT_DIM))
+	if not protagonist:
+		for combo in GameDB.combos:
+			var partner := combo.partner_of(hero.id)
+			if partner != &"":
+				_detail.add_child(_wrapped("组合技「%s」（和%s同上阵）：%s" % [combo.display_name, GameDB.hero(partner).display_name, combo.description], UiKit.TEXT_DIM))
+		var sworn := Bonds.sworn_combo(hero, GameState.PROTAGONIST_ID)
+		if GameState.sworn(hero.id):
+			_detail.add_child(_wrapped("已结义　组合技「%s」：%s" % [sworn.display_name, sworn.description], UiKit.GOLD))
+		elif GameState.can_swear(hero.id):
+			_detail.add_child(_wrapped("羁绊已到「%s」，点下面的「结义」义结金兰，解锁「%s」：%s" % [Bonds.NAMES[Bonds.SWEAR_LEVEL], sworn.display_name, sworn.description], UiKit.GOLD))
+		elif owned:
+			_detail.add_child(_wrapped("羁绊到「%s」后可以结义，解锁「%s」：%s" % [Bonds.NAMES[Bonds.SWEAR_LEVEL], sworn.display_name, sworn.description], UiKit.TEXT_DIM))
 
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_detail.add_child(spacer)
 
 	if protagonist:
 		var martial_row := HBoxContainer.new()
 		martial_row.add_theme_constant_override("separation", 10)
-		_detail.add_child(martial_row)
+		_bottom.add_child(martial_row)
 		martial_row.add_child(_martial_button(true))
 		martial_row.add_child(_martial_button(false))
 	if owned:
 		var gear_row := HBoxContainer.new()
 		gear_row.add_theme_constant_override("separation", 10)
-		_detail.add_child(gear_row)
+		_bottom.add_child(gear_row)
 		for slot in EquipData.Slot.values():
 			gear_row.add_child(_slot_button(hero, slot))
 	if protagonist:
@@ -260,13 +286,13 @@ func _show_detail() -> void:
 	var souls := GameState.souls_of(hero.id)
 	if owned:
 		var need := "勾玉已全部点亮" if star >= Stars.max_stars(hero) else "点亮下一颗需要 %d" % Stars.cost(star)
-		_detail.add_child(UiKit.label("将魂 %d（%s）" % [souls, need], 20))
+		_bottom.add_child(UiKit.label("将魂 %d（%s）" % [souls, need], 20))
 	else:
-		_detail.add_child(UiKit.label("将魂 %d / %d，攒够了就能直接招募" % [souls, Stars.RECRUIT_SOULS], 20))
+		_bottom.add_child(UiKit.label("将魂 %d / %d，攒够了就能直接招募" % [souls, Stars.RECRUIT_SOULS], 20))
 
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 12)
-	_detail.add_child(buttons)
+	_bottom.add_child(buttons)
 	if owned:
 		var up := UiKit.button("升星", Vector2(150, 56), 24)
 		up.disabled = not GameState.can_star_up(hero)
@@ -274,6 +300,13 @@ func _show_detail() -> void:
 			if GameState.star_up(hero):
 				_done("%s 点亮了第 %d 颗勾玉！" % [hero.display_name, Stars.lit(GameState.star_of(hero.id))]))
 		buttons.add_child(up)
+		if GameState.can_swear(hero.id):
+			var swear := UiKit.button("结义", Vector2(130, 56), 24)
+			swear.add_theme_color_override("font_color", UiKit.GOLD)
+			swear.pressed.connect(func() -> void:
+				if GameState.swear(hero.id):
+					_done("%s与%s义结金兰！解锁组合技「结义同心」。" % [GameState.player_name, hero.display_name]))
+			buttons.add_child(swear)
 	else:
 		var join := UiKit.button("招募", Vector2(150, 56), 24)
 		join.disabled = souls < Stars.RECRUIT_SOULS
@@ -294,6 +327,12 @@ func _show_detail() -> void:
 		if GameState.souls_to_yiqi(hero.id, SOUL_STEP):
 			_done("%d 个将魂化成了 %d 点义气" % [SOUL_STEP, SOUL_STEP * Stars.YIQI_PER_SOUL]))
 	buttons.add_child(melt)
+
+
+func _wrapped(text: String, color: Color) -> Label:
+	var l := UiKit.label(text, 17, color)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return l
 
 
 ## 主修 / 副修按钮：显示现在练的那门，点开换。

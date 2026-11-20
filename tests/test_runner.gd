@@ -46,6 +46,7 @@ func _initialize() -> void:
 		"test_talents",
 		"test_bonds",
 		"test_mingqi",
+		"test_new_combos",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
 		"test_simulated_win_rate",
@@ -123,7 +124,7 @@ func advance_to(model: BattleModel, id: StringName) -> void:
 func test_data_loads() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	check_eq(GameDB.load_dir("res://data/heroes/").size(), 24, "24 heroes")
-	check_eq(GameDB.load_dir("res://data/combos/").size(), 3, "3 combos")
+	check_eq(GameDB.load_dir("res://data/combos/").size(), 14, "14 combos")
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
 	check(stage.enemies[1].is_boss, "Lu Qian is the boss")
@@ -531,6 +532,70 @@ func test_mingqi() -> bool:
 	var horse: EquipData = load("res://data/equipment/huang_biao_ma.tres")
 	check_eq(horse.buy_price(), EquipData.MOUNT_PRICE, "horses cost more")
 	check(horse.summary().contains("赶路"), "horse summary mentions travel")
+	return true
+
+
+func combo(id: StringName, a: StringName, b: StringName, effect: ComboData.Effect, params := {}) -> ComboData:
+	var c := ComboData.new()
+	c.id = id
+	c.display_name = String(id)
+	c.hero_a = a
+	c.hero_b = b
+	c.effect = effect
+	for key: String in params:
+		c.set(key, params[key])
+	return c
+
+
+func test_new_combos() -> bool:
+	var foes: Array[UnitData] = [unit_data(&"x", [50000, 1, 0, 1]), unit_data(&"y", [50000, 1, 0, 1])]
+	# 全体连打
+	var c := combo(&"aoe", &"a", &"b", ComboData.Effect.ALL_FOES_COMBO, {power = 1.0, hits = 2})
+	var m := battle([unit_data(&"a", [500, 100, 0, 200]), unit_data(&"b", [500, 100, 0, 10])], foes, [c])
+	advance_to(m, &"a")
+	by_id(m, &"a").rage = BattleUnit.RAGE_MAX
+	by_id(m, &"b").rage = BattleUnit.RAGE_MAX
+	var events := m.act(BattleModel.Action.COMBO)
+	check_eq(events.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").size(), 4, "all-foes combo hits each foe twice")
+	check(by_id(m, &"a").rage < BattleUnit.RAGE_MAX, "combo spends rage")
+	# 全队疗伤回怒
+	c = combo(&"heal", &"a", &"b", ComboData.Effect.HEAL_RAGE, {amount = 0.3, rage_gain = 20})
+	m = battle([unit_data(&"a", [1000, 10, 0, 200]), unit_data(&"b", [1000, 10, 0, 10])], foes, [c])
+	advance_to(m, &"a")
+	by_id(m, &"b").hp = 100
+	by_id(m, &"b").stun_turns = 2
+	by_id(m, &"a").rage = BattleUnit.RAGE_MAX
+	by_id(m, &"b").rage = BattleUnit.RAGE_MAX
+	m.act(BattleModel.Action.COMBO)
+	check_eq(by_id(m, &"b").hp, 400, "heal combo restores 30%")
+	check_eq(by_id(m, &"b").stun_turns, 0, "heal combo clears stun")
+	check_eq(by_id(m, &"b").rage, 20, "heal combo gives rage")
+	# 结义同心：主角先打，好汉放一次强化过的绝招，不进冷却
+	var hero := unit_data(&"h", [1000, 100, 0, 10], skill(SkillData.Effect.DAMAGE, {power = 2.0, cooldown = 4}))
+	hero.display_name = "好汉"
+	c = Bonds.sworn_combo(hero, &"me")
+	check(c.description.contains("好汉"), "sworn combo names the hero")
+	m = battle([unit_data(&"me", [1000, 100, 0, 200]), hero], [unit_data(&"x", [50000, 1, 0, 1])], [c])
+	advance_to(m, &"me")
+	by_id(m, &"me").rage = BattleUnit.RAGE_MAX
+	by_id(m, &"h").rage = BattleUnit.RAGE_MAX
+	events = m.act(BattleModel.Action.COMBO, by_id(m, &"x"))
+	check(events.any(func(e: Dictionary) -> bool: return e["kind"] == "skill" and e["unit"] == by_id(m, &"h")), "sworn brother casts his skill")
+	check_eq(events.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").size(), 2, "protagonist hit + skill hit")
+	check_eq(by_id(m, &"h").skill_cooldown, 0, "borrowed skill does not go on cooldown")
+	# 组合技数据：两人都在卡池里、说明不空、需要目标的有目标
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var ids: Array[StringName] = []
+	for res in GameDB.load_dir("res://data/heroes/"):
+		ids.append((res as UnitData).id)
+	var pairs: Array[String] = []
+	for res in GameDB.load_dir("res://data/combos/"):
+		var cd: ComboData = res
+		check(cd.hero_a in ids and cd.hero_b in ids and cd.hero_a != cd.hero_b, "%s heroes exist" % cd.display_name)
+		check(cd.description != "", "%s described" % cd.display_name)
+		var key := "%s+%s" % ([cd.hero_a, cd.hero_b] if String(cd.hero_a) < String(cd.hero_b) else [cd.hero_b, cd.hero_a])
+		check(not key in pairs, "%s pair is unique" % cd.display_name)
+		pairs.append(key)
 	return true
 
 

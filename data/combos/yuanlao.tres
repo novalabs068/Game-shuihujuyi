@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_gr2fk"]
+
+[resource]
+script = ExtResource("1_gr2fk")
+id = &"yuanlao"
+display_name = "梁山元老"
+description = "全队获得 30% 生命的护盾，宋万对单体造成 250% 伤害。"
+hero_a = &"du_qian"
+hero_b = &"song_wan"
+power = 2.5
+amount = 0.3

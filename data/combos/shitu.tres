@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_l18fd"]
+
+[resource]
+script = ExtResource("1_l18fd")
+id = &"shitu"
+display_name = "林冲收徒"
+description = "全队获得 10% 生命的护盾，林冲对单体造成 350% 伤害。"
+hero_a = &"cao_zheng"
+hero_b = &"lin_chong"
+power = 3.5
+amount = 0.1

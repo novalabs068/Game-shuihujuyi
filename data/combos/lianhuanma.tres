@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_pb4ts"]
+
+[resource]
+script = ExtResource("1_pb4ts")
+id = &"lianhuanma"
+display_name = "连环马火炮"
+description = "凌振的火炮对敌方全体轰两轮，每轮各 90% 伤害。"
+hero_a = &"huyan_zhuo"
+hero_b = &"ling_zhen"
+effect = 3
+power = 0.9
+hits = 2

@@ -79,6 +79,32 @@ func bond_of(id: StringName) -> int:
 	return bonds.get(id, 0)
 
 
+func sworn(id: StringName) -> bool:
+	return has_flag("sworn_" + String(id))
+
+
+func can_swear(id: StringName) -> bool:
+	return owns(id) and not sworn(id) and Bonds.level(bond_of(id)) >= Bonds.SWEAR_LEVEL
+
+
+## 和羁绊到了知己的好汉结义。
+func swear(id: StringName) -> bool:
+	if not can_swear(id):
+		return false
+	set_flag("sworn_" + String(id))
+	save_game()
+	return true
+
+
+## 战斗里能用的组合技：好汉之间的，加上和结义兄弟的「结义同心」。
+func combos() -> Array[ComboData]:
+	var out: Array[ComboData] = GameDB.combos.duplicate()
+	for id in owned:
+		if sworn(id):
+			out.append(Bonds.sworn_combo(GameDB.hero(id), PROTAGONIST_ID))
+	return out
+
+
 ## 涨羁绊；升了一级时返回「与林冲的羁绊升到了相熟」，否则返回空。
 func add_bond(id: StringName, points: int) -> String:
 	if id == PROTAGONIST_ID or not owns(id):

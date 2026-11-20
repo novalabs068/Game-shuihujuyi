@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_vwj33"]
+
+[resource]
+script = ExtResource("1_vwj33")
+id = &"qingfengzhai"
+display_name = "清风寨射缨"
+description = "秦明对敌方全体各造成 160% 伤害。"
+hero_a = &"hua_rong"
+hero_b = &"qin_ming"
+effect = 3
+power = 1.6

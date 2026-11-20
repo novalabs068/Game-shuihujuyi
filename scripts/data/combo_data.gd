@@ -6,6 +6,9 @@ enum Effect {
 	SHIELD_STRIKE,   ## 全队获得 amount 比例生命的护盾，hero_b 对单体造成 power 倍伤害
 	STUN_ALL_COMBO,  ## 全体敌人眩晕 1 回合，hero_b 对单体连击 hits 次，每次 power 倍
 	STEAL_ALL_RAGE,  ## 偷取敌方全部增益，全队怒气 +rage_gain
+	ALL_FOES_COMBO,  ## hero_b 对敌方全体连打 hits 轮，每轮各 power 倍伤害
+	HEAL_RAGE,       ## 全队回复 amount 比例生命、解除眩晕，怒气 +rage_gain
+	SWORN,           ## 结义：主角（hero_a）先打单体 power 倍，hero_b 紧接着放一次强化过的绝招（不占冷却）
 }
 
 @export var id: StringName
@@ -30,4 +33,4 @@ func partner_of(hero_id: StringName) -> StringName:
 
 
 func needs_enemy_target() -> bool:
-	return effect != Effect.STEAL_ALL_RAGE
+	return effect in [Effect.SHIELD_STRIKE, Effect.STUN_ALL_COMBO, Effect.SWORN]

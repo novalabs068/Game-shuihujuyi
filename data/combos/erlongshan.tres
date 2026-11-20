@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_s50pw"]
+
+[resource]
+script = ExtResource("1_s50pw")
+id = &"erlongshan"
+display_name = "二龙山聚义"
+description = "全队获得 15% 生命的护盾，杨志对单体造成 450% 伤害。"
+hero_a = &"lu_zhishen"
+hero_b = &"yang_zhi"
+power = 4.5
+amount = 0.15

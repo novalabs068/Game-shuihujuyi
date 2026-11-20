@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_rsimo"]
+
+[resource]
+script = ExtResource("1_rsimo")
+id = &"wusanbuguowang"
+display_name = "无三不过望"
+description = "武松一路连喝三碗，对敌方全体打三轮，每轮各 60% 伤害。"
+hero_a = &"shi_en"
+hero_b = &"wu_song"
+effect = 3
+power = 0.6
+hits = 3

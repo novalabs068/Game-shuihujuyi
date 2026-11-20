@@ -243,10 +243,12 @@ func _do_attack(actor: BattleUnit, wanted: BattleUnit) -> void:
 	actor.add_rage(RAGE_ON_ATTACK)
 
 
-func _do_skill(actor: BattleUnit, wanted: BattleUnit) -> void:
-	var s := actor.data.skill
-	# 机变：冷却少 1 回合，最少 1 回合
-	actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
+## 放绝招。组合技里借放的（skill 不为空）用传进来的那招，不进冷却。
+func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -> void:
+	var s := skill if skill != null else actor.data.skill
+	if skill == null:
+		# 机变：冷却少 1 回合，最少 1 回合
+		actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
 	_emit("skill", actor, s.display_name, "%s 使用「%s」" % [actor.display_name(), s.display_name])
 	_hit_fx = SKILL_FX.get(s.effect, "")
 	match s.effect:
@@ -402,6 +404,21 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 			for ally in allies_of(actor):
 				ally.add_rage(combo.rage_gain)
 				_emit("info", ally, "怒气 +%d" % combo.rage_gain, "")
+		ComboData.Effect.ALL_FOES_COMBO:
+			for i in combo.hits:
+				for foe in foes_of(b):
+					_deal(b, foe, combo.power)
+		ComboData.Effect.HEAL_RAGE:
+			for ally in allies_of(actor):
+				var healed := mini(roundi(ally.max_hp * combo.amount), ally.max_hp - ally.hp)
+				ally.hp += healed
+				ally.stun_turns = 0
+				ally.add_rage(combo.rage_gain)
+				_emit("heal", ally, "+%d" % healed, "")
+		ComboData.Effect.SWORN:
+			_deal(a, _pick_foe(a, wanted), combo.power)
+			if b.data.skill != null and not foes_of(b).is_empty():
+				_do_skill(b, wanted if wanted != null and wanted.is_alive() else null, Stars.upgraded_skill(b.data.skill))
 
 
 ## 按设计文档的公式结算一次伤害，返回造成的伤害（含被护盾吸收的部分）。basic 表示普攻（「铁甲」只减普攻）。

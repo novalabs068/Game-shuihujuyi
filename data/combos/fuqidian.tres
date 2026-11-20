@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_j0nwc"]
+
+[resource]
+script = ExtResource("1_j0nwc")
+id = &"fuqidian"
+display_name = "十字坡夫妻店"
+description = "全体敌人被麻翻 1 回合，孙二娘对单体造成 180% 伤害。"
+hero_a = &"zhang_qing"
+hero_b = &"sun_erniang"
+effect = 1
+power = 1.8

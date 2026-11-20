@@ -48,7 +48,7 @@ var _combo_button: Button
 
 
 func _ready() -> void:
-	model = BattleModel.new(stage, team, hero_level, GameDB.combos)
+	model = BattleModel.new(stage, team, hero_level, GameState.combos())
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG
 	add_child(bg)

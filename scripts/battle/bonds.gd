@@ -1,6 +1,6 @@
 class_name Bonds
 ## 羁绊：主角和每位好汉的交情。带他打赢一场、打完他的一段列传都会涨；
-## 每升一级，这位好汉生命、攻击、防御 +3%。到「知己」后可以结义（结义另做）。纯规则，数值是初稿。
+## 每升一级，这位好汉生命、攻击、防御 +3%。到「知己」后可以结义，解锁主角和他的组合技「结义同心」。纯规则，数值是初稿。
 
 const NAMES: Array[String] = ["相识", "相熟", "相知", "知己"]
 ## 到这一级需要的羁绊点数
@@ -8,6 +8,10 @@ const THRESHOLDS: Array[int] = [0, 30, 80, 150]
 const STAT_BONUS := 0.03
 const BATTLE_POINTS := 2
 const STORY_POINTS := 20
+## 结义要到的羁绊等级（知己）
+const SWEAR_LEVEL := 3
+## 结义同心：主角先打单体这么多倍
+const SWORN_POWER := 1.5
 
 
 static func level(points: int) -> int:
@@ -41,3 +45,17 @@ static func apply(hero: UnitData, points: int) -> UnitData:
 	out.base_atk = roundi(hero.base_atk * k)
 	out.base_def = roundi(hero.base_def * k)
 	return out
+
+
+## 主角和这位好汉的组合技「结义同心」：主角先出手，好汉紧接着放一次强化过的绝招。
+static func sworn_combo(hero: UnitData, protagonist_id: StringName) -> ComboData:
+	var c := ComboData.new()
+	c.id = StringName("sworn_" + String(hero.id))
+	c.display_name = "结义同心"
+	c.hero_a = protagonist_id
+	c.hero_b = hero.id
+	c.effect = ComboData.Effect.SWORN
+	c.power = SWORN_POWER
+	var move := hero.skill.display_name if hero.skill != null else "绝招"
+	c.description = "主角先对单体造成 %d%% 伤害，%s紧接着放出强化过的「%s」（不占冷却）。" % [roundi(SWORN_POWER * 100), hero.display_name, move]
+	return c

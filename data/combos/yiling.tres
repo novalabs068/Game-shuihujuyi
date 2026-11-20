@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_vq2qp"]
+
+[resource]
+script = ExtResource("1_vq2qp")
+id = &"yiling"
+display_name = "沂岭救李逵"
+description = "李逵双斧对敌方全体砍两轮，每轮各 80% 伤害。"
+hero_a = &"zhu_gui"
+hero_b = &"li_kui"
+effect = 3
+power = 0.8
+hits = 2

@@ -183,14 +183,15 @@ func _refresh() -> void:
 	_team_label.text = "出战：%s + %s（%d/%d）" % [GameState.player_name, "、".join(names) if not names.is_empty() else "未选", _selected.size(), MAX_TEAM]
 
 	var lines := PackedStringArray()
-	for combo in GameDB.combos:
+	for combo in GameState.combos():
+		# 主角一定上场，所以结义同心只看好汉在不在
 		var a := GameDB.hero(combo.hero_a)
 		var b := GameDB.hero(combo.hero_b)
-		var has_a := a in _selected
+		var has_a := combo.hero_a == GameState.PROTAGONIST_ID or a in _selected
 		var has_b := b in _selected
 		if has_a and has_b:
 			lines.append("★ 组合技「%s」：%s" % [combo.display_name, combo.description])
-		elif has_a or has_b:
+		elif (has_a or has_b) and combo.hero_a != GameState.PROTAGONIST_ID:
 			lines.append("☆ 再加上%s可解锁「%s」" % [(b if has_a else a).display_name, combo.display_name])
 	_combo_label.text = "\n".join(lines)
 	# 一个好汉都没有时主角也能单独出发
