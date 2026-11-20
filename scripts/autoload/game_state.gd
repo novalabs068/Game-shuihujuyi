@@ -34,6 +34,10 @@ var stars: Dictionary[StringName, int] = {}
 var yiqi := 0
 ## 主角和每位好汉的羁绊点数（见 Bonds）
 var bonds: Dictionary[StringName, int] = {}
+## 气血：没回满的人剩多少（0～1，见 Vitality）；没记的就是满血
+var vitality: Dictionary[StringName, float] = {}
+## 身上带的药：id → 数量
+var medicines: Dictionary[StringName, int] = {}
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
 ## 主角学会的武学、主修（战斗里放的技能）、副修（被动加成，可以空着）
@@ -506,7 +510,87 @@ func add_rewards(gained_exp: int, gained_silver: int) -> int:
 		ups += 1
 	if level >= MAX_LEVEL:
 		experience = 0
+	# 升级时全队气血回满
+	if ups > 0:
+		vitality.clear()
 	return ups
+
+
+# --- 气血和药 ---
+
+func vitality_of(id: StringName) -> float:
+	return vitality.get(id, 1.0)
+
+
+## 打完一仗（赢、输、撤退都算）记下我方每人剩的气血。擂台不算（main 不调这里）。
+func record_battle(model: BattleModel) -> void:
+	var after := Vitality.after_battle(model)
+	for id in after:
+		_set_vitality(id, after[id])
+
+
+func _set_vitality(id: StringName, ratio: float) -> void:
+	if ratio >= 0.999:
+		vitality.erase(id)
+	else:
+		vitality[id] = ratio
+
+
+## 队里有人带「神医」这类全队回春的天赋，赶路回血翻倍。
+func has_healer() -> bool:
+	for u in battle_team():
+		if u.talent != null and u.talent_rank > 0 and u.talent.kind == &"team_regen":
+			return true
+	return false
+
+
+## 走完一段路：每人回一点气血。
+func road_regen() -> void:
+	Vitality.road_regen(vitality, has_healer())
+	for id in vitality.keys():
+		_set_vitality(id, vitality[id])
+
+
+## 在有店的地方歇脚：花银两，全队回满。
+func rest() -> bool:
+	var price := Vitality.rest_price(level)
+	if vitality.is_empty() or silver < price:
+		return false
+	silver -= price
+	vitality.clear()
+	save_game()
+	return true
+
+
+func buy_medicine(id: StringName) -> bool:
+	var price := Vitality.medicine_price(id)
+	if silver < price:
+		return false
+	silver -= price
+	medicines[id] = medicines.get(id, 0) + 1
+	save_game()
+	return true
+
+
+## 用一份药：全队药不看 target，单人药用在 target 身上。
+func use_medicine(id: StringName, target: StringName) -> bool:
+	if medicines.get(id, 0) <= 0:
+		return false
+	var heal := Vitality.medicine_heal(id)
+	if Vitality.medicine_for_team(id):
+		if vitality.is_empty():
+			return false
+		for k in vitality.keys():
+			_set_vitality(k, vitality[k] + heal)
+	else:
+		if vitality_of(target) >= 0.999:
+			return false
+		_set_vitality(target, minf(vitality_of(target) + heal, 1.0))
+	medicines[id] -= 1
+	if medicines[id] <= 0:
+		medicines.erase(id)
+	save_game()
+	return true
 
 
 func has_flag(flag: String) -> bool:
@@ -531,6 +615,8 @@ func reset() -> void:
 	stars.clear()
 	yiqi = 0
 	bonds.clear()
+	vitality.clear()
+	medicines.clear()
 	items.clear()
 	_next_uid = 1
 	martials.clear()
@@ -604,6 +690,8 @@ func save_game() -> void:
 		"pulls_since_jia": pulls_since_jia,
 		"stars": _ids_to_json(stars),
 		"bonds": _ids_to_json(bonds),
+		"vitality": _floats_to_json(vitality),
+		"medicines": _ids_to_json(medicines),
 		"yiqi": yiqi,
 		"record": record,
 		"jobs": jobs,
@@ -657,6 +745,13 @@ func load_game() -> void:
 	var saved_stars: Dictionary = data.get("stars", {})
 	for id: String in saved_stars:
 		stars[StringName(id)] = int(saved_stars[id])
+	var saved_vitality: Dictionary = data.get("vitality", {})
+	for id: String in saved_vitality:
+		vitality[StringName(id)] = float(saved_vitality[id])
+	var saved_medicines: Dictionary = data.get("medicines", {})
+	for id: String in saved_medicines:
+		if Vitality.MEDICINES.has(StringName(id)):
+			medicines[StringName(id)] = int(saved_medicines[id])
 	var saved_bonds: Dictionary = data.get("bonds", {})
 	for id: String in saved_bonds:
 		bonds[StringName(id)] = int(saved_bonds[id])
@@ -685,6 +780,13 @@ func load_game() -> void:
 			_next_uid = maxi(_next_uid, uid + 1)
 	# 有名器之前的旧存档：已经打完的列传、揭下的悬赏、开过的宝箱，补发对应的名器
 	claim_mingqi()
+
+
+func _floats_to_json(values: Dictionary[StringName, float]) -> Dictionary:
+	var out := {}
+	for id in values:
+		out[String(id)] = values[id]
+	return out
 
 
 func _ids_to_json(values: Dictionary[StringName, int]) -> Dictionary:

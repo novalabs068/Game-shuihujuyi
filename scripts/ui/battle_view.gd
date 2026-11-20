@@ -48,6 +48,8 @@ var hero_level := 1
 var background: Texture2D
 ## 战场在哪儿（背景名），决定飘什么天气，见 BattleWeather
 var place := ""
+## 开战时我方每人剩的气血（id → 0～1，见 Vitality）；空的就是满血
+var start_hp: Dictionary = {}
 var model: BattleModel
 
 signal _action_chosen(action: int)
@@ -83,6 +85,7 @@ var _combo_sub: Label
 
 func _ready() -> void:
 	model = BattleModel.new(stage, team, hero_level, GameState.combos())
+	Vitality.apply_start(model, start_hp)
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG
 	add_child(bg)

@@ -430,6 +430,8 @@ func _travel(destination: StringName, from_progress: float, can_encounter: bool)
 			return
 		await _walk(points, ENCOUNTER_AT, 1.0)
 	_walking = false
+	# 走完一段路，气血回一点
+	GameState.road_regen()
 	_arrive(map.location(destination))
 
 
@@ -538,6 +540,17 @@ func _show_panel(loc: LocationData) -> void:
 				if not _walking:
 					story_requested.emit(story))
 			_panel_buttons.add_child(button)
+	if loc.has_inn and loc.id == GameState.location_id:
+		var price := Vitality.rest_price(GameState.level)
+		var inn := UiKit.button("歇脚（%d 两）" % price, Vector2(170, 52), 22)
+		inn.disabled = GameState.vitality.is_empty() or GameState.silver < price
+		inn.tooltip_text = "住一晚，全队气血回满" if not GameState.vitality.is_empty() else "全队气血都是满的"
+		inn.pressed.connect(func() -> void:
+			if GameState.rest():
+				_flash_toast("住了一晚，全队气血回满")
+				_refresh_status()
+				_show_panel(loc))
+		_panel_buttons.add_child(inn)
 	if loc.has_market:
 		var market := UiKit.button("集市", Vector2(120, 52), 22)
 		market.pressed.connect(_open_market)

@@ -47,6 +47,7 @@ func _initialize() -> void:
 		"test_bonds",
 		"test_mingqi",
 		"test_new_combos",
+		"test_vitality",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
 		"test_simulated_win_rate",
@@ -596,6 +597,41 @@ func test_new_combos() -> bool:
 		var key := "%s+%s" % ([cd.hero_a, cd.hero_b] if String(cd.hero_a) < String(cd.hero_b) else [cd.hero_b, cd.hero_a])
 		check(not key in pairs, "%s pair is unique" % cd.display_name)
 		pairs.append(key)
+	return true
+
+
+func test_vitality() -> bool:
+	# 开战按记下的气血扣血，至少 1 点；没记的满血
+	var m := battle([unit_data(&"a", [1000, 10, 0, 100]), unit_data(&"b", [1000, 10, 0, 100])], [unit_data(&"e", [500, 1, 0, 1])])
+	Vitality.apply_start(m, {&"a": 0.4, &"b": 0.0})
+	check_eq(by_id(m, &"a").hp, 400, "starts at remembered vitality")
+	check_eq(by_id(m, &"b").hp, 1, "never starts at 0")
+	# 打完：活着的按比例，倒下的重伤；输了全队重伤
+	by_id(m, &"a").hp = 250
+	by_id(m, &"b").hp = 0
+	m.result = BattleModel.Result.WIN
+	var after := Vitality.after_battle(m)
+	check(is_equal_approx(after[&"a"], 0.25), "alive keeps its ratio")
+	check(is_equal_approx(after[&"b"], Vitality.WOUNDED), "fallen is wounded")
+	check(not after.has(&"e"), "enemies are not recorded")
+	m.result = BattleModel.Result.LOSE
+	after = Vitality.after_battle(m)
+	check(is_equal_approx(after[&"a"], Vitality.WOUNDED), "losing wounds everyone")
+	check(Vitality.is_wounded(after[&"a"]), "wounded check")
+	# 活下来但血很少的，也至少记一成
+	by_id(m, &"a").hp = 5
+	m.result = BattleModel.Result.WIN
+	check(is_equal_approx(Vitality.after_battle(m)[&"a"], Vitality.WOUNDED), "a sliver of hp counts as wounded")
+	# 赶路回血，有神医翻倍，不超过满
+	var r := {&"a": 0.5, &"b": 0.95}
+	Vitality.road_regen(r, false)
+	check(is_equal_approx(r[&"a"], 0.6) and is_equal_approx(r[&"b"], 1.0), "road regen +10%, capped")
+	Vitality.road_regen(r, true)
+	check(is_equal_approx(r[&"a"], 0.8), "healer doubles road regen")
+	check_eq(Vitality.rest_price(1), Vitality.REST_MIN, "rest has a floor price")
+	check_eq(Vitality.rest_price(20), 40, "rest price grows with level")
+	for id: StringName in Vitality.MEDICINES:
+		check(Vitality.medicine_heal(id) > 0.0 and Vitality.medicine_price(id) > 0, "%s heals and costs" % Vitality.medicine_name(id))
 	return true
 
 

@@ -88,10 +88,39 @@ func _refresh() -> void:
 	else:
 		var wares := GameDB.equipment.values().filter(func(e: EquipData) -> bool: return e.quality == EquipData.Quality.FAN)
 		wares.sort_custom(func(a: EquipData, b: EquipData) -> bool: return a.slot < b.slot)
+		# 药放最前面：受了伤最先要找的
+		for id: StringName in Vitality.MEDICINES:
+			var price := Vitality.medicine_price(id)
+			_list.add_child(_medicine_row(id, "买 %d 两" % price, GameState.silver >= price, func() -> void:
+				GameState.buy_medicine(id)
+				_refresh()))
 		for data: EquipData in wares:
 			_list.add_child(_row(data, "买 %d 两" % data.buy_price(), GameState.silver >= data.buy_price(), func() -> void:
 				GameState.buy_item(data)
 				_refresh()))
+
+
+func _medicine_row(id: StringName, action: String, enabled: bool, on_press: Callable) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_theme_constant_override("separation", 0)
+	row.add_child(info)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 10)
+	info.add_child(name_row)
+	name_row.add_child(UiKit.label(Vitality.medicine_name(id), 24, INK))
+	name_row.add_child(UiKit.label("药 · 身上有 %d 份" % GameState.medicines.get(id, 0), 18, RED))
+	var desc := UiKit.label(Vitality.MEDICINES[id][1], 16, DIM)
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.custom_minimum_size.x = 560
+	info.add_child(desc)
+	var button := UiKit.button(action, Vector2(130, 50), 20)
+	button.disabled = not enabled
+	button.pressed.connect(on_press)
+	row.add_child(button)
+	return row
 
 
 func _row(data: EquipData, action: String, enabled: bool, on_press: Callable) -> HBoxContainer:

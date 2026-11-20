@@ -33,6 +33,7 @@ level_min = 8
 level_max = 12
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("3_hsiqv"), ExtResource("4_3xsx7")])
 has_market = true
+has_inn = true
 road_to_next = PackedVector2Array(150, 370, 200, 420, 260, 455, 330, 470, 400, 455, 440, 445)
 
 [sub_resource type="Resource" id="Resource_g0lbk"]
@@ -47,6 +48,7 @@ level_min = 9
 level_max = 13
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("7_680is"), ExtResource("6_g0lbk")])
 scene_id = "shizipo"
+has_inn = true
 
 [sub_resource type="Resource" id="Resource_08vw3"]
 script = ExtResource("1_juigf")
@@ -61,6 +63,7 @@ level_max = 16
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("7_08vw3"), ExtResource("8_bor2l")])
 scene_id = "kuaihuolin"
 has_market = true
+has_inn = true
 
 [sub_resource type="Resource" id="Resource_ibthg"]
 script = ExtResource("1_juigf")
@@ -72,6 +75,7 @@ label_position = Vector2(764, 426)
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("5_5ofri"), ExtResource("6_573kp")])
 scene_id = "dongjing_street"
 has_market = true
+has_inn = true
 road_to_next = PackedVector2Array(440, 445, 520, 425, 580, 430, 640, 455, 690, 470)
 
 [sub_resource type="Resource" id="Resource_bor2l"]
@@ -124,6 +128,7 @@ level_min = 10
 level_max = 14
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("6_573kp"), ExtResource("8_bor2l")])
 has_market = true
+has_inn = true
 
 [sub_resource type="Resource" id="Resource_62d41"]
 script = ExtResource("1_juigf")
@@ -137,6 +142,7 @@ level_min = 12
 level_max = 16
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("9_08vw3"), ExtResource("10_bor2l")])
 has_market = true
+has_inn = true
 road_to_next = PackedVector2Array(905, 495, 950, 505, 1010, 480, 1090, 455, 1120, 445)
 
 [sub_resource type="Resource" id="Resource_wch8f"]

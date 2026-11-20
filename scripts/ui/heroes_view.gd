@@ -208,6 +208,12 @@ func _show_detail() -> void:
 	if owned:
 		var lv := GameState.level
 		info.add_child(UiKit.label("%d 级　生命 %d　攻击 %d　防御 %d　速度 %d" % [lv, _at(effective.base_hp, lv), _at(effective.base_atk, lv), _at(effective.base_def, lv), _at(effective.base_spd, lv)], 20))
+		var vit := GameState.vitality_of(hero.id)
+		if vit < 0.999:
+			var hurt := "气血 %d%%" % roundi(vit * 100)
+			if Vitality.is_wounded(vit):
+				hurt += "（重伤）"
+			info.add_child(UiKit.label(hurt + "　歇脚、吃药、赶路都能回", 18, UiKit.DAMAGE))
 		var bonus := PackedStringArray()
 		if star > 1 and not protagonist:
 			bonus.append("勾玉：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
@@ -281,6 +287,13 @@ func _show_detail() -> void:
 		_bottom.add_child(gear_row)
 		for slot in EquipData.Slot.values():
 			gear_row.add_child(_slot_button(hero, slot))
+		var carried := 0
+		for id in GameState.medicines:
+			carried += GameState.medicines[id]
+		var med := UiKit.button("用药（%d）" % carried, Vector2(124, 50), 17)
+		med.disabled = carried == 0
+		med.pressed.connect(_open_medicines.bind(hero))
+		gear_row.add_child(med)
 	if protagonist:
 		return
 
@@ -328,6 +341,54 @@ func _show_detail() -> void:
 		if GameState.souls_to_yiqi(hero.id, SOUL_STEP):
 			_done("%d 个将魂化成了 %d 点义气" % [SOUL_STEP, SOUL_STEP * Stars.YIQI_PER_SOUL]))
 	buttons.add_child(melt)
+
+
+## 用药：列出身上带的药，单人药用在这位身上，全队药全队都回。
+func _open_medicines(hero: UnitData) -> void:
+	var overlay := Control.new()
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.6)
+	overlay.add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	overlay.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiKit.box(UiKit.PANEL, UiKit.GOLD, 2, 10))
+	panel.custom_minimum_size = Vector2(620, 0)
+	center.add_child(panel)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 12)
+	panel.add_child(v)
+	v.add_child(UiKit.label("给%s用药　气血 %d%%" % [hero.display_name, roundi(GameState.vitality_of(hero.id) * 100)], 26, UiKit.GOLD))
+	var close := func() -> void:
+		overlay.queue_free()
+		_refresh_list()
+		_show_detail()
+	overlay.set_meta("close_on_back", close)
+	for id: StringName in GameState.medicines:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		v.add_child(row)
+		var text := UiKit.label("%s ×%d　%s" % [Vitality.medicine_name(id), GameState.medicines[id], Vitality.MEDICINES[id][1]], 18)
+		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+		var team := Vitality.medicine_for_team(id)
+		var use := UiKit.button("全队用" if team else "用", Vector2(110, 48), 20)
+		use.disabled = GameState.vitality.is_empty() if team else GameState.vitality_of(hero.id) >= 0.999
+		use.pressed.connect(func() -> void:
+			if GameState.use_medicine(id, hero.id):
+				close.call()
+				_done("用了%s" % Vitality.medicine_name(id)))
+		row.add_child(use)
+	var back := UiKit.button("返回", Vector2(160, 50), 22)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	back.pressed.connect(close)
+	v.add_child(back)
 
 
 func _wrapped(text: String, color: Color) -> Label:
@@ -434,7 +495,7 @@ func _slot_button(hero: UnitData, slot: EquipData.Slot) -> Button:
 		var data := GameState.item_data(it)
 		text = "%s：%s" % [EquipData.SLOT_NAMES[slot], data.display_name]
 		color = UiKit.QUALITY_COLORS[data.quality]
-	var button := UiKit.button(text, Vector2(176, 50), 18)
+	var button := UiKit.button(text, Vector2(150, 50), 17)
 	button.clip_text = true
 	button.add_theme_color_override("font_color", color)
 	button.pressed.connect(_open_picker.bind(hero, slot))

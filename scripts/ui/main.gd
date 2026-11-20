@@ -155,10 +155,16 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 	screen.hero_level = GameState.level
 	screen.background = _battle_background(story.location)
 	screen.place = String(story.location)
+	screen.start_hp = GameState.vitality.duplicate()
 	screen.retry_requested.connect(_start_story_battle.bind(stage, resume_at, story))
-	screen.exit_requested.connect(_show_map)
+	screen.exit_requested.connect(func() -> void:
+		GameState.record_battle(screen.model)
+		GameState.save_game()
+		_show_map())
 	screen.finished.connect(func(won: bool) -> void:
+		GameState.record_battle(screen.model)
 		if not won:
+			GameState.save_game()
 			_show_map(&"", 0.0, "「%s」没能打赢，下次从这一段开头再来。" % story.title)
 			return
 		var r: Dictionary = Encounters.rewards(screen.model)
@@ -167,6 +173,15 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 		GameState.save_game()
 		_start_story(story, resume_at))
 	_set_screen(screen)
+
+
+## 「林冲、花荣重伤」这样的提示；没人重伤返回空。
+func _wounded_text() -> String:
+	var names := PackedStringArray()
+	for u in GameState.team():
+		if Vitality.is_wounded(GameState.vitality_of(u.id)):
+			names.append(u.display_name)
+	return "" if names.is_empty() else "%s重伤，记得歇脚或用药" % "、".join(names)
 
 
 ## 战场背景：这一带的水墨画（art/story/<地点>），还没画的用江湖大地图。
@@ -246,14 +261,24 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		where = sd.battle_bg if sd.battle_bg != &"" else sd.region
 	screen.background = _battle_background(where)
 	screen.place = String(where)
+	# 擂台比武开打前回满、打完不记伤；别的仗血量都接着上一仗
+	var arena := bonus.has("arena_round")
+	if not arena:
+		screen.start_hp = GameState.vitality.duplicate()
 	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress, bonus, return_scene))
 	var leave := func(notice: String) -> void:
 		if return_scene != "":
 			_show_scene(return_scene, notice)
 		else:
 			_show_map(&"", 0.0, notice)
-	screen.exit_requested.connect(leave.bind(""))
+	screen.exit_requested.connect(func() -> void:
+		if not arena:
+			GameState.record_battle(screen.model)
+			GameState.save_game()
+		leave.call(""))
 	screen.finished.connect(func(won: bool) -> void:
+		if not arena:
+			GameState.record_battle(screen.model)
 		GameState.finish_roamer(won)
 		var bond_text := GameState.record_win() if won else ""
 		var notice := ""
@@ -285,7 +310,13 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 				parts.append("升到 %d 级！" % GameState.level)
 			if bond_text != "":
 				parts.append(bond_text)
+			var hurt := _wounded_text()
+			if hurt != "" and not arena:
+				parts.append(hurt)
 			notice = "　".join(parts)
+			GameState.save_game()
+		elif not won:
+			notice = "败下阵来，全队都受了重伤。先歇歇脚、吃点药再走。"
 			GameState.save_game()
 		if won and destination != &"":
 			_show_map(destination, progress, notice)
