@@ -1,7 +1,7 @@
 class_name UnitCard
 extends Control
-## 战场上的一个人：放大的像素小人站在地上（脚下有影子），下面一块名牌（名字、血条、怒气条、状态），
-## 名牌上方一个气泡写着敌人下一步要干什么（好汉被瞄准时也有）。点击时发出 tapped。
+## 战场上的一个人：放大的像素小人站在地上（脚下有影子），脚下一块纸色腰牌（身份印、名字、血条、怒气条、状态），
+## 头顶一个小圆标：敌人下一步普攻「攻」、放绝招「技」，好汉被敌人绝招瞄准时「危」。点击时发出 tapped。
 ## 敌人脸朝左（小人翻转）。轮到谁出手谁往前站一步、脚下亮金圈；被选中的目标脚下亮红圈。
 ## 动作都是程序做的：待机起伏、出手蓄力冲刺、远程拉弓、受击后仰、倒地、胜利跳一下。
 
@@ -10,8 +10,14 @@ signal tapped(card: UnitCard)
 ## 整个人（含名牌）占的大小
 const CARD_SIZE := Vector2(190, 272)
 const FIGURE_HEIGHT := 206.0
-const PLATE_HEIGHT := 62.0
 const ACTIVE_SHIFT := 30.0
+## 脚下腰牌：纸色底、墨色字，敌人名字朱红
+const PLATE_WIDTH := 126.0
+const PLATE_PAPER := Color("eee4cd")
+const PLATE_INK := Color("2a2420")
+const PLATE_RED := Color("b0261e")
+## 头顶意图小圆标的直径
+const INTENT_SIZE := 34
 ## 像素小人放大几倍（按整数放大，像素才不糊）；太高放不下时少放一倍
 const PIXEL_SCALE := 4
 ## 待机时上下起伏的像素数和一个来回的秒数
@@ -27,7 +33,6 @@ var _figure: TextureRect
 var _plate: PanelContainer
 var _name_label: Label
 var _hp_bar: ProgressBar
-var _hp_label: Label
 var _status_label: Label
 var _rage_bar: ProgressBar
 var _bubble: PanelContainer
@@ -80,8 +85,9 @@ func setup(p_unit: BattleUnit) -> void:
 
 	_plate = PanelContainer.new()
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_plate.position = Vector2(4, FIGURE_HEIGHT + 4)
-	_plate.size = Vector2(CARD_SIZE.x - 8, PLATE_HEIGHT)
+	_plate.position = Vector2((CARD_SIZE.x - PLATE_WIDTH) / 2, FIGURE_HEIGHT + 4)
+	_plate.size = Vector2(PLATE_WIDTH, 0)
+	_plate.custom_minimum_size.x = PLATE_WIDTH
 	add_child(_plate)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 2)
@@ -90,26 +96,28 @@ func setup(p_unit: BattleUnit) -> void:
 	top.add_theme_constant_override("separation", 4)
 	v.add_child(top)
 	if IdentitySeal.COLORS.has(unit.data.rarity):
-		top.add_child(IdentitySeal.make(unit.data.rarity, 20))
-	_name_label = UiKit.label("", 18, _name_color())
+		top.add_child(IdentitySeal.make(unit.data.rarity, 18))
+	_name_label = UiKit.label("", 16, _name_color())
 	_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_name_label.clip_text = true
 	top.add_child(_name_label)
-	_hp_label = UiKit.label("", 13, UiKit.TEXT_DIM)
-	top.add_child(_hp_label)
-	_hp_bar = _bar(UiKit.HP, 10)
+	_hp_bar = _bar(PLATE_RED, 5)
 	v.add_child(_hp_bar)
-	_rage_bar = _bar(UiKit.RAGE, 5)
+	_rage_bar = _bar(UiKit.RAGE, 3)
 	v.add_child(_rage_bar)
-	_status_label = UiKit.label("", 13, UiKit.RAGE)
+	_status_label = UiKit.label("", 12, PLATE_RED)
 	_status_label.clip_text = true
 	v.add_child(_status_label)
 
+	# 头顶的意图小圆标
 	_bubble = PanelContainer.new()
 	_bubble.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_bubble.z_index = 6
+	_bubble.custom_minimum_size = Vector2(INTENT_SIZE, INTENT_SIZE)
 	add_child(_bubble)
-	_bubble_label = UiKit.label("", 14)
+	_bubble_label = UiKit.label("", 17, PLATE_PAPER)
+	_bubble_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_bubble_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_bubble.add_child(_bubble_label)
 	_bubble.visible = false
 	UiKit.ignore_mouse(self)
@@ -120,19 +128,25 @@ func setup(p_unit: BattleUnit) -> void:
 
 func refresh() -> void:
 	var dead := not unit.is_alive()
-	_name_label.text = "%s Lv%d" % [unit.display_name(), unit.level]
+	_name_label.text = unit.display_name()
 	_hp_bar.max_value = unit.max_hp
 	_hp_bar.value = unit.hp
-	_hp_label.text = "%d" % unit.hp
 	_rage_bar.max_value = BattleUnit.RAGE_MAX
 	_rage_bar.value = unit.rage
 	_status_label.text = " ".join(unit.status_tags())
-	var border := UiKit.BOSS if unit.data.is_boss else UiKit.CARD_FRAME
+	_status_label.visible = _status_label.text != ""
+	var border := PLATE_INK
 	if _active:
 		border = UiKit.GOLD
 	elif _targeted and not dead:
-		border = UiKit.DAMAGE
-	_plate.add_theme_stylebox_override("panel", UiKit.box(Color(0.08, 0.07, 0.06, 0.82), border, 3 if (_active or _targeted) else 1, 6))
+		border = PLATE_RED
+	var plate_style := UiKit.box(PLATE_PAPER, border, 3 if (_active or _targeted) else 2, 3)
+	plate_style.content_margin_left = 6
+	plate_style.content_margin_right = 6
+	plate_style.content_margin_top = 2
+	plate_style.content_margin_bottom = 4
+	_plate.add_theme_stylebox_override("panel", plate_style)
+	_plate.reset_size()
 	if dead:
 		_bubble.visible = false
 		modulate = Color(0.55, 0.55, 0.55, 0.45)
@@ -147,16 +161,12 @@ func refresh() -> void:
 	queue_redraw()
 
 
-## 状态特效：该有就挂上（循环播），没有了就摘掉。
-## 名字颜色：好汉按品级（甲金乙紫丙蓝丁灰），主角蓝，头目橙红，其他敌人米白。
+## 名字颜色（腰牌是纸色底）：我方墨色，敌人朱红。
 func _name_color() -> Color:
-	match unit.data.rarity:
-		UnitData.Rarity.TIANGANG, UnitData.Rarity.DISHA:
-			return UiKit.TIER_COLORS[unit.data.tier]
-		UnitData.Rarity.PROTAGONIST:
-			return UiKit.ACCENT
-	return UiKit.BOSS if unit.data.is_boss else UiKit.TEXT
+	return PLATE_INK if unit.side == BattleUnit.Side.PLAYER else PLATE_RED
 
+
+## 状态特效：该有就挂上（循环播），没有了就摘掉。
 
 func _sync_overlay(name: String, on: bool, at: Vector2, k: float) -> void:
 	if on and not _overlays.has(name):
@@ -206,19 +216,17 @@ func place(pos: Vector2) -> void:
 	position = home_position + Vector2(shift if _active else 0.0, 0)
 
 
-## 敌人头顶的气泡：下一步要干什么（要放技能时变红）；好汉被瞄准时也冒一个红气泡。
-func set_intent(text: String, danger: bool) -> void:
-	_bubble.visible = text != "" and unit.is_alive()
+## 头顶的小圆标：一个字（攻、技、晕、危），danger 时朱红底；空字就藏起来。
+func set_intent(mark: String, danger: bool) -> void:
+	_bubble.visible = mark != "" and unit.is_alive()
 	if not _bubble.visible:
 		return
-	_bubble_label.text = text.trim_prefix("下一步：")
-	_bubble.add_theme_stylebox_override("panel", UiKit.box(Color(0.55, 0.1, 0.08, 0.92) if danger else Color(0.08, 0.07, 0.06, 0.85), UiKit.DAMAGE if danger else UiKit.PANEL_LIGHT, 2, 8))
-	_bubble.reset_size()
-	_bubble.position = Vector2((CARD_SIZE.x - _bubble.size.x) / 2, FIGURE_HEIGHT - _bubble.size.y - 2)
-	# 站在屏幕边上的人，气泡往里挪，别露出屏幕外
-	var left := global_position.x + _bubble.position.x
-	var right := get_viewport_rect().size.x - (left + _bubble.size.x)
-	_bubble.position.x += maxf(4.0 - left, 0.0) - maxf(4.0 - right, 0.0)
+	_bubble_label.text = mark
+	var style := UiKit.box(PLATE_RED if danger else Color(0.13, 0.1, 0.09, 0.92), PLATE_PAPER, 2, INTENT_SIZE / 2)
+	style.set_content_margin_all(0)
+	_bubble.add_theme_stylebox_override("panel", style)
+	_bubble.size = Vector2(INTENT_SIZE, INTENT_SIZE)
+	_bubble.position = Vector2((CARD_SIZE.x - INTENT_SIZE) / 2, FIGURE_HEIGHT - _figure.size.y * _depth - INTENT_SIZE - 6)
 
 
 ## 命中点：胸口（特效、飘字都对着这里）。
@@ -352,7 +360,7 @@ func _bar(color: Color, height: int) -> ProgressBar:
 	var bar := ProgressBar.new()
 	bar.show_percentage = false
 	bar.custom_minimum_size.y = height
-	var bg := UiKit.box(Color(0, 0, 0, 0.55), Color(0, 0, 0, 0), 0, 3)
+	var bg := UiKit.box(Color(0.55, 0.48, 0.38, 0.6), Color(0, 0, 0, 0), 0, 1)
 	var fill := UiKit.box(color, color, 0, 3)
 	bg.set_content_margin_all(0)
 	fill.set_content_margin_all(0)

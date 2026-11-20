@@ -157,3 +157,55 @@ static func ignore_mouse(node: Node) -> void:
 		if child is Control:
 			(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ignore_mouse(child)
+
+
+## 1～99 写成汉字（「第十二回合」）。
+static func cn_number(n: int) -> String:
+	const DIGITS := "零一二三四五六七八九"
+	if n <= 0 or n >= 100:
+		return str(n)
+	if n < 10:
+		return DIGITS[n]
+	var tens := n / 10
+	var ones := n % 10
+	return ("" if tens == 1 else DIGITS[tens]) + "十" + ("" if ones == 0 else DIGITS[ones])
+
+
+## 圆形按钮：直径 d，底色 fill，边框米色；字居中。
+static func round_button(text: String, d: float, fill: Color, text_color: Color, font_size: int) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(d, d)
+	b.size = Vector2(d, d)
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", font_size)
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		b.add_theme_color_override(state, text_color)
+	b.add_theme_color_override("font_disabled_color", Color(text_color, 0.45))
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = fill
+	normal.set_corner_radius_all(int(d / 2))
+	normal.set_border_width_all(3)
+	normal.border_color = Color("ecdcbc")
+	normal.shadow_color = Color(0, 0, 0, 0.45)
+	normal.shadow_size = 8
+	normal.shadow_offset = Vector2(0, 4)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = fill.lightened(0.15)
+	var disabled := normal.duplicate() as StyleBoxFlat
+	disabled.bg_color = Color(fill.darkened(0.3), 0.55)
+	disabled.border_color = Color("ecdcbc", 0.35)
+	b.add_theme_stylebox_override("normal", normal)
+	b.add_theme_stylebox_override("hover", normal)
+	b.add_theme_stylebox_override("pressed", pressed)
+	b.add_theme_stylebox_override("disabled", disabled)
+	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	return b
+
+
+## 带黑描边的字，直接压在战场画面上用。
+static func outlined(text: String, font_size: int, color: Color) -> Label:
+	var l := label(text, font_size, color)
+	l.add_theme_constant_override("outline_size", 8)
+	l.add_theme_color_override("font_outline_color", Color(0.06, 0.05, 0.04))
+	return l
