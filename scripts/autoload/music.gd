@@ -1,8 +1,7 @@
 extends Node
 ## 背景音乐（自动加载为 Music）：play(曲名) 换曲时两首交叉淡入淡出，同一首在放就不打断。
-## 曲子在 audio/music/<曲名>.ogg，由 tools/music/compose.py 生成；开关存在 user://settings.cfg。
+## 曲子在 audio/music/<曲名>.ogg，由 tools/music/compose.py 生成；开关和音量存在设置里（Prefs）。
 
-const SETTINGS_PATH := "user://settings.cfg"
 const FADE := 1.2
 const VOLUME_DB := -6.0
 const SILENT_DB := -60.0
@@ -10,13 +9,22 @@ const SILENT_DB := -60.0
 var enabled := true:
 	set(value):
 		enabled = value
-		_save_settings()
+		Prefs.set_value("audio", "music", enabled)
 		if enabled:
 			var track := _current
 			_current = &""
 			play(track)
 		else:
 			_fade_out(_players[_active])
+
+## 音量（0～1），在 VOLUME_DB 的基础上调
+var volume := 0.8:
+	set(value):
+		volume = clampf(value, 0.0, 1.0)
+		Prefs.set_value("audio", "volume", volume)
+		if enabled and _players.size() == 2 and _players[_active].playing:
+			_kill_fade(_active)
+			_players[_active].volume_db = _target_db()
 
 var _players: Array[AudioStreamPlayer] = []
 ## 每个播放器正在跑的淡入淡出；复用播放器前要先停掉，不然上一次「淡出后停止」会把新曲子停了
@@ -32,9 +40,8 @@ func _ready() -> void:
 		p.volume_db = SILENT_DB
 		add_child(p)
 		_players.append(p)
-	var cfg := ConfigFile.new()
-	if cfg.load(SETTINGS_PATH) == OK:
-		enabled = cfg.get_value("audio", "music", true)
+	enabled = Prefs.get_value("audio", "music", true)
+	volume = Prefs.get_value("audio", "volume", 0.8)
 
 
 func play(track: StringName) -> void:
@@ -57,7 +64,7 @@ func play(track: StringName) -> void:
 	new.volume_db = SILENT_DB
 	new.play()
 	_fades[_active] = create_tween()
-	_fades[_active].tween_property(new, "volume_db", VOLUME_DB, FADE)
+	_fades[_active].tween_property(new, "volume_db", _target_db(), FADE)
 	_fade_out(old)
 
 
@@ -89,8 +96,5 @@ func _kill_fade(i: int) -> void:
 	_fades[i] = null
 
 
-func _save_settings() -> void:
-	var cfg := ConfigFile.new()
-	cfg.load(SETTINGS_PATH)
-	cfg.set_value("audio", "music", enabled)
-	cfg.save(SETTINGS_PATH)
+func _target_db() -> float:
+	return VOLUME_DB + linear_to_db(maxf(volume, 0.001)) if volume > 0.0 else SILENT_DB

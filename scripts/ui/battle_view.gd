@@ -468,7 +468,11 @@ func _build_top_bar() -> void:
 	bar.add_child(auto)
 	var fast := CheckButton.new()
 	fast.text = "2倍速"
-	fast.toggled.connect(func(on: bool) -> void: Engine.time_scale = 2.0 if on else 1.0)
+	fast.toggled.connect(func(on: bool) -> void:
+		Engine.time_scale = 2.0 if on else 1.0
+		Prefs.set_value("battle", "fast", on))
+	# 记住上一次选的速度
+	fast.button_pressed = Prefs.get_value("battle", "fast", false)
 	bar.add_child(fast)
 	var quit_button := UiKit.button("撤退", Vector2(90, 44), 20)
 	quit_button.pressed.connect(func() -> void: exit_requested.emit())

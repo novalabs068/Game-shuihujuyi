@@ -125,6 +125,7 @@ func new_game(p_name: String, origin: OriginData) -> void:
 	location_id = origin.start_location
 	tokens = STARTING_TOKENS
 	_learn_origin_martial()
+	set_flag("tut_on")
 	_protagonist = null
 	save_game()
 
@@ -544,6 +545,39 @@ func reset() -> void:
 	silver = 0
 	tokens = 0
 	_protagonist = null
+
+
+## 新手引导走到第几步（0 = 不用引导，老存档和走完的都是 0）：
+## 1 招募 → 2 编队 → 3 打一仗 → 4 看「好汉」页 → 5 看「江湖榜」。
+func tutorial_step() -> int:
+	if not has_flag("tut_on") or has_flag("tut_done"):
+		return 0
+	if owned.is_empty():
+		return 1
+	if team_ids.size() <= 1:
+		return 2
+	if record["wins"] == 0:
+		return 3
+	if not has_flag("tut_heroes"):
+		return 4
+	if not has_flag("tut_jianghu"):
+		return 5
+	return 0
+
+
+## 引导里要求看的页面看过了，或者玩家点了「跳过引导」。
+func mark_tutorial(flag: String) -> void:
+	if tutorial_step() == 0 or has_flag(flag):
+		return
+	set_flag(flag)
+	save_game()
+
+
+## 清空存档：内存里的进度清掉，存档文件删掉（设置里的「重新开始」）。
+func delete_save() -> void:
+	reset()
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
 
 
 func has_save() -> bool:

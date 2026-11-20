@@ -4,9 +4,72 @@ extends Control
 var _screen: Control
 
 
+## 在大地图上按返回键：这么多秒内再按一次才退出
+const QUIT_CONFIRM_SECONDS := 2.0
+
+var _quit_armed_at := -100.0
+
+
 func _ready() -> void:
 	theme = UiKit.make_theme()
 	_show_title()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_go_back()
+
+
+## 电脑上按 Esc 等同手机返回键，方便调试。
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_go_back()
+		get_viewport().set_input_as_handled()
+
+
+## 手机返回键：先关最上面的弹窗；再退回上一层；在大地图和开始界面连按两次退出。
+## 战斗和列传里不响应，免得误触丢了进度（里面有「撤退」「离开」按钮）。
+func _go_back() -> void:
+	if _screen == null:
+		return
+	for i in range(_screen.get_child_count() - 1, -1, -1):
+		var child := _screen.get_child(i)
+		if child is SettingsPanel or child is MarketPanel or child is ArenaPanel or child is BountyBoard:
+			child.closed.emit()
+			return
+		if child.has_meta("close_on_back"):
+			(child.get_meta("close_on_back") as Callable).call()
+			return
+	if _screen is BattleView or _screen is StoryView:
+		return
+	if _screen is WorldMapView or _screen is TitleScreen:
+		_ask_quit()
+	elif _screen.has_method("go_back"):
+		_screen.call("go_back")
+	elif _screen.has_signal("back_requested"):
+		_screen.emit_signal("back_requested")
+	else:
+		_show_map()
+
+
+func _ask_quit() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if now - _quit_armed_at <= QUIT_CONFIRM_SECONDS:
+		get_tree().quit()
+		return
+	_quit_armed_at = now
+	var toast := UiKit.label("再按一次返回键退出游戏", 24, UiKit.GOLD)
+	toast.add_theme_constant_override("outline_size", 8)
+	toast.add_theme_color_override("font_outline_color", Color.BLACK)
+	toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	toast.z_index = 50
+	add_child(toast)
+	toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	toast.position.y -= 120
+	var t := toast.create_tween()
+	t.tween_interval(QUIT_CONFIRM_SECONDS - 0.4)
+	t.tween_property(toast, "modulate:a", 0.0, 0.4)
+	t.tween_callback(toast.queue_free)
 
 
 func _show_title() -> void:
@@ -40,6 +103,9 @@ func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, not
 	screen.story_requested.connect(_start_story)
 	screen.jianghu_requested.connect(_show_jianghu)
 	screen.profile_requested.connect(_show_profile)
+	screen.restart_requested.connect(func() -> void:
+		GameState.delete_save()
+		_show_title())
 	_set_screen(screen)
 
 

@@ -172,3 +172,9 @@ func _celebrate(card: Control) -> void:
 		var k := 10.0 * (1.0 - i / 6.0)
 		shake.tween_property(self, "position", Vector2(randf_range(-k, k), randf_range(-k, k)), 0.03)
 	shake.tween_property(self, "position", Vector2.ZERO, 0.03)
+
+
+## 手机返回键：抽卡动画放完才能返回。
+func go_back() -> void:
+	if not _revealing:
+		back_requested.emit()

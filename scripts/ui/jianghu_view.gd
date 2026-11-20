@@ -29,6 +29,7 @@ var _scroll: ScrollContainer
 
 
 func _ready() -> void:
+	GameState.mark_tutorial("tut_jianghu")
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG
 	add_child(bg)

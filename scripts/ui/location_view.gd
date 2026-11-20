@@ -310,6 +310,12 @@ func _arrived() -> void:
 				_leave()
 
 
+## 手机返回键：正在对话、开箱这类事情时不响应，否则离开场景。
+func go_back() -> void:
+	if not _busy:
+		_leave()
+
+
 ## 离开场景回大地图；小怪下次进来重新出现。
 func _leave() -> void:
 	GameState.scene_memory.erase(scene_data.id)

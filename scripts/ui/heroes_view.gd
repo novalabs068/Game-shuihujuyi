@@ -21,6 +21,7 @@ var _notice: Label
 
 
 func _ready() -> void:
+	GameState.mark_tutorial("tut_heroes")
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG
 	add_child(bg)
@@ -382,6 +383,8 @@ func _open_martials() -> void:
 		overlay.queue_free()
 		_refresh_list()
 		_show_detail()
+	# 手机返回键先关这一层（见 main._go_back）
+	overlay.set_meta("close_on_back", close)
 	for id in GameState.martials:
 		var m := GameState.martial(id)
 		var row := HBoxContainer.new()
@@ -480,6 +483,8 @@ func _open_picker(hero: UnitData, slot: EquipData.Slot) -> void:
 		overlay.queue_free()
 		_refresh_list()
 		_show_detail()
+	# 手机返回键先关这一层（见 main._go_back）
+	overlay.set_meta("close_on_back", close)
 	for it: Dictionary in candidates:
 		var data := GameState.item_data(it)
 		var uid: int = it["uid"]

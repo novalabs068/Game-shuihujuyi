@@ -46,6 +46,14 @@ func _ready() -> void:
 	var fresh := UiKit.button("新游戏", Vector2(280, 72), 30)
 	fresh.pressed.connect(func() -> void: new_game_requested.emit())
 	buttons.add_child(fresh)
+	var settings := UiKit.button("设置", Vector2(280, 60), 26)
+	settings.pressed.connect(func() -> void:
+		var panel := SettingsPanel.new()
+		panel.allow_restart = false
+		add_child(panel)
+		panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		panel.closed.connect(panel.queue_free))
+	buttons.add_child(settings)
 	if GameState.has_save():
 		var note := UiKit.label("新游戏会覆盖现在的存档（%s）" % GameState.player_name, 18, Color("5a3a2a"))
 		note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

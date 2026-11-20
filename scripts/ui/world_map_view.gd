@@ -12,6 +12,8 @@ signal heroes_requested
 signal story_requested(story: StoryData)
 signal jianghu_requested
 signal profile_requested
+## 在设置里确认了重新开始
+signal restart_requested
 
 ## 拖动地图时，手指移动超过这么多像素才算拖（不算点击）
 const DRAG_SLOP := 10.0
@@ -51,6 +53,8 @@ var _panel_buttons: HBoxContainer
 var _toast: Label
 var _event_panel: EventPanel
 var _status: Label
+## 新手引导要框亮的顶栏按钮：步骤 → 按钮
+var _guide_targets: Dictionary[int, Button] = {}
 var _walking := false
 var _rng := RandomNumberGenerator.new()
 ## 地图拖到哪了：底图左上角在屏幕上的位置
@@ -88,6 +92,7 @@ func _ready() -> void:
 	_avatar = _build_avatar()
 	_layer.add_child(_avatar)
 	_build_top_bar()
+	_build_guide()
 	_build_panel()
 	_event_panel = EventPanel.new()
 	add_child(_event_panel)
@@ -225,25 +230,68 @@ func _build_top_bar() -> void:
 		if not _walking:
 			jianghu_requested.emit())
 	row.add_child(jianghu_button)
+	_guide_targets[5] = jianghu_button
 	var recruit_button := UiKit.button("招募", Vector2(100, 40), 20)
 	recruit_button.pressed.connect(func() -> void:
 		if not _walking:
 			recruit_requested.emit())
 	row.add_child(recruit_button)
+	_guide_targets[1] = recruit_button
 	var heroes_button := UiKit.button("好汉", Vector2(100, 40), 20)
 	heroes_button.pressed.connect(func() -> void:
 		if not _walking:
 			heroes_requested.emit())
 	row.add_child(heroes_button)
+	_guide_targets[4] = heroes_button
 	var team_button := UiKit.button("编队", Vector2(100, 40), 20)
 	team_button.pressed.connect(func() -> void:
 		if not _walking:
 			team_requested.emit())
 	row.add_child(team_button)
-	var reset_button := UiKit.button("重开", Vector2(90, 40), 18)
-	reset_button.tooltip_text = "清空存档，从头开始（原型调试用）"
-	reset_button.pressed.connect(_on_reset)
-	row.add_child(reset_button)
+	_guide_targets[2] = team_button
+	var settings_button := UiKit.button("设置", Vector2(90, 40), 18)
+	settings_button.pressed.connect(_open_settings)
+	row.add_child(settings_button)
+
+
+## 新手引导：顶栏下面一条提示，对应的按钮一闪一闪。
+const GUIDE_TEXTS := {
+	1: "新手引导 1/5：点右上角「招募」，用开局送的 10 枚聚义令来一次十连，招几位好汉。",
+	2: "新手引导 2/5：点「编队」，挑 2 位好汉跟你一起闯荡。",
+	3: "新手引导 3/5：去打一仗。点地点的「进入」走进场景（东京、景阳冈、快活林、十字坡），碰到游荡的小怪就开打；在大地图上赶路也会遇到敌人。",
+	4: "新手引导 4/5：打赢了！点「好汉」看看：重复抽到的好汉会变成将魂，攒够了点亮勾玉；还能换装备、看天赋和组合技。",
+	5: "新手引导 5/5：点「江湖榜」，里面列着眼下能做的事：悬赏、列传、宝箱、没去过的地方。看完之后，江湖就随你闯了！",
+}
+
+
+func _build_guide() -> void:
+	var step := GameState.tutorial_step()
+	if step == 0:
+		return
+	var bar := PanelContainer.new()
+	bar.add_theme_stylebox_override("panel", UiKit.box(Color(INK, 0.92), UiKit.GOLD, 2, 8))
+	add_child(bar)
+	bar.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	bar.offset_top = 62
+	bar.offset_left = 16
+	bar.offset_right = -16
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	bar.add_child(row)
+	var text := UiKit.label(GUIDE_TEXTS[step], 20, UiKit.GOLD)
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	var skip := UiKit.button("跳过引导", Vector2(110, 40), 16)
+	skip.pressed.connect(func() -> void:
+		GameState.mark_tutorial("tut_done")
+		bar.queue_free())
+	row.add_child(skip)
+	var target: Button = _guide_targets.get(step)
+	if target != null:
+		var pulse := target.create_tween().set_loops()
+		pulse.tween_property(target, "modulate", Color(1.8, 1.5, 0.6), 0.5)
+		pulse.tween_property(target, "modulate", Color.WHITE, 0.5)
 
 
 func _build_panel() -> void:
@@ -530,15 +578,14 @@ func _refresh_locks() -> void:
 		_tags[loc.id].modulate = Color.WHITE if open else Color(1, 1, 1, 0.35)
 
 
-func _on_reset() -> void:
+func _open_settings() -> void:
 	if _walking:
 		return
-	GameState.reset()
-	GameState.save_game()
-	_refresh_locks()
-	_place_avatar(map.location(GameState.location_id).map_position)
-	_show_panel(map.location(GameState.location_id))
-	_flash_toast("已重新开始")
+	var panel := SettingsPanel.new()
+	add_child(panel)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.closed.connect(panel.queue_free)
+	panel.restart_requested.connect(func() -> void: restart_requested.emit())
 
 
 func _flash_toast(text: String) -> void:
