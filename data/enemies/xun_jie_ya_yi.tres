@@ -28,4 +28,5 @@ portrait = ExtResource("4_xvap3")
 bust = ExtResource("1_yvsur")
 face = ExtResource("2_pjiws")
 map_sprite = ExtResource("1_osgpp")
+attack_style = &"heavy"
 skill = SubResource("Resource_yvsur")

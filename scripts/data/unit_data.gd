@@ -31,6 +31,8 @@ enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
 @export var map_sprite: Texture2D
 
 @export_group("技能")
+## 普攻的样子（战斗里按这个放动作和特效）：slash 刀剑、thrust 枪矛、heavy 斧棒禅杖、fist 拳脚、claw 爪牙（野兽）、arrow 弓箭、throw 暗器飞石火炮
+@export var attack_style: StringName = &"slash"
 @export var skill: SkillData
 ## 好汉的天赋（被动），点亮第 1 颗勾玉时解锁
 @export var talent: TalentData

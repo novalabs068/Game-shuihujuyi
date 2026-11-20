@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_vjd0o"]
 [ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_srkow"]
 [ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_7co7o"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/fu_an.png" id="3_srkow"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_5notm"]
 
 [resource]
@@ -17,6 +18,8 @@ base_spd = 92
 portrait = ExtResource("3_7co7o")
 bust = ExtResource("1_vjd0o")
 face = ExtResource("2_srkow")
+map_sprite = ExtResource("3_srkow")
+attack_style = &"heavy"
 is_boss = true
 enrage_name = "狗仗人势"
 enrage_atk_bonus = 0.5

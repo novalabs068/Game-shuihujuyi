@@ -37,5 +37,6 @@ base_spd = 106
 portrait = ExtResource("3_yknvn")
 bust = ExtResource("1_qr6lv")
 face = ExtResource("2_0pa5l")
+attack_style = &"arrow"
 skill = SubResource("Resource_cmygp")
 talent = SubResource("Resource_yknvn")

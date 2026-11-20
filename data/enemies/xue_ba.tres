@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_mxsoa"]
 [ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_qbf2t"]
 [ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_fguen"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/xue_ba.png" id="3_qbf2t"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_te3vh"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_jdhxq"]
 
@@ -25,4 +26,6 @@ base_spd = 98
 portrait = ExtResource("3_fguen")
 bust = ExtResource("1_mxsoa")
 face = ExtResource("2_qbf2t")
+map_sprite = ExtResource("3_qbf2t")
+attack_style = &"heavy"
 skill = SubResource("Resource_nalra")

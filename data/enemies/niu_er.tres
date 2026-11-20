@@ -19,6 +19,7 @@ portrait = ExtResource("4_dwb5o")
 bust = ExtResource("1_kbl28")
 face = ExtResource("2_xb5y5")
 map_sprite = ExtResource("1_mjptv")
+attack_style = &"fist"
 is_boss = true
 enrage_name = "撒泼耍赖"
 enrage_atk_bonus = 0.5

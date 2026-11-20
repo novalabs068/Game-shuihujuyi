@@ -26,6 +26,7 @@ portrait = ExtResource("4_ljew0")
 bust = ExtResource("1_ct8vg")
 face = ExtResource("2_0atkr")
 map_sprite = ExtResource("1_4ukox")
+attack_style = &"thrust"
 skill = SubResource("Resource_ct8vg")
 is_boss = true
 enrage_name = "翻江倒海"

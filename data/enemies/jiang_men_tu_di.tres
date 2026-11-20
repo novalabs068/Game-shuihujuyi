@@ -19,3 +19,4 @@ portrait = ExtResource("4_q0qra")
 bust = ExtResource("1_v48ms")
 face = ExtResource("2_ojwrd")
 map_sprite = ExtResource("3_03lbq")
+attack_style = &"fist"

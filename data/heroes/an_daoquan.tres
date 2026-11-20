@@ -38,5 +38,6 @@ portrait = ExtResource("3_dpriw")
 bust = ExtResource("1_e70vg")
 face = ExtResource("2_3ll25")
 map_sprite = ExtResource("3_3ll25")
+attack_style = &"throw"
 skill = SubResource("Resource_23d7t")
 talent = SubResource("Resource_krymv")

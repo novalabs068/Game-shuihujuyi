@@ -22,6 +22,7 @@ base_atk = 124
 base_def = 28
 base_spd = 104
 map_sprite = ExtResource("1_fad5i")
+attack_style = &"throw"
 skill = SubResource("Resource_hrtm5")
 is_boss = true
 enrage_name = "输红了眼"

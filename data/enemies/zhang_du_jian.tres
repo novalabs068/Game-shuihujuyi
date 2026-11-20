@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" path="res://art/busts/zhang_du_jian.png" id="1_3ojwq"]
 [ext_resource type="Texture2D" path="res://art/faces/zhang_du_jian.png" id="2_opixj"]
 [ext_resource type="Texture2D" path="res://art/portraits/zhang_du_jian.png" id="3_fjf0q"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_du_jian.png" id="3_opixj"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_2iqjq"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_utbjf"]
 
@@ -28,6 +29,7 @@ base_spd = 96
 portrait = ExtResource("3_fjf0q")
 bust = ExtResource("1_3ojwq")
 face = ExtResource("2_opixj")
+map_sprite = ExtResource("3_opixj")
 skill = SubResource("Resource_mnqc8")
 is_boss = true
 enrage_name = "原形毕露"

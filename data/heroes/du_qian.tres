@@ -35,5 +35,6 @@ base_spd = 90
 portrait = ExtResource("3_djps8")
 bust = ExtResource("1_cuwwa")
 face = ExtResource("2_bdjsl")
+attack_style = &"thrust"
 skill = SubResource("Resource_dnmna")
 talent = SubResource("Resource_djps8")

@@ -25,6 +25,7 @@ portrait = ExtResource("4_0nieo")
 bust = ExtResource("1_865ig")
 face = ExtResource("2_n8lpb")
 map_sprite = ExtResource("1_hg244")
+attack_style = &"fist"
 skill = SubResource("Resource_865ig")
 is_boss = true
 enrage_name = "越战越勇"

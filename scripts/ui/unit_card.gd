@@ -1,8 +1,9 @@
 class_name UnitCard
 extends Control
-## 战场上的一个人：版画立绘站在地上（脚下有影子），下面一块名牌（名字、血条、怒气条、状态），
+## 战场上的一个人：放大的像素小人站在地上（脚下有影子），下面一块名牌（名字、血条、怒气条、状态），
 ## 名牌上方一个气泡写着敌人下一步要干什么（好汉被瞄准时也有）。点击时发出 tapped。
-## 敌人脸朝左（立绘翻转）。轮到谁出手谁往前站一步、脚下亮金圈；被选中的目标脚下亮红圈。
+## 敌人脸朝左（小人翻转）。轮到谁出手谁往前站一步、脚下亮金圈；被选中的目标脚下亮红圈。
+## 动作都是程序做的：待机起伏、出手蓄力冲刺、远程拉弓、受击后仰、倒地、胜利跳一下。
 
 signal tapped(card: UnitCard)
 
@@ -11,6 +12,11 @@ const CARD_SIZE := Vector2(190, 272)
 const FIGURE_HEIGHT := 206.0
 const PLATE_HEIGHT := 62.0
 const ACTIVE_SHIFT := 30.0
+## 像素小人放大几倍（按整数放大，像素才不糊）；太高放不下时少放一倍
+const PIXEL_SCALE := 4
+## 待机时上下起伏的像素数和一个来回的秒数
+const IDLE_BOB := 4.0
+const IDLE_PERIOD := 1.6
 ## 脚底在这个人自己坐标里的位置（立绘底边中点）
 const FEET := Vector2(CARD_SIZE.x / 2, FIGURE_HEIGHT)
 
@@ -30,6 +36,10 @@ var _active := false
 var _targeted := false
 ## 挂在身上的状态特效（眩晕的星星、减攻的黑气）
 var _overlays: Dictionary[String, FxSprite] = {}
+var _idle: Tween
+var _fallen := false
+## 小人朝右为正方向：好汉 1、敌人 -1
+var _facing := 1.0
 
 
 func setup(p_unit: BattleUnit) -> void:
@@ -43,21 +53,27 @@ func setup(p_unit: BattleUnit) -> void:
 	_figure.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_figure.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_figure.flip_h = enemy
-	_figure.size = Vector2(CARD_SIZE.x, FIGURE_HEIGHT)
+	_facing = -1.0 if enemy else 1.0
 	_figure.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var art := unit.data.portrait if unit.data.portrait != null else unit.data.bust
-	if art == null:
-		# 还没有版画立绘的：用像素小人放大
-		art = unit.data.map_sprite
-		_figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_figure.texture = art
 	add_child(_figure)
-	# 立绘底边对齐脚底：图比框矮时往下挪
-	if art != null:
-		var aspect := float(art.get_width()) / art.get_height()
+	var sprite := unit.data.map_sprite
+	if sprite != null:
+		# 像素小人按整数倍放大，底边中点对齐脚底
+		_figure.texture = sprite
+		_figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var k := PIXEL_SCALE
+		while k > 1 and sprite.get_height() * k > FIGURE_HEIGHT + 24:
+			k -= 1
+		_figure.size = Vector2(sprite.get_width(), sprite.get_height()) * k
+	else:
+		# 还没有像素小人的：用版画立绘，按比例缩进框里
+		var art := unit.data.portrait if unit.data.portrait != null else unit.data.bust
+		_figure.texture = art
+		var aspect := float(art.get_width()) / art.get_height() if art != null else 1.0
 		var h := minf(FIGURE_HEIGHT, CARD_SIZE.x / aspect)
-		_figure.size.y = h
-		_figure.position.y = FIGURE_HEIGHT - h
+		_figure.size = Vector2(h * aspect, h)
+	_figure.position = Vector2((CARD_SIZE.x - _figure.size.x) / 2, FIGURE_HEIGHT - _figure.size.y)
+	_figure.pivot_offset = Vector2(_figure.size.x / 2, _figure.size.y)
 
 	_plate = PanelContainer.new()
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -96,6 +112,7 @@ func setup(p_unit: BattleUnit) -> void:
 	UiKit.ignore_mouse(self)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	refresh()
+	_start_idle()
 
 
 func refresh() -> void:
@@ -116,6 +133,8 @@ func refresh() -> void:
 	if dead:
 		_bubble.visible = false
 		modulate = Color(0.55, 0.55, 0.55, 0.45)
+		if not _fallen:
+			_fall()
 	else:
 		modulate = Color.WHITE
 	_sync_overlay("stunned", not dead and unit.stun_turns > 0, Vector2(FEET.x, 40), 2.2)
@@ -203,24 +222,97 @@ func feet_point() -> Vector2:
 	return position + FEET
 
 
-## 出手时朝目标冲一下：冲到最远处时返回（此时结算命中），弹回的动画继续在后台播。
+## 出手时朝目标冲一下：先往后一缩蓄力，再前倾冲过去；冲到最远处时返回（此时结算命中），弹回的动画继续在后台播。
 func lunge(toward: Vector2) -> void:
+	_pause_idle()
 	var start := position
-	var offset := (toward - start).normalized() * 90.0
+	var dir := (toward - start).normalized()
 	var t := create_tween()
-	t.tween_property(self, "position", start + offset, 0.1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	t.tween_property(self, "position", start - dir * 14.0, 0.07).set_ease(Tween.EASE_OUT)
+	t.parallel().tween_property(_figure, "rotation", -0.18 * _facing, 0.07)
+	t.tween_property(self, "position", start + dir * 90.0, 0.09).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	t.parallel().tween_property(_figure, "rotation", 0.22 * _facing, 0.09)
 	await t.finished
-	create_tween().tween_property(self, "position", start, 0.16).set_ease(Tween.EASE_IN_OUT)
+	var back := create_tween()
+	back.tween_property(self, "position", start, 0.16).set_ease(Tween.EASE_IN_OUT)
+	back.parallel().tween_property(_figure, "rotation", 0.0, 0.16)
+	back.tween_callback(_start_idle)
 
 
-## 被打中时立绘闪白，往后一仰。
+## 远程出手（拉弓、甩暗器）：原地往后一仰再弹回，箭和石子由 BattleView 飞过去。
+func shoot() -> void:
+	_pause_idle()
+	var t := create_tween()
+	t.tween_property(_figure, "rotation", -0.15 * _facing, 0.08)
+	t.parallel().tween_property(_figure, "position:x", _figure.position.x - 8.0 * _facing, 0.08)
+	await t.finished
+	var back := create_tween()
+	back.tween_property(_figure, "rotation", 0.08 * _facing, 0.06)
+	back.parallel().tween_property(_figure, "position:x", _figure.position.x + 8.0 * _facing, 0.06)
+	back.tween_property(_figure, "rotation", 0.0, 0.12)
+	back.tween_callback(_start_idle)
+
+
+## 箭和石子从哪里飞出去：身前、胸口高度。
+func muzzle_point() -> Vector2:
+	return position + Vector2(CARD_SIZE.x / 2 + 40.0 * _facing, FIGURE_HEIGHT * 0.5)
+
+
+## 被打中时闪白，往后一仰。
 func flash() -> void:
 	_figure.self_modulate = Color(3, 3, 3)
 	create_tween().tween_property(_figure, "self_modulate", Color.WHITE, 0.2)
-	var back := 12.0 if unit.side == BattleUnit.Side.ENEMY else -12.0
+	if _fallen:
+		return
+	_pause_idle()
 	var t := create_tween()
-	t.tween_property(_figure, "position:x", back, 0.05)
-	t.tween_property(_figure, "position:x", 0.0, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(_figure, "rotation", -0.2 * _facing, 0.05)
+	t.parallel().tween_property(_figure, "position:x", _figure.position.x - 12.0 * _facing, 0.05)
+	t.tween_property(_figure, "rotation", 0.0, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.parallel().tween_property(_figure, "position:x", _figure.position.x, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_callback(_start_idle)
+
+
+## 打赢了：活着的人原地跳两下。
+func cheer() -> void:
+	if _fallen:
+		return
+	_pause_idle()
+	var base_y := _figure.position.y
+	var t := create_tween()
+	for i in 2:
+		t.tween_property(_figure, "position:y", base_y - 28.0, 0.16).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		t.tween_property(_figure, "position:y", base_y, 0.16).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	t.tween_callback(_start_idle)
+
+
+## 倒地：往后侧倒下。
+func _fall() -> void:
+	_fallen = true
+	_pause_idle()
+	var t := create_tween()
+	t.tween_property(_figure, "rotation", -1.45 * _facing, 0.35).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+
+
+## 待机：身体轻轻上下起伏，每个人起伏的时机错开一点。
+func _start_idle() -> void:
+	if _fallen or _figure == null:
+		return
+	_pause_idle()
+	var base_y := FIGURE_HEIGHT - _figure.size.y
+	_figure.position.y = base_y
+	_idle = create_tween().set_loops()
+	_idle.tween_interval(randf() * 0.3)
+	_idle.tween_property(_figure, "position:y", base_y - IDLE_BOB, IDLE_PERIOD / 2).set_trans(Tween.TRANS_SINE)
+	_idle.tween_property(_figure, "position:y", base_y, IDLE_PERIOD / 2).set_trans(Tween.TRANS_SINE)
+
+
+func _pause_idle() -> void:
+	if _idle != null and _idle.is_valid():
+		_idle.kill()
+	_idle = null
+	if _figure != null:
+		_figure.position.y = FIGURE_HEIGHT - _figure.size.y
 
 
 ## 在头顶飘一行字，例如伤害数字。暴击的字更大、先放大再落下。

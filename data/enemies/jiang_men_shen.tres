@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://art/busts/jiang_men_shen.png" id="1_mp200"]
 [ext_resource type="Texture2D" path="res://art/faces/jiang_men_shen.png" id="2_dpe1t"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/jiang_men_shen.png" id="3_dpe1t"]
 [ext_resource type="Texture2D" path="res://art/portraits/jiang_men_shen.png" id="3_pnqx7"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="4_3vbpk"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="5_k31ut"]
@@ -25,6 +26,8 @@ base_spd = 88
 portrait = ExtResource("3_pnqx7")
 bust = ExtResource("1_mp200")
 face = ExtResource("2_dpe1t")
+map_sprite = ExtResource("3_dpe1t")
+attack_style = &"fist"
 skill = SubResource("Resource_0e3yy")
 is_boss = true
 enrage_name = "恼羞成怒"

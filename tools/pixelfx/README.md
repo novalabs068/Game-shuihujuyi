@@ -28,3 +28,6 @@ python tools/pixelfx/fx_cut.py /tmp/pixelfx-out/explosions/small-explosion/small
 | 震地 `ground_slam` | `impacts/ground-slam` | 前 64 帧 | 呼延灼「连环马阵」、秦明「霹雳火」 |
 | 重劈 `heavy_cleave` | `melee/heavy-cleave` | 全部 58 帧 | 李逵「双斧乱砍」 |
 | 灼烧 `burning` | `fire/spirit-flame` | 全部 90 帧，染成火焰色（`fire`） | 身上着火的状态 |
+| 枪芒 `thrust` | `melee/thrust` | 前 16 帧，锚点挪到枪尖 (115, 40) | 枪矛普攻 |
+| 拳劲 `blunt_hit` | `impacts/blunt-hit` | 前 20 帧，锚点 (64, 45) | 拳脚普攻 |
+| 爪痕 `claw_swipe` | `melee/claw-swipe` | 前 22 帧，锚点 (70, 50) | 野兽普攻 |

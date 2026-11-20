@@ -22,4 +22,5 @@ base_atk = 98
 base_def = 24
 base_spd = 96
 map_sprite = ExtResource("1_r7pry")
+attack_style = &"heavy"
 skill = SubResource("Resource_vtlut")

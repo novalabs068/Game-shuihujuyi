@@ -14,4 +14,8 @@ const SHEETS := {
 	"ground_slam": [288, 208, 9, 64, 30, false, 144, 164],
 	"heavy_cleave": [208, 116, 6, 58, 30, false, 68, 96],
 	"burning": [80, 124, 12, 90, 30, true, 40, 94],
+	# 下面三个的锚点改到了命中处（枪尖、拳头、爪痕中间），对准 hit_point 放
+	"thrust": [196, 76, 4, 16, 30, false, 115, 40],
+	"blunt_hit": [128, 88, 5, 20, 30, false, 64, 45],
+	"claw_swipe": [128, 96, 5, 22, 30, false, 70, 50],
 }

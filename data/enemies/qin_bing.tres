@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" path="res://art/busts/qin_bing.png" id="1_2bk2g"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_2kahc"]
 [ext_resource type="Texture2D" path="res://art/faces/qin_bing.png" id="2_0htjv"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/qin_bing.png" id="3_0htjv"]
 [ext_resource type="Texture2D" path="res://art/portraits/qin_bing.png" id="3_0r2h4"]
 
 [resource]
@@ -17,3 +18,5 @@ base_spd = 92
 portrait = ExtResource("3_0r2h4")
 bust = ExtResource("1_2bk2g")
 face = ExtResource("2_0htjv")
+map_sprite = ExtResource("3_0htjv")
+attack_style = &"thrust"

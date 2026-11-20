@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_fbq6j"]
 [ext_resource type="Texture2D" path="res://art/faces/lu_qian.png" id="2_id6lk"]
 [ext_resource type="Texture2D" path="res://art/portraits/lu_qian.png" id="3_hdwvd"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/lu_qian.png" id="3_id6lk"]
 
 [sub_resource type="Resource" id="Resource_eoeij"]
 script = ExtResource("2_fbq6j")
@@ -26,6 +27,7 @@ base_spd = 102
 portrait = ExtResource("3_hdwvd")
 bust = ExtResource("1_7xg4j")
 face = ExtResource("2_id6lk")
+map_sprite = ExtResource("3_id6lk")
 skill = SubResource("Resource_eoeij")
 is_boss = true
 enrage_name = "狗仗人势"

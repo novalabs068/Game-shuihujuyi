@@ -26,4 +26,5 @@ portrait = ExtResource("4_f7ap1")
 bust = ExtResource("1_n5c4x")
 face = ExtResource("2_fagny")
 map_sprite = ExtResource("1_6snh3")
+attack_style = &"heavy"
 skill = SubResource("Resource_n5c4x")

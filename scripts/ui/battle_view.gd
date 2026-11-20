@@ -15,6 +15,8 @@ const AUTO_ACTION := -1
 const SLOTS: Array[Vector2] = [Vector2(196, 70), Vector2(18, 176), Vector2(330, 292)]
 ## 特效放大倍数（pixelfx 按 24×38 的小人画的，我们的人物大得多）
 const FX_SCALE := 2.6
+## 远程普攻：不冲上去，原地出手，箭或石子飞过去
+const RANGED_STYLES: Array[StringName] = [&"arrow", &"throw"]
 const BOTTOM_BAR_HEIGHT := 150.0
 const ENEMY_THINK_DELAY := 0.2
 
@@ -120,6 +122,11 @@ func _run() -> void:
 		await _play(events)
 		_cards[actor].set_active(false)
 	_refresh()
+	if model.result == BattleModel.Result.WIN:
+		for card: UnitCard in _cards.values():
+			if card.unit.side == BattleUnit.Side.PLAYER:
+				card.cheer()
+		await get_tree().create_timer(0.7).timeout
 	_show_result()
 
 
@@ -162,9 +169,14 @@ func _play(events: Array[Dictionary]) -> void:
 				var from_left := source == null or source.side == BattleUnit.Side.PLAYER
 				var fx: String = e.get("fx", "")
 				if source != null and source != unit:
-					await _cards[source].lunge(card.position)
+					var style := source.data.attack_style
+					if style in RANGED_STYLES:
+						await _cards[source].shoot()
+						await Projectile.fly(self, _cards[source].muzzle_point(), card.hit_point(), style)
+					else:
+						await _cards[source].lunge(card.position)
 					if fx == "":
-						FxSprite.spawn(self, "sword_slash", card.hit_point(), FX_SCALE, not from_left)
+						_style_hit_fx(style, card, from_left)
 				# 群攻技能各有各的特效：爆炸、震地落在脚下，重劈对着胸口
 				if fx == "heavy_cleave":
 					FxSprite.spawn(self, fx, card.hit_point(), FX_SCALE * 0.8, not from_left)
@@ -290,6 +302,24 @@ func _portrait(unit: BattleUnit, height: float, flip: bool) -> TextureRect:
 		aspect = float(unit.data.portrait.get_width()) / unit.data.portrait.get_height()
 	rect.size = Vector2(height * aspect, height)
 	return rect
+
+
+## 普攻按兵器出不同的命中特效：刀光、枪芒、重劈、拳劲、爪痕；远程的只有命中火花。
+func _style_hit_fx(style: StringName, card: UnitCard, from_left: bool) -> void:
+	match style:
+		&"thrust":
+			FxSprite.spawn(self, "thrust", card.hit_point(), FX_SCALE * 0.9, not from_left)
+		&"heavy":
+			FxSprite.spawn(self, "heavy_cleave", card.hit_point(), FX_SCALE * 0.7, not from_left)
+			_shake_screen(5.0)
+		&"fist":
+			FxSprite.spawn(self, "blunt_hit", card.hit_point(), FX_SCALE * 0.9, not from_left)
+		&"claw":
+			FxSprite.spawn(self, "claw_swipe", card.hit_point(), FX_SCALE, not from_left)
+		&"arrow", &"throw":
+			pass
+		_:
+			FxSprite.spawn(self, "sword_slash", card.hit_point(), FX_SCALE, not from_left)
 
 
 func _shake_screen(strength: float) -> void:
