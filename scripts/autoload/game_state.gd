@@ -29,6 +29,9 @@ var tokens := 0
 var owned: Array[StringName] = []
 var souls: Dictionary[StringName, int] = {}
 var pulls_since_jia := 0
+## 每位好汉的星数（没记的就是 1 星）、通用货币义气（将魂化来，可换指定好汉的将魂）
+var stars: Dictionary[StringName, int] = {}
+var yiqi := 0
 
 var _protagonist: UnitData
 
@@ -109,6 +112,70 @@ func recruit(count: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	return results
 
 
+func star_of(id: StringName) -> int:
+	return stars.get(id, 1)
+
+
+func souls_of(id: StringName) -> int:
+	return souls.get(id, 0)
+
+
+func can_star_up(hero: UnitData) -> bool:
+	var star := star_of(hero.id)
+	return owns(hero.id) and star < Stars.max_stars(hero) and souls_of(hero.id) >= Stars.cost(star)
+
+
+## 消耗将魂升 1 星，成功返回 true。
+func star_up(hero: UnitData) -> bool:
+	if not can_star_up(hero):
+		return false
+	souls[hero.id] = souls_of(hero.id) - Stars.cost(star_of(hero.id))
+	stars[hero.id] = star_of(hero.id) + 1
+	save_game()
+	return true
+
+
+## 把 count 个将魂化成义气。
+func souls_to_yiqi(id: StringName, count: int) -> bool:
+	if count <= 0 or souls_of(id) < count:
+		return false
+	souls[id] = souls_of(id) - count
+	yiqi += count * Stars.YIQI_PER_SOUL
+	save_game()
+	return true
+
+
+## 用义气换 count 个指定好汉的将魂（没招到的也能换，攒够了直接招募）。
+func buy_souls(hero: UnitData, count: int) -> bool:
+	var price := Stars.soul_price(hero) * count
+	if count <= 0 or yiqi < price:
+		return false
+	yiqi -= price
+	souls[hero.id] = souls_of(hero.id) + count
+	save_game()
+	return true
+
+
+## 没招到的好汉，用将魂直接招募。
+func recruit_with_souls(hero: UnitData) -> bool:
+	if owns(hero.id) or souls_of(hero.id) < Stars.RECRUIT_SOULS:
+		return false
+	souls[hero.id] = souls_of(hero.id) - Stars.RECRUIT_SOULS
+	owned.append(hero.id)
+	if team_ids.size() < MAX_HEROES:
+		team_ids.append(hero.id)
+	save_game()
+	return true
+
+
+## 战斗用的队伍：好汉带上星级加成。
+func battle_team() -> Array[UnitData]:
+	var out: Array[UnitData] = []
+	for u in team():
+		out.append(Stars.apply(u, star_of(u.id)) if u.id != PROTAGONIST_ID else u)
+	return out
+
+
 ## 出战队伍：主角在第一位，后面是随行好汉。
 func team() -> Array[UnitData]:
 	var out: Array[UnitData] = []
@@ -163,6 +230,8 @@ func reset() -> void:
 	owned.clear()
 	souls.clear()
 	pulls_since_jia = 0
+	stars.clear()
+	yiqi = 0
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
 	level = 1
@@ -192,8 +261,10 @@ func save_game() -> void:
 		"silver": silver,
 		"tokens": tokens,
 		"owned": owned.map(func(id: StringName) -> String: return String(id)),
-		"souls": _souls_to_json(),
+		"souls": _ids_to_json(souls),
 		"pulls_since_jia": pulls_since_jia,
+		"stars": _ids_to_json(stars),
+		"yiqi": yiqi,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -237,10 +308,14 @@ func load_game() -> void:
 	for id: String in saved_souls:
 		souls[StringName(id)] = int(saved_souls[id])
 	pulls_since_jia = data.get("pulls_since_jia", 0)
+	var saved_stars: Dictionary = data.get("stars", {})
+	for id: String in saved_stars:
+		stars[StringName(id)] = int(saved_stars[id])
+	yiqi = data.get("yiqi", 0)
 
 
-func _souls_to_json() -> Dictionary:
+func _ids_to_json(values: Dictionary[StringName, int]) -> Dictionary:
 	var out := {}
-	for id in souls:
-		out[String(id)] = souls[id]
+	for id in values:
+		out[String(id)] = values[id]
 	return out

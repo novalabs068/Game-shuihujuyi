@@ -8,6 +8,7 @@ signal battle_requested(stage: StageData, destination: StringName, progress: flo
 signal team_requested
 signal scene_requested(scene_id: String)
 signal recruit_requested
+signal heroes_requested
 
 const MAP_SIZE := Vector2(1280, 720)
 const WALK_SPEED := 260.0
@@ -188,6 +189,11 @@ func _build_top_bar() -> void:
 		if not _walking:
 			recruit_requested.emit())
 	row.add_child(recruit_button)
+	var heroes_button := UiKit.button("好汉", Vector2(100, 40), 20)
+	heroes_button.pressed.connect(func() -> void:
+		if not _walking:
+			heroes_requested.emit())
+	row.add_child(heroes_button)
 	var team_button := UiKit.button("编队", Vector2(100, 40), 20)
 	team_button.pressed.connect(func() -> void:
 		if not _walking:

@@ -35,6 +35,13 @@ func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, not
 	screen.team_requested.connect(_show_team_select)
 	screen.scene_requested.connect(_show_scene)
 	screen.recruit_requested.connect(_show_recruit)
+	screen.heroes_requested.connect(_show_heroes)
+	_set_screen(screen)
+
+
+func _show_heroes() -> void:
+	var screen := HeroesView.new()
+	screen.back_requested.connect(_show_map)
 	_set_screen(screen)
 
 
@@ -69,7 +76,7 @@ func _show_team_select() -> void:
 func _start_battle(stage: StageData, destination: StringName, progress: float, bonus := {}, return_scene := "") -> void:
 	var screen := BattleView.new()
 	screen.stage = stage
-	screen.team = GameState.team()
+	screen.team = GameState.battle_team()
 	screen.hero_level = GameState.level
 	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress, bonus, return_scene))
 	var leave := func(notice: String) -> void:

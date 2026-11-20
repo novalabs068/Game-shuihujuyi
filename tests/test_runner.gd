@@ -33,6 +33,7 @@ func _initialize() -> void:
 		"test_rewards",
 		"test_bounties_and_events_data",
 		"test_gacha",
+		"test_stars",
 		"test_new_skill_effects",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
@@ -499,6 +500,25 @@ func test_bounties_and_events_data() -> bool:
 	var li_si: NpcData = scene.npcs.filter(func(n: NpcData) -> bool: return n.id == &"li_si")[0]
 	check(li_si.event != null and li_si.event.choices.size() == 3, "garden quest has three choices")
 	check(li_si.event.choices.all(func(c: EventChoice) -> bool: return c.flag == "garden_done"), "every garden choice finishes the quest")
+	return true
+
+
+func test_stars() -> bool:
+	var h := unit_data(&"h", [1000, 100, 50, 100], skill(SkillData.Effect.DAMAGE, {power = 2.0}))
+	h.tier = UnitData.Tier.BING
+	check(Stars.apply(h, 1) == h, "1 star returns the original")
+	var s3 := Stars.apply(h, 3)
+	check_eq(s3.base_hp, 1100, "3 stars: hp +10%")
+	check_eq(s3.base_atk, 110, "3 stars: atk +10%")
+	check_eq(s3.base_spd, 100, "speed is not boosted")
+	check(is_equal_approx(s3.skill.power, 2.5), "3 stars: skill power x1.25")
+	check(is_equal_approx(h.skill.power, 2.0), "original skill untouched")
+	check(is_equal_approx(Stars.apply(h, 2).skill.power, 2.0), "2 stars: skill not upgraded yet")
+	var stun := Stars.upgraded_skill(skill(SkillData.Effect.STUN, {turns = 1}))
+	check_eq(stun.turns, 2, "control skills last one more turn")
+	check_eq(Stars.max_stars(h), 5, "丙 caps at 5 stars")
+	check_eq(Stars.cost(1) + Stars.cost(2) + Stars.cost(3) + Stars.cost(4), 100, "1→5 stars costs 100 souls")
+	check_eq(Stars.soul_price(h), 2, "丙 souls cost 2 义气")
 	return true
 
 
