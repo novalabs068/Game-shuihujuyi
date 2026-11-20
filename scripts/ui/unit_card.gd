@@ -36,6 +36,8 @@ var _active := false
 var _targeted := false
 ## 挂在身上的状态特效（眩晕的星星、减攻的黑气）
 var _overlays: Dictionary[String, FxSprite] = {}
+## 远近：后排的人画小一点（1 = 最前排）
+var _depth := 1.0
 var _idle: Tween
 var _fallen := false
 ## 小人朝右为正方向：好汉 1、敌人 -1
@@ -61,7 +63,8 @@ func setup(p_unit: BattleUnit) -> void:
 		# 像素小人按整数倍放大，底边中点对齐脚底
 		_figure.texture = sprite
 		_figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		var k := PIXEL_SCALE
+		# 高清战斗小人是按 2 倍高度切的，所以少放大一半；大家像素粗细一样，高矮就和原图一样（野兽矮一截）
+		var k := PIXEL_SCALE / 2 if unit.data.battle_sprite != null else PIXEL_SCALE
 		while k > 1 and sprite.get_height() * k > FIGURE_HEIGHT + 24:
 			k -= 1
 		_figure.size = Vector2(sprite.get_width(), sprite.get_height()) * k
@@ -164,20 +167,25 @@ func _sync_overlay(name: String, on: bool, at: Vector2, k: float) -> void:
 
 
 func _draw() -> void:
-	# 脚下的影子；轮到出手亮金圈，被选中亮红圈
-	var ring := Color(0, 0, 0, 0.35)
-	var width := 0.0
+	# 脚下一团晕开的墨影；轮到出手亮金圈，被选中亮红圈
+	var ring := Color(0, 0, 0, 0)
 	if _active:
 		ring = Color(UiKit.GOLD, 0.55)
-		width = 4.0
 	elif _targeted and unit.is_alive():
 		ring = Color(UiKit.DAMAGE, 0.55)
-		width = 4.0
-	draw_set_transform(FEET + Vector2(0, -6), 0.0, Vector2(1.0, 0.28))
-	draw_circle(Vector2.ZERO, 70, Color(0, 0, 0, 0.35))
-	if width > 0.0:
-		draw_arc(Vector2.ZERO, 76, 0, TAU, 48, ring, width * 3.0)
+	draw_set_transform(FEET + Vector2(0, -6), 0.0, Vector2(_depth, 0.28 * _depth))
+	for i in 5:
+		draw_circle(Vector2.ZERO, 82.0 - i * 13.0, Color(0.05, 0.04, 0.03, 0.09 + i * 0.03))
+	if ring.a > 0.0:
+		draw_arc(Vector2.ZERO, 76, 0, TAU, 48, ring, 12.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## 远近：后排的人按 k 缩小（以脚底为中心），影子跟着缩。
+func set_depth(k: float) -> void:
+	_depth = k
+	_figure.scale = Vector2(k, k)
+	queue_redraw()
 
 
 func set_active(on: bool) -> void:
@@ -215,7 +223,7 @@ func set_intent(text: String, danger: bool) -> void:
 
 ## 命中点：胸口（特效、飘字都对着这里）。
 func hit_point() -> Vector2:
-	return position + Vector2(CARD_SIZE.x / 2, FIGURE_HEIGHT * 0.55)
+	return position + Vector2(CARD_SIZE.x / 2, FIGURE_HEIGHT - _figure.size.y * _depth * 0.45)
 
 
 func feet_point() -> Vector2:
@@ -255,7 +263,7 @@ func shoot() -> void:
 
 ## 箭和石子从哪里飞出去：身前、胸口高度。
 func muzzle_point() -> Vector2:
-	return position + Vector2(CARD_SIZE.x / 2 + 40.0 * _facing, FIGURE_HEIGHT * 0.5)
+	return position + Vector2(CARD_SIZE.x / 2 + 40.0 * _facing, FIGURE_HEIGHT - _figure.size.y * _depth * 0.5)
 
 
 ## 被打中时闪白，往后一仰。
@@ -324,7 +332,7 @@ func popup(text: String, color: Color, big := false) -> void:
 	get_parent().add_child(l)
 	l.reset_size()
 	l.pivot_offset = l.size / 2
-	l.position = position + Vector2((CARD_SIZE.x - l.size.x) / 2 + randf_range(-16, 16), FIGURE_HEIGHT * 0.25)
+	l.position = position + Vector2((CARD_SIZE.x - l.size.x) / 2 + randf_range(-16, 16), FIGURE_HEIGHT - _figure.size.y * _depth - 10.0)
 	var t := l.create_tween()
 	if big:
 		l.scale = Vector2(1.8, 1.8)

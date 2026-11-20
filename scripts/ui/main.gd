@@ -154,6 +154,7 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 	screen.team = GameState.battle_team()
 	screen.hero_level = GameState.level
 	screen.background = _battle_background(story.location)
+	screen.place = String(story.location)
 	screen.retry_requested.connect(_start_story_battle.bind(stage, resume_at, story))
 	screen.exit_requested.connect(_show_map)
 	screen.finished.connect(func(won: bool) -> void:
@@ -244,6 +245,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		var sd: SceneData = GameDB.scenes[return_scene]
 		where = sd.battle_bg if sd.battle_bg != &"" else sd.region
 	screen.background = _battle_background(where)
+	screen.place = String(where)
 	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress, bonus, return_scene))
 	var leave := func(notice: String) -> void:
 		if return_scene != "":

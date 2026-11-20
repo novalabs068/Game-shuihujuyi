@@ -11,8 +11,14 @@ signal retry_requested
 signal finished(won: bool)
 
 const AUTO_ACTION := -1
-## 我方三个站位（左上角坐标）：1 号在前排偏上、2 号在后排、3 号在最前排偏下；敌方左右镜像
-const SLOTS: Array[Vector2] = [Vector2(196, 70), Vector2(18, 176), Vector2(330, 292)]
+## 我方三个站位：脚底的位置和远近（后排画小一点），沿一条斜线排开——2 号在最后、1 号居中、3 号最前；
+## 敌方左右镜像。越靠下越近，画在上层
+const SLOTS: Array[Vector2] = [Vector2(290, 392), Vector2(150, 312), Vector2(430, 472)]
+const SLOT_DEPTH: Array[float] = [0.93, 0.85, 1.0]
+## 画的层次：后排 1、中间 2、前排 3；天气 4、前景草 5、目标箭头 6，都在背景之上
+const SLOT_LAYER: Array[int] = [2, 1, 3]
+## 顶栏和底栏在天气、前景之上
+const BAR_LAYER := 7
 ## 特效放大倍数（pixelfx 按 24×38 的小人画的，我们的人物大得多）
 const FX_SCALE := 2.6
 ## 远程普攻：不冲上去，原地出手，箭或石子飞过去
@@ -25,6 +31,8 @@ var team: Array[UnitData] = []
 var hero_level := 1
 ## 战场背景（地区的水墨画）；为空就用深色底
 var background: Texture2D
+## 战场在哪儿（背景名），决定飘什么天气，见 BattleWeather
+var place := ""
 var model: BattleModel
 
 signal _action_chosen(action: int)
@@ -65,6 +73,24 @@ func _ready() -> void:
 		scene.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(scene)
 		scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# 下半部压暗：远处亮、脚下暗，人站得住
+	var shade := TextureRect.new()
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+	grad.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0), Color(0.03, 0.02, 0.02, 0.55)])
+	var grad_tex := GradientTexture2D.new()
+	grad_tex.gradient = grad
+	grad_tex.fill_from = Vector2(0, 0)
+	grad_tex.fill_to = Vector2(0, 1)
+	shade.texture = grad_tex
+	shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var weather := BattleWeather.make(place, Vector2(1280, 720 - BOTTOM_BAR_HEIGHT))
+	if weather != null:
+		weather.z_index = 4
+		add_child(weather)
 	_build_top_bar()
 	_build_center()
 	_build_bottom_bar()
@@ -73,12 +99,26 @@ func _ready() -> void:
 		add_child(card)
 		card.setup(u)
 		card.tapped.connect(_on_card_tapped)
+		card.set_depth(SLOT_DEPTH[u.slot])
+		# 前排盖住后排
+		card.z_index = SLOT_LAYER[u.slot]
 		_cards[u] = card
+	# 最前面一层虚化的草，底栏上方
+	var fore := TextureRect.new()
+	fore.texture = load("res://art/ui/battle_foreground.png")
+	fore.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fore.modulate = Color(1, 1, 1, 0.85)
+	fore.z_index = 5
+	add_child(fore)
+	fore.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	fore.offset_top = -BOTTOM_BAR_HEIGHT - 200
+	fore.offset_bottom = -BOTTOM_BAR_HEIGHT + 30
+	fore.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_target = model.alive(BattleUnit.Side.ENEMY)[0]
 	_target_marker = UiKit.label("▶", 40, UiKit.DAMAGE)
 	_target_marker.add_theme_constant_override("outline_size", 8)
 	_target_marker.add_theme_color_override("font_outline_color", Color.BLACK)
-	_target_marker.z_index = 5
+	_target_marker.z_index = 6
 	_target_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_target_marker)
 	var bob := _target_marker.create_tween().set_loops()
@@ -457,7 +497,8 @@ func _add_log(text: String) -> void:
 func _layout() -> void:
 	for u in _cards:
 		var card := _cards[u]
-		var p := SLOTS[u.slot]
+		var feet := SLOTS[u.slot]
+		var p := Vector2(feet.x - UnitCard.CARD_SIZE.x / 2, feet.y - UnitCard.FEET.y)
 		if u.side == BattleUnit.Side.PLAYER:
 			card.place(p)
 		else:
@@ -470,11 +511,13 @@ func _build_top_bar() -> void:
 	var back := ColorRect.new()
 	back.color = Color(0.06, 0.05, 0.05, 0.7)
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	back.z_index = BAR_LAYER
 	add_child(back)
 	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	back.offset_bottom = 66
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 16)
+	bar.z_index = BAR_LAYER
 	add_child(bar)
 	bar.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	bar.offset_left = 24
@@ -540,6 +583,7 @@ func _build_bottom_bar() -> void:
 	panel_style.content_margin_left = 24
 	panel_style.content_margin_right = 24
 	panel.add_theme_stylebox_override("panel", panel_style)
+	panel.z_index = BAR_LAYER
 	add_child(panel)
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	panel.offset_top = -BOTTOM_BAR_HEIGHT
