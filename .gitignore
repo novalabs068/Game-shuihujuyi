@@ -10,3 +10,6 @@
 
 # Python 缓存
 __pycache__/
+
+# AI 出图原稿：只在本机重新裁切时用，不进 git（另行备份）
+art/inbox/

@@ -24,6 +24,8 @@ ART = ROOT / "art"
 PORTRAIT_HEIGHT = 1024
 BUST_SIZE = 256
 FACE_SIZE = 128
+# 立绘存成 128 色调色板 PNG：版画是平涂，看不出差别，文件从 1.5 MB 左右降到 250 KB 左右
+PORTRAIT_COLORS = 128
 BG_TOLERANCE = 30
 SHEET_BG = (27, 29, 34)
 
@@ -125,11 +127,16 @@ def process(hero_id: str, crops: dict) -> Image.Image | None:
 
     for folder in ("portraits", "busts", "faces"):
         (ART / folder).mkdir(exist_ok=True)
-    figure.save(ART / "portraits" / f"{hero_id}.png")
+    save_palette(figure, ART / "portraits" / f"{hero_id}.png")
     square_crop(figure, cx, top, 0.52 / zoom, BUST_SIZE).save(ART / "busts" / f"{hero_id}.png")
     square_crop(figure, cx, top, 0.30 / zoom, FACE_SIZE).save(ART / "faces" / f"{hero_id}.png")
     print(f"{hero_id}: 立绘 {figure.size}，头部中心 x={cx:.2f} 顶 y={top:.2f}")
     return figure
+
+
+def save_palette(img: Image.Image, path: Path) -> None:
+    """压成调色板 PNG（保留透明度）。同一张图每次压出来完全一样。"""
+    img.convert("RGBA").quantize(colors=PORTRAIT_COLORS, method=Image.Quantize.FASTOCTREE, dither=Image.Dither.NONE).save(path, optimize=True)
 
 
 def contact_sheet(ids: list[str], path: Path) -> None:
