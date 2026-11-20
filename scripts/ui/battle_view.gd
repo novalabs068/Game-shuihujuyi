@@ -32,6 +32,10 @@ const COMBO_SPOT := Vector3(112, 258, 64)
 const BEAD_BIG := 54.0
 const BEAD_SMALL := 40.0
 const INK := Color("1c1714")
+## 暴击数字的朱红
+const CRIT_RED := Color("ff3b24")
+## 放绝招时招式名下面那一笔的颜色
+const STROKE_RED := Color("a8231a")
 const PAPER := Color("ecdcbc")
 const ENEMY_RED := Color("b0261e")
 const ALLY_BLUE := Color("4a6a9a")
@@ -53,6 +57,7 @@ var _target_marker: Label
 var _target: BattleUnit
 var _awaiting_input := false
 var _auto := false
+var _fast := false
 
 var _round_label: Label
 var _order_box: HBoxContainer
@@ -245,9 +250,12 @@ func _play(events: Array[Dictionary]) -> void:
 				FxSprite.spawn(self, "crit_hit" if big else "hit_spark", card.hit_point(), FX_SCALE * (0.8 if big else 1.0), not from_left)
 				card.flash()
 				card.shake()
-				card.popup(popup, UiKit.DAMAGE, big)
+				_ink_splash(card.hit_point(), from_left, big)
+				card.popup(popup, CRIT_RED if big else UiKit.DAMAGE, big)
 				if big:
 					_shake_screen(10.0)
+					_punch_zoom(card.hit_point())
+				await _hitstop(0.1 if big else 0.045)
 				wait = 0.16
 			"heal":
 				FxSprite.spawn(self, "heal", card.feet_point(), FX_SCALE)
@@ -269,32 +277,62 @@ func _play(events: Array[Dictionary]) -> void:
 
 
 ## 放技能：一条色带从出手者那一侧滑进来，带着半身像和技能名。
+## 放绝招：画面压暗，版画全身像从出手那一侧滑进来，一笔浓墨刷开，招式名一个字一个字写出来。
 func _skill_cutin(unit: BattleUnit, skill_name: String) -> void:
 	var from_left := unit.side == BattleUnit.Side.PLAYER
-	var band := PanelContainer.new()
-	band.add_theme_stylebox_override("panel", UiKit.box(Color(0, 0, 0, 0.78), UiKit.ACCENT if from_left else UiKit.DAMAGE, 3, 0))
-	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	band.z_index = 20
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 20)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	band.add_child(row)
-	var bust := UiKit.unit_picture(unit.data, 150, not from_left)
-	var title := UiKit.label(skill_name, 52, UiKit.GOLD)
-	title.add_theme_constant_override("outline_size", 8)
-	title.add_theme_color_override("font_outline_color", Color.BLACK)
-	for child: Control in ([bust, title] if from_left else [title, bust]):
-		row.add_child(child)
-	add_child(band)
-	band.size = Vector2(size.x, 170)
-	var y := size.y * 0.32
-	band.position = Vector2(-size.x if from_left else size.x, y)
-	var t := create_tween()
-	t.tween_property(band, "position:x", 0.0, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	t.tween_interval(0.38)
-	t.tween_property(band, "modulate:a", 0.0, 0.12)
+	var layer := Control.new()
+	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.z_index = 30
+	add_child(layer)
+	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.015, 0.01, 0.0)
+	layer.add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var fig_h := size.y * 0.96
+	var fig := _portrait(unit, fig_h, not from_left)
+	layer.add_child(fig)
+	var fig_to := size.x * 0.03 if from_left else size.x * 0.97 - fig.size.x
+	fig.position = Vector2(-fig.size.x if from_left else size.x, size.y - fig_h)
+
+	var stroke := _brush_stroke(Vector2(size.x * 0.62, 150), not from_left)
+	stroke.position = Vector2(size.x * (0.34 if from_left else 0.04), size.y * 0.42)
+	layer.add_child(stroke)
+	var title := UiKit.outlined(skill_name, 76, Color("f4e8cc"))
+	title.add_theme_constant_override("outline_size", 10)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.size = stroke.size
+	title.position = stroke.position + Vector2(0, (stroke.size.y - 110) / 2)
+	title.visible_ratio = 0.0
+	layer.add_child(title)
+
+	var t := create_tween().set_parallel()
+	t.tween_property(dim, "color:a", 0.6, 0.12)
+	t.tween_property(fig, "position:x", fig_to, 0.2).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	t.tween_property(stroke, "scale:x", 1.0, 0.22).set_delay(0.1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	t.tween_property(title, "visible_ratio", 1.0, 0.3).set_delay(0.16)
 	await t.finished
-	band.queue_free()
+	await get_tree().create_timer(0.38).timeout
+	var out := create_tween()
+	out.tween_property(layer, "modulate:a", 0.0, 0.14)
+	await out.finished
+	layer.queue_free()
+
+
+## 一笔横向的朱红笔触（art/ui/brush_stroke.png 是白的，这里染色），从起笔那头往外刷开：scale.x 从 0 到 1。
+func _brush_stroke(stroke_size: Vector2, flip: bool, color := STROKE_RED) -> TextureRect:
+	var stroke := TextureRect.new()
+	stroke.texture = load("res://art/ui/brush_stroke.png")
+	stroke.modulate = color
+	stroke.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	stroke.stretch_mode = TextureRect.STRETCH_SCALE
+	stroke.flip_h = flip
+	stroke.size = stroke_size
+	stroke.pivot_offset = Vector2(stroke_size.x if flip else 0.0, stroke_size.y / 2)
+	stroke.scale = Vector2(0, 1)
+	stroke.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return stroke
 
 
 ## 组合技：画面变暗，两人的立绘从左右冲进来，中间打出组合技名。
@@ -308,11 +346,8 @@ func _combo_cutin(a: BattleUnit, b: BattleUnit, combo_name: String) -> void:
 	dim.color = Color(0, 0, 0, 0.0)
 	layer.add_child(dim)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var band := ColorRect.new()
-	band.color = Color(0.62, 0.12, 0.09, 0.92)
-	band.size = Vector2(size.x, 130)
-	band.position = Vector2(0, size.y * 0.5 - 65)
-	band.scale = Vector2(0, 1)
+	var band := _brush_stroke(Vector2(size.x * 0.8, 170), false)
+	band.position = Vector2(size.x * 0.1, size.y * 0.5 - 85)
 	layer.add_child(band)
 
 	var fig_h := size.y * 0.92
@@ -323,24 +358,20 @@ func _combo_cutin(a: BattleUnit, b: BattleUnit, combo_name: String) -> void:
 	left.position = Vector2(-left.size.x, size.y - fig_h)
 	right.position = Vector2(size.x, size.y - fig_h)
 
-	var title := UiKit.label("「%s」" % combo_name, 64, UiKit.GOLD)
+	var title := UiKit.outlined("「%s」" % combo_name, 68, Color("f4e8cc"))
 	title.add_theme_constant_override("outline_size", 10)
-	title.add_theme_color_override("font_outline_color", Color.BLACK)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.size = Vector2(size.x, 90)
 	title.position = Vector2(0, size.y * 0.5 - 45)
-	title.pivot_offset = title.size / 2
-	title.scale = Vector2(2.2, 2.2)
-	title.modulate.a = 0.0
+	title.visible_ratio = 0.0
 	layer.add_child(title)
 
 	var t := create_tween().set_parallel()
 	t.tween_property(dim, "color:a", 0.72, 0.18)
 	t.tween_property(left, "position:x", size.x * 0.02, 0.22).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	t.tween_property(right, "position:x", size.x * 0.98 - right.size.x, 0.22).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	t.tween_property(band, "scale:x", 1.0, 0.2).set_delay(0.12)
-	t.tween_property(title, "scale", Vector2.ONE, 0.18).set_delay(0.24).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
-	t.tween_property(title, "modulate:a", 1.0, 0.12).set_delay(0.24)
+	t.tween_property(band, "scale:x", 1.0, 0.24).set_delay(0.12).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	t.tween_property(title, "visible_ratio", 1.0, 0.32).set_delay(0.2)
 	await t.finished
 	_shake_screen(14.0)
 	await get_tree().create_timer(0.75).timeout
@@ -353,12 +384,16 @@ func _combo_cutin(a: BattleUnit, b: BattleUnit, combo_name: String) -> void:
 func _portrait(unit: BattleUnit, height: float, flip: bool) -> TextureRect:
 	var rect := TextureRect.new()
 	rect.texture = unit.data.portrait
+	if rect.texture == null:
+		# 没有版画立绘的（少数敌人）：用放大的像素小人
+		rect.texture = unit.data.battle_sprite if unit.data.battle_sprite != null else unit.data.map_sprite
+		rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
 	rect.flip_h = flip
 	var aspect := 0.75
-	if unit.data.portrait != null:
-		aspect = float(unit.data.portrait.get_width()) / unit.data.portrait.get_height()
+	if rect.texture != null:
+		aspect = float(rect.texture.get_width()) / rect.texture.get_height()
 	rect.size = Vector2(height * aspect, height)
 	return rect
 
@@ -379,6 +414,49 @@ func _style_hit_fx(style: StringName, card: UnitCard, from_left: bool) -> void:
 			pass
 		_:
 			FxSprite.spawn(self, "sword_slash", card.hit_point(), FX_SCALE, not from_left)
+
+
+## 命中顿帧：时间几乎停一下再走（按真实时间算，2 倍速下也一样长）。
+func _hitstop(seconds: float) -> void:
+	Engine.time_scale = 0.05
+	await get_tree().create_timer(seconds, true, false, true).timeout
+	# 顿帧期间战斗结束退出了，就别再动全局速度（_exit_tree 已经复原）
+	if is_inside_tree():
+		Engine.time_scale = 2.0 if _fast else 1.0
+
+
+## 命中处溅开一把墨点，往挨打的方向飞。
+func _ink_splash(at: Vector2, from_left: bool, big: bool) -> void:
+	var p := CPUParticles2D.new()
+	p.position = at
+	p.z_index = 14
+	p.one_shot = true
+	p.explosiveness = 1.0
+	p.amount = 22 if big else 12
+	p.lifetime = 0.55
+	p.direction = Vector2(1 if from_left else -1, -0.4)
+	p.spread = 55.0
+	p.initial_velocity_min = 180.0
+	p.initial_velocity_max = 420.0 if big else 320.0
+	p.gravity = Vector2(0, 900)
+	p.scale_amount_min = 3.0
+	p.scale_amount_max = 7.0 if big else 5.0
+	p.color = Color(0.08, 0.06, 0.05, 0.9)
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.7, 1.0])
+	fade.colors = PackedColorArray([Color.WHITE, Color.WHITE, Color(1, 1, 1, 0)])
+	p.color_ramp = fade
+	add_child(p)
+	p.emitting = true
+	get_tree().create_timer(1.0).timeout.connect(p.queue_free)
+
+
+## 暴击：镜头往命中处轻轻推一下再回来。
+func _punch_zoom(at: Vector2) -> void:
+	pivot_offset = at
+	var t := create_tween()
+	t.tween_property(self, "scale", Vector2(1.04, 1.04), 0.06).set_ease(Tween.EASE_OUT)
+	t.tween_property(self, "scale", Vector2.ONE, 0.22).set_ease(Tween.EASE_IN_OUT)
 
 
 func _shake_screen(strength: float) -> void:
@@ -617,7 +695,7 @@ func _build_top_bar() -> void:
 	_auto_button.pressed.connect(func() -> void: _on_auto_toggled(not _auto))
 	buttons.add_child(_auto_button)
 	_fast_button = _small_round("速")
-	_fast_button.pressed.connect(func() -> void: _set_fast(Engine.time_scale < 1.5))
+	_fast_button.pressed.connect(func() -> void: _set_fast(not _fast))
 	buttons.add_child(_fast_button)
 	var log_button := _small_round("记")
 	log_button.pressed.connect(func() -> void: _log_panel.visible = not _log_panel.visible)
@@ -650,6 +728,7 @@ func _small_round(text: String) -> Button:
 
 
 func _set_fast(on: bool) -> void:
+	_fast = on
 	Engine.time_scale = 2.0 if on else 1.0
 	Prefs.set_value("battle", "fast", on)
 	_set_lit(_fast_button, on)
@@ -782,49 +861,100 @@ func _corner_caption(spot: Vector3) -> Label:
 
 # --- 结算 ---
 
+## 结算：赢了「咚」地盖下一枚朱红「胜」字大印，输了一团墨晕开一个「败」字；下面展开一卷宣纸写三星条件和奖励。
 func _show_result() -> void:
 	var won := model.result == BattleModel.Result.WIN
 	_banner.text = ""
 	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.6)
+	dim.color = Color(0.02, 0.015, 0.01, 0.0)
+	dim.z_index = 40
 	add_child(dim)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	create_tween().tween_property(dim, "color:a", 0.62, 0.2)
 
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiKit.box(UiKit.PANEL, UiKit.GOLD if won else UiKit.ENEMY, 3, 16))
-	add_child(panel)
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.custom_minimum_size = Vector2(460, 0)
+	# 大印
+	var seal_size := 168.0
+	var seal := PanelContainer.new()
+	var seal_style := StyleBoxFlat.new()
+	seal_style.bg_color = ENEMY_RED if won else INK
+	seal_style.set_corner_radius_all(10 if won else int(seal_size / 2))
+	seal_style.set_border_width_all(5)
+	seal_style.border_color = PAPER if won else Color("5a1a14")
+	seal.add_theme_stylebox_override("panel", seal_style)
+	seal.custom_minimum_size = Vector2(seal_size, seal_size)
+	seal.size = Vector2(seal_size, seal_size)
+	seal.z_index = 41
+	var mark := UiKit.label("胜" if won else "败", 118, PAPER if won else Color("c8b8a0"))
+	mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	mark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	seal.add_child(mark)
+	add_child(seal)
+	seal.position = Vector2((size.x - seal_size) / 2, size.y * 0.06)
+	seal.pivot_offset = seal.size / 2
+	seal.rotation = -0.08 if won else 0.0
+	seal.modulate.a = 0.0
+	var st := create_tween().set_parallel()
+	if won:
+		seal.scale = Vector2(2.4, 2.4)
+		st.tween_property(seal, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+		st.tween_property(seal, "modulate:a", 1.0, 0.12)
+	else:
+		# 墨慢慢晕开
+		seal.scale = Vector2(0.4, 0.4)
+		st.tween_property(seal, "scale", Vector2.ONE, 0.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+		st.tween_property(seal, "modulate:a", 1.0, 0.5)
+	await st.finished
+	if won:
+		_shake_screen(14.0)
+
+	# 宣纸卷：从中间往两边展开
+	var scroll := PanelContainer.new()
+	var paper := UiKit.box(Color("ece0c4"), INK, 2, 4)
+	paper.content_margin_left = 48
+	paper.content_margin_right = 48
+	paper.content_margin_top = 18
+	paper.content_margin_bottom = 20
+	scroll.add_theme_stylebox_override("panel", paper)
+	scroll.custom_minimum_size = Vector2(560, 0)
+	# 宣纸和两头的木轴放在一个普通节点里一起展开（木轴不能放进容器，会被拉伸）
+	var holder := Control.new()
+	holder.z_index = 41
+	add_child(holder)
+	holder.add_child(scroll)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 12)
-	panel.add_child(v)
-
-	var title := UiKit.label("胜利！" if won else "战败……", 40, UiKit.GOLD if won else UiKit.DAMAGE)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(title)
-	var conditions := model.star_conditions()
-	var stars := UiKit.label("★".repeat(model.stars()) + "☆".repeat(3 - model.stars()), 44, UiKit.GOLD)
+	v.add_theme_constant_override("separation", 8)
+	scroll.add_child(v)
+	var stars := UiKit.label("★".repeat(model.stars()) + "☆".repeat(3 - model.stars()), 44, ENEMY_RED)
 	stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(stars)
+	var conditions := model.star_conditions()
 	var texts := ["获胜", "无人倒下", "%d 回合内获胜（用了 %d 回合）" % [stage.star_round_limit, model.round_number()]]
 	for i in texts.size():
-		v.add_child(UiKit.label(("● " if conditions[i] else "○ ") + texts[i], 20, UiKit.TEXT if conditions[i] else UiKit.TEXT_DIM))
+		v.add_child(UiKit.label(("● " if conditions[i] else "○ ") + texts[i], 20, INK if conditions[i] else Color("8a7a66")))
 	if won:
 		var r := Encounters.rewards(model)
-		var gain := UiKit.label("获得：经验 +%d　银两 +%d" % [r["exp"], r["silver"]], 22, UiKit.GOLD)
+		var gain := UiKit.label("获得：经验 +%d　银两 +%d" % [r["exp"], r["silver"]], 22, ENEMY_RED)
 		gain.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(gain)
-
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 20)
 	v.add_child(buttons)
-	var retry := UiKit.button("再打一次", Vector2(180, 64))
+	var retry := UiKit.button("再打一次", Vector2(180, 60))
 	retry.pressed.connect(func() -> void: retry_requested.emit())
 	buttons.add_child(retry)
-	var back := UiKit.button("继续", Vector2(180, 64))
+	var back := UiKit.button("继续", Vector2(180, 60))
 	back.pressed.connect(func() -> void: finished.emit(won))
 	buttons.add_child(back)
-	# 面板要等内容撑开尺寸后再居中
+	# 内容撑开尺寸后再摆位置、加两头的木轴
 	await get_tree().process_frame
-	panel.position = (size - panel.size) / 2
+	holder.position = Vector2((size.x - scroll.size.x) / 2, seal.position.y + seal_size + 26)
+	for left in [true, false]:
+		var rod := ColorRect.new()
+		rod.color = Color("5c3a22")
+		rod.size = Vector2(16, scroll.size.y + 24)
+		rod.position = Vector2(-16 if left else scroll.size.x, -12)
+		holder.add_child(rod)
+	holder.pivot_offset = Vector2(scroll.size.x / 2, 0)
+	holder.scale = Vector2(0.02, 1)
+	create_tween().tween_property(holder, "scale:x", 1.0, 0.32).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
