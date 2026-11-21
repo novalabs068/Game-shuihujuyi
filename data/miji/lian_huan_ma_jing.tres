@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_hiny1"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_r1jfb"]
+
+[sub_resource type="Resource" id="Resource_7cpye"]
+script = ExtResource("1_hiny1")
+display_name = "连环马经"
+kind = &"team_haste_open"
+amount = 0.12
+text = "开战时全队速度 +{x}，持续 2 回合"
+
+[resource]
+script = ExtResource("2_r1jfb")
+id = &"lian_huan_ma_jing"
+display_name = "连环马经"
+quality = 3
+flavor = "呼延灼的连环马阵，开阵就是一阵冲锋。"
+owner = &"huyan_zhuo"
+effect = SubResource("Resource_7cpye")

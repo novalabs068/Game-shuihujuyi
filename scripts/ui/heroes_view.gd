@@ -182,6 +182,8 @@ func _show_detail() -> void:
 	var owned := _owned(hero)
 	var star := GameState.star_of(hero.id)
 	var effective := Equipment.apply(hero if protagonist else Bonds.apply(Stars.apply(hero, star), GameState.bond_of(hero.id)), GameState.effective_gear(hero.id))
+	var held_scroll := GameState.scroll_of(hero.id)
+	effective = Miji.apply(effective, GameState.scroll_data(held_scroll) if not held_scroll.is_empty() else null)
 
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 16)
@@ -261,7 +263,14 @@ func _show_detail() -> void:
 			var got := GameState.has_flag("mingqi_" + String(e.id))
 			var where := "已得到" if got else "出处：%s" % e.source_text
 			_detail.add_child(UiKit.label("%s「%s」：%s　%s" % [e.quality_name(), e.display_name, e.summary(), where], 17, UiKit.QUALITY_COLORS[EquipData.Quality.MING] if got else UiKit.TEXT_DIM))
+	if owned and not held_scroll.is_empty():
+		var held := GameState.scroll_data(held_scroll)
+		_detail.add_child(_wrapped("秘籍《%s》%s" % [held.display_name, held.summary()], UiKit.QUALITY_COLORS[mini(held.quality, EquipData.Quality.MING)]))
 	if not protagonist:
+		var own_miji := GameDB.miji_of_hero(hero.id)
+		if own_miji != null:
+			var taught := GameState.has_flag("miji_" + String(hero.id))
+			_detail.add_child(_wrapped("独门秘籍《%s》%s　%s" % [own_miji.display_name, own_miji.summary(), "已传授" if taught else "结义时传授"], UiKit.GOLD if taught else UiKit.TEXT_DIM))
 		for combo in GameDB.combos:
 			var partner := combo.partner_of(hero.id)
 			if partner != &"":
@@ -280,20 +289,16 @@ func _show_detail() -> void:
 		martial_row.add_theme_constant_override("separation", 10)
 		_bottom.add_child(martial_row)
 		martial_row.add_child(_martial_button(true))
-		martial_row.add_child(_martial_button(false))
+		martial_row.add_child(_scroll_button(hero))
+		martial_row.add_child(_medicine_button(hero))
 	if owned:
 		var gear_row := HBoxContainer.new()
 		gear_row.add_theme_constant_override("separation", 10)
 		_bottom.add_child(gear_row)
 		for slot in EquipData.Slot.values():
 			gear_row.add_child(_slot_button(hero, slot))
-		var carried := 0
-		for id in GameState.medicines:
-			carried += GameState.medicines[id]
-		var med := UiKit.button("用药（%d）" % carried, Vector2(124, 50), 17)
-		med.disabled = carried == 0
-		med.pressed.connect(_open_medicines.bind(hero))
-		gear_row.add_child(med)
+		if not protagonist:
+			gear_row.add_child(_scroll_button(hero))
 	if protagonist:
 		return
 
@@ -308,18 +313,19 @@ func _show_detail() -> void:
 	buttons.add_theme_constant_override("separation", 12)
 	_bottom.add_child(buttons)
 	if owned:
-		var up := UiKit.button("升星", Vector2(150, 56), 24)
+		var up := UiKit.button("升星", Vector2(120, 56), 24)
 		up.disabled = not GameState.can_star_up(hero)
 		up.pressed.connect(func() -> void:
 			if GameState.star_up(hero):
 				_done("%s 点亮了第 %d 颗勾玉！" % [hero.display_name, Stars.lit(GameState.star_of(hero.id))]))
 		buttons.add_child(up)
+		buttons.add_child(_medicine_button(hero))
 		if GameState.can_swear(hero.id):
-			var swear := UiKit.button("结义", Vector2(130, 56), 24)
+			var swear := UiKit.button("结义", Vector2(100, 56), 24)
 			swear.add_theme_color_override("font_color", UiKit.GOLD)
 			swear.pressed.connect(func() -> void:
 				if GameState.swear(hero.id):
-					_done("%s与%s义结金兰！解锁组合技「结义同心」。" % [GameState.player_name, hero.display_name]))
+					_done("%s与%s义结金兰！解锁组合技「结义同心」。%s" % [GameState.player_name, hero.display_name, GameState.taught_text(hero.id)]))
 			buttons.add_child(swear)
 	else:
 		var join := UiKit.button("招募", Vector2(150, 56), 24)
@@ -329,13 +335,13 @@ func _show_detail() -> void:
 				_done("%s 加入了！" % hero.display_name))
 		buttons.add_child(join)
 	var price := Stars.soul_price(hero) * SOUL_STEP
-	var buy := UiKit.button("义气 %d 换 %d 将魂" % [price, SOUL_STEP], Vector2(220, 56), 20)
+	var buy := UiKit.button("义气 %d 换 %d 将魂" % [price, SOUL_STEP], Vector2(190, 56), 19)
 	buy.disabled = GameState.yiqi < price
 	buy.pressed.connect(func() -> void:
 		if GameState.buy_souls(hero, SOUL_STEP):
 			_done("换来 %s 的将魂 %d 个" % [hero.display_name, SOUL_STEP]))
 	buttons.add_child(buy)
-	var melt := UiKit.button("%d 将魂化为义气" % SOUL_STEP, Vector2(200, 56), 20)
+	var melt := UiKit.button("%d 将魂化为义气" % SOUL_STEP, Vector2(170, 56), 19)
 	melt.disabled = souls < SOUL_STEP
 	melt.pressed.connect(func() -> void:
 		if GameState.souls_to_yiqi(hero.id, SOUL_STEP):
@@ -431,7 +437,7 @@ func _open_martials() -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	pad.add_child(v)
-	v.add_child(UiKit.label("武学：主修的是战斗里放的技能，副修的只给被动加成", 24, UiKit.ACCENT))
+	v.add_child(UiKit.label("武学：主修的是战斗里放的技能，也决定职业；也可以把一门放进秘籍栏，只给被动加成", 22, UiKit.ACCENT))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -459,20 +465,20 @@ func _open_martials() -> void:
 		name_row.add_theme_constant_override("separation", 10)
 		info.add_child(name_row)
 		name_row.add_child(UiKit.label(m.display_name, 24))
-		var state := "主修中" if id == GameState.martial_main else ("副修中" if id == GameState.martial_side else "")
+		var state := "主修中" if id == GameState.martial_main else ("在秘籍栏" if id == GameState.martial_side else "")
 		name_row.add_child(UiKit.label(state, 18, UiKit.ACCENT))
 		name_row.add_child(UiKit.label(m.source, 16, UiKit.TEXT_DIM))
 		var main_text := UiKit.label("主修（职业变为%s）：%s" % [UiKit.ROLE_NAMES[m.role], m.skill.description], 17)
 		main_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(main_text)
-		info.add_child(UiKit.label("副修：%s" % m.side_summary(), 17, UiKit.TEXT_DIM))
+		info.add_child(UiKit.label("放进秘籍栏：%s" % m.side_summary(), 17, UiKit.TEXT_DIM))
 		var as_main := UiKit.button("主修", Vector2(90, 46), 20)
 		as_main.disabled = id == GameState.martial_main
 		as_main.pressed.connect(func() -> void:
 			GameState.set_martial_main(id)
 			close.call())
 		row.add_child(as_main)
-		var as_side := UiKit.button("副修", Vector2(90, 46), 20)
+		var as_side := UiKit.button("当秘籍", Vector2(100, 46), 20)
 		as_side.disabled = id == GameState.martial_side
 		as_side.pressed.connect(func() -> void:
 			GameState.set_martial_side(id)
@@ -495,11 +501,21 @@ func _slot_button(hero: UnitData, slot: EquipData.Slot) -> Button:
 		var data := GameState.item_data(it)
 		text = "%s：%s" % [EquipData.SLOT_NAMES[slot], data.display_name]
 		color = UiKit.QUALITY_COLORS[data.quality]
-	var button := UiKit.button(text, Vector2(150, 50), 17)
+	var button := UiKit.button(text, Vector2(130, 50), 17)
 	button.clip_text = true
 	button.add_theme_color_override("font_color", color)
 	button.pressed.connect(_open_picker.bind(hero, slot))
 	return button
+
+
+func _medicine_button(hero: UnitData) -> Button:
+	var carried := 0
+	for id in GameState.medicines:
+		carried += GameState.medicines[id]
+	var med := UiKit.button("用药（%d）" % carried, Vector2(124, 50), 17)
+	med.disabled = carried == 0
+	med.pressed.connect(_open_medicines.bind(hero))
+	return med
 
 
 ## 挑装备：列出这个栏位的所有装备，品质高的在前；点「穿上」换上，点「卸下」脱掉。
@@ -579,6 +595,109 @@ func _open_picker(hero: UnitData, slot: EquipData.Slot) -> void:
 				GameState.equip(hero.id, uid)
 			close.call())
 		row.add_child(action)
+	var back := UiKit.button("返回", Vector2(160, 50), 22)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	back.pressed.connect(close)
+	v.add_child(back)
+
+
+## 秘籍栏：显示装着的那本（主角也可能是一门武学），点开挑别的。
+func _scroll_button(hero: UnitData) -> Button:
+	var slot_name := GameState.scroll_slot_name(hero.id)
+	var button := UiKit.button("秘籍：%s" % (slot_name if slot_name != "" else "空"), Vector2(170, 50), 17)
+	button.clip_text = true
+	var sc := GameState.scroll_of(hero.id)
+	button.add_theme_color_override("font_color", UiKit.QUALITY_COLORS[mini(GameState.scroll_data(sc).quality, EquipData.Quality.MING)] if not sc.is_empty() else (UiKit.ACCENT if slot_name != "" else UiKit.TEXT_DIM))
+	button.pressed.connect(_open_scrolls.bind(hero))
+	return button
+
+
+## 挑秘籍：列出所有秘籍（品质高的在前），主角还能把学会的武学放进来。
+func _open_scrolls(hero: UnitData) -> void:
+	var overlay := Control.new()
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.6)
+	overlay.add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	overlay.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(880, 540)
+	panel.add_theme_stylebox_override("panel", UiKit.box(UiKit.PANEL, UiKit.GOLD, 2, 10))
+	center.add_child(panel)
+	var pad := MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 16)
+	panel.add_child(pad)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	pad.add_child(v)
+	v.add_child(UiKit.label("给%s挑秘籍：每人一格，被动、追击、开局三类" % hero.display_name, 26, UiKit.GOLD))
+	var scroll_box := ScrollContainer.new()
+	scroll_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll_box.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(scroll_box)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 8)
+	scroll_box.add_child(list)
+	var close := func() -> void:
+		overlay.queue_free()
+		_refresh_list()
+		_show_detail()
+	overlay.set_meta("close_on_back", close)
+	var row_for := func(title: String, color: Color, line: String, note: String, wearing: bool, on_pick: Callable) -> void:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		list.add_child(row)
+		var info := VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_theme_constant_override("separation", 0)
+		row.add_child(info)
+		var name_row := HBoxContainer.new()
+		name_row.add_theme_constant_override("separation", 10)
+		info.add_child(name_row)
+		name_row.add_child(UiKit.label(title, 22, color))
+		if note != "":
+			name_row.add_child(UiKit.label(note, 16, UiKit.TEXT_DIM))
+		var desc := UiKit.label(line, 17)
+		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		info.add_child(desc)
+		var action := UiKit.button("卸下" if wearing else "装上", Vector2(110, 48), 20)
+		action.pressed.connect(func() -> void:
+			on_pick.call(wearing)
+			close.call())
+		row.add_child(action)
+	var candidates := GameState.scrolls.duplicate()
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return GameState.scroll_data(a).quality > GameState.scroll_data(b).quality)
+	for sc: Dictionary in candidates:
+		var data := GameState.scroll_data(sc)
+		var uid: int = sc["uid"]
+		var holder: StringName = sc["holder"]
+		var note := data.quality_name()
+		if holder != &"" and holder != hero.id:
+			note += "（%s 装着）" % _holder_name(holder)
+		row_for.call("《%s》" % data.display_name, UiKit.QUALITY_COLORS[mini(data.quality, EquipData.Quality.MING)], data.summary(), note, holder == hero.id, func(wearing: bool) -> void:
+			if wearing:
+				GameState.unequip_scroll(hero.id)
+			else:
+				GameState.equip_scroll(hero.id, uid))
+	if _is_protagonist(hero):
+		for id in GameState.martials:
+			if id == GameState.martial_main:
+				continue
+			var m := GameState.martial(id)
+			row_for.call("武学·%s" % m.display_name, UiKit.ACCENT, "【被动】%s" % m.side_summary(), m.source, id == GameState.martial_side, func(wearing: bool) -> void:
+				if wearing:
+					GameState.unequip_scroll(hero.id)
+				else:
+					GameState.set_martial_side(id))
+	if list.get_child_count() == 0:
+		list.add_child(UiKit.label("还没有秘籍。和好汉结义时他会传授独门秘籍；悬赏、宝箱会给，集市也有卖凡品。", 20, UiKit.TEXT_DIM))
 	var back := UiKit.button("返回", Vector2(160, 50), 22)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back.pressed.connect(close)

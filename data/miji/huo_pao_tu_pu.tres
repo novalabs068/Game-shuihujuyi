@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_v2pm5"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_7jm71"]
+
+[sub_resource type="Resource" id="Resource_vnunx"]
+script = ExtResource("1_v2pm5")
+display_name = "火炮图谱"
+kind = &"skill_power"
+amount = 0.15
+text = "绝招伤害 +{x}"
+
+[resource]
+script = ExtResource("2_7jm71")
+id = &"huo_pao_tu_pu"
+display_name = "火炮图谱"
+quality = 3
+flavor = "凌振造炮的图样，装药多少、仰角几何都有讲究。"
+owner = &"ling_zhen"
+effect = SubResource("Resource_vnunx")

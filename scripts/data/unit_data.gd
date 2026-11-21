@@ -42,6 +42,8 @@ const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
 @export var talent: TalentData
 ## 天赋现在的档次：0 未解锁、1 解锁、2 勾玉全亮强化。由 Stars.apply 在出战前设置
 @export var talent_rank := 0
+## 身上装的秘籍的效果（和天赋同一种写法，按 1 档算）。由 Miji.apply 在出战前设置
+@export var miji_effect: TalentData
 
 @export_group("装备")
 ## 身上装备（和「特效」类天赋）带来的特效（EquipData.EFFECTS 的键）。由 Stars.apply、Equipment.apply 在出战前设置

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_xoiwy"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_8rufm"]
+
+[sub_resource type="Resource" id="Resource_wejex"]
+script = ExtResource("1_xoiwy")
+display_name = "宝刀心得"
+kind = &"effect"
+effect = &"keen"
+text = "暴击率 +15%"
+
+[resource]
+script = ExtResource("2_8rufm")
+id = &"bao_dao_xin_de"
+display_name = "宝刀心得"
+quality = 3
+flavor = "杨志卖刀时说的那口宝刀，吹毛断发、杀人不见血。"
+owner = &"yang_zhi"
+effect = SubResource("Resource_wejex")

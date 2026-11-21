@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_44amm"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_vf4lw"]
+
+[sub_resource type="Resource" id="Resource_rjf23"]
+script = ExtResource("1_44amm")
+display_name = "步法图"
+kind = &"stat"
+amount = 0.05
+stats = Array[StringName]([&"spd"])
+text = "速度 +{x}"
+
+[resource]
+script = ExtResource("2_vf4lw")
+id = &"bu_fa_tu"
+display_name = "步法图"
+flavor = "画着脚印的步法图。"
+effect = SubResource("Resource_rjf23")

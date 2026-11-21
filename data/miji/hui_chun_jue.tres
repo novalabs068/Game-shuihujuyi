@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_hvrsx"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_uhn7w"]
+
+[sub_resource type="Resource" id="Resource_dkag6"]
+script = ExtResource("1_hvrsx")
+display_name = "回春诀"
+kind = &"effect"
+effect = &"regen"
+text = "每次轮到自己回复 2% 生命"
+
+[resource]
+script = ExtResource("2_uhn7w")
+id = &"hui_chun_jue"
+display_name = "回春诀"
+quality = 1
+flavor = "边打边调息的内功。"
+effect = SubResource("Resource_dkag6")

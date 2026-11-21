@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_sbfag"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_lpjux"]
+
+[sub_resource type="Resource" id="Resource_00c0e"]
+script = ExtResource("1_sbfag")
+display_name = "金刚身法"
+kind = &"stat"
+amount = 0.12
+stats = Array[StringName]([&"def"])
+text = "防御 +{x}"
+
+[resource]
+script = ExtResource("2_lpjux")
+id = &"jin_gang_shen_fa"
+display_name = "金刚身法"
+quality = 3
+flavor = "宋万的站桩功，往那一站就是一堵墙。"
+owner = &"song_wan"
+effect = SubResource("Resource_00c0e")

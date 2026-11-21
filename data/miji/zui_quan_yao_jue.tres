@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_0rjok"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_rljum"]
+
+[sub_resource type="Resource" id="Resource_0p4pr"]
+script = ExtResource("1_0rjok")
+display_name = "醉拳要诀"
+kind = &"low_hp_crit"
+amount = 0.2
+text = "生命低于一半时暴击率 +{x}"
+
+[resource]
+script = ExtResource("2_rljum")
+id = &"zui_quan_yao_jue"
+display_name = "醉拳要诀"
+quality = 3
+flavor = "武松醉打蒋门神的玉环步、鸳鸯脚，越是伤重越打得狠。"
+owner = &"wu_song"
+effect = SubResource("Resource_0p4pr")

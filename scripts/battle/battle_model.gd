@@ -161,6 +161,16 @@ func start_next_turn() -> Array[Dictionary]:
 		var amount := mini(roundi(actor.max_hp * Equipment.REGEN_RATIO), actor.max_hp - actor.hp)
 		actor.hp += amount
 		_emit("heal", actor, "+%d" % amount, "%s 回春，回复 %d 生命" % [actor.display_name(), amount])
+	if actor.has_talent(&"cleanse_regen"):
+		var heal := mini(roundi(actor.max_hp * actor.talent(&"cleanse_regen")), actor.max_hp - actor.hp)
+		if heal > 0:
+			actor.hp += heal
+			_emit("heal", actor, "+%d" % heal, "%s 运功疗伤，回复 %d 生命" % [actor.display_name(), heal])
+		for field: String in ["stun_turns", "disarm_turns", "silence_turns"]:
+			if actor.get(field) > 0:
+				actor.set(field, 0)
+				_emit("info", actor, "解", "%s 解开了身上的控制" % actor.display_name())
+				break
 	if actor.burn_turns > 0:
 		actor.burn_turns -= 1
 		var burn := mini(actor.burn_damage, actor.hp)
@@ -492,6 +502,8 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	if target == null or not target.is_alive():
 		return 0
 	var crit_chance := CRIT_CHANCE + (Equipment.KEEN_CRIT if attacker.has_gear(&"keen") else 0.0)
+	if attacker.hp_ratio() < 0.5:
+		crit_chance += attacker.talent(&"low_hp_crit")
 	var crit := force_crit or attacker.first_crit_ready or rng.randf() < crit_chance
 	attacker.first_crit_ready = false
 	var def := 0.0 if pierce else target.def()
@@ -510,6 +522,8 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 		raw *= 1.0 + attacker.talent(&"boss_slayer")
 	raw *= 1.0 - target.talent(&"tough")
 	raw *= Roles.damage_multiplier(attacker.data.role, target.data.role)
+	if Roles.beats(attacker.data.role, target.data.role):
+		raw *= 1.0 - target.talent(&"anti_counter")
 	var exposed := target.expose_turns > 0
 	if exposed:
 		raw *= 1.0 + EXPOSE_BONUS
@@ -525,7 +539,7 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 		log_text += "（%s克%s）" % [UnitData.ROLE_TAGS[attacker.data.role], UnitData.ROLE_TAGS[target.data.role]]
 	_emit("damage", target, popup, log_text, crit, attacker)
 	if crit and attacker.has_talent(&"crit_haste"):
-		var t := attacker.data.talent
+		var t := attacker.passive(&"crit_haste")
 		if attacker.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.name == t.display_name).size() < TalentData.CRIT_HASTE_STACKS:
 			attacker.add_buff(BattleUnit.Buff.new(t.display_name, 0.0, attacker.talent(&"crit_haste"), WHOLE_BATTLE))
 			_emit("info", attacker, "加速", "%s「%s」，越打越快" % [attacker.display_name(), t.display_name])
@@ -587,16 +601,32 @@ func _apply_opening_gear(u: BattleUnit) -> void:
 		_emit("prep", u, "疾风", "%s「疾风」：速度 +%d%%，%d 回合" % [u.display_name(), roundi(Equipment.SWIFT_BONUS * 100), Equipment.SWIFT_TURNS])
 
 
-## 开战时生效的天赋：自己或全队加怒气、加攻、加速、回春。
+## 开战时生效的天赋和秘籍：加怒气、加攻、加速、回春、减伤，或者给敌人计穷、减攻。
 func _apply_opening_talent(u: BattleUnit) -> void:
-	if u.data.talent == null or u.data.talent_rank <= 0:
-		return
-	var t := u.data.talent
-	var v := t.value(u.data.talent_rank)
+	for p in u.passives():
+		_apply_opening_passive(u, p[0], p[1])
+
+
+func _apply_opening_passive(u: BattleUnit, t: TalentData, rank: int) -> void:
+	var v := t.value(rank)
 	var allies := allies_of(u)
-	if t.kind in [&"rage_start", &"team_rage_start", &"team_atk", &"team_haste_open", &"team_regen"]:
-		_emit("prep", u, t.display_name, "%s「%s」：%s" % [u.display_name(), t.display_name, t.describe(u.data.talent_rank)])
+	if t.kind in TalentData.OPENING_KINDS:
+		_emit("prep", u, t.display_name, "%s「%s」：%s" % [u.display_name(), t.display_name, t.describe(rank)])
 	match t.kind:
+		&"team_guard_open":
+			for a in allies:
+				a.reduction = maxf(a.reduction, v)
+				a.reduction_turns = maxi(a.reduction_turns, 2)
+		&"open_silence":
+			var strongest: BattleUnit = null
+			for f in foes_of(u):
+				if strongest == null or f.atk() > strongest.atk():
+					strongest = f
+			if strongest != null:
+				_control(u, strongest, &"silence", 2)
+		&"open_weaken":
+			for f in foes_of(u):
+				f.add_buff(BattleUnit.Buff.new(t.display_name, -v, 0.0, 2))
 		&"rage_start":
 			u.add_rage(roundi(v))
 		&"team_rage_start":

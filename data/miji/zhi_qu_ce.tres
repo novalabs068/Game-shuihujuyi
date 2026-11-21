@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_5jtir"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_k1cmi"]
+
+[sub_resource type="Resource" id="Resource_umc5m"]
+script = ExtResource("1_5jtir")
+display_name = "智取策"
+kind = &"open_silence"
+text = "开战时让敌方攻击最高的一人计穷 2 回合"
+
+[resource]
+script = ExtResource("2_k1cmi")
+id = &"zhi_qu_ce"
+display_name = "智取策"
+quality = 3
+flavor = "吴用智取生辰纲时的算计，先叫对头乱了阵脚。"
+owner = &"wu_yong"
+effect = SubResource("Resource_umc5m")

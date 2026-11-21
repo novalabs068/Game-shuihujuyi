@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_u28ul"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_8qdm0"]
+
+[sub_resource type="Resource" id="Resource_m77sa"]
+script = ExtResource("1_u28ul")
+display_name = "豹子头枪诀"
+kind = &"pursuit"
+amount = 0.8
+text = "普攻后 30% 再刺一枪，{x} 伤害"
+chance = 0.3
+pursuit_kind = &"hit"
+
+[resource]
+script = ExtResource("2_8qdm0")
+id = &"bao_zi_tou_qiang_jue"
+display_name = "豹子头枪诀"
+quality = 3
+flavor = "林冲把八十万禁军枪棒教头的看家枪法，一招一式写给了兄弟。"
+owner = &"lin_chong"
+effect = SubResource("Resource_m77sa")

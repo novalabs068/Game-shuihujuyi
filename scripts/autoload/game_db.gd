@@ -12,6 +12,7 @@ const EVENTS_DIR := "res://data/events/"
 const EQUIPMENT_DIR := "res://data/equipment/"
 const STORIES_DIR := "res://data/stories/"
 const MARTIAL_DIR := "res://data/martial/"
+const MIJI_DIR := "res://data/miji/"
 
 var heroes: Array[UnitData] = []
 var combos: Array[ComboData] = []
@@ -26,9 +27,13 @@ var equipment: Dictionary[StringName, EquipData] = {}
 ## 好汉列传，按好汉、段数排好
 var stories: Array[StoryData] = []
 var martials: Dictionary[StringName, MartialData] = {}
+var mijis: Dictionary[StringName, MijiData] = {}
 
 
 func _ready() -> void:
+	for res in load_dir(MIJI_DIR):
+		var mj := res as MijiData
+		mijis[mj.id] = mj
 	for res in load_dir(MARTIAL_DIR):
 		var m := res as MartialData
 		martials[m.id] = m
@@ -60,6 +65,14 @@ func _ready() -> void:
 	bounties.sort_custom(func(a: BountyData, b: BountyData) -> bool: return a.grade < b.grade)
 	for res in load_dir(EVENTS_DIR):
 		events.append(res as EventData)
+
+
+## 这位好汉结义时传授的独门秘籍（绝品），没有返回 null。
+func miji_of_hero(hero_id: StringName) -> MijiData:
+	for mj: MijiData in mijis.values():
+		if mj.quality == MijiData.Quality.JUE and mj.owner == hero_id:
+			return mj
+	return null
 
 
 ## 出身按 sort_order 排好的列表，给创建角色界面用。

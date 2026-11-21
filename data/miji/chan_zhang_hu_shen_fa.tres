@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_hska5"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_k0uv0"]
+
+[sub_resource type="Resource" id="Resource_qancs"]
+script = ExtResource("1_hska5")
+display_name = "禅杖护身法"
+kind = &"team_guard_open"
+amount = 0.15
+text = "开战时全队受到的伤害 -{x}，持续 2 回合"
+
+[resource]
+script = ExtResource("2_k0uv0")
+id = &"chan_zhang_hu_shen_fa"
+display_name = "禅杖护身法"
+quality = 3
+flavor = "鲁智深舞起禅杖，水泼不进，护住身边弟兄。"
+owner = &"lu_zhishen"
+effect = SubResource("Resource_qancs")

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_02s5d"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_lhh8v"]
+
+[sub_resource type="Resource" id="Resource_7y2su"]
+script = ExtResource("1_02s5d")
+display_name = "蒙汗药方"
+kind = &"pursuit"
+text = "普攻后 20% 把目标麻翻，眩晕 1 回合"
+chance = 0.2
+pursuit_kind = &"stun"
+
+[resource]
+script = ExtResource("2_lhh8v")
+id = &"meng_han_yao_fang"
+display_name = "蒙汗药方"
+quality = 3
+flavor = "白胜挑的那担酒里下的药，方子就写在这里。"
+owner = &"bai_sheng"
+effect = SubResource("Resource_7y2su")

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_v5j8d"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_d83gu"]
+
+[sub_resource type="Resource" id="Resource_yfvjl"]
+script = ExtResource("1_v5j8d")
+display_name = "破计心法"
+kind = &"anti_counter"
+amount = 0.15
+text = "被克制时受到的伤害 -{x}"
+
+[resource]
+script = ExtResource("2_d83gu")
+id = &"po_ji_xin_fa"
+display_name = "破计心法"
+quality = 1
+flavor = "教人不被克制、不慌不乱的心法。"
+effect = SubResource("Resource_yfvjl")

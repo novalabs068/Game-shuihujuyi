@@ -490,6 +490,10 @@ func _open_chest(chest: ChestData) -> void:
 		return
 	GameState.set_flag(flag)
 	var gained := Rewards.grant(chest.tokens, chest.silver, 0, chest.equipment, chest.medicine, chest.medicine_count)
+	if randf() < Miji.CHEST_DROP_CHANCE:
+		var scroll_text := Rewards.grant_scroll(Miji.random_of(GameDB.mijis.values(), MijiData.Quality.LIANG, RandomNumberGenerator.new()))
+		if scroll_text != "":
+			gained += "　" + scroll_text
 	var mingqi := GameState.claim_mingqi()
 	if mingqi != "":
 		gained = mingqi + "　" + gained

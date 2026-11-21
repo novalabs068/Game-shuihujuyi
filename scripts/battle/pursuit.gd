@@ -26,12 +26,13 @@ func _init(p_name: String, p_chance: float, p_kind: StringName, p_power: float) 
 	power = p_power
 
 
-## 这个人身上的全部追击来源：天赋在前，装备在后。
+## 这个人身上的全部追击来源：天赋、秘籍在前，装备在后。
 static func sources_for(unit: BattleUnit) -> Array[Pursuit]:
 	var out: Array[Pursuit] = []
-	if unit.has_talent(&"pursuit"):
-		var t := unit.data.talent
-		out.append(Pursuit.new(t.display_name, t.chance, t.pursuit_kind, unit.talent(&"pursuit")))
+	for p in unit.passives():
+		var t: TalentData = p[0]
+		if t.kind == &"pursuit":
+			out.append(Pursuit.new(t.display_name, t.chance, t.pursuit_kind, t.value(p[1])))
 	for effect: StringName in GEAR:
 		if unit.has_gear(effect):
 			var g: Array = GEAR[effect]

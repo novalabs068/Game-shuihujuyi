@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_qu2j8"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_3kuvo"]
+
+[sub_resource type="Resource" id="Resource_6yod1"]
+script = ExtResource("1_qu2j8")
+display_name = "百步穿杨谱"
+kind = &"pursuit"
+amount = 0.7
+text = "普攻后 35% 再射一箭，打血最少的敌人，{x} 伤害"
+chance = 0.35
+pursuit_kind = &"snipe"
+
+[resource]
+script = ExtResource("2_3kuvo")
+id = &"bai_bu_chuan_yang_pu"
+display_name = "百步穿杨谱"
+quality = 3
+flavor = "花荣的箭谱，专射阵后最虚弱的那一个。"
+owner = &"hua_rong"
+effect = SubResource("Resource_6yod1")

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_sykke"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_5u71u"]
+
+[sub_resource type="Resource" id="Resource_mgdv1"]
+script = ExtResource("1_sykke")
+display_name = "点穴手"
+kind = &"pursuit"
+text = "普攻后 15% 点住目标，眩晕 1 回合"
+chance = 0.15
+pursuit_kind = &"stun"
+
+[resource]
+script = ExtResource("2_5u71u")
+id = &"dian_xue_shou"
+display_name = "点穴手"
+quality = 2
+flavor = "点中要穴，叫人动弹不得。"
+effect = SubResource("Resource_mgdv1")

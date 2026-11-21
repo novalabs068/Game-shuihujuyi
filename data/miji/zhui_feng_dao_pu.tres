@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_4w2qe"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_cgegm"]
+
+[sub_resource type="Resource" id="Resource_lheo1"]
+script = ExtResource("1_4w2qe")
+display_name = "追风刀谱"
+kind = &"pursuit"
+amount = 0.6
+text = "普攻后 25% 再追一刀，{x} 伤害"
+chance = 0.25
+pursuit_kind = &"hit"
+
+[resource]
+script = ExtResource("2_cgegm")
+id = &"zhui_feng_dao_pu"
+display_name = "追风刀谱"
+quality = 1
+flavor = "一刀紧跟一刀的快刀谱。"
+effect = SubResource("Resource_lheo1")

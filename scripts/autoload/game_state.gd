@@ -43,7 +43,10 @@ var items: Array[Dictionary] = []
 ## 主角学会的武学、主修（战斗里放的技能）、副修（被动加成，可以空着）
 var martials: Array[StringName] = []
 var martial_main: StringName = &""
+## 主角的副修武学。它和秘籍共用主角的秘籍栏：主角栏里装的要么是一本秘籍，要么是一门副修武学
 var martial_side: StringName = &""
+## 秘籍：每本一条 {uid, id, holder}，holder 为空就是没人装。和装备共用编号
+var scrolls: Array[Dictionary] = []
 ## 江湖履历：打赢几场、其中游荡小怪几只、闯荡了多少秒（主角页显示）
 var record: Dictionary = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0}
 ## 小悬赏：{地区 id: [{enemy, name, need, have, silver, exp, tokens}, ...]}，见 OddJobs
@@ -91,11 +94,98 @@ func can_swear(id: StringName) -> bool:
 	return owns(id) and not sworn(id) and Bonds.level(bond_of(id)) >= Bonds.SWEAR_LEVEL
 
 
-## 和羁绊到了知己的好汉结义。
+## 和羁绊到了知己的好汉结义：他传授一本独门秘籍。
 func swear(id: StringName) -> bool:
 	if not can_swear(id):
 		return false
 	set_flag("sworn_" + String(id))
+	_teach_miji(id)
+	save_game()
+	return true
+
+
+## 结义兄弟传授的秘籍；返回「林冲传授了秘籍《豹子头枪诀》」，已经传过或没有就返回空。
+func _teach_miji(id: StringName) -> String:
+	var mj := GameDB.miji_of_hero(id)
+	if mj == null or has_flag("miji_" + String(id)):
+		return ""
+	set_flag("miji_" + String(id))
+	add_scroll(mj.id)
+	return "%s传授了秘籍《%s》" % [GameDB.hero(id).display_name, mj.display_name]
+
+
+## 结义时传授的那句话（界面用）。
+func taught_text(id: StringName) -> String:
+	var mj := GameDB.miji_of_hero(id)
+	return "%s传授了独门秘籍《%s》：%s" % [GameDB.hero(id).display_name, mj.display_name, mj.summary()] if mj != null else ""
+
+
+# --- 秘籍 ---
+
+func add_scroll(id: StringName) -> int:
+	var uid := _next_uid
+	_next_uid += 1
+	scrolls.append({"uid": uid, "id": id, "holder": &""})
+	return uid
+
+
+func scroll(uid: int) -> Dictionary:
+	for sc in scrolls:
+		if sc["uid"] == uid:
+			return sc
+	return {}
+
+
+static func scroll_data(sc: Dictionary) -> MijiData:
+	return GameDB.mijis.get(sc["id"])
+
+
+## 某人秘籍栏里的那本（没有返回空字典）。主角栏里装的若是副修武学，这里也是空的。
+func scroll_of(holder: StringName) -> Dictionary:
+	for sc in scrolls:
+		if sc["holder"] == holder:
+			return sc
+	return {}
+
+
+## 给 holder 装上这本：他原来那本卸下；这本原来在别人身上就拿过来。主角装秘籍会把副修武学换下来。
+func equip_scroll(holder: StringName, uid: int) -> void:
+	var sc := scroll(uid)
+	if sc.is_empty():
+		return
+	var old := scroll_of(holder)
+	if not old.is_empty():
+		old["holder"] = &""
+	sc["holder"] = holder
+	if holder == PROTAGONIST_ID:
+		martial_side = &""
+	save_game()
+
+
+func unequip_scroll(holder: StringName) -> void:
+	var sc := scroll_of(holder)
+	if not sc.is_empty():
+		sc["holder"] = &""
+	if holder == PROTAGONIST_ID:
+		martial_side = &""
+	save_game()
+
+
+## 秘籍栏里写的是什么：「《豹子头枪诀》」「武学·林家枪法」或空。
+func scroll_slot_name(holder: StringName) -> String:
+	var sc := scroll_of(holder)
+	if not sc.is_empty():
+		return "《%s》" % scroll_data(sc).display_name
+	if holder == PROTAGONIST_ID and martial(martial_side) != null:
+		return "武学·%s" % martial(martial_side).display_name
+	return ""
+
+
+func buy_scroll(mj: MijiData) -> bool:
+	if mj.quality != MijiData.Quality.FAN or silver < MijiData.FAN_PRICE:
+		return false
+	silver -= MijiData.FAN_PRICE
+	add_scroll(mj.id)
 	save_game()
 	return true
 
@@ -258,12 +348,14 @@ func recruit_with_souls(hero: UnitData) -> bool:
 	return true
 
 
-## 战斗用的队伍：好汉带上星级加成，所有人带上装备加成，主角再加上副修武学的加成。
+## 战斗用的队伍：好汉带上星级加成，所有人带上装备和秘籍，主角再加上副修武学的加成。
 func battle_team() -> Array[UnitData]:
 	var out: Array[UnitData] = []
 	for u in team():
 		var unit := Bonds.apply(Stars.apply(u, star_of(u.id)), bond_of(u.id)) if u.id != PROTAGONIST_ID else u
-		out.append(Equipment.apply(unit, effective_gear(u.id)))
+		unit = Equipment.apply(unit, effective_gear(u.id))
+		var sc := scroll_of(u.id)
+		out.append(Miji.apply(unit, scroll_data(sc) if not sc.is_empty() else null))
 	return out
 
 
@@ -296,7 +388,7 @@ func learn_martial(m: MartialData) -> bool:
 	if martial_main == &"":
 		martial_main = m.id
 		_protagonist = null
-	elif martial_side == &"":
+	elif martial_side == &"" and scroll_of(PROTAGONIST_ID).is_empty():
 		martial_side = m.id
 	save_game()
 	return true
@@ -313,10 +405,13 @@ func set_martial_main(id: StringName) -> void:
 	save_game()
 
 
-## 换副修；原来主修这门的话，两门对调。
+## 换副修（放进主角的秘籍栏，原来装的秘籍卸下）；原来主修这门的话，两门对调。
 func set_martial_side(id: StringName) -> void:
 	if not id in martials or id == martial_side:
 		return
+	var sc := scroll_of(PROTAGONIST_ID)
+	if not sc.is_empty():
+		sc["holder"] = &""
 	if id == martial_main:
 		martial_main = martial_side
 		_protagonist = null
@@ -626,6 +721,7 @@ func reset() -> void:
 	vitality.clear()
 	medicines.clear()
 	items.clear()
+	scrolls.clear()
 	_next_uid = 1
 	martials.clear()
 	martial_main = &""
@@ -707,6 +803,7 @@ func save_game() -> void:
 		"martial_main": String(martial_main),
 		"martial_side": String(martial_side),
 		"items": items.map(func(it: Dictionary) -> Dictionary: return {"uid": it["uid"], "id": String(it["id"]), "holder": String(it["holder"])}),
+		"scrolls": scrolls.map(func(sc: Dictionary) -> Dictionary: return {"uid": sc["uid"], "id": String(sc["id"]), "holder": String(sc["holder"])}),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -786,8 +883,20 @@ func load_game() -> void:
 			var uid := int(it["uid"])
 			items.append({"uid": uid, "id": StringName(it["id"]), "holder": StringName(it.get("holder", ""))})
 			_next_uid = maxi(_next_uid, uid + 1)
+	var saved_scrolls: Array = data.get("scrolls", [])
+	for sc: Dictionary in saved_scrolls:
+		if GameDB.mijis.has(StringName(sc.get("id", ""))):
+			var uid := int(sc["uid"])
+			scrolls.append({"uid": uid, "id": StringName(sc["id"]), "holder": StringName(sc.get("holder", ""))})
+			_next_uid = maxi(_next_uid, uid + 1)
+	if not scroll_of(PROTAGONIST_ID).is_empty():
+		martial_side = &""
 	# 有名器之前的旧存档：已经打完的列传、揭下的悬赏、开过的宝箱，补发对应的名器
 	claim_mingqi()
+	# 有秘籍之前就结义了的兄弟：补传秘籍
+	for id in owned:
+		if sworn(id):
+			_teach_miji(id)
 
 
 func _floats_to_json(values: Dictionary[StringName, float]) -> Dictionary:

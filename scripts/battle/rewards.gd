@@ -23,6 +23,14 @@ static func grant(tokens: int, silver: int, experience: int, equipment: EquipDat
 	return "　".join(parts)
 
 
+## 得到一本秘籍，返回给玩家看的一句话。
+static func grant_scroll(mj: MijiData) -> String:
+	if mj == null:
+		return ""
+	GameState.add_scroll(mj.id)
+	return "得到%s秘籍《%s》" % [mj.quality_name(), mj.display_name]
+
+
 ## 选项能不能选：银两够不够；教武学的选项，已经会了就不能再选。
 static func affordable(choice: EventChoice) -> bool:
 	if choice.martial != null and choice.martial.id in GameState.martials:
@@ -34,7 +42,7 @@ static func affordable(choice: EventChoice) -> bool:
 static func learn(m: MartialData) -> String:
 	if m == null or not GameState.learn_martial(m):
 		return ""
-	return "学会武学「%s」（在「好汉」页主角那里换主修、副修）" % m.display_name
+	return "学会武学「%s」（在「好汉」页主角那里换主修，或放进秘籍栏）" % m.display_name
 
 
 ## 选了一个不打仗的选项：扣银两、给奖励、设标记，返回奖励说明。

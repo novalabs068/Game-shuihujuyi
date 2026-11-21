@@ -16,6 +16,7 @@ func _initialize() -> void:
 		"test_role_counters",
 		"test_disarm_and_silence",
 		"test_pursuit",
+		"test_miji",
 		"test_opening_events",
 		"test_same_buffs_do_not_stack",
 		"test_expose_and_boss_resist",
@@ -265,6 +266,87 @@ func test_pursuit() -> bool:
 		var h: UnitData = load("res://data/heroes/%s.tres" % id)
 		check_eq(h.talent.kind, &"pursuit", "%s has a pursuit talent" % id)
 		check(h.talent.pursuit_kind in Pursuit.KINDS, "%s pursuit kind is known" % id)
+	return true
+
+
+func _miji_effect(kind: StringName, amount: float, extra := {}) -> TalentData:
+	var t := TalentData.new()
+	t.display_name = "秘"
+	t.kind = kind
+	t.amount = amount
+	t.text = "{x}"
+	for key: String in extra:
+		t.set(key, extra[key])
+	return t
+
+
+func test_miji() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var all: Array = GameDB.load_dir("res://data/miji/")
+	var heroes: Array = GameDB.load_dir("res://data/heroes/")
+	var jue: Array = all.filter(func(m: MijiData) -> bool: return m.quality == MijiData.Quality.JUE)
+	check_eq(jue.size(), heroes.size(), "one 绝品秘籍 per hero")
+	for h: UnitData in heroes:
+		check(jue.any(func(m: MijiData) -> bool: return m.owner == h.id), "%s teaches a 秘籍" % h.display_name)
+	for m: MijiData in all:
+		check(TalentData.KINDS.has(m.effect.kind), "%s uses a known kind" % m.display_name)
+		check(m.summary().find("{x}") < 0, "%s describes itself" % m.display_name)
+		if m.effect.kind == &"pursuit":
+			check(m.effect.pursuit_kind in Pursuit.KINDS, "%s pursuit kind known" % m.display_name)
+		if m.effect.kind == &"effect":
+			check(EquipData.EFFECTS.has(m.effect.effect), "%s effect known" % m.display_name)
+	for q in [MijiData.Quality.FAN, MijiData.Quality.LIANG, MijiData.Quality.JING]:
+		check(all.any(func(m: MijiData) -> bool: return m.quality == q), "there are %s 秘籍" % MijiData.QUALITY_NAMES[q])
+	# 属性类秘籍直接改数据；天赋和秘籍同种的数值相加
+	var stat_miji := MijiData.new()
+	stat_miji.effect = _miji_effect(&"stat", 0.1, {"stats": [&"atk"] as Array[StringName]})
+	var base := unit_data(&"a", [100, 100, 10, 100])
+	check_eq(Miji.apply(base, stat_miji).base_atk, 110, "stat 秘籍 adds attack")
+	check_eq(base.base_atk, 100, "apply copies the unit")
+	check(Miji.apply(base, null) == base, "no 秘籍, same unit")
+	var tough := unit_data(&"t", [100, 10, 10, 100])
+	tough.talent = _miji_effect(&"tough", 0.1)
+	tough.talent_rank = 1
+	tough.miji_effect = _miji_effect(&"tough", 0.05)
+	var tu := BattleUnit.new(tough, BattleUnit.Side.PLAYER, 0, 1)
+	check(is_equal_approx(tu.talent(&"tough"), 0.15), "talent and 秘籍 of the same kind add up")
+	# 秘籍追击
+	var p := unit_data(&"a", [5000, 100, 0, 200])
+	p.miji_effect = _miji_effect(&"pursuit", 0.5, {"chance": 1.0, "pursuit_kind": &"hit"})
+	check_eq(Pursuit.sources_for(BattleUnit.new(p, BattleUnit.Side.PLAYER, 0, 1)).size(), 1, "秘籍 pursuit is a source")
+	# 开局：计穷敌方攻击最高的、全队减伤、敌方减攻
+	var wy := unit_data(&"a", [500, 10, 10, 100])
+	wy.miji_effect = _miji_effect(&"open_silence", 0.0)
+	var m := battle([wy], [unit_data(&"weak", [500, 10, 10, 100]), unit_data(&"strong", [500, 90, 10, 100])])
+	check_eq(by_id(m, &"strong").silence_turns, 2, "open_silence hits the strongest foe")
+	check_eq(by_id(m, &"weak").silence_turns, 0, "others are fine")
+	check(m.opening_events.any(func(e: Dictionary) -> bool: return e["kind"] == "prep"), "秘籍 shows in the 准备回合")
+	var guard := unit_data(&"a", [500, 10, 10, 100])
+	guard.miji_effect = _miji_effect(&"team_guard_open", 0.15)
+	var weak := unit_data(&"e", [500, 10, 10, 100])
+	var mg := battle([guard, unit_data(&"b", [500, 10, 10, 100])], [weak])
+	check(is_equal_approx(by_id(mg, &"b").reduction, 0.15), "team_guard_open protects allies")
+	check(by_id(mg, &"e").reduction_turns < 0, "not the enemy")
+	# 运功：轮到自己时回血、解控
+	var healer := unit_data(&"a", [1000, 10, 10, 100])
+	healer.miji_effect = _miji_effect(&"cleanse_regen", 0.05)
+	var mh := battle([healer], [unit_data(&"e", [500, 10, 10, 50])])
+	var h := by_id(mh, &"a")
+	h.hp = 500
+	h.stun_turns = 1
+	mh.start_next_turn()
+	check_eq(h.hp, 550, "cleanse_regen heals 5%")
+	check(mh.current == h, "cleanse_regen clears the stun before it bites")
+	# 破计：被克时少挨打
+	var anti := unit_data(&"e", [100000, 1, 100, 1])
+	anti.role = UnitData.Role.ARCHER
+	anti.miji_effect = _miji_effect(&"anti_counter", 0.2)
+	var warrior := unit_data(&"a", [500, 100, 0, 100])
+	warrior.role = UnitData.Role.WARRIOR
+	var ma := battle([warrior], [anti])
+	for i in 10:
+		var dmg := ma._deal(by_id(ma, &"a"), by_id(ma, &"e"), 1.0, true)
+		check(dmg >= 68 and dmg <= 76, "anti_counter cuts the counter hit (%d)" % dmg)
 	return true
 
 

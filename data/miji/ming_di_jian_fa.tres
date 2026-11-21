@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_ba2ey"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_gm5bt"]
+
+[sub_resource type="Resource" id="Resource_yqy48"]
+script = ExtResource("1_ba2ey")
+display_name = "鸣镝箭法"
+kind = &"first_crit"
+text = "每场第一次出手必暴击"
+
+[resource]
+script = ExtResource("2_gm5bt")
+id = &"ming_di_jian_fa"
+display_name = "鸣镝箭法"
+quality = 3
+flavor = "朱贵在酒店报信用的响箭，第一箭总是最准。"
+owner = &"zhu_gui"
+effect = SubResource("Resource_yqy48")

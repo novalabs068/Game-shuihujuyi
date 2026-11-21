@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_c6xhj"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_to1cr"]
+
+[sub_resource type="Resource" id="Resource_vyh3s"]
+script = ExtResource("1_c6xhj")
+display_name = "王进棍谱"
+kind = &"stat"
+amount = 0.08
+stats = Array[StringName]([&"atk", &"spd"])
+text = "攻击、速度 +{x}"
+
+[resource]
+script = ExtResource("2_to1cr")
+id = &"wang_jin_gun_pu"
+display_name = "王进棍谱"
+quality = 3
+flavor = "史进跟王进学的棍法，十八般武艺件件精熟。"
+owner = &"shi_jin"
+effect = SubResource("Resource_vyh3s")

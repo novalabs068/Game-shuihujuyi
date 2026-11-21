@@ -50,7 +50,7 @@ func _ready() -> void:
 		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		desc.custom_minimum_size.x = 440
 		info.add_child(desc)
-		info.add_child(UiKit.label("赏：聚义令 %d、%s装备一件、%s" % [b.tokens(), EquipData.QUALITY_NAMES[b.equip_quality()], Vitality.medicine_name(b.medicine())], 18, Color("be3226")))
+		info.add_child(UiKit.label("赏：聚义令 %d、%s装备一件%s、%s" % [b.tokens(), EquipData.QUALITY_NAMES[b.equip_quality()], b.miji_text(), Vitality.medicine_name(b.medicine())], 18, Color("be3226")))
 		var take := UiKit.button("接下", Vector2(120, 56), 22)
 		take.pressed.connect(func() -> void: accepted.emit(b))
 		row.add_child(take)

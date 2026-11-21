@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_0chqv"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_sv0jc"]
+
+[sub_resource type="Resource" id="Resource_8l5gu"]
+script = ExtResource("1_0chqv")
+display_name = "黑旋风斧谱"
+kind = &"bloodlust"
+amount = 0.3
+text = "生命低于一半时攻击 +{x}"
+
+[resource]
+script = ExtResource("2_sv0jc")
+id = &"hei_xuan_feng_fu_pu"
+display_name = "黑旋风斧谱"
+quality = 3
+flavor = "李逵砍人不看路数，杀红了眼才算开始。"
+owner = &"li_kui"
+effect = SubResource("Resource_8l5gu")

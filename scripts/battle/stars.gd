@@ -56,8 +56,12 @@ static func apply(hero: UnitData, star: int) -> UnitData:
 
 ## 改数据就能生效的天赋（属性、特效、绝招伤害）在这里算；战斗里才起作用的由 BattleModel 结算。
 static func _apply_talent(out: UnitData) -> void:
-	var t := out.talent
-	var v := t.value(out.talent_rank)
+	apply_passive(out, out.talent, out.talent_rank)
+
+
+## 一条被动（天赋或秘籍）里改数据就能生效的部分：属性、特效、绝招伤害。out 要是复制出来的。
+static func apply_passive(out: UnitData, t: TalentData, rank: int) -> void:
+	var v := t.value(rank)
 	match t.kind:
 		&"stat":
 			for stat in t.stats:
@@ -70,7 +74,7 @@ static func _apply_talent(out: UnitData) -> void:
 			if out.skill != null:
 				out.skill = out.skill.duplicate()
 				out.skill.power *= 1.0 + v
-	if out.talent_rank >= 2 and t.kind in TalentData.FLAT_KINDS:
+	if rank >= 2 and t.kind in TalentData.FLAT_KINDS:
 		out.base_atk = roundi(out.base_atk * (1.0 + TalentData.FLAT_ENHANCE_ATK))
 
 

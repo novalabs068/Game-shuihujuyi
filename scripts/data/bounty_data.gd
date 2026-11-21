@@ -25,6 +25,16 @@ func equip_quality() -> EquipData.Quality:
 	return EquipData.Quality.JING if grade == Grade.JIA else EquipData.Quality.LIANG
 
 
+## 悬赏给的秘籍品质：乙等良品、甲等精品，丙等不给（-1）。
+func miji_quality() -> int:
+	return [-1, MijiData.Quality.LIANG, MijiData.Quality.JING][grade]
+
+
+## 「、良品秘籍一本」或空，悬赏告示上用。
+func miji_text() -> String:
+	return "、%s秘籍一本" % MijiData.QUALITY_NAMES[miji_quality()] if miji_quality() >= 0 else ""
+
+
 ## 悬赏还送一份药：甲等续命膏，乙丙等金疮药。
 func medicine() -> StringName:
 	return &"xu_ming_gao" if grade == Grade.JIA else &"jin_chuang_yao"
@@ -32,7 +42,10 @@ func medicine() -> StringName:
 
 ## 接下悬赏开打时交给 main 的额外奖励。
 func battle_bonus() -> Dictionary:
-	return {"tokens": tokens(), "equip_quality": equip_quality(), "medicine": medicine(), "flag": "bounty_" + String(id), "text": "揭下了「%s」的悬赏。" % target}
+	var bonus := {"tokens": tokens(), "equip_quality": equip_quality(), "medicine": medicine(), "flag": "bounty_" + String(id), "text": "揭下了「%s」的悬赏。" % target}
+	if miji_quality() >= 0:
+		bonus["miji_quality"] = miji_quality()
+	return bonus
 
 
 func grade_name() -> String:

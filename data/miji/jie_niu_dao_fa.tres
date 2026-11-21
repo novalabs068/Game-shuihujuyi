@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_gtkwg"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_omvt6"]
+
+[sub_resource type="Resource" id="Resource_fs6op"]
+script = ExtResource("1_gtkwg")
+display_name = "解牛刀法"
+kind = &"pursuit"
+text = "普攻后 35% 让目标露出破绽，下次挨打伤害 +20%"
+chance = 0.35
+pursuit_kind = &"expose"
+
+[resource]
+script = ExtResource("2_omvt6")
+id = &"jie_niu_dao_fa"
+display_name = "解牛刀法"
+quality = 3
+flavor = "曹正杀牛的刀法，一刀下去，专找骨缝。"
+owner = &"cao_zheng"
+effect = SubResource("Resource_fs6op")

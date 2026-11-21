@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_744xv"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_tedsr"]
+
+[sub_resource type="Resource" id="Resource_skvoh"]
+script = ExtResource("1_744xv")
+display_name = "拳经残页"
+kind = &"stat"
+amount = 0.05
+stats = Array[StringName]([&"atk"])
+text = "攻击 +{x}"
+
+[resource]
+script = ExtResource("2_tedsr")
+id = &"quan_jing_can_ye"
+display_name = "拳经残页"
+flavor = "江湖上流传的拳谱残页。"
+effect = SubResource("Resource_skvoh")

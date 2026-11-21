@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_8npm4"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_tso3i"]
+
+[sub_resource type="Resource" id="Resource_yblka"]
+script = ExtResource("1_8npm4")
+display_name = "菜园护身法"
+kind = &"tough"
+amount = 0.12
+text = "受到的伤害 -{x}"
+
+[resource]
+script = ExtResource("2_tso3i")
+id = &"cai_yuan_hu_shen_fa"
+display_name = "菜园护身法"
+quality = 3
+flavor = "张青在十字坡开店，挨打的功夫比打人的多。"
+owner = &"zhang_qing"
+effect = SubResource("Resource_yblka")

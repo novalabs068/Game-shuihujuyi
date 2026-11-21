@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_fely1"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_2ywg6"]
+
+[sub_resource type="Resource" id="Resource_vlbco"]
+script = ExtResource("1_fely1")
+display_name = "吐纳法"
+kind = &"stat"
+amount = 0.06
+stats = Array[StringName]([&"hp"])
+text = "生命 +{x}"
+
+[resource]
+script = ExtResource("2_2ywg6")
+id = &"tu_na_fa"
+display_name = "吐纳法"
+flavor = "道观里抄来的吐纳功夫。"
+effect = SubResource("Resource_vlbco")

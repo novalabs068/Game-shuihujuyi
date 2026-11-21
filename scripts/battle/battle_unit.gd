@@ -135,13 +135,35 @@ func has_gear(effect: StringName) -> bool:
 	return effect in data.gear_effects or effect in extra_effects
 
 
+## 身上起作用的被动：天赋（按档次）和秘籍（按 1 档），每项是 [TalentData, 档次]。
+func passives() -> Array:
+	var out := []
+	if data.talent != null and data.talent_rank > 0:
+		out.append([data.talent, data.talent_rank])
+	if data.miji_effect != null:
+		out.append([data.miji_effect, 1])
+	return out
+
+
+## 某种被动（天赋或秘籍）里的第一条，没有返回 null。
+func passive(kind: StringName) -> TalentData:
+	for p in passives():
+		if p[0].kind == kind:
+			return p[0]
+	return null
+
+
 func has_talent(kind: StringName) -> bool:
-	return data.talent != null and data.talent_rank > 0 and data.talent.kind == kind
+	return passive(kind) != null
 
 
-## 这种天赋的当前数值；没有这个天赋时为 0。
+## 这种被动的当前数值（天赋和秘籍都有就相加）；没有时为 0。
 func talent(kind: StringName) -> float:
-	return data.talent.value(data.talent_rank) if has_talent(kind) else 0.0
+	var total := 0.0
+	for p in passives():
+		if p[0].kind == kind:
+			total += p[0].value(p[1])
+	return total
 
 
 func is_taunting() -> bool:

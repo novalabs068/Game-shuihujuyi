@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_ea5xv"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_k1cog"]
+
+[sub_resource type="Resource" id="Resource_dodw2"]
+script = ExtResource("1_ea5xv")
+display_name = "摸天功"
+kind = &"stat"
+amount = 0.12
+stats = Array[StringName]([&"hp"])
+text = "生命 +{x}"
+
+[resource]
+script = ExtResource("2_k1cog")
+id = &"mo_tian_gong"
+display_name = "摸天功"
+quality = 3
+flavor = "杜迁身长力大，这门功夫就练一个耐打。"
+owner = &"du_qian"
+effect = SubResource("Resource_dodw2")

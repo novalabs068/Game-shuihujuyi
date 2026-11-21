@@ -94,6 +94,11 @@ func _refresh() -> void:
 			_list.add_child(_medicine_row(id, "买 %d 两" % price, GameState.silver >= price, func() -> void:
 				GameState.buy_medicine(id)
 				_refresh()))
+		for mj: MijiData in GameDB.mijis.values():
+			if mj.quality == MijiData.Quality.FAN:
+				_list.add_child(_scroll_row(mj, "买 %d 两" % MijiData.FAN_PRICE, GameState.silver >= MijiData.FAN_PRICE, func() -> void:
+					GameState.buy_scroll(mj)
+					_refresh()))
 		for data: EquipData in wares:
 			_list.add_child(_row(data, "买 %d 两" % data.buy_price(), GameState.silver >= data.buy_price(), func() -> void:
 				GameState.buy_item(data)
@@ -116,6 +121,30 @@ func _medicine_row(id: StringName, action: String, enabled: bool, on_press: Call
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.custom_minimum_size.x = 560
 	info.add_child(desc)
+	var button := UiKit.button(action, Vector2(130, 50), 20)
+	button.disabled = not enabled
+	button.pressed.connect(on_press)
+	row.add_child(button)
+	return row
+
+
+func _scroll_row(mj: MijiData, action: String, enabled: bool, on_press: Callable) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_theme_constant_override("separation", 0)
+	row.add_child(info)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 10)
+	info.add_child(name_row)
+	name_row.add_child(UiKit.label("《%s》" % mj.display_name, 24, INK))
+	name_row.add_child(UiKit.label("秘籍 · %s" % mj.quality_name(), 18, UiKit.QUALITY_INK[mj.quality]))
+	name_row.add_child(UiKit.label(mj.summary(), 18, RED))
+	var flavor := UiKit.label(mj.flavor, 16, DIM)
+	flavor.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	flavor.custom_minimum_size.x = 560
+	info.add_child(flavor)
 	var button := UiKit.button(action, Vector2(130, 50), 20)
 	button.disabled = not enabled
 	button.pressed.connect(on_press)

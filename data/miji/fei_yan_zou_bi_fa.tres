@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_042md"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_7yq5m"]
+
+[sub_resource type="Resource" id="Resource_8ombe"]
+script = ExtResource("1_042md")
+display_name = "飞檐走壁法"
+kind = &"stat"
+amount = 0.12
+stats = Array[StringName]([&"spd"])
+text = "速度 +{x}"
+
+[resource]
+script = ExtResource("2_7yq5m")
+id = &"fei_yan_zou_bi_fa"
+display_name = "飞檐走壁法"
+quality = 3
+flavor = "时迁的轻身功夫，来去无踪。"
+owner = &"shi_qian"
+effect = SubResource("Resource_8ombe")

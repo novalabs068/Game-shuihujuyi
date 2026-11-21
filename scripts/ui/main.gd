@@ -301,6 +301,15 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			var extra := Rewards.grant(bonus.get("tokens", 0), bonus.get("silver", 0), bonus.get("experience", 0), drop, bonus.get("medicine", &""))
 			if extra != "":
 				parts.append(extra)
+			# 秘籍：乙甲等悬赏、擂台指定关给；普通遇敌偶尔掉一本凡品
+			var mj: MijiData = null
+			if bonus.has("miji_quality"):
+				mj = Miji.random_of(GameDB.mijis.values(), bonus["miji_quality"], screen.model.rng)
+			elif bonus.is_empty() and screen.model.rng.randf() < Miji.ENCOUNTER_DROP_CHANCE:
+				mj = Miji.random_of(GameDB.mijis.values(), MijiData.Quality.FAN, screen.model.rng)
+			var scroll_text := Rewards.grant_scroll(mj)
+			if scroll_text != "":
+				parts.append(scroll_text)
 			GameState.set_flag(bonus.get("flag", ""))
 			if bonus.has("arena_round"):
 				GameState.record["arena"] = maxi(Arena.best(), bonus["arena_round"])
