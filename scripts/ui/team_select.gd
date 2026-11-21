@@ -18,6 +18,8 @@ var _tiles: Dictionary[UnitData, PanelContainer] = {}
 var _badges: Dictionary[UnitData, Label] = {}
 var _team_label: Label
 var _combo_label: Label
+var _formation_label: Label
+var _formation_buttons: Dictionary[StringName, Button] = {}
 var _start_button: Button
 var _show_all := false
 var _empty_hint: Label
@@ -96,6 +98,24 @@ func _ready() -> void:
 	bottom.add_child(info)
 	_team_label = UiKit.label("", 22)
 	info.add_child(_team_label)
+	# 阵法：一队选一个
+	var formation_row := HBoxContainer.new()
+	formation_row.add_theme_constant_override("separation", 8)
+	info.add_child(formation_row)
+	formation_row.add_child(UiKit.label("阵法", 20, UiKit.ACCENT))
+	for id: StringName in Formations.ALL:
+		var b := UiKit.button(Formations.display_name(id), Vector2(92, 40), 18)
+		b.toggle_mode = true
+		b.disabled = not GameState.formation_unlocked(id)
+		b.tooltip_text = Formations.description(id) if not b.disabled else "%s后解锁" % Formations.unlock_text(id)
+		b.pressed.connect(func() -> void:
+			GameState.set_formation(id)
+			_refresh())
+		formation_row.add_child(b)
+		_formation_buttons[id] = b
+	_formation_label = UiKit.label("", 17, UiKit.TEXT_DIM)
+	_formation_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	info.add_child(_formation_label)
 	_combo_label = UiKit.label("", 18, UiKit.GOLD)
 	_combo_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	info.add_child(_combo_label)
@@ -186,7 +206,22 @@ func _refresh() -> void:
 		names.append(hero.display_name)
 	_team_label.text = "出战：%s + %s（%d/%d）" % [GameState.player_name, "、".join(names) if not names.is_empty() else "未选", _selected.size(), MAX_TEAM]
 
+	var current := GameState.current_formation()
+	for id: StringName in _formation_buttons:
+		_formation_buttons[id].button_pressed = id == current
+	var locked := PackedStringArray()
+	for id: StringName in Formations.ALL:
+		if not GameState.formation_unlocked(id):
+			locked.append("%s（%s）" % [Formations.display_name(id), Formations.unlock_text(id)])
+	_formation_label.text = "「%s」%s%s" % [Formations.display_name(current), Formations.description(current), ("　未解锁：" + "、".join(locked)) if not locked.is_empty() else ""]
+
 	var lines := PackedStringArray()
+	var hero_ids: Array[StringName] = []
+	for hero in _selected:
+		hero_ids.append(hero.id)
+	var faction := Factions.shared(hero_ids)
+	if faction != &"":
+		lines.append("◆ 同出%s：%s" % [Factions.display_name(faction), Factions.bonus_text(faction)])
 	for combo in GameState.combos():
 		# 主角一定上场，所以结义同心只看好汉在不在
 		var a := GameDB.hero(combo.hero_a)

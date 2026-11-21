@@ -63,7 +63,8 @@ var _hit_fx := ""
 var _charge_mult := 1.0
 
 
-func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1) -> void:
+## formation 是玩家选的阵法（Formations 的 id，空 = 不摆阵）。
+func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1, formation: StringName = &"") -> void:
 	stage = p_stage
 	combos = p_combos
 	if seed_value >= 0:
@@ -79,6 +80,17 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 			e.strengthen(stage.enemy_power * boss_k, boss_k)
 		units.append(e)
 	_events = []
+	var players := alive(BattleUnit.Side.PLAYER)
+	if not players.is_empty():
+		var formation_text := Formations.apply(formation, players, alive(BattleUnit.Side.ENEMY))
+		if formation_text != "":
+			_emit("prep", players[0], Formations.display_name(formation), "阵法%s" % formation_text)
+		var hero_ids: Array[StringName] = []
+		for u in players.slice(1):
+			hero_ids.append(u.data.id)
+		var faction := Factions.shared(hero_ids)
+		if faction != &"":
+			_emit("prep", players[1], Factions.display_name(faction), Factions.apply(faction, players))
 	for u in units:
 		_apply_opening_gear(u)
 		_apply_opening_talent(u)
@@ -530,7 +542,7 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_crit := false, basic := false, pierce := false) -> int:
 	if target == null or not target.is_alive():
 		return 0
-	var crit_chance := CRIT_CHANCE + (Equipment.KEEN_CRIT if attacker.has_gear(&"keen") else 0.0)
+	var crit_chance := CRIT_CHANCE + attacker.crit_bonus + (Equipment.KEEN_CRIT if attacker.has_gear(&"keen") else 0.0)
 	if attacker.hp_ratio() < 0.5:
 		crit_chance += attacker.talent(&"low_hp_crit")
 	var crit := force_crit or attacker.first_crit_ready or rng.randf() < crit_chance
@@ -550,6 +562,7 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	if target.data.is_boss:
 		raw *= 1.0 + attacker.talent(&"boss_slayer")
 	raw *= 1.0 - target.talent(&"tough")
+	raw *= target.taken_mult
 	raw *= Roles.damage_multiplier(attacker.data.role, target.data.role)
 	if Roles.beats(attacker.data.role, target.data.role):
 		raw *= 1.0 - target.talent(&"anti_counter")

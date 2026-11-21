@@ -207,6 +207,9 @@ func _show_detail() -> void:
 		marks.add_child(UiKit.role_tag(hero, 15))
 		marks.add_child(UiKit.label("%s · %s（%s）" % [UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role], Roles.summary(hero.role)], 18, UiKit.TEXT_DIM))
 		info.add_child(marks)
+		var faction := Factions.of(hero.id)
+		if faction != &"":
+			info.add_child(UiKit.label("山头：%s（和同山头的好汉一起出战：%s）" % [Factions.display_name(faction), Factions.bonus_text(faction)], 17, UiKit.TEXT_DIM))
 	if owned:
 		var lv := GameState.level
 		info.add_child(UiKit.label("%d 级　生命 %d　攻击 %d　防御 %d　速度 %d" % [lv, _at(effective.base_hp, lv), _at(effective.base_atk, lv), _at(effective.base_def, lv), _at(effective.base_spd, lv)], 20))

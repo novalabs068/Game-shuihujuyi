@@ -84,7 +84,7 @@ var _combo_sub: Label
 
 
 func _ready() -> void:
-	model = BattleModel.new(stage, team, hero_level, GameState.combos())
+	model = BattleModel.new(stage, team, hero_level, GameState.combos(), -1, GameState.current_formation())
 	Vitality.apply_start(model, start_hp)
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG

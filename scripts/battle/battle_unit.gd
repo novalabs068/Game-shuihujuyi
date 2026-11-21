@@ -52,6 +52,9 @@ var expose_turns := 0
 var control_resist := {}
 ## 头目蓄力中：下一次行动放出蓄满的绝招（伤害 ×BattleModel.CHARGE_BONUS）；这期间被控制就打断
 var charging := false
+## 阵法、山头给的：受到的伤害倍数、额外暴击率
+var taken_mult := 1.0
+var crit_bonus := 0.0
 var taunt_turns := -1
 var reduction := 0.0
 var reduction_turns := -1
@@ -93,6 +96,16 @@ func strengthen(k: float, k_def := 1.0) -> void:
 	hp = max_hp
 	_atk = roundi(_atk * k)
 	_def = roundi(_def * k_def)
+
+
+## 开战时按倍数加防御、加生命（阵法、山头用）。
+func scale_def(k: float) -> void:
+	_def = roundi(_def * k)
+
+
+func scale_hp(k: float) -> void:
+	max_hp = roundi(max_hp * k)
+	hp = max_hp
 
 
 func _scaled(base: int) -> int:

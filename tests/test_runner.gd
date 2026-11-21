@@ -17,6 +17,7 @@ func _initialize() -> void:
 		"test_disarm_and_silence",
 		"test_pursuit",
 		"test_miji",
+		"test_formations_and_factions",
 		"test_opening_events",
 		"test_same_buffs_do_not_stack",
 		"test_expose_and_boss_resist",
@@ -348,6 +349,39 @@ func test_miji() -> bool:
 	for i in 10:
 		var dmg := ma._deal(by_id(ma, &"a"), by_id(ma, &"e"), 1.0, true)
 		check(dmg >= 68 and dmg <= 76, "anti_counter cuts the counter hit (%d)" % dmg)
+	return true
+
+
+func test_formations_and_factions() -> bool:
+	for id: StringName in Formations.ALL:
+		check(Formations.display_name(id) != "", "formation %s has a name" % id)
+	check_eq(Formations.unlock_condition(Formations.DEFAULT), "", "the default formation is open from the start")
+	var lead := unit_data(&"p", [1000, 100, 50, 100])
+	var h1 := unit_data(&"lu_zhishen", [1000, 100, 50, 100])
+	var h2 := unit_data(&"yang_zhi", [1000, 100, 50, 100])
+	var foe := unit_data(&"e", [1000, 100, 50, 100])
+	var stage := StageData.new()
+	stage.enemies = [foe]
+	var team: Array[UnitData] = [lead, h1, h2]
+	# 鱼鳞阵：好汉防御 +20%，主角不变
+	var m := BattleModel.new(stage, team, 1, [], 1, &"yu_lin")
+	check_eq(roundi(by_id(m, &"lu_zhishen").def()), 60, "鱼鳞阵 raises a hero's defense")
+	check_eq(roundi(by_id(m, &"p").def()), 50, "the protagonist is unchanged")
+	check(m.opening_events.any(func(e: Dictionary) -> bool: return String(e["log"]).begins_with("阵法")), "the formation shows in the 准备回合")
+	# 鲁智深 + 杨志 同出二龙山：全队生命 +8%
+	check_eq(Factions.shared([&"lu_zhishen", &"yang_zhi"] as Array[StringName]), &"er_long_shan", "both from 二龙山")
+	check_eq(Factions.shared([&"lu_zhishen", &"lin_chong"] as Array[StringName]), &"", "different 山头")
+	check_eq(by_id(m, &"p").max_hp, 1080, "山头 bonus reaches the whole team")
+	# 八卦阵：敌方减攻 3 回合
+	var mb := BattleModel.new(stage, team, 1, [], 1, &"ba_gua")
+	check(by_id(mb, &"e").atk() < 100.0, "八卦阵 weakens the enemy")
+	# 长蛇阵：主角多挨打
+	var mc := BattleModel.new(stage, team, 1, [], 1, &"chang_she")
+	check(is_equal_approx(by_id(mc, &"p").taken_mult, 1.15), "长蛇阵 lead takes more")
+	check(is_equal_approx(by_id(mc, &"yang_zhi").taken_mult, 0.9), "长蛇阵 heroes take less")
+	# 不摆阵、不同山头：什么也不加
+	var plain := BattleModel.new(stage, [lead, h1, unit_data(&"x", [1000, 100, 50, 100])] as Array[UnitData], 1, [], 1)
+	check(plain.opening_events.is_empty(), "no formation, no 山头, nothing to show")
 	return true
 
 

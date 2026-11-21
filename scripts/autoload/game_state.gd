@@ -47,6 +47,8 @@ var martial_main: StringName = &""
 var martial_side: StringName = &""
 ## 秘籍：每本一条 {uid, id, holder}，holder 为空就是没人装。和装备共用编号
 var scrolls: Array[Dictionary] = []
+## 选用的阵法（Formations 的 id）
+var formation: StringName = Formations.DEFAULT
 ## 江湖履历：打赢几场、其中游荡小怪几只、闯荡了多少秒（主角页显示）
 var record: Dictionary = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0}
 ## 小悬赏：{地区 id: [{enemy, name, need, have, silver, exp, tokens}, ...]}，见 OddJobs
@@ -179,6 +181,33 @@ func scroll_slot_name(holder: StringName) -> String:
 	if holder == PROTAGONIST_ID and martial(martial_side) != null:
 		return "武学·%s" % martial(martial_side).display_name
 	return ""
+
+
+# --- 阵法 ---
+
+func formation_unlocked(id: StringName) -> bool:
+	var cond := Formations.unlock_condition(id)
+	return cond == "" or _source_done(cond)
+
+
+## 能用的阵法（按 Formations.ALL 的顺序）。
+func unlocked_formations() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for id: StringName in Formations.ALL:
+		if formation_unlocked(id):
+			out.append(id)
+	return out
+
+
+func set_formation(id: StringName) -> void:
+	if formation_unlocked(id):
+		formation = id
+		save_game()
+
+
+## 现在出战用的阵法（选的那个没解锁就用默认的）。
+func current_formation() -> StringName:
+	return formation if formation_unlocked(formation) else Formations.DEFAULT
 
 
 func buy_scroll(mj: MijiData) -> bool:
@@ -722,6 +751,7 @@ func reset() -> void:
 	medicines.clear()
 	items.clear()
 	scrolls.clear()
+	formation = Formations.DEFAULT
 	_next_uid = 1
 	martials.clear()
 	martial_main = &""
@@ -803,6 +833,7 @@ func save_game() -> void:
 		"martial_main": String(martial_main),
 		"martial_side": String(martial_side),
 		"items": items.map(func(it: Dictionary) -> Dictionary: return {"uid": it["uid"], "id": String(it["id"]), "holder": String(it["holder"])}),
+		"formation": String(formation),
 		"scrolls": scrolls.map(func(sc: Dictionary) -> Dictionary: return {"uid": sc["uid"], "id": String(sc["id"]), "holder": String(sc["holder"])}),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -883,6 +914,9 @@ func load_game() -> void:
 			var uid := int(it["uid"])
 			items.append({"uid": uid, "id": StringName(it["id"]), "holder": StringName(it.get("holder", ""))})
 			_next_uid = maxi(_next_uid, uid + 1)
+	var saved_formation := StringName(data.get("formation", ""))
+	if Formations.ALL.has(saved_formation):
+		formation = saved_formation
 	var saved_scrolls: Array = data.get("scrolls", [])
 	for sc: Dictionary in saved_scrolls:
 		if GameDB.mijis.has(StringName(sc.get("id", ""))):
