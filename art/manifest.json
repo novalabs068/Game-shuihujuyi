@@ -11465,6 +11465,31 @@
         "url_or_tool": "tools/tile_variants.py 的 snow_cap（草垛加积雪）",
         "date": "2026-11-20"
       }
+    },
+    {
+      "id": "story-juyiting",
+      "role": "招募画面背景",
+      "path": "art/story/juyiting.jpg",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "1280×720",
+        "alpha": false,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "ink-wash",
+        "palette"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（cursor-agent 2026.11.19），经 tools/art_pipeline.py 抠图裁切",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/story_juyiting.txt；原图 art/inbox/story_juyiting.png，缩到 1280×720 存 jpg",
+        "prompt_file": "art/prompts/story_kuaihuolin.txt"
+      }
     }
   ]
 }
