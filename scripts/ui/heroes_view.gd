@@ -197,13 +197,13 @@ func _show_detail() -> void:
 	name_row.add_child(UiKit.label(hero.display_name, 34, UiKit.ACCENT if protagonist else UiKit.TIER_COLORS[hero.tier]))
 	name_row.add_child(UiKit.label(hero.nickname, 22, UiKit.TEXT_DIM))
 	if protagonist:
-		info.add_child(UiKit.label("主角 · %s" % GameState.origin().display_name, 20, UiKit.ACCENT))
+		info.add_child(UiKit.label("主角 · %s · %s（%s，随主修武学）" % [GameState.origin().display_name, UiKit.ROLE_NAMES[hero.role], Roles.summary(hero.role)], 20, UiKit.ACCENT))
 	else:
 		var marks := HBoxContainer.new()
 		marks.add_theme_constant_override("separation", 8)
 		marks.add_child(MagatamaRow.for_hero(hero, star, 24))
 		marks.add_child(UiKit.role_tag(hero, 15))
-		marks.add_child(UiKit.label("%s · %s" % [UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role]], 18, UiKit.TEXT_DIM))
+		marks.add_child(UiKit.label("%s · %s（%s）" % [UiKit.RARITY_NAMES[hero.rarity], UiKit.ROLE_NAMES[hero.role], Roles.summary(hero.role)], 18, UiKit.TEXT_DIM))
 		info.add_child(marks)
 	if owned:
 		var lv := GameState.level
@@ -462,7 +462,7 @@ func _open_martials() -> void:
 		var state := "主修中" if id == GameState.martial_main else ("副修中" if id == GameState.martial_side else "")
 		name_row.add_child(UiKit.label(state, 18, UiKit.ACCENT))
 		name_row.add_child(UiKit.label(m.source, 16, UiKit.TEXT_DIM))
-		var main_text := UiKit.label("主修：%s" % m.skill.description, 17)
+		var main_text := UiKit.label("主修（职业变为%s）：%s" % [UiKit.ROLE_NAMES[m.role], m.skill.description], 17)
 		main_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(main_text)
 		info.add_child(UiKit.label("副修：%s" % m.side_summary(), 17, UiKit.TEXT_DIM))

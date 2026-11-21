@@ -75,6 +75,14 @@ func _init(p_data: UnitData, p_side: BattleUnit.Side, p_slot: int, p_level: int)
 	first_crit_ready = has_talent(&"first_crit")
 
 
+## 敌人加强：生命、攻击按 k 放大，防御按 k_def 放大（开战前调用，血是满的）。
+func strengthen(k: float, k_def := 1.0) -> void:
+	max_hp = roundi(max_hp * k)
+	hp = max_hp
+	_atk = roundi(_atk * k)
+	_def = roundi(_def * k_def)
+
+
 func _scaled(base: int) -> int:
 	return roundi(base * pow(LEVEL_GROWTH, level - 1))
 

@@ -151,6 +151,7 @@ func protagonist() -> UnitData:
 		var main := martial(martial_main)
 		if main != null:
 			_protagonist.skill = main.skill
+			_protagonist.role = main.role
 	return _protagonist
 
 
@@ -264,6 +265,13 @@ func battle_team() -> Array[UnitData]:
 		var unit := Bonds.apply(Stars.apply(u, star_of(u.id)), bond_of(u.id)) if u.id != PROTAGONIST_ID else u
 		out.append(Equipment.apply(unit, effective_gear(u.id)))
 	return out
+
+
+## 开打前的关卡：头目按队伍的养成程度加强（复制一份，不改原关卡）。
+func prepare_stage(stage: StageData) -> StageData:
+	var st: StageData = stage.duplicate()
+	st.boss_power = Encounters.boss_power(team(), battle_team())
+	return st
 
 
 ## 算属性时用的「装备」：身上的装备，主角再加副修武学。

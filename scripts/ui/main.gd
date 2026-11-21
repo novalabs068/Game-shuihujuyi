@@ -256,7 +256,7 @@ func _show_team_select() -> void:
 ## return_scene 非空时，打完回到这个地点场景，否则回大地图。
 func _start_battle(stage: StageData, destination: StringName, progress: float, bonus := {}, return_scene := "") -> void:
 	var screen := BattleView.new()
-	screen.stage = stage
+	screen.stage = stage if bonus.has("arena_round") else GameState.prepare_stage(stage)
 	screen.team = GameState.battle_team()
 	screen.hero_level = GameState.level
 	var where := destination if destination != &"" else GameState.location_id

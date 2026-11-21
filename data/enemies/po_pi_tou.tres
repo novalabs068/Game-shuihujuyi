@@ -11,7 +11,7 @@
 script = ExtResource("2_q0kbn")
 id = &"po_pi_tou"
 display_name = "泼皮头"
-role = 1
+role = 0
 base_hp = 364
 base_atk = 78
 base_def = 18

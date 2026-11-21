@@ -7,6 +7,8 @@ enum Rarity { NONE, DISHA, TIANGANG, PROTAGONIST }
 ## 品级：强弱，决定抽卡概率和星数上限。和身份无关，见设计文档「好汉卡牌与招募」
 enum Tier { JIA, YI, BING, DING }
 enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
+## 职业的单字，战斗日志和相克说明里用（和 UiKit.ROLE_TAGS 一致）
+const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
 
 @export var id: StringName
 @export var display_name: String

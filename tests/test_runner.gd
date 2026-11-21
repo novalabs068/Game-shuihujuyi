@@ -13,6 +13,9 @@ func _initialize() -> void:
 	for t: String in [
 		"test_data_loads",
 		"test_damage_formula",
+		"test_role_counters",
+		"test_defense_scales_with_level",
+		"test_danger_and_boss_power",
 		"test_guard_halves_damage",
 		"test_faster_unit_acts_first",
 		"test_taunt_forces_target",
@@ -142,6 +145,88 @@ func test_damage_formula() -> bool:
 		check(dmg >= 47 and dmg <= 79, "damage %d in [47, 79]" % dmg)
 	var crit := m._deal(a, e, 1.0, true)
 	check(crit >= 71 and crit <= 79, "forced crit %d in [71, 79]" % crit)
+	return true
+
+
+func test_role_counters() -> bool:
+	check(Roles.beats(UnitData.Role.WARRIOR, UnitData.Role.ARCHER), "武克射")
+	check(Roles.beats(UnitData.Role.ARCHER, UnitData.Role.STRATEGIST), "射克谋")
+	check(Roles.beats(UnitData.Role.STRATEGIST, UnitData.Role.TANK), "谋克猛")
+	check(Roles.beats(UnitData.Role.TANK, UnitData.Role.MYSTIC), "猛克奇")
+	check(Roles.beats(UnitData.Role.MYSTIC, UnitData.Role.WARRIOR), "奇克武")
+	check(not Roles.beats(UnitData.Role.WARRIOR, UnitData.Role.TANK), "武和猛不相干")
+	check_eq(Roles.beaten_by(UnitData.Role.WARRIOR), UnitData.Role.MYSTIC, "武被奇克")
+	# 克制 +20%、被克 -15%：攻击 100、防御 100 的基准伤害 50
+	var archer := unit_data(&"e", [100000, 1, 100, 1])
+	archer.role = UnitData.Role.ARCHER
+	var mystic := unit_data(&"m", [100000, 1, 100, 1])
+	mystic.role = UnitData.Role.MYSTIC
+	var warrior := unit_data(&"a", [500, 100, 0, 100])
+	warrior.role = UnitData.Role.WARRIOR
+	var m := battle([warrior], [archer, mystic])
+	var a := by_id(m, &"a")
+	for i in 20:
+		var up := m._deal(a, by_id(m, &"e"), 1.0, true)
+		check(up >= 85 and up <= 95, "武打射 crit %d in [85, 95]" % up)
+		var down := m._deal(a, by_id(m, &"m"), 1.0, true)
+		check(down >= 60 and down <= 67, "武打奇 crit %d in [60, 67]" % down)
+	check(m._events.any(func(e: Dictionary) -> bool: return String(e["popup"]).begins_with("克")), "countered hits pop 克")
+	# 克制方的眩晕多 1 回合
+	m._stun(a, by_id(m, &"e"), 1)
+	check_eq(by_id(m, &"e").stun_turns, 2, "advantaged stun lasts one more turn")
+	m._stun(a, by_id(m, &"m"), 1)
+	check_eq(by_id(m, &"m").stun_turns, 1, "plain stun keeps its turns")
+	return true
+
+
+func test_defense_scales_with_level() -> bool:
+	# 同级相打，防御挡掉的比例前期后期一样：同一对人 1 级和 20 级的「伤害 / 对方生命」相同
+	var ratios: Array[float] = []
+	for level in [1, 20]:
+		var stage := StageData.new()
+		stage.enemies = [unit_data(&"e", [1000, 50, 60, 1])]
+		stage.enemy_level = level
+		var team: Array[UnitData] = [unit_data(&"a", [800, 80, 40, 100])]
+		var m := BattleModel.new(stage, team, level, [], 1)
+		var a := by_id(m, &"a")
+		var e := by_id(m, &"e")
+		var total := 0
+		for i in 40:
+			total += m._deal(a, e, 1.0, true)
+			e.hp = e.max_hp
+		ratios.append(float(total) / 40 / e.max_hp)
+	check(absf(ratios[0] - ratios[1]) / ratios[0] < 0.03, "damage share at Lv1 %.4f ≈ Lv20 %.4f" % ratios)
+	return true
+
+
+func test_danger_and_boss_power() -> bool:
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	var liangshan := map.location(&"liangshan")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	for i in 30:
+		var st := Encounters.build(liangshan, 28, rng)
+		check(st.enemy_level >= 26, "danger %d region follows a Lv28 party (got %d)" % [liangshan.danger, st.enemy_level])
+		check(is_equal_approx(st.enemy_power, 1.0 + Encounters.POWER_PER_DANGER * (liangshan.danger - 1)), "enemy power follows danger")
+	check(is_equal_approx(Encounters.power_of(1), 1.0), "one-star regions are unchanged")
+	check(Encounters.elite_chance(4) > Encounters.elite_chance(1), "more elites in dangerous regions")
+	# 敌人加强在开战时生效，头目再乘上 boss_power
+	var stage := StageData.new()
+	var boss := unit_data(&"b", [1000, 100, 50, 1])
+	boss.is_boss = true
+	stage.enemies = [unit_data(&"e", [1000, 100, 50, 1]), boss]
+	stage.enemy_power = 1.5
+	stage.boss_power = 2.0
+	var team: Array[UnitData] = [unit_data(&"a", [500, 10, 10, 100])]
+	var m := BattleModel.new(stage, team, 1, [], 1)
+	check_eq(by_id(m, &"e").max_hp, 1500, "regular enemy gets enemy_power")
+	check_eq(by_id(m, &"b").max_hp, 3000, "boss gets enemy_power × boss_power")
+	check_eq(roundi(by_id(m, &"b").def()), 100, "boss defense follows boss_power only")
+	# 养成翻倍，头目也跟着翻倍；没养成就不变
+	var raw: Array[UnitData] = [unit_data(&"x", [100, 10, 10, 100])]
+	var grown: Array[UnitData] = [unit_data(&"x", [200, 20, 20, 100])]
+	check(is_equal_approx(Encounters.boss_power(raw, raw), 1.0), "no growth, no boss boost")
+	check(is_equal_approx(Encounters.boss_power(raw, grown), 1.0 + Encounters.BOSS_GROWTH_SHARE), "boss keeps up with growth")
 	return true
 
 

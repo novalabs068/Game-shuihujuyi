@@ -11,7 +11,7 @@
 script = ExtResource("6_hm1yy")
 id = &"er_long_lou_luo"
 display_name = "二龙山喽啰"
-role = 1
+role = 0
 base_hp = 420
 base_atk = 104
 base_def = 22

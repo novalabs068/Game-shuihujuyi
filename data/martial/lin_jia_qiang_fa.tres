@@ -17,6 +17,7 @@ id = &"lin_jia_qiang_fa"
 display_name = "林家枪法"
 flavor = "八十万禁军教头的家传枪法，一枪快过一枪。"
 source = "林冲列传完结时，林冲传授"
+role = 1
 skill = SubResource("Resource_2olli")
 side_atk_pct = 0.08
 side_effects = Array[StringName]([&"keen"])

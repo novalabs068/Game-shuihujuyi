@@ -11,7 +11,7 @@
 script = ExtResource("4_rrovu")
 id = &"fu_an_follower"
 display_name = "富安"
-role = 1
+role = 3
 base_hp = 520
 base_atk = 108
 base_def = 24

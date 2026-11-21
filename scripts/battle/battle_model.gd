@@ -22,6 +22,8 @@ const RAGE_ON_GUARD := 25
 const GUARD_REDUCTION := 0.5
 ## 「铁甲」精英受到的普攻伤害倍率
 const IRON_BASIC_MULTIPLIER := 0.5
+## 伤害公式里防御的基准（1 级时）：伤害 = 攻击 × 倍率 × 基准 ÷ (基准 + 防御)
+const DEF_BASE := 100.0
 const EXECUTE_THRESHOLD := 0.3
 const ENRAGE_THRESHOLD := 0.5
 const TURN_PREVIEW_COUNT := 6
@@ -62,7 +64,11 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 	for i in team.size():
 		units.append(BattleUnit.new(team[i], BattleUnit.Side.PLAYER, i, hero_level))
 	for i in stage.enemies.size():
-		units.append(BattleUnit.new(stage.enemies[i], BattleUnit.Side.ENEMY, i, stage.enemy_level))
+		var e := BattleUnit.new(stage.enemies[i], BattleUnit.Side.ENEMY, i, stage.enemy_level)
+		var boss_k := stage.boss_power if e.data.is_boss else 1.0
+		if not is_equal_approx(stage.enemy_power * boss_k, 1.0):
+			e.strengthen(stage.enemy_power * boss_k, boss_k)
+		units.append(e)
 	for u in units:
 		_apply_opening_gear(u)
 		_apply_opening_talent(u)
@@ -283,7 +289,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			_emit("info", actor, "", "全队速度提升，怒气 +%d" % s.rage_gain)
 		SkillData.Effect.STUN:
 			var target := _pick_foe(actor, wanted)
-			target.stun_turns = maxi(target.stun_turns, s.turns)
+			_stun(actor, target, s.turns)
 			_emit("info", target, "眩晕", "%s 被放倒了" % target.display_name())
 		SkillData.Effect.STEAL:
 			var target := _pick_foe(actor, wanted)
@@ -358,7 +364,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			_emit("info", actor, "", "全队攻击提升")
 		SkillData.Effect.STUN_ALL:
 			for foe in foes_of(actor):
-				foe.stun_turns = maxi(foe.stun_turns, s.turns)
+				_stun(actor, foe, s.turns)
 				_emit("info", foe, "昏睡", "")
 			_emit("info", actor, "", "敌方全体被麻翻了")
 		SkillData.Effect.BACKSTAB:
@@ -384,7 +390,7 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 			_deal(b, _pick_foe(b, wanted), combo.power)
 		ComboData.Effect.STUN_ALL_COMBO:
 			for foe in foes_of(actor):
-				foe.stun_turns = maxi(foe.stun_turns, 1)
+				_stun(b, foe, 1)
 				_emit("info", foe, "眩晕", "")
 			var target := _pick_foe(b, wanted)
 			for i in combo.hits:
@@ -429,7 +435,9 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	var crit := force_crit or attacker.first_crit_ready or rng.randf() < crit_chance
 	attacker.first_crit_ready = false
 	var def := 0.0 if pierce else target.def()
-	var raw := attacker.atk() * multiplier * 100.0 / (100.0 + def) * rng.randf_range(0.95, 1.05)
+	# 防御的「基准」跟着挨打的人的等级一起成长：防御挡掉的比例只看自己的防御，前期后期一样
+	var base := DEF_BASE * pow(BattleUnit.LEVEL_GROWTH, target.level - 1)
+	var raw := attacker.atk() * multiplier * base / (base + def) * rng.randf_range(0.95, 1.05)
 	if crit:
 		raw *= CRIT_MULTIPLIER
 	if target.guarding:
@@ -441,12 +449,17 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	if target.data.is_boss:
 		raw *= 1.0 + attacker.talent(&"boss_slayer")
 	raw *= 1.0 - target.talent(&"tough")
+	raw *= Roles.damage_multiplier(attacker.data.role, target.data.role)
 	var amount := maxi(1, roundi(raw))
 	var absorbed := mini(target.shield, amount)
 	target.shield -= absorbed
 	target.hp = maxi(target.hp - (amount - absorbed), 0)
-	var popup := ("暴击 -%d" if crit else "-%d") % amount
-	_emit("damage", target, popup, "%s 对 %s 造成 %d 伤害" % [attacker.display_name(), target.display_name(), amount], crit, attacker)
+	var countered := Roles.beats(attacker.data.role, target.data.role)
+	var popup := ("克 " if countered else "") + ("暴击 -%d" if crit else "-%d") % amount
+	var log_text := "%s 对 %s 造成 %d 伤害" % [attacker.display_name(), target.display_name(), amount]
+	if countered:
+		log_text += "（%s克%s）" % [UnitData.ROLE_TAGS[attacker.data.role], UnitData.ROLE_TAGS[target.data.role]]
+	_emit("damage", target, popup, log_text, crit, attacker)
 	if crit and attacker.has_talent(&"crit_haste"):
 		var t := attacker.data.talent
 		if attacker.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.name == t.display_name).size() < TalentData.CRIT_HASTE_STACKS:
@@ -462,6 +475,11 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 
 
 # --- 内部工具 ---
+
+## 眩晕 turns 回合；克制对方职业时多 1 回合。
+func _stun(actor: BattleUnit, target: BattleUnit, turns: int) -> void:
+	target.stun_turns = maxi(target.stun_turns, Roles.control_turns(actor.data.role, target.data.role, turns))
+
 
 func _on_death(unit: BattleUnit) -> void:
 	if unit.side == BattleUnit.Side.PLAYER:

@@ -11,7 +11,7 @@
 script = ExtResource("5_2lnsi")
 id = &"xi_men_jia_ding"
 display_name = "西门府打手"
-role = 1
+role = 0
 base_hp = 440
 base_atk = 92
 base_def = 22

@@ -16,5 +16,6 @@ id = &"chuan_lin_zhui_hun_jian"
 display_name = "穿林追魂箭"
 flavor = "隔着树林听声放箭，专射受了伤的猎物。"
 source = "猎户出身"
+role = 2
 skill = SubResource("Resource_3w5a7")
 side_spd_pct = 0.06

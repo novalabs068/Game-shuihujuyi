@@ -343,7 +343,7 @@ func _spawn_roamers(cleared: Array) -> void:
 			continue
 		var groups := scene_data.roam_groups if not scene_data.roam_groups.is_empty() else loc.encounter_groups
 		var bonus := scene_data.roam_bonus[i] if i < scene_data.roam_bonus.size() else 0
-		var stage := Encounters.build_from(groups, loc.level_min, loc.level_max, GameState.level, rng, bonus)
+		var stage := Encounters.build_from(groups, loc.level_min, loc.level_max, GameState.level, rng, bonus, loc.danger)
 		var lead: UnitData = stage.enemies[0]
 		var actor := MapActor.new()
 		for e in stage.enemies:

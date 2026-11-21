@@ -18,5 +18,6 @@ id = &"zong_heng_zhi_shu"
 display_name = "纵横之术"
 flavor = "书生抄给你的一卷兵书，讲的是怎样调度人马、抢占先机。"
 source = "奇遇「落难书生」，资助盘缠后书生相赠"
+role = 3
 skill = SubResource("Resource_dq2ro")
 side_effects = Array[StringName]([&"nimble"])

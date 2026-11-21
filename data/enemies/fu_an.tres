@@ -11,7 +11,7 @@
 script = ExtResource("4_5notm")
 id = &"fu_an"
 display_name = "富安"
-role = 1
+role = 3
 base_hp = 1000
 base_atk = 150
 base_def = 26

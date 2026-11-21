@@ -17,5 +17,6 @@ id = &"lian_huan_tui"
 display_name = "连环腿"
 flavor = "江湖卖艺人压箱底的腿法，左右开弓，连踢两腿。"
 source = "奇遇「卖艺汉子」，拜师学艺"
+role = 1
 skill = SubResource("Resource_tvsaj")
 side_spd_pct = 0.05

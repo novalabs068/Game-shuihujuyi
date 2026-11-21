@@ -15,6 +15,7 @@ id = &"feng_mo_chan_zhang"
 display_name = "疯魔禅杖"
 flavor = "鲁智深的禅杖功夫，抡开了水泼不进，一扫一大片。"
 source = "鲁智深列传完结时，鲁智深传授"
+role = 0
 skill = SubResource("Resource_k48jc")
 side_hp_pct = 0.1
 side_def_pct = 0.05

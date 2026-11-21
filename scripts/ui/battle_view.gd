@@ -532,7 +532,7 @@ func _refresh() -> void:
 		_actor_bust.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if pixel else CanvasItem.TEXTURE_FILTER_PARENT_NODE
 		_actor_label.text = actor.display_name()
 		_actor_label.add_theme_color_override("font_color", PAPER if player else Color("f0907c"))
-		_target_label.text = ("→ %s" % _target.display_name()) if player and _target != null else "出手…"
+		_target_label.text = ("→ %s%s" % [_target.display_name(), Roles.matchup_text(actor.data.role, _target.data.role)]) if player and _target != null else "出手…"
 		var skill := actor.data.skill
 		_hint_label.text = ""
 		if skill != null:

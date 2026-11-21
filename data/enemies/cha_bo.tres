@@ -11,7 +11,7 @@
 script = ExtResource("4_bsyho")
 id = &"cha_bo"
 display_name = "差拨"
-role = 1
+role = 3
 base_hp = 440
 base_atk = 100
 base_def = 24

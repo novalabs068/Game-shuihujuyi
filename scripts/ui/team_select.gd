@@ -59,6 +59,10 @@ func _ready() -> void:
 			enemy_names.append(e.display_name)
 		v.add_child(UiKit.label("%s「%s」　敌人：%s　推荐等级 %d" % [stage.id, stage.title, "、".join(enemy_names), stage.recommended_level], 20, UiKit.TEXT_DIM))
 
+	var loc: LocationData = GameDB.maps[GameState.DEFAULT_MAP].location(GameState.location_id)
+	if loc != null and not loc.encounter_groups.is_empty():
+		v.add_child(UiKit.label("%s一带的%s。相克：武 → 射 → 谋 → 猛 → 奇 → 武" % [loc.display_name, Roles.region_hint(loc.encounter_groups)], 20, UiKit.GOLD))
+
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED

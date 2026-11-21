@@ -97,6 +97,8 @@ func setup(p_unit: BattleUnit) -> void:
 	v.add_child(top)
 	if IdentitySeal.COLORS.has(unit.data.rarity):
 		top.add_child(IdentitySeal.make(unit.data.rarity, 18))
+	# 职业小标：敌我都显示，看一眼就知道谁克谁
+	top.add_child(UiKit.role_tag(unit.data, 12))
 	_name_label = UiKit.label("", 16, _name_color())
 	_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_name_label.clip_text = true

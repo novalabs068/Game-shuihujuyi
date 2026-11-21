@@ -10,6 +10,8 @@ extends Resource
 @export var source: String
 ## 主修时的技能
 @export var skill: SkillData
+## 主修这门武学时主角算哪一种职业（相克按它算）
+@export var role: UnitData.Role = UnitData.Role.WARRIOR
 
 @export_group("副修加成")
 @export var side_hp_pct := 0.0

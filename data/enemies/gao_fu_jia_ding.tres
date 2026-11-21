@@ -11,7 +11,7 @@
 script = ExtResource("2_k1qpr")
 id = &"gao_fu_jia_ding"
 display_name = "高府家丁"
-role = 1
+role = 0
 base_hp = 300
 base_atk = 74
 base_def = 16
