@@ -17,7 +17,9 @@ const MIN_STAT_RATIO := 0.3
 ## 持续这么多回合以上的增益算「整场有效」（天赋、越打越快），各算各的，不和同类合并
 const PERMANENT_TURNS := 900
 ## 头目的「定力」：一种控制结束后，同一种控制在这么多回合内对它无效
-const BOSS_RESIST_TURNS := 1
+const BOSS_RESIST_TURNS := 2
+## 控制落在头目身上最多持续这么多回合（免得被一招晕到底）
+const BOSS_MAX_CONTROL := 1
 
 
 class Buff:

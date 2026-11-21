@@ -266,8 +266,8 @@ func intent_target_of(enemy: BattleUnit) -> BattleUnit:
 	var foes := foes_of(enemy)
 	if foes.is_empty():
 		return null
-	# 只有「背后捅刀」这类技能无视嘲讽，其他攻击都会被嘲讽拉走
-	var ignores_taunt := enemy.intent_skill and enemy.data.skill != null and enemy.data.skill.effect == SkillData.Effect.BACKSTAB
+	# 「背后捅刀」这类技能、头目蓄满的绝招无视嘲讽，其他攻击都会被嘲讽拉走
+	var ignores_taunt := enemy.intent_skill and enemy.data.skill != null and (enemy.data.skill.effect == SkillData.Effect.BACKSTAB or enemy.charging)
 	if not ignores_taunt:
 		for f in foes:
 			if f.is_taunting():
@@ -612,6 +612,8 @@ func _control(actor: BattleUnit, target: BattleUnit, kind: StringName, turns: in
 		_emit("info", target, "定力", "%s 定力未失，%s无效" % [target.display_name(), CONTROL_NAMES[kind]])
 		return false
 	var n := Roles.control_turns(actor.data.role, target.data.role, turns)
+	if target.data.is_boss:
+		n = mini(n, BattleUnit.BOSS_MAX_CONTROL)
 	match kind:
 		&"stun":
 			target.stun_turns = maxi(target.stun_turns, n)
@@ -730,11 +732,13 @@ func _plan_intent(enemy: BattleUnit) -> void:
 		enemy.intent_target = foes[rng.randi_range(0, foes.size() - 1)]
 
 
-## 有嘲讽的敌人时必须打它；否则打指定目标，没指定就打第一个活着的。
+## 有嘲讽的敌人时必须打它；否则打指定目标，没指定就打第一个活着的。头目蓄满的绝招直取预告的目标，不吃嘲讽。
 func _pick_foe(actor: BattleUnit, wanted: BattleUnit) -> BattleUnit:
 	var foes := foes_of(actor)
 	if foes.is_empty():
 		return null
+	if _charge_mult > 1.0 and wanted != null and wanted in foes:
+		return wanted
 	for f in foes:
 		if f.is_taunting():
 			return f

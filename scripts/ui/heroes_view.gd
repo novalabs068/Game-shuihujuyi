@@ -277,7 +277,8 @@ func _show_detail() -> void:
 		for combo in GameDB.combos:
 			var partner := combo.partner_of(hero.id)
 			if partner != &"":
-				_detail.add_child(_wrapped("组合技「%s」（和%s同上阵）：%s" % [combo.display_name, GameDB.hero(partner).display_name, combo.description], UiKit.TEXT_DIM))
+				var partner_owned := GameState.owns(partner)
+				_detail.add_child(_wrapped("组合技「%s」（和%s同上阵%s）：%s" % [combo.display_name, GameDB.hero(partner).display_name, "" if partner_owned else "，还没招到", combo.description], UiKit.TEXT_DIM if partner_owned else Color(UiKit.TEXT_DIM, 0.6)))
 		var sworn := Bonds.sworn_combo(hero, GameState.PROTAGONIST_ID)
 		if GameState.sworn(hero.id):
 			_detail.add_child(_wrapped("已结义　组合技「%s」：%s" % [sworn.display_name, sworn.description], UiKit.GOLD))

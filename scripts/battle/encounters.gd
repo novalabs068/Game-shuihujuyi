@@ -10,7 +10,7 @@ const POWER_PER_DANGER := 0.15
 const LEVEL_FOLLOW_DANGER := 3
 const LEVEL_FOLLOW_GAP := 2
 ## 头目跟着队伍的养成变强：队伍因养成（勾玉、羁绊、装备）变强了多少倍，头目就跟上这么多比例
-const BOSS_GROWTH_SHARE := 1.0
+const BOSS_GROWTH_SHARE := 1.3
 const ELITE_HP_BONUS := 0.3
 const ELITE_TRAITS: Array[StringName] = [&"iron", &"berserk"]
 const ELITE_PREFIX := {&"iron": "铁甲·", &"berserk": "狂暴·"}

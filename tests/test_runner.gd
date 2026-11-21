@@ -136,7 +136,7 @@ func advance_to(model: BattleModel, id: StringName) -> void:
 func test_data_loads() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	check_eq(GameDB.load_dir("res://data/heroes/").size(), 24, "24 heroes")
-	check_eq(GameDB.load_dir("res://data/combos/").size(), 14, "14 combos")
+	check_eq(GameDB.load_dir("res://data/combos/").size(), 15, "15 combos")
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
 	check(stage.enemies[1].is_boss, "Lu Qian is the boss")
@@ -434,8 +434,11 @@ func test_expose_and_boss_resist() -> bool:
 	check(b.resists(&"stun"), "boss resists stun right after one")
 	check(not m2._stun(by_id(m2, &"a"), b, 1), "second stun is resisted")
 	m2.act(BattleModel.Action.GUARD)
-	advance_to(m2, &"a")  # 头目又动了一次，定力过去
-	check(not b.resists(&"stun"), "resist wears off after the boss acts")
+	advance_to(m2, &"a")  # 头目又动了一次，定力还剩一回合
+	check(b.resists(&"stun"), "resist lasts two boss turns")
+	m2.act(BattleModel.Action.GUARD)
+	advance_to(m2, &"a")  # 再动一次，定力过去
+	check(not b.resists(&"stun"), "resist wears off after the boss acts twice")
 	check(m2._stun(by_id(m2, &"a"), b, 1), "stun works again")
 	# 普通敌人没有定力
 	var m3 := battle([unit_data(&"a", [500, 1, 0, 100])], [unit_data(&"e", [100000, 1, 0, 100])])
@@ -478,6 +481,26 @@ func test_boss_charge() -> bool:
 	check(not b2.charging, "stun interrupts the charge")
 	check_eq(b2.skill_cooldown, 3, "the skill goes back on cooldown")
 	check(b2.expose_turns > 0, "an interrupted boss is exposed")
+	# 头目身上的控制最多 1 回合
+	var boss3 := unit_data(&"b", [100000, 100, 0, 100])
+	boss3.is_boss = true
+	var m4 := battle([unit_data(&"a", [100000, 1, 0, 90])], [boss3])
+	m4._stun(by_id(m4, &"a"), by_id(m4, &"b"), 3)
+	check_eq(by_id(m4, &"b").stun_turns, 1, "a boss is stunned for at most 1 turn")
+	# 蓄满的绝招不吃嘲讽：打预告里的人
+	var boss4 := unit_data(&"b", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0, "cooldown": 3}))
+	boss4.is_boss = true
+	var m5 := battle([unit_data(&"tank", [100000, 1, 0, 80]), unit_data(&"soft", [100000, 1, 0, 70])], [boss4])
+	advance_to(m5, &"b")
+	m5.act_ai()
+	var b5 := by_id(m5, &"b")
+	b5.intent_target = by_id(m5, &"soft")
+	by_id(m5, &"tank").taunt_turns = 5
+	check(m5.intent_target_of(b5) == by_id(m5, &"soft"), "a charged boss ignores taunt in its intent")
+	var soft_hp := by_id(m5, &"soft").hp
+	advance_to(m5, &"b")
+	m5.act_ai()
+	check(by_id(m5, &"soft").hp < soft_hp, "the charged blow lands on the announced target")
 	# 普通敌人不蓄力
 	var m3 := battle([unit_data(&"a", [100000, 1, 0, 90])], [unit_data(&"e", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0}))])
 	advance_to(m3, &"e")

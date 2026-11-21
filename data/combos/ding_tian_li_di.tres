@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ComboData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/combo_data.gd" id="1_dtld"]
+
+[resource]
+script = ExtResource("1_dtld")
+id = &"ding_tian_li_di"
+display_name = "顶天立地"
+description = "两个大个子一个擎旗、一个开路：全队回复 20% 生命、解除眩晕，怒气 +30。"
+hero_a = &"yu_baosi"
+hero_b = &"du_qian"
+effect = 4
+amount = 0.2
+rage_gain = 30
