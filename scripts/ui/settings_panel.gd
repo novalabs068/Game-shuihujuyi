@@ -68,7 +68,7 @@ func _ready() -> void:
 		_restart.pressed.connect(_on_restart)
 		v.add_child(_restart)
 
-	v.add_child(UiKit.label("《水浒聚义》　单机离线，没有任何付费", 17, UiKit.TEXT_DIM))
+	v.add_child(UiKit.label("《水浒聚义》 版本 %s　单机离线，没有任何付费" % UiKit.version(), 17, UiKit.TEXT_DIM))
 	var close := UiKit.button("返回", Vector2(180, 56), 24)
 	close.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void: closed.emit())

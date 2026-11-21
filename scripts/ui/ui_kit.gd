@@ -159,6 +159,11 @@ static func ignore_mouse(node: Node) -> void:
 		ignore_mouse(child)
 
 
+## 游戏版本号（tools/build_apk.sh 每打一次包加一，写在 project.godot）。
+static func version() -> String:
+	return str(ProjectSettings.get_setting("application/config/version", "开发版"))
+
+
 ## 1～99 写成汉字（「第十二回合」）。
 static func cn_number(n: int) -> String:
 	const DIGITS := "零一二三四五六七八九"

@@ -58,3 +58,12 @@ func _ready() -> void:
 		var note := UiKit.label("新游戏会覆盖现在的存档（%s）" % GameState.player_name, 18, Color("5a3a2a"))
 		note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		buttons.add_child(note)
+	# 右下角的版本号
+	var ver := UiKit.label("版本 %s" % UiKit.version(), 18, Color("5a3a2a"))
+	add_child(ver)
+	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	ver.offset_left = -220
+	ver.offset_top = -40
+	ver.offset_right = -16
+	ver.offset_bottom = -12
+	ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
