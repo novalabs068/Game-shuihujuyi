@@ -50,6 +50,8 @@ var silence_turns := 0
 var expose_turns := 0
 ## 头目的定力：控制种类（&"stun"、&"disarm"、&"silence"）→ 还要几回合才会再被这种控制
 var control_resist := {}
+## 头目蓄力中：下一次行动放出蓄满的绝招（伤害 ×BattleModel.CHARGE_BONUS）；这期间被控制就打断
+var charging := false
 var taunt_turns := -1
 var reduction := 0.0
 var reduction_turns := -1
@@ -278,6 +280,8 @@ func status_tags() -> PackedStringArray:
 		tags.append("破绽")
 	if not control_resist.is_empty():
 		tags.append("定力")
+	if charging:
+		tags.append("蓄力")
 	if burn_turns > 0:
 		tags.append("灼烧")
 	if shield > 0:

@@ -232,6 +232,12 @@ func _play(events: Array[Dictionary]) -> void:
 				_banner.text = ""
 				await _combo_cutin(unit, source, popup)
 				wait = 0.0
+			"charge":
+				_banner.text = "%s 蓄力！" % unit.display_name()
+				FxSprite.spawn(self, "cursed", card.feet_point(), FX_SCALE, false, 0)
+				card.popup(popup, CRIT_RED, true)
+				Sfx.play(&"skill_drum", -6.0)
+				wait = 0.6
 			"prep":
 				_banner.text = "准备回合 · %s" % log_text.get_slice("：", 0)
 				FxSprite.spawn(self, "blessing", card.feet_point(), FX_SCALE * 0.9, false, 0)
@@ -588,6 +594,8 @@ func _intent_mark(u: BattleUnit) -> String:
 			return "晕"
 		if model.intent_target_of(u) == null:
 			return ""
+		if u.charging:
+			return "蓄"
 		return "技" if u.intent_skill and u.data.skill != null else "攻"
 	return "危" if model.is_threatened(u) else ""
 
@@ -603,11 +611,15 @@ func _intent_text(u: BattleUnit) -> String:
 		var t := model.intent_target_of(u)
 		if t == null:
 			return ""
+		if u.charging:
+			return "蓄力中！下一步：「%s」→ %s，伤害 ×%.1f。用眩晕、缴械、计穷打断" % [u.data.skill.display_name, t.display_name(), BattleModel.CHARGE_BONUS]
+		if u.intent_skill and u.data.skill != null and u.data.is_boss:
+			return "下一步：蓄力，准备「%s」" % u.data.skill.display_name
 		if u.intent_skill and u.data.skill != null:
 			return "下一步：「%s」→ %s" % [u.data.skill.display_name, t.display_name()]
 		return "下一步：普攻 → %s" % t.display_name()
 	for e in model.alive(BattleUnit.Side.ENEMY):
-		if e.intent_skill and e.stun_turns == 0 and model.intent_target_of(e) == u:
+		if model.releases_skill_next(e) and model.intent_target_of(e) == u:
 			return "被%s的「%s」瞄准" % [e.display_name(), e.data.skill.display_name]
 	return ""
 

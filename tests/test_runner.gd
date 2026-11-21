@@ -20,6 +20,7 @@ func _initialize() -> void:
 		"test_opening_events",
 		"test_same_buffs_do_not_stack",
 		"test_expose_and_boss_resist",
+		"test_boss_charge",
 		"test_defense_scales_with_level",
 		"test_danger_and_boss_power",
 		"test_guard_halves_damage",
@@ -407,6 +408,47 @@ func test_expose_and_boss_resist() -> bool:
 	m3._stun(by_id(m3, &"a"), by_id(m3, &"e"), 1)
 	advance_to(m3, &"a")
 	check(m3._stun(by_id(m3, &"a"), by_id(m3, &"e"), 1), "regular enemies can be stunned again")
+	return true
+
+
+func test_boss_charge() -> bool:
+	var boss := unit_data(&"b", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0, "cooldown": 3}))
+	boss.is_boss = true
+	var m := battle([unit_data(&"a", [100000, 1, 0, 90])], [boss])
+	var b := by_id(m, &"b")
+	var a := by_id(m, &"a")
+	advance_to(m, &"b")
+	check(not m.is_threatened(a), "before the charge the boss only gets ready")
+	var ev := m.act_ai()
+	check(b.charging, "a boss charges before its skill")
+	check_eq(ev[0]["kind"], "charge", "the charge is announced first")
+	check_eq(ev.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").size(), 1, "the boss still attacks while charging")
+	check(m.is_threatened(a), "after charging, the release is the next hit")
+	m.start_next_turn()
+	m.act(BattleModel.Action.ATTACK, b)
+	m.start_next_turn()
+	var hp := a.hp
+	m.act_ai()
+	var dealt := hp - a.hp
+	# 攻击 100 × 2.0 × 1.4 = 280（±5%），不蓄力是 200
+	check(dealt >= 266 and dealt <= 294, "charged skill hits ×1.4 (%d)" % dealt)
+	check(not b.charging, "the charge is spent")
+	# 蓄力中被眩晕：打断，重新冷却，露出破绽
+	var boss2 := unit_data(&"b", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0, "cooldown": 3}))
+	boss2.is_boss = true
+	var m2 := battle([unit_data(&"a", [100000, 1, 0, 90])], [boss2])
+	advance_to(m2, &"b")
+	m2.act_ai()
+	var b2 := by_id(m2, &"b")
+	check(m2._stun(by_id(m2, &"a"), b2, 1), "stun lands on a charging boss")
+	check(not b2.charging, "stun interrupts the charge")
+	check_eq(b2.skill_cooldown, 3, "the skill goes back on cooldown")
+	check(b2.expose_turns > 0, "an interrupted boss is exposed")
+	# 普通敌人不蓄力
+	var m3 := battle([unit_data(&"a", [100000, 1, 0, 90])], [unit_data(&"e", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0}))])
+	advance_to(m3, &"e")
+	m3.act_ai()
+	check(not by_id(m3, &"e").charging, "regular enemies don't charge")
 	return true
 
 

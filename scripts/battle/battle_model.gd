@@ -24,6 +24,8 @@ const GUARD_REDUCTION := 0.5
 const IRON_BASIC_MULTIPLIER := 0.5
 ## 破绽：下一次挨打的伤害加成
 const EXPOSE_BONUS := 0.2
+## 头目蓄满的绝招伤害倍数
+const CHARGE_BONUS := 1.4
 ## 伤害公式里防御的基准（1 级时）：伤害 = 攻击 × 倍率 × 基准 ÷ (基准 + 防御)
 const DEF_BASE := 100.0
 const EXECUTE_THRESHOLD := 0.3
@@ -57,6 +59,8 @@ var _events: Array[Dictionary] = []
 var _extra_action := false
 ## 这次技能命中时播的特效（群攻技能各有各的），写进 damage 事件的 fx
 var _hit_fx := ""
+## 正在放蓄满的绝招时为 CHARGE_BONUS，伤害都乘上它
+var _charge_mult := 1.0
 
 
 func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1) -> void:
@@ -224,6 +228,8 @@ func act_ai() -> Array[Dictionary]:
 		return []
 	if actor.side == BattleUnit.Side.ENEMY:
 		var use_skill := actor.intent_skill and actor.skill_ready()
+		if use_skill and actor.data.is_boss and not actor.charging:
+			return _charge(actor)
 		return act(Action.SKILL if use_skill else Action.ATTACK, intent_target_of(actor))
 	var foes := foes_of(actor)
 	var weakest := _weakest(foes)
@@ -231,6 +237,11 @@ func act_ai() -> Array[Dictionary]:
 		return act(Action.COMBO, weakest)
 	if not actor.can_attack() and not actor.skill_ready():
 		return act(Action.GUARD)
+	# 有头目在蓄力，手上有控制就先打断它
+	if actor.skill_ready() and actor.data.skill.effect in CONTROL_EFFECTS:
+		for f in foes:
+			if f.charging and not f.resists(CONTROL_EFFECTS[actor.data.skill.effect]):
+				return act(Action.SKILL, f)
 	if is_threatened(actor) and not (actor.skill_ready() and actor.data.skill.effect in [SkillData.Effect.STUN, SkillData.Effect.STUN_ALL, SkillData.Effect.HEAL]):
 		return act(Action.GUARD)
 	if actor.skill_ready() and _skill_worth_using(actor, foes):
@@ -254,12 +265,26 @@ func intent_target_of(enemy: BattleUnit) -> BattleUnit:
 	return _weakest(foes)
 
 
-## 有没有敌人预告要用技能打这个好汉。
+## 有没有敌人预告下一步要用技能打这个好汉（头目还没蓄力的话，下一步只是蓄力，不算）。
 func is_threatened(hero: BattleUnit) -> bool:
 	for e in alive(BattleUnit.Side.ENEMY):
-		if e.intent_skill and e.stun_turns == 0 and e.silence_turns == 0 and intent_target_of(e) == hero:
+		if releases_skill_next(e) and intent_target_of(e) == hero:
 			return true
 	return false
+
+
+## 敌人下一步是不是真的放绝招（不是蓄力，也没被晕、被计穷）。
+func releases_skill_next(e: BattleUnit) -> bool:
+	return e.intent_skill and e.stun_turns == 0 and e.silence_turns == 0 and (not e.data.is_boss or e.charging)
+
+
+## 头目开始蓄力：这一回合照常普攻，同时蓄力，下一回合放出 ×1.4 的绝招。
+func _charge(actor: BattleUnit) -> Array[Dictionary]:
+	actor.charging = true
+	var target := intent_target_of(actor)
+	var events := act(Action.ATTACK, target)
+	events.push_front({"kind": "charge", "unit": actor, "popup": "蓄力", "log": "%s 一边出手一边蓄力，下一步「%s」伤害 ×%.1f！用眩晕、缴械、计穷可以打断" % [actor.display_name(), actor.data.skill.display_name, CHARGE_BONUS], "big": false, "source": null, "fx": ""})
+	return events
 
 
 # --- 行动结算 ---
@@ -312,6 +337,9 @@ func _try_pursuit(actor: BattleUnit, target: BattleUnit) -> void:
 ## 放绝招。组合技里借放的（skill 不为空）用传进来的那招，不进冷却。
 func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -> void:
 	var s := skill if skill != null else actor.data.skill
+	if actor.charging and skill == null:
+		actor.charging = false
+		_charge_mult = CHARGE_BONUS
 	if skill == null:
 		# 机变：冷却少 1 回合，最少 1 回合
 		actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
@@ -440,6 +468,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			var target := wanted if wanted != null and wanted.is_alive() else _weakest(foes_of(actor))
 			_deal(actor, target, s.power)
 	_hit_fx = ""
+	_charge_mult = 1.0
 	actor.add_rage(RAGE_ON_SKILL)
 
 
@@ -509,7 +538,7 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	var def := 0.0 if pierce else target.def()
 	# 防御的「基准」跟着挨打的人的等级一起成长：防御挡掉的比例只看自己的防御，前期后期一样
 	var base := DEF_BASE * pow(BattleUnit.LEVEL_GROWTH, target.level - 1)
-	var raw := attacker.atk() * multiplier * base / (base + def) * rng.randf_range(0.95, 1.05)
+	var raw := attacker.atk() * multiplier * _charge_mult * base / (base + def) * rng.randf_range(0.95, 1.05)
 	if crit:
 		raw *= CRIT_MULTIPLIER
 	if target.guarding:
@@ -560,6 +589,8 @@ func _stun(actor: BattleUnit, target: BattleUnit, turns: int) -> bool:
 
 
 const CONTROL_NAMES := {&"stun": "眩晕", &"disarm": "缴械", &"silence": "计穷"}
+## 能打断蓄力的技能 → 它上的控制
+const CONTROL_EFFECTS := {SkillData.Effect.STUN: &"stun", SkillData.Effect.STUN_ALL: &"stun", SkillData.Effect.DISARM: &"disarm", SkillData.Effect.SILENCE: &"silence"}
 
 ## 上一种控制（眩晕、缴械、计穷）：同种不叠加，取较长的回合；克制对方职业时多 1 回合；
 ## 头目的定力期间无效。返回是否生效。
@@ -577,7 +608,19 @@ func _control(actor: BattleUnit, target: BattleUnit, kind: StringName, turns: in
 		&"silence":
 			target.silence_turns = maxi(target.silence_turns, n)
 			_emit("info", target, "计穷", "%s 计穷，%d 回合放不了绝招" % [target.display_name(), n])
+	if target.charging:
+		_interrupt(target)
 	return true
+
+
+## 打断蓄力：绝招作废、重新冷却，露出破绽。
+func _interrupt(target: BattleUnit) -> void:
+	target.charging = false
+	if target.data.skill != null:
+		target.skill_cooldown = target.data.skill.cooldown
+	target.intent_skill = false
+	_emit("banner", target, "打断", "%s 的蓄力被打断了！" % target.display_name())
+	_expose(target)
 
 
 ## 让目标露出破绽：下一次挨打伤害 +20%。
@@ -665,6 +708,9 @@ func _plan_intent(enemy: BattleUnit) -> void:
 		return
 	# 冷却在轮到自己时才减 1，所以现在 ≤ 1 就代表下回合可用
 	enemy.intent_skill = enemy.data.skill != null and enemy.skill_cooldown <= 1
+	# 蓄力中的头目盯住原来的目标不换
+	if enemy.charging and enemy.intent_target != null and enemy.intent_target.is_alive():
+		return
 	if enemy.intent_skill and enemy.data.skill.effect == SkillData.Effect.BACKSTAB:
 		enemy.intent_target = _weakest(foes)
 	else:
