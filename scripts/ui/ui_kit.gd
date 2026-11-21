@@ -81,11 +81,21 @@ static func label(text: String, font_size := 22, color := TEXT) -> Label:
 	return l
 
 
+## 按钮按下时笃一声（木鱼）。
+## 按名字在运行时找 Sfx：UiKit 也被不带自动加载的测试用到，不能直接写 Sfx。
+static func click_sound(b: BaseButton) -> void:
+	b.pressed.connect(func() -> void:
+		var sfx := b.get_node_or_null("/root/Sfx")
+		if sfx != null:
+			sfx.play(&"ui_click", -6.0, 0.05))
+
+
 static func button(text: String, min_size: Vector2, font_size := 24) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.custom_minimum_size = min_size
 	b.add_theme_font_size_override("font_size", font_size)
+	click_sound(b)
 	return b
 
 
@@ -205,6 +215,7 @@ static func round_button(text: String, d: float, fill: Color, text_color: Color,
 	b.add_theme_stylebox_override("pressed", pressed)
 	b.add_theme_stylebox_override("disabled", disabled)
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	click_sound(b)
 	return b
 
 

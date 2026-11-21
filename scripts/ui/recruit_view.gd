@@ -159,6 +159,7 @@ func _recruit(count: int) -> void:
 		var t := create_tween().set_parallel()
 		t.tween_property(slot, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		t.tween_property(slot, "modulate:a", 1.0, 0.12)
+		Sfx.play(&"card_drop", -4.0, 0.1)
 		if not _skip:
 			await get_tree().create_timer(0.05).timeout
 	await get_tree().create_timer(0.25).timeout
@@ -242,6 +243,7 @@ func _token_strike(best: int) -> void:
 	token.scale = Vector2(0.2, 0.2)
 	token.rotation = -TAU
 	var fast := 0.5 if _skip else 1.0
+	Sfx.play(&"token_whoosh")
 	var t := create_tween().set_parallel()
 	t.tween_property(dim, "color:a", 0.7, 0.25 * fast)
 	t.tween_property(token, "scale", Vector2(1.5, 1.5), 0.55 * fast).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
@@ -255,6 +257,7 @@ func _token_strike(best: int) -> void:
 	_shockwave(token.position + token.size / 2, color)
 	_flash(color)
 	_shake(12.0)
+	Sfx.play(&"token_slam")
 	var out := create_tween().set_parallel()
 	out.tween_property(token, "modulate:a", 0.0, 0.3)
 	out.tween_property(token, "scale", Vector2(1.2, 1.2), 0.3)
@@ -342,6 +345,7 @@ func _build_up(slot: Control, tier: int) -> void:
 	sparks.scale_amount_max = 6.0
 	sparks.color = color.lightened(0.3)
 	slot.add_child(sparks)
+	Sfx.play(&"rare_shimmer", -2.0 if tier == UnitData.Tier.JIA else -6.0)
 	var shake := create_tween()
 	var base := slot.position
 	for i in (10 if tier == UnitData.Tier.JIA else 6):
@@ -354,6 +358,7 @@ func _build_up(slot: Control, tier: int) -> void:
 ## 翻牌：横着收窄到 0，换成正面，再展开；稀有的翻开时亮一下。
 func _flip(slot: Control, tier: int, rare: bool) -> void:
 	var half := 0.06 if _skip else 0.1
+	Sfx.play(&"card_flip", -2.0, 0.12)
 	var t := create_tween()
 	t.tween_property(slot, "scale:x", 0.0, half).set_ease(Tween.EASE_IN)
 	await t.finished
@@ -365,6 +370,7 @@ func _flip(slot: Control, tier: int, rare: bool) -> void:
 		create_tween().tween_property(front, "self_modulate", Color.WHITE, 0.35)
 		if tier == UnitData.Tier.JIA:
 			_shake(10.0)
+			Sfx.play(&"jia_gong")
 	var t2 := create_tween()
 	t2.tween_property(slot, "scale:x", 1.0, half).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	await t2.finished
@@ -445,6 +451,8 @@ func _showcase(hero: UnitData, is_new: bool) -> void:
 	t.tween_property(hint, "modulate:a", 1.0, 0.3).set_delay(1.0)
 	await t.finished
 	_flash(color)
+	if hero.tier != UnitData.Tier.JIA:
+		Sfx.play(&"rare_shimmer", -4.0)
 	# 等玩家点一下
 	var tap := Button.new()
 	tap.flat = true

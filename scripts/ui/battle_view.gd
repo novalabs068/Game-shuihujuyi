@@ -239,6 +239,7 @@ func _play(events: Array[Dictionary]) -> void:
 					var style := source.data.attack_style
 					if style in RANGED_STYLES:
 						await _cards[source].shoot()
+						Sfx.play(&"arrow", -4.0, 0.1)
 						await Projectile.fly(self, _cards[source].muzzle_point(), card.hit_point(), style)
 					else:
 						await _cards[source].lunge(card.position)
@@ -253,6 +254,7 @@ func _play(events: Array[Dictionary]) -> void:
 				FxSprite.spawn(self, "crit_hit" if big else "hit_spark", card.hit_point(), FX_SCALE * (0.8 if big else 1.0), not from_left)
 				card.flash()
 				card.shake()
+				_hit_sound(source, big)
 				_ink_splash(card.hit_point(), from_left, big)
 				card.popup(popup, CRIT_RED if big else UiKit.DAMAGE, big)
 				if big:
@@ -283,6 +285,7 @@ func _play(events: Array[Dictionary]) -> void:
 ## 放绝招：画面压暗，版画全身像从出手那一侧滑进来，一笔浓墨刷开，招式名一个字一个字写出来。
 func _skill_cutin(unit: BattleUnit, skill_name: String) -> void:
 	var from_left := unit.side == BattleUnit.Side.PLAYER
+	Sfx.play(&"skill_drum", -2.0)
 	var layer := Control.new()
 	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.z_index = 30
@@ -340,6 +343,7 @@ func _brush_stroke(stroke_size: Vector2, flip: bool, color := STROKE_RED) -> Tex
 
 ## 组合技：画面变暗，两人的立绘从左右冲进来，中间打出组合技名。
 func _combo_cutin(a: BattleUnit, b: BattleUnit, combo_name: String) -> void:
+	Sfx.play(&"skill_drum")
 	var layer := Control.new()
 	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.z_index = 30
@@ -420,6 +424,13 @@ func _style_hit_fx(style: StringName, card: UnitCard, from_left: bool) -> void:
 
 
 ## 命中顿帧：时间几乎停一下再走（按真实时间算，2 倍速下也一样长）。
+## 命中声：斧棒拳脚是闷击，其余是刀光；暴击更响。
+func _hit_sound(source: BattleUnit, big: bool) -> void:
+	var style := source.data.attack_style if source != null else &""
+	var blunt := style in [&"heavy", &"fist"]
+	Sfx.play(&"hit_blunt" if blunt else &"hit_slash", 2.0 if big else -3.0, 0.12)
+
+
 func _hitstop(seconds: float) -> void:
 	Engine.time_scale = 0.05
 	await get_tree().create_timer(seconds, true, false, true).timeout
@@ -909,6 +920,7 @@ func _show_result() -> void:
 	await st.finished
 	if won:
 		_shake_screen(14.0)
+		Sfx.play(&"victory")
 
 	# 宣纸卷：从中间往两边展开
 	var scroll := PanelContainer.new()

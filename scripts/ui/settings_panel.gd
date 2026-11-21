@@ -45,7 +45,7 @@ func _ready() -> void:
 	var volume_row := HBoxContainer.new()
 	volume_row.add_theme_constant_override("separation", 16)
 	v.add_child(volume_row)
-	volume_row.add_child(UiKit.label("音量", 24))
+	volume_row.add_child(UiKit.label("音乐音量", 24))
 	var slider := HSlider.new()
 	slider.min_value = 0.0
 	slider.max_value = 1.0
@@ -55,6 +55,29 @@ func _ready() -> void:
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.value_changed.connect(func(value: float) -> void: Music.volume = value)
 	volume_row.add_child(slider)
+
+	var sfx := CheckButton.new()
+	sfx.text = "音效"
+	sfx.add_theme_font_size_override("font_size", 24)
+	sfx.button_pressed = Sfx.enabled
+	sfx.toggled.connect(func(on: bool) -> void:
+		Sfx.enabled = on
+		Sfx.play(&"ui_click"))
+	v.add_child(sfx)
+	var sfx_row := HBoxContainer.new()
+	sfx_row.add_theme_constant_override("separation", 16)
+	v.add_child(sfx_row)
+	sfx_row.add_child(UiKit.label("音效音量", 24))
+	var sfx_slider := HSlider.new()
+	sfx_slider.min_value = 0.0
+	sfx_slider.max_value = 1.0
+	sfx_slider.step = 0.05
+	sfx_slider.value = Sfx.volume
+	sfx_slider.custom_minimum_size = Vector2(300, 40)
+	sfx_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sfx_slider.drag_ended.connect(func(_changed: bool) -> void: Sfx.play(&"hit_slash"))
+	sfx_slider.value_changed.connect(func(value: float) -> void: Sfx.volume = value)
+	sfx_row.add_child(sfx_slider)
 
 	var fast := CheckButton.new()
 	fast.text = "战斗默认 2 倍速"
