@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_vehyf"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_cuo5g"]
+[ext_resource type="Resource" path="res://data/enemies/ye_lang.tres" id="3_7ituq"]
+[ext_resource type="Resource" path="res://data/enemies/lang_wang.tres" id="4_y6vju"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_f5civ"]
+
+[sub_resource type="Resource" id="Resource_g2ibi"]
+script = ExtResource("5_f5civ")
+id = "bounty_lang_wang"
+title = "悬赏：野猪林狼王"
+enemies = Array[ExtResource("2_cuo5g")]([ExtResource("3_7ituq"), ExtResource("4_y6vju"), ExtResource("3_7ituq")])
+enemy_level = 10
+recommended_level = 10
+
+[resource]
+script = ExtResource("1_vehyf")
+id = &"lang_wang"
+location = &"yezhulin"
+target = "野猪林狼王"
+description = "野猪林深处一头独眼狼王带着狼群，接连咬伤了好几个过路的客商。（自拟）"
+stage = SubResource("Resource_g2ibi")

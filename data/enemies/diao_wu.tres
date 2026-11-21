@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shan_zei_tou_mu.png" id="1_onbbu"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="2_cgo1w"]
+[ext_resource type="Texture2D" path="res://art/busts/shan_zei_tou_mu.png" id="2_xgx0m"]
+[ext_resource type="Texture2D" path="res://art/faces/shan_zei_tou_mu.png" id="3_4xtmb"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_le6h5"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="4_xgx0m"]
+[ext_resource type="Texture2D" path="res://art/portraits/shan_zei_tou_mu.png" id="5_srgfc"]
+
+[sub_resource type="Resource" id="Resource_4xtmb"]
+script = ExtResource("4_xgx0m")
+display_name = "独眼狼刀"
+description = "单体 160% 伤害，目标血量低于 30% 时伤害翻倍。"
+effect = 1
+power = 1.6
+
+[resource]
+script = ExtResource("3_le6h5")
+id = &"diao_wu"
+display_name = "邓龙余党刁五"
+nickname = "Boss"
+role = 1
+base_hp = 950
+base_atk = 144
+base_def = 30
+portrait = ExtResource("5_srgfc")
+bust = ExtResource("2_xgx0m")
+face = ExtResource("3_4xtmb")
+map_sprite = ExtResource("2_cgo1w")
+battle_sprite = ExtResource("1_onbbu")
+attack_style = &"heavy"
+skill = SubResource("Resource_4xtmb")
+is_boss = true
+enrage_name = "困兽犹斗"
+enrage_atk_bonus = 0.5

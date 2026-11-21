@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_uc6wx"]
+[ext_resource type="Resource" path="res://data/enemies/liang_shan_lou_luo.tres" id="2_570qb"]
+[ext_resource type="Resource" path="res://data/enemies/liang_shan_tou_mu.tres" id="3_84ko2"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_ean81"]
+
+[resource]
+script = ExtResource("4_ean81")
+id = "liang_shan_xun_hu"
+title = "梁山巡湖"
+enemies = Array[ExtResource("1_uc6wx")]([ExtResource("2_570qb"), ExtResource("3_84ko2"), ExtResource("2_570qb")])

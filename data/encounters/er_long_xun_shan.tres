@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_v7f1r"]
+[ext_resource type="Resource" path="res://data/enemies/er_long_lou_luo.tres" id="2_fwtsv"]
+[ext_resource type="Resource" path="res://data/enemies/shan_zei_tou_mu.tres" id="3_nc4ds"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_6dk2m"]
+
+[resource]
+script = ExtResource("4_6dk2m")
+id = "er_long_xun_shan"
+title = "二龙山巡山"
+enemies = Array[ExtResource("1_v7f1r")]([ExtResource("2_fwtsv"), ExtResource("3_nc4ds"), ExtResource("2_fwtsv")])

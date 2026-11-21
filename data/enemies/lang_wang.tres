@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/ye_lang.png" id="1_38vqg"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/ye_lang.png" id="2_04w5a"]
+[ext_resource type="Texture2D" path="res://art/busts/ye_lang.png" id="2_b17je"]
+[ext_resource type="Texture2D" path="res://art/faces/ye_lang.png" id="3_fm1hx"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_r8rm1"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="4_b17je"]
+[ext_resource type="Texture2D" path="res://art/portraits/ye_lang.png" id="5_r0mof"]
+
+[sub_resource type="Resource" id="Resource_fm1hx"]
+script = ExtResource("4_b17je")
+display_name = "群狼围猎"
+description = "全队攻击 +25%，持续 2 回合。"
+effect = 15
+power = 0.0
+turns = 2
+amount = 0.25
+
+[resource]
+script = ExtResource("3_r8rm1")
+id = &"lang_wang"
+display_name = "野猪林狼王"
+nickname = "Boss"
+role = 1
+base_hp = 1000
+base_atk = 118
+base_def = 26
+base_spd = 116
+portrait = ExtResource("5_r0mof")
+bust = ExtResource("2_b17je")
+face = ExtResource("3_fm1hx")
+map_sprite = ExtResource("2_04w5a")
+battle_sprite = ExtResource("1_38vqg")
+attack_style = &"claw"
+skill = SubResource("Resource_fm1hx")
+is_boss = true
+enrage_name = "嗜血"
+enrage_atk_bonus = 0.5

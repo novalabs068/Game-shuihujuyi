@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_1tdr7"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_shoys"]
+[ext_resource type="Resource" path="res://data/enemies/er_long_lou_luo.tres" id="3_e5a7s"]
+[ext_resource type="Resource" path="res://data/enemies/diao_wu.tres" id="4_f24du"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_qdwjx"]
+
+[sub_resource type="Resource" id="Resource_xgrrm"]
+script = ExtResource("5_qdwjx")
+id = "bounty_diao_wu"
+title = "悬赏：邓龙余党刁五"
+enemies = Array[ExtResource("2_shoys")]([ExtResource("3_e5a7s"), ExtResource("4_f24du"), ExtResource("3_e5a7s")])
+enemy_level = 20
+recommended_level = 20
+
+[resource]
+script = ExtResource("1_1tdr7")
+id = &"diao_wu"
+location = &"erlongshan"
+grade = 1
+target = "邓龙余党刁五"
+description = "邓龙死后，他手下的头目刁五带着一伙残兵躲进山里，专劫上山拜佛的香客。（自拟）"
+stage = SubResource("Resource_xgrrm")

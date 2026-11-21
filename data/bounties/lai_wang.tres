@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_npsie"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_iwrjf"]
+[ext_resource type="Resource" path="res://data/enemies/xi_men_jia_ding.tres" id="3_5s0h1"]
+[ext_resource type="Resource" path="res://data/enemies/lai_wang.tres" id="4_7c1ra"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_jmo2j"]
+
+[sub_resource type="Resource" id="Resource_omtix"]
+script = ExtResource("5_jmo2j")
+id = "bounty_lai_wang"
+title = "悬赏：西门府恶奴来旺"
+enemies = Array[ExtResource("2_iwrjf")]([ExtResource("3_5s0h1"), ExtResource("4_7c1ra")])
+enemy_level = 11
+recommended_level = 11
+
+[resource]
+script = ExtResource("1_npsie")
+id = &"lai_wang"
+location = &"yanggu"
+target = "西门府恶奴来旺"
+description = "西门庆家的管家来旺，仗着主子的势，在紫石街强买强卖、打伤街坊。（自拟）"
+stage = SubResource("Resource_omtix")

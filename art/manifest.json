@@ -11223,6 +11223,248 @@
         "url_or_tool": "tools/battle_foreground.py",
         "date": "2026-11-20"
       }
+    },
+    {
+      "id": "pixel-rou_an",
+      "role": "像素物件（茅草农舍）",
+      "path": "art/pixel/props/rou_an.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_map_props2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_map_props2.png；按 3×2 格子切开后逐个处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-du_chuan",
+      "role": "像素物件（茅草农舍）",
+      "path": "art/pixel/props/du_chuan.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_map_props2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_map_props2.png；按 3×2 格子切开后逐个处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-lu_wei",
+      "role": "像素物件（茅草农舍）",
+      "path": "art/pixel/props/lu_wei.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_map_props2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_map_props2.png；按 3×2 格子切开后逐个处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-cao_duo",
+      "role": "像素物件（茅草农舍）",
+      "path": "art/pixel/props/cao_duo.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_map_props2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_map_props2.png；按 3×2 格子切开后逐个处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-ma_tou",
+      "role": "像素物件（茅草农舍）",
+      "path": "art/pixel/props/ma_tou.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_map_props2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_map_props2.png；按 3×2 格子切开后逐个处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "pixel-da_dian",
+      "role": "像素物件（茅草农舍）",
+      "path": "art/pixel/buildings/da_dian.png",
+      "status": "prototype",
+      "technical": {
+        "alpha": true,
+        "filtering": "nearest",
+        "scale": "3x",
+        "max_colors": 32
+      },
+      "visual_locks": [
+        "palette",
+        "pixel-grid",
+        "outline",
+        "view-angle"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具，经 tools/pixel_pipeline.py 切分、缩放、压色",
+        "creator": "",
+        "created_at": "2026-11-20",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/pixel_map_props2.txt + art/STYLE.md 像素提示词固定段；原图 art/inbox/pixel_map_props2.png；按 3×2 格子切开后逐个处理"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": ""
+      }
+    },
+    {
+      "id": "derived-snow",
+      "role": "场景（程序调色）",
+      "path": "art/tiles/snow.png",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/tile_variants.py（从 art/tiles/xiangguosi.png 调色）",
+        "date": "2026-11-20"
+      }
+    },
+    {
+      "id": "derived-loess",
+      "role": "场景（程序调色）",
+      "path": "art/tiles/loess.png",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/tile_variants.py（从 art/tiles/xiangguosi.png 调色）",
+        "date": "2026-11-20"
+      }
+    },
+    {
+      "id": "derived-song_shu_snow",
+      "role": "场景（程序调色）",
+      "path": "art/pixel/props/song_shu_snow.png",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/tile_variants.py（松树加积雪）",
+        "date": "2026-11-20"
+      }
+    },
+    {
+      "id": "derived-cao_duo_snow",
+      "role": "场景（程序调色）",
+      "path": "art/pixel/props/cao_duo_snow.png",
+      "status": "prototype",
+      "source": {
+        "kind": "code-generated",
+        "url_or_tool": "tools/tile_variants.py 的 snow_cap（草垛加积雪）",
+        "date": "2026-11-20"
+      }
     }
   ]
 }

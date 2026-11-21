@@ -834,7 +834,7 @@ func test_rewards() -> bool:
 func test_bounties_and_events_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var bounties: Array[Resource] = GameDB.load_dir("res://data/bounties/")
-	check_eq(bounties.size(), 10, "ten bounties")
+	check_eq(bounties.size(), 13, "13 bounties")
 	var map: WorldMapData = load("res://data/maps/ch1.tres")
 	for res in bounties:
 		var b := res as BountyData

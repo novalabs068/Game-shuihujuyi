@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/tai_wei_jia_ding.png" id="1_1egpq"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/tai_wei_jia_ding.png" id="2_80t3c"]
+[ext_resource type="Texture2D" path="res://art/busts/gao_fu_jia_ding.png" id="2_emtcf"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_40k4b"]
+[ext_resource type="Texture2D" path="res://art/faces/gao_fu_jia_ding.png" id="3_pvhwi"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="4_emtcf"]
+[ext_resource type="Texture2D" path="res://art/portraits/gao_fu_jia_ding.png" id="5_varep"]
+
+[sub_resource type="Resource" id="Resource_pvhwi"]
+script = ExtResource("4_emtcf")
+display_name = "狗仗人势"
+description = "全队攻击 +20%，持续 2 回合。"
+effect = 15
+power = 0.0
+turns = 2
+amount = 0.2
+
+[resource]
+script = ExtResource("3_40k4b")
+id = &"lai_wang"
+display_name = "西门府恶奴来旺"
+nickname = "Boss"
+role = 1
+base_hp = 1050
+base_atk = 120
+base_def = 28
+base_spd = 102
+portrait = ExtResource("5_varep")
+bust = ExtResource("2_emtcf")
+face = ExtResource("3_pvhwi")
+map_sprite = ExtResource("2_80t3c")
+battle_sprite = ExtResource("1_1egpq")
+attack_style = &"heavy"
+skill = SubResource("Resource_pvhwi")
+is_boss = true
+enrage_name = "仗势欺人"
+enrage_atk_bonus = 0.5
