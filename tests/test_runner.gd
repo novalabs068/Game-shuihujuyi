@@ -14,6 +14,9 @@ func _initialize() -> void:
 		"test_data_loads",
 		"test_damage_formula",
 		"test_role_counters",
+		"test_disarm_and_silence",
+		"test_same_buffs_do_not_stack",
+		"test_expose_and_boss_resist",
 		"test_defense_scales_with_level",
 		"test_danger_and_boss_power",
 		"test_guard_halves_damage",
@@ -176,6 +179,82 @@ func test_role_counters() -> bool:
 	check_eq(by_id(m, &"e").stun_turns, 2, "advantaged stun lasts one more turn")
 	m._stun(a, by_id(m, &"m"), 1)
 	check_eq(by_id(m, &"m").stun_turns, 1, "plain stun keeps its turns")
+	return true
+
+
+func test_disarm_and_silence() -> bool:
+	var disarm := skill(SkillData.Effect.DISARM, {"power": 0.0, "turns": 1})
+	var e := unit_data(&"e", [5000, 50, 0, 50], skill(SkillData.Effect.DAMAGE, {"power": 2.0}))
+	var m := battle([unit_data(&"a", [5000, 50, 0, 200], disarm)], [e])
+	advance_to(m, &"a")
+	m.act(BattleModel.Action.SKILL, by_id(m, &"e"))
+	var foe := by_id(m, &"e")
+	check_eq(foe.disarm_turns, 1, "disarm lands for 1 turn")
+	check(not foe.can_attack(), "disarmed unit cannot attack")
+	advance_to(m, &"e")
+	var hp_before := by_id(m, &"a").hp
+	foe.skill_cooldown = 1  # 让它只能普攻
+	m.act(BattleModel.Action.ATTACK, by_id(m, &"a"))
+	check_eq(by_id(m, &"a").hp, hp_before, "a disarmed attack turns into guarding")
+	check(foe.guarding, "disarmed unit guards instead")
+	check_eq(foe.disarm_turns, 0, "disarm wears off after its turn")
+	# 计穷：绝招和组合技都放不了
+	var silence := skill(SkillData.Effect.SILENCE, {"power": 0.0, "turns": 2})
+	var m2 := battle([unit_data(&"a", [5000, 50, 0, 200], silence)], [unit_data(&"e", [5000, 50, 0, 50], skill(SkillData.Effect.DAMAGE, {"power": 2.0}))])
+	advance_to(m2, &"a")
+	m2.act(BattleModel.Action.SKILL, by_id(m2, &"e"))
+	var silenced := by_id(m2, &"e")
+	check(not silenced.skill_ready(), "silenced unit's skill is not ready")
+	check(silenced.can_attack(), "silence still allows attacks")
+	return true
+
+
+func test_same_buffs_do_not_stack() -> bool:
+	var u := BattleUnit.new(unit_data(&"a", [100, 100, 0, 100]), BattleUnit.Side.PLAYER, 0, 1)
+	u.add_buff(BattleUnit.Buff.new("醉", -0.25, 0.0, 2))
+	u.add_buff(BattleUnit.Buff.new("醉", -0.25, 0.0, 2))
+	u.add_buff(BattleUnit.Buff.new("另一种减攻", -0.1, 0.0, 4))
+	check_eq(u.buffs.size(), 1, "attack debuffs merge into one")
+	check(is_equal_approx(u.buffs[0].atk_bonus, -0.25), "the stronger value is kept")
+	check_eq(u.buffs[0].turns_left, 4, "the longer duration is kept")
+	u.add_buff(BattleUnit.Buff.new("踩踏", 0.0, -0.2, 2))
+	check_eq(u.buffs.size(), 2, "a slow is a different kind")
+	u.add_buff(BattleUnit.Buff.new("天赋", 0.1, 0.0, BattleModel.WHOLE_BATTLE))
+	u.add_buff(BattleUnit.Buff.new("天赋", 0.1, 0.0, BattleModel.WHOLE_BATTLE))
+	check_eq(u.buffs.size(), 4, "whole-battle talent buffs stay separate")
+	return true
+
+
+func test_expose_and_boss_resist() -> bool:
+	var m := battle([unit_data(&"a", [500, 100, 0, 100])], [unit_data(&"e", [100000, 1, 100, 1])])
+	var a := by_id(m, &"a")
+	var e := by_id(m, &"e")
+	m._expose(e)
+	var hit := m._deal(a, e, 1.0, true)
+	check(hit >= 85 and hit <= 95, "exposed crit %d in [85, 95]" % hit)
+	check_eq(e.expose_turns, 0, "expose is used up by one hit")
+	var normal := m._deal(a, e, 1.0, true)
+	check(normal >= 71 and normal <= 79, "next hit is normal again (%d)" % normal)
+	# 头目：眩晕结束后的那一回合里，再眩晕无效
+	var boss := unit_data(&"b", [100000, 1, 0, 100])
+	boss.is_boss = true
+	var m2 := battle([unit_data(&"a", [500, 1, 0, 100])], [boss])
+	var b := by_id(m2, &"b")
+	advance_to(m2, &"a")
+	check(m2._stun(by_id(m2, &"a"), b, 1), "first stun lands")
+	m2.act(BattleModel.Action.GUARD)
+	advance_to(m2, &"a")  # 头目这回合被跳过，定力开始
+	check(b.resists(&"stun"), "boss resists stun right after one")
+	check(not m2._stun(by_id(m2, &"a"), b, 1), "second stun is resisted")
+	m2.act(BattleModel.Action.GUARD)
+	advance_to(m2, &"a")  # 头目又动了一次，定力过去
+	check(not b.resists(&"stun"), "resist wears off after the boss acts")
+	check(m2._stun(by_id(m2, &"a"), b, 1), "stun works again")
+	# 普通敌人没有定力
+	var m3 := battle([unit_data(&"a", [500, 1, 0, 100])], [unit_data(&"e", [100000, 1, 0, 100])])
+	m3._stun(by_id(m3, &"a"), by_id(m3, &"e"), 1)
+	advance_to(m3, &"a")
+	check(m3._stun(by_id(m3, &"a"), by_id(m3, &"e"), 1), "regular enemies can be stunned again")
 	return true
 
 

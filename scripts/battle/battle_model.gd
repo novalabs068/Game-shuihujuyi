@@ -22,6 +22,8 @@ const RAGE_ON_GUARD := 25
 const GUARD_REDUCTION := 0.5
 ## 「铁甲」精英受到的普攻伤害倍率
 const IRON_BASIC_MULTIPLIER := 0.5
+## 破绽：下一次挨打的伤害加成
+const EXPOSE_BONUS := 0.2
 ## 伤害公式里防御的基准（1 级时）：伤害 = 攻击 × 倍率 × 基准 ÷ (基准 + 防御)
 const DEF_BASE := 100.0
 const EXECUTE_THRESHOLD := 0.3
@@ -120,11 +122,11 @@ func turn_order_preview() -> Array[BattleUnit]:
 
 ## 当前行动者能发动的组合技（搭档在场、双方怒气都满），没有则返回 null。
 func available_combo(actor: BattleUnit) -> ComboData:
-	if actor == null or not actor.has_full_rage():
+	if actor == null or not actor.has_full_rage() or actor.silence_turns > 0:
 		return null
 	for c in combos:
 		var partner := _find_ally(actor, c.partner_of(actor.data.id))
-		if partner != null and partner != actor and partner.has_full_rage():
+		if partner != null and partner != actor and partner.has_full_rage() and partner.silence_turns == 0:
 			return c
 	return null
 
@@ -163,7 +165,7 @@ func start_next_turn() -> Array[Dictionary]:
 			_finish_turn(actor)
 			return _events
 	if actor.stun_turns > 0:
-		actor.stun_turns -= 1
+		actor.consume_stun()
 		_emit("info", actor, "眩晕", "%s 被眩晕，跳过本回合" % actor.display_name())
 		_finish_turn(actor)
 		return _events
@@ -182,12 +184,16 @@ func act(action: Action, target: BattleUnit = null) -> Array[Dictionary]:
 	match action:
 		Action.SKILL when actor.skill_ready():
 			_do_skill(actor, target)
+		Action.ATTACK when not actor.can_attack():
+			_do_guard(actor, "%s 被缴了械，只能防御" % actor.display_name())
 		Action.GUARD:
 			actor.guarding = true
 			actor.add_rage(RAGE_ON_GUARD)
 			_emit("action", actor, "防御", "%s 摆出防御架势" % actor.display_name())
 		Action.COMBO when available_combo(actor) != null:
 			_do_combo(actor, available_combo(actor), target)
+		_ when not actor.can_attack():
+			_do_guard(actor, "%s 被缴了械，只能防御" % actor.display_name())
 		_:
 			_do_attack(actor, target)
 	_finish_turn(actor)
@@ -207,6 +213,8 @@ func act_ai() -> Array[Dictionary]:
 	var weakest := _weakest(foes)
 	if available_combo(actor) != null:
 		return act(Action.COMBO, weakest)
+	if not actor.can_attack() and not actor.skill_ready():
+		return act(Action.GUARD)
 	if is_threatened(actor) and not (actor.skill_ready() and actor.data.skill.effect in [SkillData.Effect.STUN, SkillData.Effect.STUN_ALL, SkillData.Effect.HEAL]):
 		return act(Action.GUARD)
 	if actor.skill_ready() and _skill_worth_using(actor, foes):
@@ -233,12 +241,18 @@ func intent_target_of(enemy: BattleUnit) -> BattleUnit:
 ## 有没有敌人预告要用技能打这个好汉。
 func is_threatened(hero: BattleUnit) -> bool:
 	for e in alive(BattleUnit.Side.ENEMY):
-		if e.intent_skill and e.stun_turns == 0 and intent_target_of(e) == hero:
+		if e.intent_skill and e.stun_turns == 0 and e.silence_turns == 0 and intent_target_of(e) == hero:
 			return true
 	return false
 
 
 # --- 行动结算 ---
+
+func _do_guard(actor: BattleUnit, log_text: String) -> void:
+	actor.guarding = true
+	actor.add_rage(RAGE_ON_GUARD)
+	_emit("action", actor, "防御", log_text)
+
 
 func _do_attack(actor: BattleUnit, wanted: BattleUnit) -> void:
 	var target := _pick_foe(actor, wanted)
@@ -264,7 +278,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			var target := _pick_foe(actor, wanted)
 			var low := target.hp_ratio() < EXECUTE_THRESHOLD
 			if low:
-				_emit("info", target, "破绽", "%s 露出破绽，伤害翻倍" % target.display_name())
+				_emit("info", target, "残血", "%s 伤重难支，伤害翻倍" % target.display_name())
 			_deal(actor, target, s.power * (2.0 if low else 1.0))
 		SkillData.Effect.MULTI_HIT:
 			var target := _pick_foe(actor, wanted)
@@ -283,14 +297,14 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			_emit("info", actor, "嘲讽", "%s 吸引了全体敌人的注意" % actor.display_name())
 		SkillData.Effect.TEAM_HASTE:
 			for ally in allies_of(actor):
-				ally.buffs.append(BattleUnit.Buff.new(s.display_name, 0.0, s.amount, s.turns))
+				ally.add_buff(BattleUnit.Buff.new(s.display_name, 0.0, s.amount, s.turns))
 				ally.add_rage(s.rage_gain)
 				_emit("info", ally, "加速", "")
 			_emit("info", actor, "", "全队速度提升，怒气 +%d" % s.rage_gain)
 		SkillData.Effect.STUN:
 			var target := _pick_foe(actor, wanted)
-			_stun(actor, target, s.turns)
-			_emit("info", target, "眩晕", "%s 被放倒了" % target.display_name())
+			if _stun(actor, target, s.turns):
+				_emit("info", target, "眩晕", "%s 被放倒了" % target.display_name())
 		SkillData.Effect.STEAL:
 			var target := _pick_foe(actor, wanted)
 			# 只偷增益，减益（减攻、减速）不偷
@@ -300,7 +314,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			else:
 				var b: BattleUnit.Buff = gains.back()
 				target.buffs.erase(b)
-				actor.buffs.append(b)
+				actor.add_buff(b)
 				_emit("info", actor, "偷到 " + b.name, "%s 偷走了 %s 的「%s」" % [actor.display_name(), target.display_name(), b.name])
 			_extra_action = true
 			_emit("info", actor, "再动", "%s 立刻再行动一次" % actor.display_name())
@@ -309,6 +323,8 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 				var amount := mini(roundi(ally.max_hp * s.amount), ally.max_hp - ally.hp)
 				ally.hp += amount
 				ally.stun_turns = 0
+				ally.disarm_turns = 0
+				ally.silence_turns = 0
 				_emit("heal", ally, "+%d" % amount, "")
 			_emit("info", actor, "", "%s 为全队疗伤" % actor.display_name())
 		SkillData.Effect.GUARD_STRIKE:
@@ -326,7 +342,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			for foe in foes_of(actor):
 				_deal(actor, foe, s.power)
 				if foe.is_alive():
-					foe.buffs.append(BattleUnit.Buff.new("踩踏", 0.0, -s.amount, s.turns))
+					foe.add_buff(BattleUnit.Buff.new("踩踏", 0.0, -s.amount, s.turns))
 					_emit("info", foe, "减速", "")
 		SkillData.Effect.ALL_FOES_RAGE:
 			var k := 1.0 + s.amount * actor.rage / BattleUnit.RAGE_MAX
@@ -350,23 +366,29 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			var target := _pick_foe(actor, wanted)
 			_deal(actor, target, s.power)
 			if target.is_alive():
-				target.buffs.append(BattleUnit.Buff.new("断筋", 0.0, -s.amount, s.turns))
+				target.add_buff(BattleUnit.Buff.new("断筋", 0.0, -s.amount, s.turns))
 				_emit("info", target, "减速", "%s 行动变慢了" % target.display_name())
 		SkillData.Effect.WEAKEN_ALL:
 			for foe in foes_of(actor):
-				foe.buffs.append(BattleUnit.Buff.new("醉", -s.amount, 0.0, s.turns))
+				foe.add_buff(BattleUnit.Buff.new("醉", -s.amount, 0.0, s.turns))
 				_emit("info", foe, "减攻", "")
 			_emit("info", actor, "", "敌方全体攻击下降")
 		SkillData.Effect.TEAM_ATK:
 			for ally in allies_of(actor):
-				ally.buffs.append(BattleUnit.Buff.new(s.display_name, s.amount, 0.0, s.turns))
+				ally.add_buff(BattleUnit.Buff.new(s.display_name, s.amount, 0.0, s.turns))
 				_emit("info", ally, "增攻", "")
 			_emit("info", actor, "", "全队攻击提升")
 		SkillData.Effect.STUN_ALL:
 			for foe in foes_of(actor):
-				_stun(actor, foe, s.turns)
-				_emit("info", foe, "昏睡", "")
+				if _stun(actor, foe, s.turns):
+					_emit("info", foe, "昏睡", "")
 			_emit("info", actor, "", "敌方全体被麻翻了")
+		SkillData.Effect.DISARM, SkillData.Effect.SILENCE:
+			var target := _pick_foe(actor, wanted)
+			if s.power > 0.0:
+				_deal(actor, target, s.power)
+			if target != null and target.is_alive():
+				_control(actor, target, &"disarm" if s.effect == SkillData.Effect.DISARM else &"silence", s.turns)
 		SkillData.Effect.BACKSTAB:
 			# 绕过嘲讽，打预告里的目标（预告时血量比例最低的人）
 			var target := wanted if wanted != null and wanted.is_alive() else _weakest(foes_of(actor))
@@ -390,8 +412,8 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 			_deal(b, _pick_foe(b, wanted), combo.power)
 		ComboData.Effect.STUN_ALL_COMBO:
 			for foe in foes_of(actor):
-				_stun(b, foe, 1)
-				_emit("info", foe, "眩晕", "")
+				if _stun(b, foe, 1):
+					_emit("info", foe, "眩晕", "")
 			var target := _pick_foe(b, wanted)
 			for i in combo.hits:
 				if not target.is_alive():
@@ -403,7 +425,7 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 			var stolen := 0
 			for foe in foes_of(actor):
 				for buff in foe.buffs:
-					actor.buffs.append(buff)
+					actor.add_buff(buff)
 					stolen += 1
 				foe.buffs.clear()
 			_emit("info", actor, "偷到 %d 个增益" % stolen, "")
@@ -419,6 +441,8 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 				var healed := mini(roundi(ally.max_hp * combo.amount), ally.max_hp - ally.hp)
 				ally.hp += healed
 				ally.stun_turns = 0
+				ally.disarm_turns = 0
+				ally.silence_turns = 0
 				ally.add_rage(combo.rage_gain)
 				_emit("heal", ally, "+%d" % healed, "")
 		ComboData.Effect.SWORN:
@@ -450,12 +474,16 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 		raw *= 1.0 + attacker.talent(&"boss_slayer")
 	raw *= 1.0 - target.talent(&"tough")
 	raw *= Roles.damage_multiplier(attacker.data.role, target.data.role)
+	var exposed := target.expose_turns > 0
+	if exposed:
+		raw *= 1.0 + EXPOSE_BONUS
+		target.expose_turns = 0
 	var amount := maxi(1, roundi(raw))
 	var absorbed := mini(target.shield, amount)
 	target.shield -= absorbed
 	target.hp = maxi(target.hp - (amount - absorbed), 0)
 	var countered := Roles.beats(attacker.data.role, target.data.role)
-	var popup := ("克 " if countered else "") + ("暴击 -%d" if crit else "-%d") % amount
+	var popup := ("克 " if countered else "") + ("绽 " if exposed else "") + ("暴击 -%d" if crit else "-%d") % amount
 	var log_text := "%s 对 %s 造成 %d 伤害" % [attacker.display_name(), target.display_name(), amount]
 	if countered:
 		log_text += "（%s克%s）" % [UnitData.ROLE_TAGS[attacker.data.role], UnitData.ROLE_TAGS[target.data.role]]
@@ -463,13 +491,13 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	if crit and attacker.has_talent(&"crit_haste"):
 		var t := attacker.data.talent
 		if attacker.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.name == t.display_name).size() < TalentData.CRIT_HASTE_STACKS:
-			attacker.buffs.append(BattleUnit.Buff.new(t.display_name, 0.0, attacker.talent(&"crit_haste"), WHOLE_BATTLE))
+			attacker.add_buff(BattleUnit.Buff.new(t.display_name, 0.0, attacker.talent(&"crit_haste"), WHOLE_BATTLE))
 			_emit("info", attacker, "加速", "%s「%s」，越打越快" % [attacker.display_name(), t.display_name])
 	if not target.is_alive():
 		_on_death(target)
 	elif target.data.is_boss and not target.enraged and target.hp_ratio() < ENRAGE_THRESHOLD:
 		target.enraged = true
-		target.buffs.append(BattleUnit.Buff.new(target.data.enrage_name, target.data.enrage_atk_bonus, 0.0, target.data.enrage_turns))
+		target.add_buff(BattleUnit.Buff.new(target.data.enrage_name, target.data.enrage_atk_bonus, 0.0, target.data.enrage_turns))
 		_emit("banner", target, target.data.enrage_name, "%s「%s」，攻击大幅提升！" % [target.display_name(), target.data.enrage_name])
 	return amount
 
@@ -477,8 +505,35 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 # --- 内部工具 ---
 
 ## 眩晕 turns 回合；克制对方职业时多 1 回合。
-func _stun(actor: BattleUnit, target: BattleUnit, turns: int) -> void:
-	target.stun_turns = maxi(target.stun_turns, Roles.control_turns(actor.data.role, target.data.role, turns))
+func _stun(actor: BattleUnit, target: BattleUnit, turns: int) -> bool:
+	return _control(actor, target, &"stun", turns)
+
+
+const CONTROL_NAMES := {&"stun": "眩晕", &"disarm": "缴械", &"silence": "计穷"}
+
+## 上一种控制（眩晕、缴械、计穷）：同种不叠加，取较长的回合；克制对方职业时多 1 回合；
+## 头目的定力期间无效。返回是否生效。
+func _control(actor: BattleUnit, target: BattleUnit, kind: StringName, turns: int) -> bool:
+	if target.resists(kind):
+		_emit("info", target, "定力", "%s 定力未失，%s无效" % [target.display_name(), CONTROL_NAMES[kind]])
+		return false
+	var n := Roles.control_turns(actor.data.role, target.data.role, turns)
+	match kind:
+		&"stun":
+			target.stun_turns = maxi(target.stun_turns, n)
+		&"disarm":
+			target.disarm_turns = maxi(target.disarm_turns, n)
+			_emit("info", target, "缴械", "%s 被缴了械，%d 回合不能普攻" % [target.display_name(), n])
+		&"silence":
+			target.silence_turns = maxi(target.silence_turns, n)
+			_emit("info", target, "计穷", "%s 计穷，%d 回合放不了绝招" % [target.display_name(), n])
+	return true
+
+
+## 让目标露出破绽：下一次挨打伤害 +20%。
+func _expose(target: BattleUnit, turns := 1) -> void:
+	target.expose_turns = maxi(target.expose_turns, turns)
+	_emit("info", target, "破绽", "%s 露出破绽" % target.display_name())
 
 
 func _on_death(unit: BattleUnit) -> void:
@@ -492,7 +547,7 @@ func _on_death(unit: BattleUnit) -> void:
 ## 装备的开战效果：疾风加速。
 func _apply_opening_gear(u: BattleUnit) -> void:
 	if u.has_gear(&"swift"):
-		u.buffs.append(BattleUnit.Buff.new("疾风", 0.0, Equipment.SWIFT_BONUS, Equipment.SWIFT_TURNS))
+		u.add_buff(BattleUnit.Buff.new("疾风", 0.0, Equipment.SWIFT_BONUS, Equipment.SWIFT_TURNS))
 
 
 ## 开战时生效的天赋：自己或全队加怒气、加攻、加速、回春。
@@ -510,10 +565,10 @@ func _apply_opening_talent(u: BattleUnit) -> void:
 				a.add_rage(roundi(v))
 		&"team_atk":
 			for a in allies:
-				a.buffs.append(BattleUnit.Buff.new(t.display_name, v, 0.0, WHOLE_BATTLE))
+				a.add_buff(BattleUnit.Buff.new(t.display_name, v, 0.0, WHOLE_BATTLE))
 		&"team_haste_open":
 			for a in allies:
-				a.buffs.append(BattleUnit.Buff.new(t.display_name, 0.0, v, 2))
+				a.add_buff(BattleUnit.Buff.new(t.display_name, 0.0, v, 2))
 		&"team_regen":
 			for a in allies:
 				if not &"regen" in a.extra_effects:
@@ -521,6 +576,7 @@ func _apply_opening_talent(u: BattleUnit) -> void:
 
 
 func _finish_turn(actor: BattleUnit) -> void:
+	actor.tick_turn_end()
 	if not _extra_action:
 		actor.next_time = time + TIME_PER_ACTION / actor.spd()
 	_extra_action = false
@@ -590,6 +646,19 @@ func _skill_worth_using(actor: BattleUnit, foes: Array[BattleUnit]) -> bool:
 
 
 func _skill_target(actor: BattleUnit, foes: Array[BattleUnit], weakest: BattleUnit) -> BattleUnit:
+	match actor.data.skill.effect:
+		SkillData.Effect.SILENCE:
+			# 先封住正要放绝招的人
+			for u in foes:
+				if u.intent_skill and u.silence_turns == 0 and not u.resists(&"silence"):
+					return u
+		SkillData.Effect.DISARM:
+			var strongest: BattleUnit = null
+			for u in foes:
+				if u.disarm_turns == 0 and not u.resists(&"disarm") and (strongest == null or u.atk() > strongest.atk()):
+					strongest = u
+			if strongest != null:
+				return strongest
 	if actor.data.skill.effect == SkillData.Effect.STUN:
 		var best: BattleUnit = null
 		for u in foes:

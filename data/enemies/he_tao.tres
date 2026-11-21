@@ -11,9 +11,10 @@
 [sub_resource type="Resource" id="Resource_1004g"]
 script = ExtResource("4_baddu")
 display_name = "锁拿"
-description = "单体眩晕 1 回合。"
-effect = 6
-turns = 1
+description = "单体 120% 伤害，锁拿：缴械 2 回合，不能普攻。"
+effect = 21
+power = 1.2
+turns = 2
 
 [resource]
 script = ExtResource("3_5p3dc")

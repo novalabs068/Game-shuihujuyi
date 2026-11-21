@@ -24,6 +24,8 @@ enum Effect {
 	ALL_FOES_RAGE,  ## 敌方全体各受 power 倍伤害；自己怒气越高越疼，满怒时 ×(1+amount)。不消耗怒气
 	ALL_FOES_BURN,  ## 敌方全体各受 power 倍伤害，并灼烧 turns 回合：每次轮到时掉施放者攻击 amount 倍的血（无视防御）
 	ALL_FOES_MULTI, ## 敌方全体连打 hits 轮，每轮各受 power 倍伤害
+	DISARM,      ## 单体 power 倍伤害（0 就不打），并缴械 turns 回合：不能普攻
+	SILENCE,     ## 单体 power 倍伤害（0 就不打），并计穷 turns 回合：不能放绝招和组合技
 }
 
 @export var display_name: String
@@ -39,4 +41,4 @@ enum Effect {
 
 ## 出手前是否需要玩家选一个敌人。
 func needs_enemy_target() -> bool:
-	return effect in [Effect.DAMAGE, Effect.EXECUTE, Effect.MULTI_HIT, Effect.SURE_CRIT, Effect.STUN, Effect.STEAL, Effect.GUARD_STRIKE, Effect.PIERCE, Effect.CRIPPLE]
+	return effect in [Effect.DAMAGE, Effect.EXECUTE, Effect.MULTI_HIT, Effect.SURE_CRIT, Effect.STUN, Effect.STEAL, Effect.GUARD_STRIKE, Effect.PIERCE, Effect.CRIPPLE, Effect.DISARM, Effect.SILENCE]

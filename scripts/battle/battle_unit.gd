@@ -14,6 +14,10 @@ const BERSERK_THRESHOLD := 0.3
 const BERSERK_BONUS := 1.0
 ## 减益叠得再多，攻击和速度也不低于原来的这么多
 const MIN_STAT_RATIO := 0.3
+## 持续这么多回合以上的增益算「整场有效」（天赋、越打越快），各算各的，不和同类合并
+const PERMANENT_TURNS := 900
+## 头目的「定力」：一种控制结束后，同一种控制在这么多回合内对它无效
+const BOSS_RESIST_TURNS := 1
 
 
 class Buff:
@@ -40,6 +44,12 @@ var skill_cooldown := 0
 var shield := 0
 var guarding := false
 var stun_turns := 0
+## 缴械：不能普攻；计穷：不能放绝招和组合技；破绽：下一次挨打伤害 +20%。都在自己行动结束时减 1
+var disarm_turns := 0
+var silence_turns := 0
+var expose_turns := 0
+## 头目的定力：控制种类（&"stun"、&"disarm"、&"silence"）→ 还要几回合才会再被这种控制
+var control_resist := {}
 var taunt_turns := -1
 var reduction := 0.0
 var reduction_turns := -1
@@ -147,7 +157,62 @@ func add_rage(amount: int) -> void:
 
 
 func skill_ready() -> bool:
-	return data.skill != null and skill_cooldown == 0
+	return data.skill != null and skill_cooldown == 0 and silence_turns == 0
+
+
+func can_attack() -> bool:
+	return disarm_turns == 0
+
+
+func resists(kind: StringName) -> bool:
+	return int(control_resist.get(kind, 0)) > 0
+
+
+## 加一个增益或减益。同一类（加攻、减攻、加速、减速）不叠加：数值取大的，回合取长的。
+## 整场有效的（天赋给的）各算各的。
+func add_buff(b: Buff) -> void:
+	if b.turns_left < PERMANENT_TURNS:
+		var key := _buff_kind(b)
+		for old in buffs:
+			if old.turns_left < PERMANENT_TURNS and _buff_kind(old) == key:
+				if absf(b.atk_bonus) + absf(b.spd_bonus) > absf(old.atk_bonus) + absf(old.spd_bonus):
+					old.name = b.name
+					old.atk_bonus = b.atk_bonus
+					old.spd_bonus = b.spd_bonus
+				old.turns_left = maxi(old.turns_left, b.turns_left)
+				return
+	buffs.append(b)
+
+
+static func _buff_kind(b: Buff) -> String:
+	if not is_zero_approx(b.atk_bonus):
+		return "atk+" if b.atk_bonus > 0 else "atk-"
+	return "spd+" if b.spd_bonus > 0 else "spd-"
+
+
+## 自己行动结束时：缴械、计穷、破绽各减 1；头目的控制刚结束就起定力。
+func tick_turn_end() -> void:
+	if disarm_turns > 0:
+		disarm_turns -= 1
+		if disarm_turns == 0:
+			_start_resist(&"disarm")
+	if silence_turns > 0:
+		silence_turns -= 1
+		if silence_turns == 0:
+			_start_resist(&"silence")
+	expose_turns = maxi(expose_turns - 1, 0)
+
+
+## 眩晕的这一回合被跳过时调用。
+func consume_stun() -> void:
+	stun_turns -= 1
+	if stun_turns == 0:
+		_start_resist(&"stun")
+
+
+func _start_resist(kind: StringName) -> void:
+	if data.is_boss:
+		control_resist[kind] = BOSS_RESIST_TURNS
 
 
 ## 轮到自己时调用：清掉上回合的防御，冷却和各状态减 1。
@@ -160,6 +225,10 @@ func tick_turn_start() -> void:
 		reduction_turns -= 1
 		if reduction_turns < 0:
 			reduction = 0.0
+	for kind in control_resist.keys():
+		control_resist[kind] = int(control_resist[kind]) - 1
+		if control_resist[kind] <= 0:
+			control_resist.erase(kind)
 	for b in buffs:
 		b.turns_left -= 1
 	buffs.assign(buffs.filter(func(b: Buff) -> bool: return b.turns_left >= 0))
@@ -179,6 +248,14 @@ func status_tags() -> PackedStringArray:
 		tags.append("防御")
 	if stun_turns > 0:
 		tags.append("眩晕")
+	if disarm_turns > 0:
+		tags.append("缴械")
+	if silence_turns > 0:
+		tags.append("计穷")
+	if expose_turns > 0:
+		tags.append("破绽")
+	if not control_resist.is_empty():
+		tags.append("定力")
 	if burn_turns > 0:
 		tags.append("灼烧")
 	if shield > 0:

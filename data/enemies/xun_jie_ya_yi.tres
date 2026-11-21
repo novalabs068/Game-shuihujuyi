@@ -11,8 +11,9 @@
 [sub_resource type="Resource" id="Resource_yvsur"]
 script = ExtResource("3_dstm5")
 display_name = "铁尺锁人"
-description = "单体眩晕 1 回合。"
-effect = 6
+description = "单体 80% 伤害，铁尺锁住兵器：缴械 1 回合，不能普攻。"
+effect = 21
+power = 0.8
 turns = 1
 cooldown = 4
 

@@ -537,8 +537,12 @@ func _refresh() -> void:
 		_hint_label.text = ""
 		if skill != null:
 			_hint_label.text = "「%s」%s" % [skill.display_name, skill.description]
-			if player and not actor.skill_ready():
+			if player and actor.silence_turns > 0:
+				_hint_label.text = "计穷：还有 %d 回合放不了绝招和组合技" % actor.silence_turns
+			elif player and not actor.skill_ready():
 				_hint_label.text = "「%s」冷却中，还要 %d 回合。普攻、防御能攒怒气" % [skill.display_name, actor.skill_cooldown]
+			if player and not actor.can_attack():
+				_hint_label.text += "　被缴械：不能普攻"
 	else:
 		_actor_label.text = ""
 		_target_label.text = ""
@@ -556,7 +560,9 @@ func _refresh() -> void:
 	_skill_sub.text = skill_name if skill_name != "" else "绝招"
 	if player and actor.data.skill != null and not actor.skill_ready():
 		_skill_button.disabled = true
-		_skill_sub.text = "冷却 %d" % actor.skill_cooldown
+		_skill_sub.text = "计穷 %d" % actor.silence_turns if actor.silence_turns > 0 else "冷却 %d" % actor.skill_cooldown
+	if player and not actor.can_attack():
+		_attack_button.disabled = true
 	var combo := model.available_combo(actor) if player else null
 	_combo_button.disabled = not input or combo == null
 	_combo_sub.text = combo.display_name if combo != null else "组合技"
@@ -582,6 +588,8 @@ func _intent_text(u: BattleUnit) -> String:
 	if u.side == BattleUnit.Side.ENEMY:
 		if u.stun_turns > 0:
 			return "眩晕中，下一步动不了"
+		if u.silence_turns > 0 and u.intent_skill:
+			return "计穷，绝招放不出来"
 		var t := model.intent_target_of(u)
 		if t == null:
 			return ""
