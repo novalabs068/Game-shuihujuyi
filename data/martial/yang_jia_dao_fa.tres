@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_uquvl"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_7qn83"]
+
+[sub_resource type="Resource" id="Resource_3nasa"]
+script = ExtResource("2_7qn83")
+display_name = "杨家刀法"
+description = "一刀劈开对方的护身，单体 220% 伤害，无视防御。"
+effect = 11
+power = 2.2
+
+[resource]
+script = ExtResource("1_uquvl")
+id = &"yang_jia_dao_fa"
+display_name = "杨家刀法"
+flavor = "杨令公传下来的刀法，一刀下去，铁甲也挡不住。"
+source = "杨志列传完结时，杨志传授"
+skill = SubResource("Resource_3nasa")
+side_atk_pct = 0.06
+side_effects = Array[StringName]([&"keen"])

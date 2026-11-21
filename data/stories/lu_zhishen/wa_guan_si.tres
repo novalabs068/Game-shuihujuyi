@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_y0pd8"]
+[ext_resource type="Resource" path="res://data/enemies/cui_daocheng.tres" id="2_8s68s"]
+[ext_resource type="Resource" path="res://data/enemies/qiu_xiaoyi.tres" id="3_tk3bw"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_byyuo"]
+
+[resource]
+script = ExtResource("4_byyuo")
+id = "lu_zhishen_wa_guan_si"
+title = "瓦罐寺"
+enemies = Array[ExtResource("1_y0pd8")]([ExtResource("2_8s68s"), ExtResource("3_tk3bw")])
+enemy_level = 13
+recommended_level = 13

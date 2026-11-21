@@ -11,5 +11,5 @@ flavor = "杨家祖传宝刀：砍铜剁铁、吹毛断发、杀人不见血。"
 atk_pct = 0.12
 effects = Array[StringName]([&"keen"])
 owner = &"yang_zhi"
-source = "bounty_niu_er"
-source_text = "东京悬赏「泼皮牛二」"
+source = "story_yang_zhi_4"
+source_text = "杨志列传完结"

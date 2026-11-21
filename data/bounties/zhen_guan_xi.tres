@@ -3,14 +3,14 @@
 [ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_d5t07"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_geoni"]
 [ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="3_x7f4m"]
-[ext_resource type="Resource" path="res://data/enemies/zhen_guan_xi.tres" id="4_cpgva"]
+[ext_resource type="Resource" path="res://data/enemies/ma_biao.tres" id="4_d5t07"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_ttn30"]
 
 [sub_resource type="Resource" id="Resource_igbkb"]
 script = ExtResource("5_ttn30")
 id = "bounty_zhen_guan_xi"
-title = "悬赏：镇关西"
-enemies = Array[ExtResource("2_geoni")]([ExtResource("3_x7f4m"), ExtResource("4_cpgva"), ExtResource("3_x7f4m")])
+title = "悬赏：过街虎马彪"
+enemies = Array[ExtResource("2_geoni")]([ExtResource("3_x7f4m"), ExtResource("4_d5t07"), ExtResource("3_x7f4m")])
 enemy_level = 11
 recommended_level = 11
 
@@ -19,6 +19,6 @@ script = ExtResource("1_d5t07")
 id = &"zhen_guan_xi"
 location = &"weizhou"
 grade = 1
-target = "镇关西"
-description = "渭州状元桥下开肉铺的郑屠，自号镇关西，强骗民女、欺压乡里。"
+target = "过街虎马彪"
+description = "渭州城外的恶霸，霸着集市收「平安钱」，不给就砸摊打人。（自拟）"
 stage = SubResource("Resource_igbkb")

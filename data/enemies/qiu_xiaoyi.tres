@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/qiu_xiaoyi.png" id="1_8u7ac"]
+[ext_resource type="Texture2D" path="res://art/busts/qiu_xiaoyi.png" id="2_cx46p"]
+[ext_resource type="Texture2D" path="res://art/faces/qiu_xiaoyi.png" id="3_ycj73"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/qiu_xiaoyi.png" id="4_0fyif"]
+[ext_resource type="Texture2D" path="res://art/portraits/qiu_xiaoyi.png" id="5_nbh62"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_7plek"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_n7p06"]
+
+[sub_resource type="Resource" id="Resource_gp4fr"]
+script = ExtResource("7_n7p06")
+display_name = "夜叉暗刀"
+description = "无视嘲讽，打血量比例最低的人，180% 伤害。"
+effect = 9
+power = 1.8
+
+[resource]
+script = ExtResource("6_7plek")
+id = &"qiu_xiaoyi"
+display_name = "飞天夜叉丘小乙"
+role = 1
+base_hp = 680
+base_atk = 124
+base_def = 22
+base_spd = 114
+portrait = ExtResource("5_nbh62")
+bust = ExtResource("2_cx46p")
+face = ExtResource("3_ycj73")
+map_sprite = ExtResource("4_0fyif")
+battle_sprite = ExtResource("1_8u7ac")
+skill = SubResource("Resource_gp4fr")

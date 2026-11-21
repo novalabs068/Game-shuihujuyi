@@ -25,9 +25,14 @@ func equip_quality() -> EquipData.Quality:
 	return EquipData.Quality.JING if grade == Grade.JIA else EquipData.Quality.LIANG
 
 
+## 悬赏还送一份药：甲等续命膏，乙丙等金疮药。
+func medicine() -> StringName:
+	return &"xu_ming_gao" if grade == Grade.JIA else &"jin_chuang_yao"
+
+
 ## 接下悬赏开打时交给 main 的额外奖励。
 func battle_bonus() -> Dictionary:
-	return {"tokens": tokens(), "equip_quality": equip_quality(), "flag": "bounty_" + String(id), "text": "揭下了「%s」的悬赏。" % target}
+	return {"tokens": tokens(), "equip_quality": equip_quality(), "medicine": medicine(), "flag": "bounty_" + String(id), "text": "揭下了「%s」的悬赏。" % target}
 
 
 func grade_name() -> String:

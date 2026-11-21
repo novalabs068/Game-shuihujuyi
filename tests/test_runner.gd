@@ -834,7 +834,7 @@ func test_rewards() -> bool:
 func test_bounties_and_events_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var bounties: Array[Resource] = GameDB.load_dir("res://data/bounties/")
-	check_eq(bounties.size(), 9, "nine bounties")
+	check_eq(bounties.size(), 10, "ten bounties")
 	var map: WorldMapData = load("res://data/maps/ch1.tres")
 	for res in bounties:
 		var b := res as BountyData
@@ -957,9 +957,12 @@ func test_story_script_parse() -> bool:
 
 
 func test_story_data() -> bool:
+	var bg_ops := StoryScript.parse("@bg weizhou\n甲：一\n@bg wutaishan\n乙：二\n@battle x\n@bg dongjing")
+	check_eq(StoryScript.background_before(bg_ops, 4), "wutaishan", "battle uses the latest background")
+	check_eq(StoryScript.background_before(bg_ops, 0), "", "no background before the first op")
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var stories: Array = GameDB.load_dir("res://data/stories/")
-	check_eq(stories.size(), 8, "林冲、武松列传各 4 段")
+	check_eq(stories.size(), 16, "林冲、武松、杨志、鲁智深列传各 4 段")
 	var map: WorldMapData = load("res://data/maps/ch1.tres")
 	for res in stories:
 		var story: StoryData = res
@@ -993,7 +996,7 @@ func test_story_data() -> bool:
 func test_martial_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var all: Array = GameDB.load_dir("res://data/martial/")
-	check_eq(all.size(), 6, "6 martial arts")
+	check_eq(all.size(), 8, "8 martial arts")
 	for res in all:
 		var m: MartialData = res
 		check(m.skill != null and m.skill.description != "", "%s has a described skill" % m.display_name)

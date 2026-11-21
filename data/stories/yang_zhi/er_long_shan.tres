@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_c1qm0"]
+[ext_resource type="Resource" path="res://data/enemies/er_long_lou_luo.tres" id="2_3fihw"]
+[ext_resource type="Resource" path="res://data/enemies/deng_long.tres" id="3_guykd"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_g2d11"]
+
+[resource]
+script = ExtResource("4_g2d11")
+id = "yang_zhi_er_long_shan"
+title = "宝珠寺"
+enemies = Array[ExtResource("1_c1qm0")]([ExtResource("2_3fihw"), ExtResource("3_guykd"), ExtResource("2_3fihw")])
+enemy_level = 19
+recommended_level = 19

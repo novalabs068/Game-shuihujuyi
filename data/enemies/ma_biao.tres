@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shan_zei_tou_mu.png" id="1_ed8ja"]
+[ext_resource type="Texture2D" path="res://art/busts/shan_zei_tou_mu.png" id="2_1dwct"]
+[ext_resource type="Texture2D" path="res://art/faces/shan_zei_tou_mu.png" id="3_5famv"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="4_0cmhg"]
+[ext_resource type="Texture2D" path="res://art/portraits/shan_zei_tou_mu.png" id="5_6n0wg"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_f7ao5"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_12ehh"]
+
+[sub_resource type="Resource" id="Resource_62lq2"]
+script = ExtResource("7_12ehh")
+display_name = "猛虎下山"
+description = "单体 200% 伤害。"
+power = 2.0
+
+[resource]
+script = ExtResource("6_f7ao5")
+id = &"ma_biao"
+display_name = "过街虎马彪"
+nickname = "Boss"
+role = 1
+base_hp = 1200
+base_atk = 120
+base_def = 30
+base_spd = 98
+portrait = ExtResource("5_6n0wg")
+bust = ExtResource("2_1dwct")
+face = ExtResource("3_5famv")
+map_sprite = ExtResource("4_0cmhg")
+battle_sprite = ExtResource("1_ed8ja")
+attack_style = &"heavy"
+skill = SubResource("Resource_62lq2")
+is_boss = true
+enrage_name = "红了眼"
+enrage_atk_bonus = 0.5

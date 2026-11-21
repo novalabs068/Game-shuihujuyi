@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/lin_zhong_qiang_ren.png" id="1_yk5gj"]
+[ext_resource type="Texture2D" path="res://art/busts/lin_zhong_qiang_ren.png" id="2_r8c6q"]
+[ext_resource type="Texture2D" path="res://art/faces/lin_zhong_qiang_ren.png" id="3_2cx5e"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/lin_zhong_qiang_ren.png" id="4_mywhu"]
+[ext_resource type="Texture2D" path="res://art/portraits/lin_zhong_qiang_ren.png" id="5_c1w3q"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_hm1yy"]
+
+[resource]
+script = ExtResource("6_hm1yy")
+id = &"er_long_lou_luo"
+display_name = "二龙山喽啰"
+role = 1
+base_hp = 420
+base_atk = 104
+base_def = 22
+base_spd = 98
+portrait = ExtResource("5_c1w3q")
+bust = ExtResource("2_r8c6q")
+face = ExtResource("3_2cx5e")
+map_sprite = ExtResource("4_mywhu")
+battle_sprite = ExtResource("1_yk5gj")

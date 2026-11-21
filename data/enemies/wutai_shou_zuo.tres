@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/wutai_seng.png" id="1_lm3ej"]
+[ext_resource type="Texture2D" path="res://art/busts/wutai_seng.png" id="2_rd5eb"]
+[ext_resource type="Texture2D" path="res://art/faces/wutai_seng.png" id="3_eseyv"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/wutai_seng.png" id="4_0vprh"]
+[ext_resource type="Texture2D" path="res://art/portraits/wutai_seng.png" id="5_6vlo1"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_hacfn"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_ticdk"]
+
+[sub_resource type="Resource" id="Resource_fyc5n"]
+script = ExtResource("7_ticdk")
+display_name = "降魔棍"
+description = "单体 180% 伤害。"
+power = 1.8
+
+[resource]
+script = ExtResource("6_hacfn")
+id = &"wutai_shou_zuo"
+display_name = "监寺僧"
+nickname = "Boss"
+role = 1
+base_hp = 820
+base_atk = 124
+base_def = 28
+base_spd = 96
+portrait = ExtResource("5_6vlo1")
+bust = ExtResource("2_rd5eb")
+face = ExtResource("3_eseyv")
+map_sprite = ExtResource("4_0vprh")
+battle_sprite = ExtResource("1_lm3ej")
+attack_style = &"heavy"
+skill = SubResource("Resource_fyc5n")
+is_boss = true
+enrage_name = "动了真火"
+enrage_atk_bonus = 0.5

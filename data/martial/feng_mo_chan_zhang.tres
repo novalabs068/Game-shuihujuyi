@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_4k78x"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_854du"]
+
+[sub_resource type="Resource" id="Resource_k48jc"]
+script = ExtResource("2_854du")
+display_name = "疯魔禅杖"
+description = "禅杖横扫，敌方全体各受 100% 伤害。"
+effect = 12
+
+[resource]
+script = ExtResource("1_4k78x")
+id = &"feng_mo_chan_zhang"
+display_name = "疯魔禅杖"
+flavor = "鲁智深的禅杖功夫，抡开了水泼不进，一扫一大片。"
+source = "鲁智深列传完结时，鲁智深传授"
+skill = SubResource("Resource_k48jc")
+side_hp_pct = 0.1
+side_def_pct = 0.05

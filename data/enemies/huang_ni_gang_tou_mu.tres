@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shan_zei_tou_mu.png" id="1_u08hn"]
+[ext_resource type="Texture2D" path="res://art/busts/shan_zei_tou_mu.png" id="2_317da"]
+[ext_resource type="Texture2D" path="res://art/faces/shan_zei_tou_mu.png" id="3_f68ko"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="4_cg1t0"]
+[ext_resource type="Texture2D" path="res://art/portraits/shan_zei_tou_mu.png" id="5_fenum"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_t41lv"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_c6g2r"]
+
+[sub_resource type="Resource" id="Resource_7j87k"]
+script = ExtResource("7_c6g2r")
+display_name = "拦路劫财"
+description = "敌方全体各受 90% 伤害。"
+effect = 12
+power = 0.9
+cooldown = 4
+
+[resource]
+script = ExtResource("6_t41lv")
+id = &"huang_ni_gang_tou_mu"
+display_name = "黄泥冈强人头目"
+nickname = "Boss"
+role = 1
+base_hp = 1150
+base_atk = 136
+base_def = 32
+base_spd = 102
+portrait = ExtResource("5_fenum")
+bust = ExtResource("2_317da")
+face = ExtResource("3_f68ko")
+map_sprite = ExtResource("4_cg1t0")
+battle_sprite = ExtResource("1_u08hn")
+attack_style = &"heavy"
+skill = SubResource("Resource_7j87k")
+is_boss = true
+enrage_name = "红了眼"
+enrage_atk_bonus = 0.5

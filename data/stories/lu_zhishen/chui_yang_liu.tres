@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_xsoaq"]
+[ext_resource type="Resource" path="res://data/enemies/zhang_san.tres" id="2_wh6ob"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="3_ykiuw"]
+[ext_resource type="Resource" path="res://data/enemies/li_si.tres" id="4_x41oj"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="5_jhiw4"]
+
+[resource]
+script = ExtResource("5_jhiw4")
+id = "lu_zhishen_chui_yang_liu"
+title = "相国寺菜园"
+enemies = Array[ExtResource("1_xsoaq")]([ExtResource("2_wh6ob"), ExtResource("3_ykiuw"), ExtResource("4_x41oj")])
+enemy_level = 15
+recommended_level = 15

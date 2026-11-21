@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/zhang_san.png" id="1_v7pyk"]
+[ext_resource type="Texture2D" path="res://art/busts/po_pi.png" id="2_2scf6"]
+[ext_resource type="Texture2D" path="res://art/faces/po_pi.png" id="3_20gis"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_san.png" id="4_iyu7c"]
+[ext_resource type="Texture2D" path="res://art/portraits/po_pi.png" id="5_rehk0"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_h237w"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_yih07"]
+
+[sub_resource type="Resource" id="Resource_2exbr"]
+script = ExtResource("7_yih07")
+display_name = "抢脚"
+description = "单体眩晕 1 回合。"
+effect = 6
+turns = 1
+cooldown = 4
+
+[resource]
+script = ExtResource("6_h237w")
+id = &"zhang_san"
+display_name = "过街老鼠张三"
+role = 1
+base_hp = 700
+base_atk = 112
+base_def = 26
+base_spd = 102
+portrait = ExtResource("5_rehk0")
+bust = ExtResource("2_2scf6")
+face = ExtResource("3_20gis")
+map_sprite = ExtResource("4_iyu7c")
+battle_sprite = ExtResource("1_v7pyk")
+attack_style = &"fist"
+skill = SubResource("Resource_2exbr")

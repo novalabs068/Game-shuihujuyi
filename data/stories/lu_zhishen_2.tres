@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StoryData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/story_data.gd" id="1_dbc0y"]
+
+[resource]
+script = ExtResource("1_dbc0y")
+id = &"lu_zhishen_2"
+hero = &"lu_zhishen"
+order = 2
+title = "大闹五台山"
+location = &"weizhou"
+recommended_level = 11
+script_path = "res://data/stories/lu_zhishen/2_wu_tai_shan.txt"
+tokens = 3
+silver = 40
+souls = 10

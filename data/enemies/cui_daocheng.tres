@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/cui_daocheng.png" id="1_70xm2"]
+[ext_resource type="Texture2D" path="res://art/busts/cui_daocheng.png" id="2_hm1ky"]
+[ext_resource type="Texture2D" path="res://art/faces/cui_daocheng.png" id="3_o4ujj"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/cui_daocheng.png" id="4_lehaw"]
+[ext_resource type="Texture2D" path="res://art/portraits/cui_daocheng.png" id="5_efvmf"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_gccmo"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_uh0lv"]
+
+[sub_resource type="Resource" id="Resource_3xi6t"]
+script = ExtResource("7_uh0lv")
+display_name = "生铁佛压顶"
+description = "单体 210% 伤害。"
+power = 2.1
+
+[resource]
+script = ExtResource("6_gccmo")
+id = &"cui_daocheng"
+display_name = "生铁佛崔道成"
+nickname = "Boss"
+role = 1
+base_hp = 1080
+base_atk = 128
+base_def = 30
+base_spd = 94
+portrait = ExtResource("5_efvmf")
+bust = ExtResource("2_hm1ky")
+face = ExtResource("3_o4ujj")
+map_sprite = ExtResource("4_lehaw")
+battle_sprite = ExtResource("1_70xm2")
+skill = SubResource("Resource_3xi6t")
+is_boss = true
+enrage_name = "凶性大发"
+enrage_atk_bonus = 0.5

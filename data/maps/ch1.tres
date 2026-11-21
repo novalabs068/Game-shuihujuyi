@@ -89,6 +89,7 @@ danger = 2
 level_min = 10
 level_max = 14
 encounter_groups = Array[ExtResource("2_cfjxm")]([ExtResource("9_08vw3"), ExtResource("10_bor2l")])
+scene_id = "huangnigang"
 
 [sub_resource type="Resource" id="Resource_f4jke"]
 script = ExtResource("1_juigf")

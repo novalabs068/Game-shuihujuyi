@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shan_zei_tou_mu.png" id="1_2v82s"]
+[ext_resource type="Texture2D" path="res://art/busts/shan_zei_tou_mu.png" id="2_cul4y"]
+[ext_resource type="Texture2D" path="res://art/faces/shan_zei_tou_mu.png" id="3_s5w06"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/shan_zei_tou_mu.png" id="4_asp6p"]
+[ext_resource type="Texture2D" path="res://art/portraits/shan_zei_tou_mu.png" id="5_358ju"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_52m8u"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_hd1cg"]
+
+[sub_resource type="Resource" id="Resource_njc8o"]
+script = ExtResource("7_hd1cg")
+display_name = "劈面一刀"
+description = "单体 170% 伤害。"
+power = 1.7
+
+[resource]
+script = ExtResource("6_52m8u")
+id = &"liang_shan_tou_mu"
+display_name = "梁山小头目"
+role = 1
+base_hp = 980
+base_atk = 132
+base_def = 30
+portrait = ExtResource("5_358ju")
+bust = ExtResource("2_cul4y")
+face = ExtResource("3_s5w06")
+map_sprite = ExtResource("4_asp6p")
+battle_sprite = ExtResource("1_2v82s")
+attack_style = &"heavy"
+skill = SubResource("Resource_njc8o")

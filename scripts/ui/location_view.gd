@@ -489,7 +489,7 @@ func _open_chest(chest: ChestData) -> void:
 		_flash("箱子是空的")
 		return
 	GameState.set_flag(flag)
-	var gained := Rewards.grant(chest.tokens, chest.silver, 0, chest.equipment)
+	var gained := Rewards.grant(chest.tokens, chest.silver, 0, chest.equipment, chest.medicine, chest.medicine_count)
 	var mingqi := GameState.claim_mingqi()
 	if mingqi != "":
 		gained = mingqi + "　" + gained

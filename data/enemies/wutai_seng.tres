@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/wutai_seng.png" id="1_c6ycc"]
+[ext_resource type="Texture2D" path="res://art/busts/wutai_seng.png" id="2_ksoqx"]
+[ext_resource type="Texture2D" path="res://art/faces/wutai_seng.png" id="3_rie8y"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/wutai_seng.png" id="4_63c2t"]
+[ext_resource type="Texture2D" path="res://art/portraits/wutai_seng.png" id="5_bobmu"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_l266p"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_i8hga"]
+
+[sub_resource type="Resource" id="Resource_7odc2"]
+script = ExtResource("7_i8hga")
+display_name = "当头一棒"
+description = "单体眩晕 1 回合。"
+effect = 6
+turns = 1
+cooldown = 4
+
+[resource]
+script = ExtResource("6_l266p")
+id = &"wutai_seng"
+display_name = "护院僧"
+role = 1
+base_hp = 430
+base_atk = 104
+base_def = 24
+base_spd = 96
+portrait = ExtResource("5_bobmu")
+bust = ExtResource("2_ksoqx")
+face = ExtResource("3_rie8y")
+map_sprite = ExtResource("4_63c2t")
+battle_sprite = ExtResource("1_c6ycc")
+attack_style = &"heavy"
+skill = SubResource("Resource_7odc2")

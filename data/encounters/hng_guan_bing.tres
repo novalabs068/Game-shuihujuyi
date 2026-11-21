@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_amuvp"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="2_gnius"]
+[ext_resource type="Resource" path="res://data/enemies/guan_bing_gong_shou.tres" id="3_gw7tj"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_a0awl"]
+
+[resource]
+script = ExtResource("4_a0awl")
+id = "hng_guan_bing"
+title = "官兵搜冈"
+enemies = Array[ExtResource("1_amuvp")]([ExtResource("2_gnius"), ExtResource("3_gw7tj"), ExtResource("2_gnius")])

@@ -153,8 +153,12 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 	screen.stage = stage
 	screen.team = GameState.battle_team()
 	screen.hero_level = GameState.level
-	screen.background = _battle_background(story.location)
-	screen.place = String(story.location)
+	# 在剧本里打仗前最后换的那张背景下打（五台山、瓦罐寺这些不是大地图上的地点）
+	var where := StoryScript.background_before(StoryScript.load_file(story.script_path), resume_at)
+	if where == "":
+		where = String(story.location)
+	screen.background = _battle_background(StringName(where))
+	screen.place = where
 	screen.start_hp = GameState.vitality.duplicate()
 	screen.retry_requested.connect(_start_story_battle.bind(stage, resume_at, story))
 	screen.exit_requested.connect(func() -> void:
@@ -294,7 +298,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 				drop = Equipment.random_of(GameDB.equipment.values(), bonus["equip_quality"], screen.model.rng)
 			elif bonus.is_empty() and screen.model.rng.randf() < Equipment.ENCOUNTER_DROP_CHANCE:
 				drop = Equipment.random_of(GameDB.equipment.values(), EquipData.Quality.FAN, screen.model.rng)
-			var extra := Rewards.grant(bonus.get("tokens", 0), bonus.get("silver", 0), bonus.get("experience", 0), drop)
+			var extra := Rewards.grant(bonus.get("tokens", 0), bonus.get("silver", 0), bonus.get("experience", 0), drop, bonus.get("medicine", &""))
 			if extra != "":
 				parts.append(extra)
 			GameState.set_flag(bonus.get("flag", ""))

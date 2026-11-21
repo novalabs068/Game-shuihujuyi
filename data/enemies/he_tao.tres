@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/xun_jie_ya_yi.png" id="1_rv8ad"]
+[ext_resource type="Texture2D" path="res://art/busts/xun_jie_ya_yi.png" id="2_baddu"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/xun_jie_ya_yi.png" id="2_l6x8b"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_5p3dc"]
+[ext_resource type="Texture2D" path="res://art/faces/xun_jie_ya_yi.png" id="3_1004g"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="4_baddu"]
+[ext_resource type="Texture2D" path="res://art/portraits/xun_jie_ya_yi.png" id="5_n153m"]
+
+[sub_resource type="Resource" id="Resource_1004g"]
+script = ExtResource("4_baddu")
+display_name = "锁拿"
+description = "单体眩晕 1 回合。"
+effect = 6
+turns = 1
+
+[resource]
+script = ExtResource("3_5p3dc")
+id = &"he_tao"
+display_name = "缉捕使臣何涛"
+nickname = "Boss"
+role = 1
+base_hp = 1150
+base_atk = 124
+base_def = 30
+portrait = ExtResource("5_n153m")
+bust = ExtResource("2_baddu")
+face = ExtResource("3_1004g")
+map_sprite = ExtResource("2_l6x8b")
+battle_sprite = ExtResource("1_rv8ad")
+attack_style = &"heavy"
+skill = SubResource("Resource_1004g")
+is_boss = true
+enrage_name = "严刑逼供"
+enrage_atk_bonus = 0.5

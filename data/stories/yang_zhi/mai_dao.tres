@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_1mehu"]
+[ext_resource type="Resource" path="res://data/enemies/po_pi.tres" id="2_3u0cf"]
+[ext_resource type="Resource" path="res://data/enemies/niu_er.tres" id="3_736us"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_b7nty"]
+
+[resource]
+script = ExtResource("4_b7nty")
+id = "yang_zhi_mai_dao"
+title = "天汉州桥"
+enemies = Array[ExtResource("1_1mehu")]([ExtResource("2_3u0cf"), ExtResource("3_736us"), ExtResource("2_3u0cf")])
+enemy_level = 14
+recommended_level = 14

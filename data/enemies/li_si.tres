@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/li_si.png" id="1_j1d0k"]
+[ext_resource type="Texture2D" path="res://art/busts/po_pi.png" id="2_gji3d"]
+[ext_resource type="Texture2D" path="res://art/faces/po_pi.png" id="3_xpi16"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="4_tpd6h"]
+[ext_resource type="Texture2D" path="res://art/portraits/po_pi.png" id="5_sjdu5"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_nkcv6"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_ej3bg"]
+
+[sub_resource type="Resource" id="Resource_6wjyl"]
+script = ExtResource("7_ej3bg")
+display_name = "蛇缠"
+description = "单体 130% 伤害，目标速度 -25%，持续 2 回合。"
+effect = 13
+power = 1.3
+turns = 2
+amount = 0.25
+
+[resource]
+script = ExtResource("6_nkcv6")
+id = &"li_si"
+display_name = "青草蛇李四"
+role = 1
+base_hp = 660
+base_atk = 116
+base_def = 24
+base_spd = 106
+portrait = ExtResource("5_sjdu5")
+bust = ExtResource("2_gji3d")
+face = ExtResource("3_xpi16")
+map_sprite = ExtResource("4_tpd6h")
+battle_sprite = ExtResource("1_j1d0k")
+attack_style = &"fist"
+skill = SubResource("Resource_6wjyl")

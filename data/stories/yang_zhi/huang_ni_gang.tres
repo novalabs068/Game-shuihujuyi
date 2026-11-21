@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_6qkea"]
+[ext_resource type="Resource" path="res://data/enemies/lin_zhong_qiang_ren.tres" id="2_oknu7"]
+[ext_resource type="Resource" path="res://data/enemies/huang_ni_gang_tou_mu.tres" id="3_7yuru"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_kjnyp"]
+
+[resource]
+script = ExtResource("4_kjnyp")
+id = "yang_zhi_huang_ni_gang"
+title = "黄泥冈"
+enemies = Array[ExtResource("1_6qkea")]([ExtResource("2_oknu7"), ExtResource("3_7yuru"), ExtResource("2_oknu7")])
+enemy_level = 16
+recommended_level = 16

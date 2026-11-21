@@ -12,4 +12,5 @@ atk_pct = 0.08
 spd_pct = 0.08
 effects = Array[StringName]([&"nimble"])
 owner = &"wu_yong"
-source_text = "黄泥冈（待投放）"
+source = "chest_huangnigang_hng_zao_che"
+source_text = "黄泥冈枣子车下的宝箱"

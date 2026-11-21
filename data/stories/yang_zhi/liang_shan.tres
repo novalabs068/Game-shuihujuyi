@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_owgtu"]
+[ext_resource type="Resource" path="res://data/enemies/liang_shan_lou_luo.tres" id="2_6p1xi"]
+[ext_resource type="Resource" path="res://data/enemies/liang_shan_tou_mu.tres" id="3_6w2hw"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_t1tgh"]
+
+[resource]
+script = ExtResource("4_t1tgh")
+id = "yang_zhi_liang_shan"
+title = "梁山泊"
+enemies = Array[ExtResource("1_owgtu")]([ExtResource("2_6p1xi"), ExtResource("3_6w2hw"), ExtResource("2_6p1xi")])
+enemy_level = 13
+recommended_level = 13

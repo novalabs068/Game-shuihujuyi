@@ -48,6 +48,14 @@ static func parse(text: String) -> Array[Dictionary]:
 	return ops
 
 
+## 第 index 条指令之前最后一次换的背景（列传里的仗就在这个背景下打）；没换过返回空。
+static func background_before(ops: Array[Dictionary], index: int) -> String:
+	for i in range(mini(index, ops.size()) - 1, -1, -1):
+		if ops[i]["op"] == "bg":
+			return ops[i]["key"]
+	return ""
+
+
 static func load_file(path: String) -> Array[Dictionary]:
 	return parse(FileAccess.get_file_as_string(path))
 

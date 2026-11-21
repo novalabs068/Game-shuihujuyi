@@ -11,5 +11,5 @@ flavor = "鲁智深在五台山下铁匠铺打的禅杖，六十二斤重。"
 hp_pct = 0.08
 atk_pct = 0.12
 owner = &"lu_zhishen"
-source = "bounty_zhen_guan_xi"
-source_text = "渭州悬赏「镇关西」"
+source = "story_lu_zhishen_4"
+source_text = "鲁智深列传完结"

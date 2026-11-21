@@ -9,3 +9,6 @@ extends Resource
 @export var silver := 0
 ## 宝箱里的一件装备（可以没有）
 @export var equipment: EquipData
+## 宝箱里的药（Vitality.MEDICINES 的键，可以没有）和份数
+@export var medicine: StringName
+@export var medicine_count := 1

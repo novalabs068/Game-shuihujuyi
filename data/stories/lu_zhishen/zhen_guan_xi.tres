@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_hux6q"]
+[ext_resource type="Resource" path="res://data/enemies/rou_pu_huo_ji.tres" id="2_ync0l"]
+[ext_resource type="Resource" path="res://data/enemies/zhen_guan_xi.tres" id="3_7fy1y"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_qb5vf"]
+
+[resource]
+script = ExtResource("4_qb5vf")
+id = "lu_zhishen_zhen_guan_xi"
+title = "状元桥"
+enemies = Array[ExtResource("1_hux6q")]([ExtResource("2_ync0l"), ExtResource("3_7fy1y"), ExtResource("2_ync0l")])
+enemy_level = 9
+recommended_level = 9

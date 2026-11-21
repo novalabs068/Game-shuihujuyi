@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/battle/li_si.png" id="1_hx7w8"]
+[ext_resource type="Texture2D" path="res://art/busts/po_pi_tou.png" id="2_blipg"]
+[ext_resource type="Texture2D" path="res://art/faces/po_pi_tou.png" id="3_kyfwo"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/li_si.png" id="4_sidrp"]
+[ext_resource type="Texture2D" path="res://art/portraits/po_pi_tou.png" id="5_gmstk"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_bt80r"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_ymcy0"]
+
+[sub_resource type="Resource" id="Resource_hbyge"]
+script = ExtResource("7_ymcy0")
+display_name = "撒泼打滚"
+description = "单体眩晕 1 回合。"
+effect = 6
+turns = 1
+cooldown = 4
+
+[resource]
+script = ExtResource("6_bt80r")
+id = &"liu_san"
+display_name = "破落户刘三"
+nickname = "Boss"
+role = 1
+base_hp = 1100
+base_atk = 118
+base_def = 28
+portrait = ExtResource("5_gmstk")
+bust = ExtResource("2_blipg")
+face = ExtResource("3_kyfwo")
+map_sprite = ExtResource("4_sidrp")
+battle_sprite = ExtResource("1_hx7w8")
+attack_style = &"heavy"
+skill = SubResource("Resource_hbyge")
+is_boss = true
+enrage_name = "恼羞成怒"
+enrage_atk_bonus = 0.5

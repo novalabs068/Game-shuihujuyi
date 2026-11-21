@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StoryData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/story_data.gd" id="1_lqj76"]
+
+[resource]
+script = ExtResource("1_lqj76")
+id = &"yang_zhi_3"
+hero = &"yang_zhi"
+order = 3
+title = "黄泥冈失纲"
+location = &"huangnigang"
+recommended_level = 16
+script_path = "res://data/stories/yang_zhi/3_huang_ni_gang.txt"
+tokens = 4
+silver = 60
+souls = 10

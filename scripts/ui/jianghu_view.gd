@@ -221,7 +221,7 @@ func _show_bounties() -> void:
 		info.add_theme_constant_override("separation", 0)
 		h.add_child(info)
 		info.add_child(UiKit.label("%s　%s" % [b.target, map.location(b.location).display_name], 22))
-		info.add_child(UiKit.label("赏：聚义令 %d、%s装备一件" % [b.tokens(), EquipData.QUALITY_NAMES[b.equip_quality()]], 16, UiKit.TEXT_DIM))
+		info.add_child(UiKit.label("赏：聚义令 %d、%s装备一件、%s" % [b.tokens(), EquipData.QUALITY_NAMES[b.equip_quality()], Vitality.medicine_name(b.medicine())], 16, UiKit.TEXT_DIM))
 		h.add_child(_level_label(b.stage.enemy_level))
 		if taken:
 			h.add_child(UiKit.label("已揭", 20, UiKit.TEXT_DIM))

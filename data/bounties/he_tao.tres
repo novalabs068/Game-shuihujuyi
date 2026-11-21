@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="BountyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/bounty_data.gd" id="1_hrqk6"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_u6bgu"]
+[ext_resource type="Resource" path="res://data/enemies/qin_bing.tres" id="3_neqr3"]
+[ext_resource type="Resource" path="res://data/enemies/he_tao.tres" id="4_8jjlb"]
+[ext_resource type="Resource" path="res://data/enemies/guan_bing_gong_shou.tres" id="5_j03q4"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="6_im7md"]
+
+[sub_resource type="Resource" id="Resource_5asxs"]
+script = ExtResource("6_im7md")
+id = "bounty_he_tao"
+title = "悬赏：缉捕使臣何涛"
+enemies = Array[ExtResource("2_u6bgu")]([ExtResource("3_neqr3"), ExtResource("4_8jjlb"), ExtResource("5_j03q4")])
+enemy_level = 17
+recommended_level = 17
+
+[resource]
+script = ExtResource("1_hrqk6")
+id = &"he_tao"
+location = &"huangnigang"
+grade = 1
+target = "缉捕使臣何涛"
+description = "济州府缉捕使臣何涛，为了破生辰纲的案子，在黄泥冈一带乱抓过路客商，屈打成招。"
+stage = SubResource("Resource_5asxs")
