@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_8tb6v"]
+
+[resource]
+script = ExtResource("1_8tb6v")
+id = &"yan_ling_shuang_dao"
+display_name = "雁翎双刀"
+quality = 1
+flavor = "一长一短两口刀，左手刀刚架开，右手刀已经跟上。"
+atk_pct = 0.05
+effects = Array[StringName]([&"pursuit"])

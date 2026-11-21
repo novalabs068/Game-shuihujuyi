@@ -15,6 +15,8 @@ func _initialize() -> void:
 		"test_damage_formula",
 		"test_role_counters",
 		"test_disarm_and_silence",
+		"test_pursuit",
+		"test_opening_events",
 		"test_same_buffs_do_not_stack",
 		"test_expose_and_boss_resist",
 		"test_defense_scales_with_level",
@@ -206,6 +208,74 @@ func test_disarm_and_silence() -> bool:
 	var silenced := by_id(m2, &"e")
 	check(not silenced.skill_ready(), "silenced unit's skill is not ready")
 	check(silenced.can_attack(), "silence still allows attacks")
+	return true
+
+
+func _pursuer(kind: StringName, chance: float, amount: float) -> UnitData:
+	var u := unit_data(&"a", [5000, 100, 0, 200])
+	var t := TalentData.new()
+	t.display_name = "追"
+	t.kind = &"pursuit"
+	t.chance = chance
+	t.amount = amount
+	t.pursuit_kind = kind
+	u.talent = t
+	u.talent_rank = 1
+	return u
+
+
+func test_pursuit() -> bool:
+	# 几率 100%：每次普攻后都追加一下，只追一次
+	var m := battle([_pursuer(&"hit", 1.0, 0.5)], [unit_data(&"e", [100000, 1, 0, 1])])
+	advance_to(m, &"a")
+	var events := m.act(BattleModel.Action.ATTACK, by_id(m, &"e"))
+	var hits := events.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage")
+	check_eq(hits.size(), 2, "attack + one pursuit hit")
+	check(events.any(func(e: Dictionary) -> bool: return e["popup"] == "追击"), "pursuit pops 追击")
+	# 几率 0：不追
+	var m0 := battle([_pursuer(&"hit", 0.0, 0.5)], [unit_data(&"e", [100000, 1, 0, 1])])
+	advance_to(m0, &"a")
+	check_eq(m0.act(BattleModel.Action.ATTACK, by_id(m0, &"e")).filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").size(), 1, "no pursuit at 0%")
+	# 偷袭：绕开嘲讽，打血最少的
+	var tank := unit_data(&"t", [100000, 1, 0, 1])
+	var weak := unit_data(&"w", [100000, 1, 0, 1])
+	var ms := battle([_pursuer(&"snipe", 1.0, 0.5)], [tank, weak])
+	by_id(ms, &"t").taunt_turns = 5
+	by_id(ms, &"w").hp = 100
+	advance_to(ms, &"a")
+	var ev := ms.act(BattleModel.Action.ATTACK, by_id(ms, &"w"))
+	var hit_units := ev.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").map(func(e: Dictionary) -> StringName: return e["unit"].data.id)
+	check_eq(hit_units, [&"t", &"w"], "attack hits the taunter, the snipe hits the weakest")
+	# 减速
+	var mslow := battle([_pursuer(&"slow", 1.0, 0.2)], [unit_data(&"e", [100000, 1, 0, 100])])
+	advance_to(mslow, &"a")
+	mslow.act(BattleModel.Action.ATTACK, by_id(mslow, &"e"))
+	check(by_id(mslow, &"e").spd() < 100.0, "slow pursuit lowers speed")
+	# 被缴械不能普攻，也就没有追击
+	var md := battle([_pursuer(&"hit", 1.0, 0.5)], [unit_data(&"e", [100000, 1, 0, 1])])
+	advance_to(md, &"a")
+	by_id(md, &"a").disarm_turns = 1
+	check_eq(md.act(BattleModel.Action.ATTACK, by_id(md, &"e")).filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").size(), 0, "disarmed: no attack, no pursuit")
+	# 装备特效「追击」也算来源
+	var geared := unit_data(&"g", [100, 1, 0, 1])
+	geared.gear_effects = [&"pursuit"]
+	check_eq(Pursuit.sources_for(BattleUnit.new(geared, BattleUnit.Side.PLAYER, 0, 1)).size(), 1, "gear pursuit is a source")
+	# 改成追击型的三位好汉
+	for id in [&"shi_jin", &"shi_qian", &"wang_dingliu"]:
+		var h: UnitData = load("res://data/heroes/%s.tres" % id)
+		check_eq(h.talent.kind, &"pursuit", "%s has a pursuit talent" % id)
+		check(h.talent.pursuit_kind in Pursuit.KINDS, "%s pursuit kind is known" % id)
+	return true
+
+
+func test_opening_events() -> bool:
+	var u := unit_data(&"a", [500, 10, 10, 100])
+	u.gear_effects = [&"swift"]
+	var m := battle([u], [unit_data(&"e", [500, 10, 10, 100])])
+	check_eq(m.opening_events.size(), 1, "swift shows up in the 准备回合")
+	check_eq(m.opening_events[0]["kind"], "prep", "opening events are prep events")
+	var plain := battle([unit_data(&"a", [500, 10, 10, 100])], [unit_data(&"e", [500, 10, 10, 100])])
+	check(plain.opening_events.is_empty(), "nothing to show without opening effects")
 	return true
 
 
@@ -1054,7 +1124,7 @@ func test_equipment() -> bool:
 			check_eq(e.effects.size(), e.quality, "%s has %d effects" % [e.display_name, e.quality])
 		for fx in e.effects:
 			check(EquipData.EFFECTS.has(fx), "%s effect %s is known" % [e.display_name, fx])
-	check_eq(per_quality, [9, 6, 3, 26], "9 凡品（含 3 匹马）6 良品 3 精品 26 名器")
+	check_eq(per_quality, [9, 7, 4, 26], "9 凡品（含 3 匹马）7 良品 4 精品 26 名器")
 	check_eq(mounts, 5, "3 horses + 2 famous horses")
 	var h := unit_data(&"h", [1000, 100, 50, 100])
 	var sword := EquipData.new()

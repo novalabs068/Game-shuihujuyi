@@ -21,10 +21,11 @@ rage_gain = 10
 [sub_resource type="Resource" id="Resource_ol3jo"]
 script = ExtResource("6_kvesg")
 display_name = "活闪婆"
-kind = &"stat"
-amount = 0.1
-stats = Array[StringName]([&"spd"])
-text = "速度 +{x}"
+kind = &"pursuit"
+amount = 0.15
+chance = 0.4
+pursuit_kind = &"slow"
+text = "普攻后 40% 让目标速度 -{x}，持续 2 回合"
 
 [resource]
 script = ExtResource("4_otxbb")

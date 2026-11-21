@@ -165,6 +165,11 @@ func _exit_tree() -> void:
 
 func _run() -> void:
 	await get_tree().create_timer(0.3).timeout
+	# 准备回合：开局效果一条一条亮出来
+	if not model.opening_events.is_empty():
+		_banner.text = "准备回合"
+		await get_tree().create_timer(0.35).timeout
+		await _play(model.opening_events)
 	while model.result == BattleModel.Result.ONGOING:
 		if not is_inside_tree():
 			return
@@ -227,6 +232,11 @@ func _play(events: Array[Dictionary]) -> void:
 				_banner.text = ""
 				await _combo_cutin(unit, source, popup)
 				wait = 0.0
+			"prep":
+				_banner.text = "准备回合 · %s" % log_text.get_slice("：", 0)
+				FxSprite.spawn(self, "blessing", card.feet_point(), FX_SCALE * 0.9, false, 0)
+				card.popup(popup, UiKit.GOLD)
+				wait = 0.55
 			"banner":
 				_banner.text = "「%s」" % popup
 				card.popup(popup, UiKit.GOLD, true)
@@ -246,7 +256,7 @@ func _play(events: Array[Dictionary]) -> void:
 					if fx == "":
 						_style_hit_fx(style, card, from_left)
 				# 群攻技能各有各的特效：爆炸、震地落在脚下，重劈对着胸口
-				if fx == "heavy_cleave":
+				if fx in ["heavy_cleave", "sword_slash"]:
 					FxSprite.spawn(self, fx, card.hit_point(), FX_SCALE * 0.8, not from_left)
 				elif fx != "":
 					FxSprite.spawn(self, fx, card.feet_point(), 1.1, not from_left)
@@ -274,7 +284,7 @@ func _play(events: Array[Dictionary]) -> void:
 				if popup in ["加速", "增攻"] or popup.begins_with("护盾"):
 					FxSprite.spawn(self, "blessing", card.feet_point(), FX_SCALE * 0.9, false, 0)
 				if popup != "":
-					card.popup(popup, UiKit.TEXT)
+					card.popup(popup, UiKit.GOLD if popup in ["追击", "定力", "缴械", "计穷", "破绽"] else UiKit.TEXT)
 					wait = 0.15
 		_refresh()
 		if wait > 0.0:

@@ -50,6 +50,9 @@ var time := 0.0
 var player_deaths := 0
 var rng := RandomNumberGenerator.new()
 
+## 准备回合：开战时结算的开局效果（阵法、天赋、装备……），由 BattleView 在第一回合前逐条亮出来
+var opening_events: Array[Dictionary] = []
+
 var _events: Array[Dictionary] = []
 var _extra_action := false
 ## 这次技能命中时播的特效（群攻技能各有各的），写进 damage 事件的 fx
@@ -71,9 +74,12 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 		if not is_equal_approx(stage.enemy_power * boss_k, 1.0):
 			e.strengthen(stage.enemy_power * boss_k, boss_k)
 		units.append(e)
+	_events = []
 	for u in units:
 		_apply_opening_gear(u)
 		_apply_opening_talent(u)
+	opening_events = _events
+	_events = []
 	for u in units:
 		u.next_time = TIME_PER_ACTION / u.spd()
 	for e in alive(BattleUnit.Side.ENEMY):
@@ -261,6 +267,36 @@ func _do_attack(actor: BattleUnit, wanted: BattleUnit) -> void:
 	_emit("action", actor, "普攻", "%s 普攻 %s" % [actor.display_name(), target.display_name()])
 	_deal(actor, target, 1.0, false, true)
 	actor.add_rage(RAGE_ON_ATTACK)
+	_try_pursuit(actor, target)
+
+
+## 普攻之后判定追击：按来源顺序掷骰，第一个成功的生效，一次普攻最多一个。
+func _try_pursuit(actor: BattleUnit, target: BattleUnit) -> void:
+	if not actor.is_alive() or foes_of(actor).is_empty():
+		return
+	for p in Pursuit.sources_for(actor):
+		if rng.randf() >= p.chance:
+			continue
+		var t := target
+		if p.kind == &"snipe":
+			t = _weakest(foes_of(actor))
+		if t == null or not t.is_alive():
+			return
+		_emit("info", actor, "追击", "%s「%s」追击" % [actor.display_name(), p.name])
+		match p.kind:
+			&"hit", &"snipe":
+				_hit_fx = "sword_slash"
+				_deal(actor, t, p.power)
+				_hit_fx = ""
+			&"slow":
+				t.add_buff(BattleUnit.Buff.new(p.name, 0.0, -p.power, Pursuit.SLOW_TURNS))
+				_emit("info", t, "减速", "%s 行动变慢了" % t.display_name())
+			&"stun":
+				if _stun(actor, t, 1):
+					_emit("info", t, "眩晕", "%s 被打晕了" % t.display_name())
+			&"expose":
+				_expose(t)
+		return
 
 
 ## 放绝招。组合技里借放的（skill 不为空）用传进来的那招，不进冷却。
@@ -548,6 +584,7 @@ func _on_death(unit: BattleUnit) -> void:
 func _apply_opening_gear(u: BattleUnit) -> void:
 	if u.has_gear(&"swift"):
 		u.add_buff(BattleUnit.Buff.new("疾风", 0.0, Equipment.SWIFT_BONUS, Equipment.SWIFT_TURNS))
+		_emit("prep", u, "疾风", "%s「疾风」：速度 +%d%%，%d 回合" % [u.display_name(), roundi(Equipment.SWIFT_BONUS * 100), Equipment.SWIFT_TURNS])
 
 
 ## 开战时生效的天赋：自己或全队加怒气、加攻、加速、回春。
@@ -557,6 +594,8 @@ func _apply_opening_talent(u: BattleUnit) -> void:
 	var t := u.data.talent
 	var v := t.value(u.data.talent_rank)
 	var allies := allies_of(u)
+	if t.kind in [&"rage_start", &"team_rage_start", &"team_atk", &"team_haste_open", &"team_regen"]:
+		_emit("prep", u, t.display_name, "%s「%s」：%s" % [u.display_name(), t.display_name, t.describe(u.data.talent_rank)])
 	match t.kind:
 		&"rage_start":
 			u.add_rage(roundi(v))

@@ -19,10 +19,11 @@ power = 0.9
 [sub_resource type="Resource" id="Resource_7fky8"]
 script = ExtResource("6_ntqga")
 display_name = "王进亲传"
-kind = &"stat"
-amount = 0.08
-stats = Array[StringName]([&"atk", &"def"])
-text = "攻击、防御 +{x}"
+kind = &"pursuit"
+amount = 0.8
+chance = 0.35
+pursuit_kind = &"hit"
+text = "普攻后 35% 再追一棍，{x} 伤害"
 
 [resource]
 script = ExtResource("4_q4n4r")

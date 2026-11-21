@@ -18,9 +18,11 @@ effect = 7
 [sub_resource type="Resource" id="Resource_p8fww"]
 script = ExtResource("7_l6byi")
 display_name = "鼓上蚤"
-kind = &"effect"
-effect = &"swift"
-text = "开战时速度 +20%，持续 2 回合"
+kind = &"pursuit"
+amount = 0.7
+chance = 0.3
+pursuit_kind = &"snipe"
+text = "普攻后 30% 绕开嘲讽，偷袭血最少的敌人，{x} 伤害"
 
 [resource]
 script = ExtResource("1_l0n7y")

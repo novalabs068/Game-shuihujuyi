@@ -23,6 +23,7 @@ const KINDS := {
 	&"team_rage_start": "开战时全队怒气 +amount",
 	&"team_haste_open": "开战时全队速度 +amount，持续 2 回合",
 	&"team_regen": "全队每次轮到自己回复 2% 生命",
+	&"pursuit": "追击：普攻后有 chance 的机会追加一下，pursuit_kind 决定追加什么，amount 是伤害倍数（减速时是减速比例）",
 }
 const CRIT_HASTE_STACKS := 3
 
@@ -34,6 +35,9 @@ const CRIT_HASTE_STACKS := 3
 ## kind 为 effect 时的特效
 @export var effect: StringName
 @export var text: String
+## kind 为 pursuit 时：触发几率，和追加什么（见 Pursuit.KINDS）
+@export var chance := 0.0
+@export var pursuit_kind: StringName
 
 
 ## rank：0 未解锁，1 解锁，2 强化。
