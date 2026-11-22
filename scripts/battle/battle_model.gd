@@ -360,6 +360,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 	if skill == null:
 		# 机变：冷却少 1 回合，最少 1 回合
 		actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
+		actor.skill_cooldown_total = actor.skill_cooldown
 	_emit("skill", actor, s.display_name, "%s 使用「%s」" % [actor.display_name(), s.display_name])
 	_hit_fx = SKILL_FX.get(s.effect, "")
 	match s.effect:
@@ -641,6 +642,7 @@ func _interrupt(target: BattleUnit) -> void:
 	target.charging = false
 	if target.data.skill != null:
 		target.skill_cooldown = target.data.skill.cooldown
+		target.skill_cooldown_total = target.skill_cooldown
 	target.intent_skill = false
 	_emit("banner", target, "打断", "%s 的蓄力被打断了！" % target.display_name())
 	_expose(target)

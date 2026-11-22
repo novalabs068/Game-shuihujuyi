@@ -98,6 +98,10 @@ var _skill_button: Button
 var _guard_button: Button
 var _combo_button: Button
 var _skill_sub: Label
+## 绝招钮上的冷却圈，和上次轮到每个人时他还剩几回合冷却（用来播「亮回一格」的动画）
+var _cooldown_ring: CooldownRing
+var _ring_actor: BattleUnit
+var _ring_seen: Dictionary[BattleUnit, int] = {}
 ## 我方的阵法（决定站位）
 var _formation: StringName = &""
 ## 战场背景（按 BG_ZOOM 放大、贴底边摆）
@@ -604,6 +608,7 @@ func _refresh() -> void:
 		_skill_sub.text = "计穷 %d" % actor.silence_turns if actor.silence_turns > 0 else "冷却 %d" % actor.skill_cooldown
 	if player and not actor.can_attack():
 		_attack_button.disabled = true
+	_update_cooldown_ring(actor if player else null)
 	var combo := model.available_combo(actor) if player else null
 	_combo_button.disabled = not input or combo == null
 	_combo_sub.text = combo.display_name if combo != null else "组合技"
@@ -697,6 +702,35 @@ func _add_log(text: String) -> void:
 	if _log_lines.size() > 10:
 		_log_lines.remove_at(0)
 	_log_label.text = "\n".join(_log_lines)
+
+
+## 冷却圈：每回合亮回一格。轮到一个新的人时，从少一格的样子长到现在的样子；刚好转满就闪一下。
+func _update_cooldown_ring(actor: BattleUnit) -> void:
+	if actor == null or actor.data.skill == null:
+		_cooldown_ring.recovered = 1.0
+		_ring_actor = null
+		return
+	var total := maxi(actor.skill_cooldown_total, actor.skill_cooldown)
+	var remaining := actor.skill_cooldown
+	var target := 1.0 if remaining <= 0 or total <= 0 else float(total - remaining) / total
+	_cooldown_ring.segments = maxi(total, 1)
+	if actor == _ring_actor:
+		_cooldown_ring.recovered = target
+		return
+	_ring_actor = actor
+	var was: int = _ring_seen.get(actor, 0)
+	_ring_seen[actor] = remaining
+	# 和上次轮到时不一样（冷却减了一格，或者中间放过绝招）：从少一格的样子长过来
+	if was != remaining and total > 0:
+		_cooldown_ring.recovered = maxf(target - 1.0 / total, 0.0)
+		var t := _cooldown_ring.create_tween()
+		t.tween_property(_cooldown_ring, "recovered", target, 0.45).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		if remaining <= 0:
+			_skill_button.pivot_offset = _skill_button.size / 2
+			t.tween_property(_skill_button, "scale", Vector2(1.15, 1.15), 0.1)
+			t.tween_property(_skill_button, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	else:
+		_cooldown_ring.recovered = target
 
 
 ## 这个人站在哪：我方按阵法，敌方按默认的斜线。
@@ -925,6 +959,9 @@ func _build_bottom_bar() -> void:
 	_guard_button = _corner_button("守", GUARD_SPOT, Color(INK, 0.9), PAPER, 32)
 	_combo_button = _corner_button("合", COMBO_SPOT, Color(INK, 0.9), PAPER, 28)
 	_skill_sub = _corner_caption(SKILL_SPOT)
+	_cooldown_ring = CooldownRing.new()
+	_skill_button.add_child(_cooldown_ring)
+	_cooldown_ring.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_corner_caption(GUARD_SPOT).text = "防御"
 	_combo_sub = _corner_caption(COMBO_SPOT)
 	_attack_button.pressed.connect(_choose.bind(BattleModel.Action.ATTACK))

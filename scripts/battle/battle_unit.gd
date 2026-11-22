@@ -43,6 +43,8 @@ var max_hp: int
 var hp: int
 var rage := 0
 var skill_cooldown := 0
+## 这一轮冷却一共几回合（放绝招时记下，界面画冷却弧用）
+var skill_cooldown_total := 0
 var shield := 0
 var guarding := false
 var stun_turns := 0
