@@ -12,6 +12,7 @@ var failed := 0
 func _initialize() -> void:
 	for t: String in [
 		"test_data_loads",
+		"test_font_covers_text",
 		"test_damage_formula",
 		"test_role_counters",
 		"test_disarm_and_silence",
@@ -141,6 +142,27 @@ func test_data_loads() -> bool:
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
 	check(stage.enemies[1].is_boss, "Lu Qian is the boss")
+	return true
+
+
+## 打包的字体只收了 art/fonts/chars.txt 里的字：脚本和数据里出现的字都得在里面，不然手机上会显示成方框。
+func test_font_covers_text() -> bool:
+	var have := {}
+	for ch in FileAccess.get_file_as_string("res://art/fonts/chars.txt"):
+		have[ch] = true
+	var missing := {}
+	var dirs: Array[String] = ["res://scripts", "res://data"]
+	while not dirs.is_empty():
+		var dir: String = dirs.pop_back()
+		for sub in DirAccess.get_directories_at(dir):
+			dirs.append(dir + "/" + sub)
+		for f in DirAccess.get_files_at(dir):
+			if not (f.ends_with(".gd") or f.ends_with(".tres") or f.ends_with(".txt")):
+				continue
+			for ch in FileAccess.get_file_as_string(dir + "/" + f):
+				if ch.unicode_at(0) > 0x2000 and not have.has(ch):
+					missing[ch] = f
+	check(missing.is_empty(), "font has every character used in the game; missing: %s（重新生成字体，见 art/fonts/README.md）" % ", ".join(missing.keys().map(func(c: String) -> String: return "%s(%s)" % [c, missing[c]])))
 	return true
 
 

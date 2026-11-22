@@ -38,12 +38,18 @@ static var _font: Font
 
 
 ## 简体中文字体。主题外的地方（比如 Node2D 下的 Label 拿不到主题）也用它。
+const FONT_PATH := "res://art/fonts/NotoSansSC.ttf"
+
+
 static func cjk_font() -> Font:
 	if _font == null:
-		# 默认的系统字体回退会缺简体字，所以点名简体中文字体。不用苹方：Godot 取到的是合集里的繁体（港）字面。
-		# M4 再换成打包进游戏的字体。
-		var font := SystemFont.new()
-		font.font_names = PackedStringArray(["Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", "sans-serif"])
+		# 打包进游戏的思源黑体（Noto Sans SC，字重 500）：只收了游戏里用到的字和 3755 个常用字（见 art/fonts/chars.txt），
+		# 各家手机显示一样。单独一个全角符号（比如「！」）也不会再被系统换成没有这个字的西文字体、画成「FF01」方框。
+		# 玩家起名用到的生僻字不在里面，交给系统字体兜底（点名简体字体，不用苹方：Godot 取到的是繁体字面）。
+		var font: FontFile = load(FONT_PATH)
+		var system := SystemFont.new()
+		system.font_names = PackedStringArray(["Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei", "sans-serif"])
+		font.fallbacks = [system]
 		_font = font
 	return _font
 
