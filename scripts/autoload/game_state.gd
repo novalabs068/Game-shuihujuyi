@@ -6,7 +6,9 @@ const SAVE_PATH := "user://save.json"
 ## 版本不同的旧存档不兼容，当作没有存档
 const SAVE_VERSION := 2
 ## 队伍是主角 + 最多这么多位好汉
-const MAX_HEROES := 2
+const MAX_HEROES := 3
+## 统领光环：主修武学的加成放大这么多倍给全队（统领不上阵，全靠这一条撑着）
+const COMMANDER_AURA_MULT := 3.0
 ## 新开局送的聚义令，正好一次十连
 const STARTING_TOKENS := 10
 const DEFAULT_MAP := "ch1"
@@ -40,10 +42,10 @@ var vitality: Dictionary[StringName, float] = {}
 var medicines: Dictionary[StringName, int] = {}
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
-## 主角学会的武学、主修（战斗里放的技能）、副修（被动加成，可以空着）
+## 主角学会的武学和主修（主修那门就是统领光环）
 var martials: Array[StringName] = []
 var martial_main: StringName = &""
-## 主角的副修武学。它和秘籍共用主角的秘籍栏：主角栏里装的要么是一本秘籍，要么是一门副修武学
+## 老存档里的副修武学。主角改当统领后不再用，读档时清空
 var martial_side: StringName = &""
 ## 秘籍：每本一条 {uid, id, holder}，holder 为空就是没人装。和装备共用编号
 var scrolls: Array[Dictionary] = []
@@ -142,7 +144,7 @@ static func scroll_data(sc: Dictionary) -> MijiData:
 	return GameDB.mijis.get(sc["id"])
 
 
-## 某人秘籍栏里的那本（没有返回空字典）。主角栏里装的若是副修武学，这里也是空的。
+## 某人秘籍栏里的那本（没有返回空字典）。主角是统领，没有秘籍栏。
 func scroll_of(holder: StringName) -> Dictionary:
 	for sc in scrolls:
 		if sc["holder"] == holder:
@@ -150,17 +152,15 @@ func scroll_of(holder: StringName) -> Dictionary:
 	return {}
 
 
-## 给 holder 装上这本：他原来那本卸下；这本原来在别人身上就拿过来。主角装秘籍会把副修武学换下来。
+## 给 holder 装上这本：他原来那本卸下；这本原来在别人身上就拿过来。
 func equip_scroll(holder: StringName, uid: int) -> void:
 	var sc := scroll(uid)
-	if sc.is_empty():
+	if sc.is_empty() or holder == PROTAGONIST_ID:
 		return
 	var old := scroll_of(holder)
 	if not old.is_empty():
 		old["holder"] = &""
 	sc["holder"] = holder
-	if holder == PROTAGONIST_ID:
-		martial_side = &""
 	save_game()
 
 
@@ -168,19 +168,13 @@ func unequip_scroll(holder: StringName) -> void:
 	var sc := scroll_of(holder)
 	if not sc.is_empty():
 		sc["holder"] = &""
-	if holder == PROTAGONIST_ID:
-		martial_side = &""
 	save_game()
 
 
-## 秘籍栏里写的是什么：「《豹子头枪诀》」「武学·林家枪法」或空。
+## 秘籍栏里写的是什么：「《豹子头枪诀》」或空。
 func scroll_slot_name(holder: StringName) -> String:
 	var sc := scroll_of(holder)
-	if not sc.is_empty():
-		return "《%s》" % scroll_data(sc).display_name
-	if holder == PROTAGONIST_ID and martial(martial_side) != null:
-		return "武学·%s" % martial(martial_side).display_name
-	return ""
+	return "《%s》" % scroll_data(sc).display_name if not sc.is_empty() else ""
 
 
 # --- 阵法 ---
@@ -377,12 +371,16 @@ func recruit_with_souls(hero: UnitData) -> bool:
 	return true
 
 
-## 战斗用的队伍：好汉带上星级加成，所有人带上装备和秘籍，主角再加上副修武学的加成。
+## 战斗用的队伍：三位好汉带上星级、羁绊、装备、秘籍，再加上统领（主角）的光环。
 func battle_team() -> Array[UnitData]:
 	var out: Array[UnitData] = []
+	var aura := commander_aura()
 	for u in team():
-		var unit := Bonds.apply(Stars.apply(u, star_of(u.id)), bond_of(u.id)) if u.id != PROTAGONIST_ID else u
-		unit = Equipment.apply(unit, effective_gear(u.id))
+		var unit := Bonds.apply(Stars.apply(u, star_of(u.id)), bond_of(u.id))
+		var gear := effective_gear(u.id)
+		if aura != null:
+			gear.append(aura)
+		unit = Equipment.apply(unit, gear)
 		var sc := scroll_of(u.id)
 		out.append(Miji.apply(unit, scroll_data(sc) if not sc.is_empty() else null))
 	return out
@@ -395,12 +393,25 @@ func prepare_stage(stage: StageData) -> StageData:
 	return st
 
 
-## 算属性时用的「装备」：身上的装备，主角再加副修武学。
+## 算属性时用的「装备」：身上的装备。
 func effective_gear(holder: StringName) -> Array[EquipData]:
-	var gear := gear_of(holder)
-	if holder == PROTAGONIST_ID and martial(martial_side) != null:
-		gear.append(martial(martial_side).side_as_gear())
-	return gear
+	return gear_of(holder)
+
+
+## 统领光环：主角不上场，主修武学的加成给出战的每一位好汉（折成一件「装备」）。没有主修返回 null。
+func commander_aura() -> EquipData:
+	return aura_of(martial(martial_main))
+
+
+## 某门武学作主修时的统领光环。
+static func aura_of(m: MartialData) -> EquipData:
+	if m == null:
+		return null
+	var g := m.side_as_gear()
+	g.display_name = "统领·%s" % m.display_name
+	for stat: String in ["hp_pct", "atk_pct", "def_pct", "spd_pct"]:
+		g.set(stat, g.get(stat) * COMMANDER_AURA_MULT)
+	return g
 
 
 # --- 武学 ---
@@ -409,7 +420,7 @@ func martial(id: StringName) -> MartialData:
 	return GameDB.martials.get(id)
 
 
-## 学会一门武学，已经会了返回 false。学会的第一门直接主修，第二门直接副修。
+## 学会一门武学，已经会了返回 false。学会的第一门直接主修。
 func learn_martial(m: MartialData) -> bool:
 	if m == null or m.id in martials:
 		return false
@@ -417,34 +428,16 @@ func learn_martial(m: MartialData) -> bool:
 	if martial_main == &"":
 		martial_main = m.id
 		_protagonist = null
-	elif martial_side == &"" and scroll_of(PROTAGONIST_ID).is_empty():
-		martial_side = m.id
 	save_game()
 	return true
 
 
-## 换主修；原来副修这门的话，两门对调。
+## 换主修（统领光环跟着换）。
 func set_martial_main(id: StringName) -> void:
 	if not id in martials or id == martial_main:
 		return
-	if id == martial_side:
-		martial_side = martial_main
 	martial_main = id
 	_protagonist = null
-	save_game()
-
-
-## 换副修（放进主角的秘籍栏，原来装的秘籍卸下）；原来主修这门的话，两门对调。
-func set_martial_side(id: StringName) -> void:
-	if not id in martials or id == martial_side:
-		return
-	var sc := scroll_of(PROTAGONIST_ID)
-	if not sc.is_empty():
-		sc["holder"] = &""
-	if id == martial_main:
-		martial_main = martial_side
-		_protagonist = null
-	martial_side = id
 	save_game()
 
 
@@ -571,7 +564,7 @@ func equipped(holder: StringName, slot: EquipData.Slot) -> Dictionary:
 ## 给 holder 穿上这件：同一栏位原来那件卸下；这件原来在别人身上就从那人身上拿过来。
 func equip(holder: StringName, uid: int) -> void:
 	var it := item(uid)
-	if it.is_empty():
+	if it.is_empty() or (holder == PROTAGONIST_ID and item_data(it).slot != EquipData.Slot.MOUNT):
 		return
 	var old := equipped(holder, item_data(it).slot)
 	if not old.is_empty():
@@ -610,14 +603,9 @@ func buy_item(data: EquipData) -> bool:
 	return true
 
 
-## 出战队伍：主角在第一位，后面是随行好汉。
+## 出战队伍：三位好汉，第一位是主将。主角是统领，不上场。
 func team() -> Array[UnitData]:
-	var out: Array[UnitData] = []
-	var p := protagonist()
-	if p != null:
-		out.append(p)
-	out.append_array(heroes())
-	return out
+	return heroes()
 
 
 func set_heroes(list: Array[UnitData]) -> void:
@@ -923,8 +911,14 @@ func load_game() -> void:
 			var uid := int(sc["uid"])
 			scrolls.append({"uid": uid, "id": StringName(sc["id"]), "holder": StringName(sc.get("holder", ""))})
 			_next_uid = maxi(_next_uid, uid + 1)
-	if not scroll_of(PROTAGONIST_ID).is_empty():
-		martial_side = &""
+	# 主角改当统领：只留坐骑，别的装备、秘籍放回行囊，副修作废
+	martial_side = &""
+	for it in items:
+		if it["holder"] == PROTAGONIST_ID and item_data(it).slot != EquipData.Slot.MOUNT:
+			it["holder"] = &""
+	for sc in scrolls:
+		if sc["holder"] == PROTAGONIST_ID:
+			sc["holder"] = &""
 	# 有名器之前的旧存档：已经打完的列传、揭下的悬赏、开过的宝箱，补发对应的名器
 	claim_mingqi()
 	# 有秘籍之前就结义了的兄弟：补传秘籍

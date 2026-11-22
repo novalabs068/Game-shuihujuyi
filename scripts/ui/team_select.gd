@@ -1,6 +1,7 @@
 class_name TeamSelect
 extends Control
-## 编队：主角固定上场，再点卡片选最多 2 位随行好汉，底部提示能触发的组合技。
+## 编队：点卡片选最多 3 位好汉出战，第一位是主将；主角是统领，不上场，主修武学给全队光环。
+## 底部选阵法，提示山头和能触发的组合技。
 ## stage 为空时不显示关卡信息。
 
 ## heroes 只含好汉，不含主角
@@ -43,7 +44,7 @@ func _ready() -> void:
 
 	var title_row := HBoxContainer.new()
 	v.add_child(title_row)
-	var title := UiKit.label("编队：主角%s固定上场，再选 %d 位好汉随行" % [GameState.player_name, MAX_TEAM], 32)
+	var title := UiKit.label("编队：选 %d 位好汉出战，第一位是主将" % MAX_TEAM, 30)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(title)
 	# 默认只列已招募的好汉；打开开关才显示没招到的（变暗，不能选）
@@ -55,6 +56,13 @@ func _ready() -> void:
 		_show_all = on
 		_refresh())
 	title_row.add_child(show_all)
+	_start_button = UiKit.button("确定", Vector2(120, 50), 24)
+	_start_button.pressed.connect(func() -> void: start_requested.emit(_selected.duplicate()))
+	title_row.add_child(_start_button)
+	# 统领：主角不上场，主修武学的加成给全队
+	var aura := GameState.commander_aura()
+	var main_martial := GameState.martial(GameState.martial_main)
+	v.add_child(UiKit.label("统领 %s：%s" % [GameState.player_name, ("主修「%s」，全队 %s" % [main_martial.display_name, aura.summary()]) if aura != null else "还没有主修武学"], 20, UiKit.ACCENT))
 	if stage != null:
 		var enemy_names := PackedStringArray()
 		for e in stage.enemies:
@@ -119,9 +127,6 @@ func _ready() -> void:
 	_combo_label = UiKit.label("", 18, UiKit.GOLD)
 	_combo_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	info.add_child(_combo_label)
-	_start_button = UiKit.button("确定", Vector2(200, 80), 30)
-	_start_button.pressed.connect(func() -> void: start_requested.emit(_selected.duplicate()))
-	bottom.add_child(_start_button)
 
 	_selected = GameState.heroes()
 	_refresh()
@@ -197,14 +202,15 @@ func _refresh() -> void:
 		var owned := GameState.owns(hero.id)
 		_tiles[hero].visible = owned or _show_all
 		_tiles[hero].modulate = Color.WHITE if owned else Color(0.45, 0.45, 0.45)
-		_badges[hero].text = "①②③"[_selected.find(hero)] if picked else ""
+		_badges[hero].text = ["主将", "②", "③"][_selected.find(hero)] if picked else ""
 		if not owned:
 			_badges[hero].text = "未招募"
 
 	var names := PackedStringArray()
 	for hero in _selected:
 		names.append(hero.display_name)
-	_team_label.text = "出战：%s + %s（%d/%d）" % [GameState.player_name, "、".join(names) if not names.is_empty() else "未选", _selected.size(), MAX_TEAM]
+	_team_label.text = "出战：%s（%d/%d）　统领：%s" % ["、".join(names) if not names.is_empty() else "未选", _selected.size(), MAX_TEAM, GameState.player_name]
+	_start_button.disabled = _selected.is_empty()
 
 	var current := GameState.current_formation()
 	for id: StringName in _formation_buttons:

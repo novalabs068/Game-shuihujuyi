@@ -186,8 +186,8 @@ func _build_avatar() -> Control:
 	frame.add_theme_stylebox_override("panel", UiKit.box(PAPER, CINNABAR, 4, 36))
 	frame.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
 	root.add_child(frame)
-	var leader := GameState.team()
-	var face := UiKit.picture(leader[0].face if not leader.is_empty() else null, 64)
+	var me := GameState.protagonist()
+	var face := UiKit.picture(me.face if me != null else null, 64)
 	face.position = Vector2(4, 4)
 	face.size = Vector2(64, 64)
 	frame.add_child(face)
@@ -409,7 +409,8 @@ func _travel(destination: StringName, from_progress: float, can_encounter: bool)
 	# 先决定这一程路上会发生什么：遇敌（按目的地一带的敌人组合生成）、奇遇，或者一路平安
 	var stage: StageData = null
 	var event: EventData = null
-	if can_encounter:
+	# 还没有好汉随行时路上不遇敌
+	if can_encounter and not GameState.team().is_empty():
 		var mount := GameState.mount()
 		var cut := mount.encounter_cut if mount != null else 0.0
 		if _rng.randf() < map.encounter_chance * (1.0 - cut):

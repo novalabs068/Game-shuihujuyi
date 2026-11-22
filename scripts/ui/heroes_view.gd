@@ -199,7 +199,7 @@ func _show_detail() -> void:
 	name_row.add_child(UiKit.label(hero.display_name, 34, UiKit.ACCENT if protagonist else UiKit.TIER_COLORS[hero.tier]))
 	name_row.add_child(UiKit.label(hero.nickname, 22, UiKit.TEXT_DIM))
 	if protagonist:
-		info.add_child(UiKit.label("主角 · %s · %s（%s，随主修武学）" % [GameState.origin().display_name, UiKit.ROLE_NAMES[hero.role], Roles.summary(hero.role)], 20, UiKit.ACCENT))
+		info.add_child(UiKit.label("统领 · %s · 不上阵，在阵外领兵" % GameState.origin().display_name, 20, UiKit.ACCENT))
 	else:
 		var marks := HBoxContainer.new()
 		marks.add_theme_constant_override("separation", 8)
@@ -210,7 +210,13 @@ func _show_detail() -> void:
 		var faction := Factions.of(hero.id)
 		if faction != &"":
 			info.add_child(UiKit.label("山头：%s（和同山头的好汉一起出战：%s）" % [Factions.display_name(faction), Factions.bonus_text(faction)], 17, UiKit.TEXT_DIM))
-	if owned:
+	if protagonist:
+		var aura := GameState.commander_aura()
+		var m := GameState.martial(GameState.martial_main)
+		info.add_child(UiKit.label("%d 级　队伍等级" % GameState.level, 20))
+		info.add_child(_wrapped("统领光环：%s" % (("主修「%s」，出战的每位好汉 %s" % [m.display_name, aura.summary()]) if aura != null else "还没有主修武学"), UiKit.GOLD))
+		info.add_child(_wrapped("换主修就换光环。学到的武学越多，能统领的打法越多。", UiKit.TEXT_DIM))
+	elif owned:
 		var lv := GameState.level
 		info.add_child(UiKit.label("%d 级　生命 %d　攻击 %d　防御 %d　速度 %d" % [lv, _at(effective.base_hp, lv), _at(effective.base_atk, lv), _at(effective.base_def, lv), _at(effective.base_spd, lv)], 20))
 		var vit := GameState.vitality_of(hero.id)
@@ -245,10 +251,11 @@ func _show_detail() -> void:
 			else:
 				tip += "　已完结"
 			info.add_child(UiKit.label(tip, 17, UiKit.GOLD))
-	_detail.add_child(UiKit.label("「%s」" % effective.skill.display_name, 24))
-	var desc := UiKit.label(effective.skill.description, 18, UiKit.TEXT_DIM)
-	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_detail.add_child(desc)
+	if not protagonist:
+		_detail.add_child(UiKit.label("「%s」" % effective.skill.display_name, 24))
+		var desc := UiKit.label(effective.skill.description, 18, UiKit.TEXT_DIM)
+		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_detail.add_child(desc)
 	if not protagonist and star < Stars.SKILL_UP_STAR and Stars.max_stars(hero) >= Stars.SKILL_UP_STAR:
 		_detail.add_child(UiKit.label("点亮 %d 颗勾玉时强化：%s" % [Stars.lit(Stars.SKILL_UP_STAR), Stars.upgrade_text(hero.skill)], 17, UiKit.TEXT_DIM))
 	if hero.talent != null:
@@ -293,16 +300,14 @@ func _show_detail() -> void:
 		martial_row.add_theme_constant_override("separation", 10)
 		_bottom.add_child(martial_row)
 		martial_row.add_child(_martial_button(true))
-		martial_row.add_child(_scroll_button(hero))
-		martial_row.add_child(_medicine_button(hero))
-	if owned:
+		martial_row.add_child(_slot_button(hero, EquipData.Slot.MOUNT))
+	if owned and not protagonist:
 		var gear_row := HBoxContainer.new()
 		gear_row.add_theme_constant_override("separation", 10)
 		_bottom.add_child(gear_row)
 		for slot in EquipData.Slot.values():
 			gear_row.add_child(_slot_button(hero, slot))
-		if not protagonist:
-			gear_row.add_child(_scroll_button(hero))
+		gear_row.add_child(_scroll_button(hero))
 	if protagonist:
 		return
 
@@ -407,17 +412,19 @@ func _wrapped(text: String, color: Color) -> Label:
 	return l
 
 
-## 主修 / 副修按钮：显示现在练的那门，点开换。
+## 主修按钮：显示现在练的那门（就是统领光环），点开换。
 func _martial_button(main: bool) -> Button:
-	var m := GameState.martial(GameState.martial_main if main else GameState.martial_side)
+	var m := GameState.martial(GameState.martial_main) if main else null
 	var text := "%s：%s" % ["主修" if main else "副修", m.display_name if m != null else "空"]
+	if main:
+		text = "统领光环：%s" % (m.display_name if m != null else "空")
 	var button := UiKit.button(text, Vector2(220, 50), 19)
 	button.add_theme_color_override("font_color", UiKit.ACCENT if m != null else UiKit.TEXT_DIM)
 	button.pressed.connect(_open_martials)
 	return button
 
 
-## 武学：列出学会的每一门，主修时是什么技能、副修时加什么，点按钮换。
+## 武学：列出学会的每一门和它作统领光环时给全队加什么，点按钮换主修。
 func _open_martials() -> void:
 	var overlay := Control.new()
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -441,7 +448,7 @@ func _open_martials() -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	pad.add_child(v)
-	v.add_child(UiKit.label("武学：主修的是战斗里放的技能，也决定职业；也可以把一门放进秘籍栏，只给被动加成", 22, UiKit.ACCENT))
+	v.add_child(UiKit.label("武学：主修的那门就是统领光环，加给出战的每一位好汉", 22, UiKit.ACCENT))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -469,25 +476,19 @@ func _open_martials() -> void:
 		name_row.add_theme_constant_override("separation", 10)
 		info.add_child(name_row)
 		name_row.add_child(UiKit.label(m.display_name, 24))
-		var state := "主修中" if id == GameState.martial_main else ("在秘籍栏" if id == GameState.martial_side else "")
+		var state := "主修中" if id == GameState.martial_main else ""
 		name_row.add_child(UiKit.label(state, 18, UiKit.ACCENT))
 		name_row.add_child(UiKit.label(m.source, 16, UiKit.TEXT_DIM))
-		var main_text := UiKit.label("主修（职业变为%s）：%s" % [UiKit.ROLE_NAMES[m.role], m.skill.description], 17)
-		main_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		info.add_child(main_text)
-		info.add_child(UiKit.label("放进秘籍栏：%s" % m.side_summary(), 17, UiKit.TEXT_DIM))
+		info.add_child(UiKit.label("统领光环：全队 %s" % GameState.aura_of(m).summary(), 17))
+		var flavor := UiKit.label(m.flavor, 16, UiKit.TEXT_DIM)
+		flavor.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		info.add_child(flavor)
 		var as_main := UiKit.button("主修", Vector2(90, 46), 20)
 		as_main.disabled = id == GameState.martial_main
 		as_main.pressed.connect(func() -> void:
 			GameState.set_martial_main(id)
 			close.call())
 		row.add_child(as_main)
-		var as_side := UiKit.button("当秘籍", Vector2(100, 46), 20)
-		as_side.disabled = id == GameState.martial_side
-		as_side.pressed.connect(func() -> void:
-			GameState.set_martial_side(id)
-			close.call())
-		row.add_child(as_side)
 	if GameState.martials.size() < 2:
 		list.add_child(UiKit.label("武学从奇遇和好汉列传里学：比如路上遇到的卖艺汉子、落难书生，林冲列传完结时林冲也会传授枪法。", 18, UiKit.TEXT_DIM))
 	var back := UiKit.button("返回", Vector2(160, 50), 22)
@@ -690,16 +691,6 @@ func _open_scrolls(hero: UnitData) -> void:
 				GameState.unequip_scroll(hero.id)
 			else:
 				GameState.equip_scroll(hero.id, uid))
-	if _is_protagonist(hero):
-		for id in GameState.martials:
-			if id == GameState.martial_main:
-				continue
-			var m := GameState.martial(id)
-			row_for.call("武学·%s" % m.display_name, UiKit.ACCENT, "【被动】%s" % m.side_summary(), m.source, id == GameState.martial_side, func(wearing: bool) -> void:
-				if wearing:
-					GameState.unequip_scroll(hero.id)
-				else:
-					GameState.set_martial_side(id))
 	if list.get_child_count() == 0:
 		list.add_child(UiKit.label("还没有秘籍。和好汉结义时他会传授独门秘籍；悬赏、宝箱会给，集市也有卖凡品。", 20, UiKit.TEXT_DIM))
 	var back := UiKit.button("返回", Vector2(160, 50), 22)

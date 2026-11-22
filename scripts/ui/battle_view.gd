@@ -359,6 +359,9 @@ func _brush_stroke(stroke_size: Vector2, flip: bool, color := STROKE_RED) -> Tex
 
 ## 组合技：画面变暗，两人的立绘从左右冲进来，中间打出组合技名。
 func _combo_cutin(a: BattleUnit, b: BattleUnit, combo_name: String) -> void:
+	# 结义同心：统领不在阵上，左边换成主角的立绘
+	if a == b and GameState.protagonist() != null:
+		a = BattleUnit.new(GameState.protagonist(), BattleUnit.Side.PLAYER, -1, 1)
 	Sfx.play(&"skill_drum")
 	var layer := Control.new()
 	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE

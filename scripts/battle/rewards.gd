@@ -42,7 +42,7 @@ static func affordable(choice: EventChoice) -> bool:
 static func learn(m: MartialData) -> String:
 	if m == null or not GameState.learn_martial(m):
 		return ""
-	return "学会武学「%s」（在「好汉」页主角那里换主修，或放进秘籍栏）" % m.display_name
+	return "学会武学「%s」（在「好汉」页主角那里换主修，统领光环就跟着换）" % m.display_name
 
 
 ## 选了一个不打仗的选项：扣银两、给奖励、设标记，返回奖励说明。

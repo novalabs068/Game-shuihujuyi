@@ -12,6 +12,8 @@ const REVEAL_DELAY := 0.12
 const CARD_BACK := Color("3a1d14")
 const SEAL_RED := Color("b0261e")
 const PAPER := Color("ecdcbc")
+## 聚义令落地后的大小（图高 520，落地后约 430）
+const TOKEN_SCALE := 0.82
 
 var _rng := RandomNumberGenerator.new()
 var _tokens_label: Label
@@ -171,7 +173,9 @@ func _recruit(count: int) -> void:
 		if rare and not _skip:
 			await _build_up(slots[i], hero.tier)
 		await _flip(slots[i], hero.tier, rare)
-		if hero.tier == UnitData.Tier.JIA or (hero.tier == UnitData.Tier.YI and is_new and not _skip):
+		if hero.tier == UnitData.Tier.JIA:
+			await _showcase_gold(hero, is_new)
+		elif hero.tier == UnitData.Tier.YI and is_new and not _skip:
 			await _showcase(hero, is_new)
 		elif not _skip:
 			await get_tree().create_timer(REVEAL_DELAY).timeout
@@ -213,7 +217,7 @@ func _make_slot(hero: UnitData, is_new: bool) -> Control:
 	return slot
 
 
-## 聚义令：画面压暗，令牌旋转着放大，然后「咚」地砸下，冲出一圈光；光的颜色预示这一抽最好的品级。
+## 聚义令：画面压暗，一块乌木铜边的竖令牌晃着从上方落下，「咚」地砸在地上，冲出一圈光；光的颜色预示这一抽最好的品级。
 func _token_strike(best: int) -> void:
 	var color: Color = UiKit.TIER_COLORS[best]
 	var dim := ColorRect.new()
@@ -221,51 +225,92 @@ func _token_strike(best: int) -> void:
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fx.add_child(dim)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var d := 170.0
-	var token := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = SEAL_RED
-	style.set_corner_radius_all(int(d / 2))
-	style.set_border_width_all(7)
-	style.border_color = UiKit.GOLD
-	style.shadow_color = Color(color, 0.8)
-	style.shadow_size = 30
-	token.add_theme_stylebox_override("panel", style)
-	token.custom_minimum_size = Vector2(d, d)
-	token.size = Vector2(d, d)
-	var ch := UiKit.label("令", 104, PAPER)
-	ch.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ch.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	token.add_child(ch)
+	var token := _make_token()
+	# 背后的光：品级的颜色
+	var glow := Panel.new()
+	var glow_style := StyleBoxFlat.new()
+	glow_style.bg_color = Color(color, 0.0)
+	glow_style.set_corner_radius_all(120)
+	glow_style.shadow_color = Color(color, 0.75)
+	glow_style.shadow_size = 70
+	glow.add_theme_stylebox_override("panel", glow_style)
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	glow.size = Vector2(120, 380)
+	glow.position = (token.size - glow.size) / 2 - Vector2(0, 30)
+	glow.modulate.a = 0.0
+	token.add_child(glow)
+	token.move_child(glow, 0)
 	_fx.add_child(token)
-	token.position = (size - token.size) / 2
-	token.pivot_offset = token.size / 2
-	token.scale = Vector2(0.2, 0.2)
-	token.rotation = -TAU
+	var land := Vector2((size.x - token.size.x) / 2, (size.y - token.size.y) / 2 - 10)
+	token.position = land - Vector2(0, size.y * 0.9)
+	token.pivot_offset = Vector2(token.size.x / 2, token.size.y * 0.62)
+	token.rotation = -0.35
+	token.scale = Vector2(0.6, 0.6)
 	var fast := 0.5 if _skip else 1.0
 	Sfx.play(&"token_whoosh")
 	var t := create_tween().set_parallel()
-	t.tween_property(dim, "color:a", 0.7, 0.25 * fast)
-	t.tween_property(token, "scale", Vector2(1.5, 1.5), 0.55 * fast).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	t.tween_property(token, "rotation", 0.0, 0.55 * fast).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(dim, "color:a", 0.75, 0.25 * fast)
+	t.tween_property(token, "position:y", land.y - 60, 0.5 * fast).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(token, "rotation", 0.08, 0.5 * fast).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+	t.tween_property(token, "scale", Vector2(0.9, 0.9), 0.5 * fast).set_ease(Tween.EASE_OUT)
+	t.tween_property(glow, "modulate:a", 1.0, 0.5 * fast)
 	await t.finished
-	await get_tree().create_timer(0.12 * fast).timeout
-	# 砸下
-	var slam := create_tween()
-	slam.tween_property(token, "scale", Vector2(0.9, 0.9), 0.07).set_ease(Tween.EASE_IN)
+	# 悬一下，再砸下
+	var hang := create_tween()
+	hang.tween_property(token, "rotation", 0.0, 0.14 * fast).set_trans(Tween.TRANS_SINE)
+	await hang.finished
+	var slam := create_tween().set_parallel()
+	slam.tween_property(token, "position:y", land.y, 0.08).set_ease(Tween.EASE_IN)
+	slam.tween_property(token, "scale", Vector2(TOKEN_SCALE, TOKEN_SCALE), 0.08)
 	await slam.finished
-	_shockwave(token.position + token.size / 2, color)
+	var squash := create_tween()
+	squash.tween_property(token, "scale", Vector2(TOKEN_SCALE * 1.05, TOKEN_SCALE * 0.95), 0.05)
+	squash.tween_property(token, "scale", Vector2(TOKEN_SCALE, TOKEN_SCALE), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	var foot := token.position + token.pivot_offset + (Vector2(token.size.x / 2, token.size.y * 0.86) - token.pivot_offset) * TOKEN_SCALE
+	_shockwave(foot, color)
 	_flash(color)
-	_shake(12.0)
+	_shake(14.0)
 	Sfx.play(&"token_slam")
+	await get_tree().create_timer(0.45 * fast).timeout
 	var out := create_tween().set_parallel()
 	out.tween_property(token, "modulate:a", 0.0, 0.3)
-	out.tween_property(token, "scale", Vector2(1.2, 1.2), 0.3)
+	out.tween_property(token, "position:y", land.y - 20, 0.3)
 	out.tween_property(dim, "color:a", 0.0, 0.5)
-	await get_tree().create_timer(0.35 * fast).timeout
+	await get_tree().create_timer(0.25 * fast).timeout
 	out.finished.connect(func() -> void:
 		token.queue_free()
 		dim.queue_free())
+
+
+## 聚义令：乌木铜边的令牌图，牌面正中竖写金色「聚义」（字是游戏里放上去的，图上是空白牌面）。
+func _make_token() -> Control:
+	var tex: Texture2D = load("res://art/ui/juyi_token.png")
+	var token := Control.new()
+	token.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	token.size = tex.get_size()
+	var pic := TextureRect.new()
+	pic.texture = tex
+	pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pic.size = tex.get_size()
+	token.add_child(pic)
+	# 牌面空白区：x 30～138、y 67～326（见 art/ui/juyi_token.png）
+	var face := VBoxContainer.new()
+	face.alignment = BoxContainer.ALIGNMENT_CENTER
+	face.add_theme_constant_override("separation", 6)
+	face.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	face.position = Vector2(30, 67)
+	face.size = Vector2(108, 259)
+	token.add_child(face)
+	for ch: String in ["聚", "义"]:
+		var l := UiKit.outlined(ch, 76, Color("e8c060"))
+		l.add_theme_color_override("font_outline_color", Color("2a1408"))
+		l.add_theme_constant_override("outline_size", 8)
+		l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
+		l.add_theme_constant_override("shadow_offset_x", 2)
+		l.add_theme_constant_override("shadow_offset_y", 3)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		face.add_child(l)
+	return token
 
 
 ## 一圈光从 at 往外扩开。
@@ -462,6 +507,156 @@ func _showcase(hero: UnitData, is_new: bool) -> void:
 	await tap.pressed
 	var out := create_tween()
 	out.tween_property(layer, "modulate:a", 0.0, 0.18)
+	await out.finished
+	layer.queue_free()
+	_in_showcase = false
+
+
+## 五玉金卡：整屏转成金色，背后金光放射，全身立绘从中间完整升起，名字竖写在左边，金色光点往上飘。
+func _showcase_gold(hero: UnitData, is_new: bool) -> void:
+	_in_showcase = true
+	var gold: Color = UiKit.TIER_COLORS[UnitData.Tier.JIA]
+	var layer := Control.new()
+	layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.modulate.a = 0.0
+	_fx.add_child(layer)
+	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var bg := ColorRect.new()
+	bg.color = Color("1a1006")
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(bg)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := Vector2(size.x / 2, size.y * 0.46)
+
+	# 放射的金光：一圈细长三角，慢慢转
+	var rays := Node2D.new()
+	rays.position = center
+	layer.add_child(rays)
+	var reach := size.length()
+	for i in 18:
+		var ray := Polygon2D.new()
+		var a := TAU * i / 18.0
+		var w := 0.07
+		ray.polygon = PackedVector2Array([Vector2.ZERO, Vector2.from_angle(a - w) * reach, Vector2.from_angle(a + w) * reach])
+		ray.vertex_colors = PackedColorArray([Color(gold, 0.38), Color(gold, 0.0), Color(gold, 0.0)])
+		rays.add_child(ray)
+	var spin := rays.create_tween().set_loops()
+	spin.tween_property(rays, "rotation", TAU, 40.0).as_relative()
+	# 中间一团暖光
+	var halo := Panel.new()
+	var halo_style := StyleBoxFlat.new()
+	halo_style.bg_color = Color(gold, 0.0)
+	halo_style.set_corner_radius_all(200)
+	halo_style.shadow_color = Color(gold.lightened(0.3), 0.55)
+	halo_style.shadow_size = 160
+	halo.add_theme_stylebox_override("panel", halo_style)
+	halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	halo.size = Vector2(260, 260)
+	halo.position = center - halo.size / 2
+	layer.add_child(halo)
+
+	# 金色光点往上飘
+	var motes := CPUParticles2D.new()
+	motes.amount = 70
+	motes.lifetime = 3.0
+	motes.preprocess = 1.0
+	motes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	motes.emission_rect_extents = Vector2(size.x / 2, 10)
+	motes.position = Vector2(size.x / 2, size.y + 10)
+	motes.direction = Vector2(0, -1)
+	motes.spread = 15.0
+	motes.gravity = Vector2.ZERO
+	motes.initial_velocity_min = 80.0
+	motes.initial_velocity_max = 200.0
+	motes.scale_amount_min = 2.0
+	motes.scale_amount_max = 5.0
+	motes.color = gold.lightened(0.3)
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
+	fade.colors = PackedColorArray([Color(1, 1, 1, 0), Color.WHITE, Color(1, 1, 1, 0)])
+	motes.color_ramp = fade
+	layer.add_child(motes)
+
+	# 全身立绘：整个人都在画面里
+	var fig := TextureRect.new()
+	fig.texture = hero.portrait if hero.portrait != null else hero.bust
+	fig.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fig.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	fig.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var fig_h := size.y * 0.94
+	var aspect := 0.75
+	if fig.texture != null:
+		aspect = float(fig.texture.get_width()) / fig.texture.get_height()
+	fig.size = Vector2(fig_h * aspect, fig_h)
+	var fig_to := Vector2((size.x - fig.size.x) / 2, size.y - fig_h)
+	fig.position = fig_to + Vector2(0, 120)
+	fig.modulate = Color(1.6, 1.4, 0.9, 0.0)
+	layer.add_child(fig)
+
+	# 左边竖写名字，旁边小字绰号
+	var name_col := VBoxContainer.new()
+	name_col.add_theme_constant_override("separation", -10)
+	name_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_col.position = Vector2(size.x * 0.12, size.y * 0.12)
+	name_col.modulate.a = 0.0
+	layer.add_child(name_col)
+	for ch in hero.display_name:
+		var l := UiKit.outlined(ch, 120, Color("fff0c0"))
+		l.add_theme_constant_override("outline_size", 14)
+		l.add_theme_color_override("font_outline_color", Color("3a1a04"))
+		name_col.add_child(l)
+	var nick_col := VBoxContainer.new()
+	nick_col.add_theme_constant_override("separation", -4)
+	nick_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	nick_col.position = name_col.position + Vector2(150, 30)
+	nick_col.modulate.a = 0.0
+	layer.add_child(nick_col)
+	for ch in hero.nickname:
+		nick_col.add_child(UiKit.outlined(ch, 40, gold))
+
+	# 右边：五玉、是否新入伙、绝招
+	var info := VBoxContainer.new()
+	info.add_theme_constant_override("separation", 12)
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info.position = Vector2(size.x * 0.68, size.y * 0.3)
+	info.custom_minimum_size.x = size.x * 0.28
+	info.modulate.a = 0.0
+	layer.add_child(info)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 12)
+	info.add_child(top)
+	top.add_child(IdentitySeal.make(hero.rarity, 48))
+	top.add_child(MagatamaRow.for_tier(hero.tier, 34))
+	info.add_child(UiKit.outlined("新入伙！" if is_new else "已在麾下，化作将魂 +%d" % Gacha.DUPLICATE_SOULS, 40 if is_new else 26, gold if is_new else Color("e8d8b8")))
+	if hero.skill != null:
+		var skill_line := UiKit.outlined("「%s」%s" % [hero.skill.display_name, hero.skill.description], 20, Color("fff0d8"))
+		skill_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		skill_line.custom_minimum_size.x = size.x * 0.28
+		info.add_child(skill_line)
+	var hint := UiKit.outlined("点一下继续", 18, Color("e8d8b8"))
+	hint.position = Vector2(size.x * 0.68, size.y - 60)
+	hint.modulate.a = 0.0
+	layer.add_child(hint)
+
+	_flash(gold)
+	Sfx.play(&"rare_shimmer", -1.0)
+	var t := create_tween().set_parallel()
+	t.tween_property(layer, "modulate:a", 1.0, 0.25)
+	t.tween_property(fig, "position", fig_to, 0.6).set_delay(0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(fig, "modulate", Color.WHITE, 0.7).set_delay(0.15)
+	t.tween_property(name_col, "modulate:a", 1.0, 0.4).set_delay(0.6)
+	t.tween_property(nick_col, "modulate:a", 1.0, 0.4).set_delay(0.8)
+	t.tween_property(info, "modulate:a", 1.0, 0.4).set_delay(0.9)
+	t.tween_property(hint, "modulate:a", 1.0, 0.3).set_delay(1.3)
+	await t.finished
+	var tap := Button.new()
+	tap.flat = true
+	tap.focus_mode = Control.FOCUS_NONE
+	layer.add_child(tap)
+	tap.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	await tap.pressed
+	var out := create_tween()
+	out.tween_property(layer, "modulate:a", 0.0, 0.2)
 	await out.finished
 	layer.queue_free()
 	_in_showcase = false

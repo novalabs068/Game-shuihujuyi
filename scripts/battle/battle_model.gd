@@ -12,6 +12,8 @@ extends RefCounted
 enum Action { ATTACK, SKILL, GUARD, COMBO }
 enum Result { ONGOING, WIN, LOSE }
 
+## 统领（主角）不上场；以他为一方的组合技（结义同心）只看另一位好汉
+const COMMANDER_ID := &"protagonist"
 const TIME_PER_ACTION := 1000.0
 const ROUND_TIME := 10.0
 const CRIT_CHANCE := 0.05
@@ -86,11 +88,12 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 		if formation_text != "":
 			_emit("prep", players[0], Formations.display_name(formation), "阵法%s" % formation_text)
 		var hero_ids: Array[StringName] = []
-		for u in players.slice(1):
+		for u in players:
 			hero_ids.append(u.data.id)
 		var faction := Factions.shared(hero_ids)
 		if faction != &"":
-			_emit("prep", players[1], Factions.display_name(faction), Factions.apply(faction, players))
+			var who := players.filter(func(u: BattleUnit) -> bool: return Factions.of(u.data.id) == faction)
+			_emit("prep", who[0], Factions.display_name(faction), Factions.apply(faction, players))
 	for u in units:
 		_apply_opening_gear(u)
 		_apply_opening_talent(u)
@@ -147,6 +150,8 @@ func available_combo(actor: BattleUnit) -> ComboData:
 	if actor == null or not actor.has_full_rage() or actor.silence_turns > 0:
 		return null
 	for c in combos:
+		if c.partner_of(actor.data.id) == COMMANDER_ID:
+			return c
 		var partner := _find_ally(actor, c.partner_of(actor.data.id))
 		if partner != null and partner != actor and partner.has_full_rage() and partner.silence_turns == 0:
 			return c
@@ -487,6 +492,9 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 	var a := _find_ally(actor, combo.hero_a)
 	var b := _find_ally(actor, combo.hero_b)
+	# 结义同心：统领在阵外，由结义兄弟一个人放
+	if a == null:
+		a = b
 	a.rage = 0
 	b.rage = 0
 	_emit("combo", a, combo.display_name, "%s + %s 发动组合技「%s」" % [a.display_name(), b.display_name(), combo.display_name], false, b)

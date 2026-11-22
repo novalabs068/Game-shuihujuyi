@@ -57,5 +57,5 @@ static func sworn_combo(hero: UnitData, protagonist_id: StringName) -> ComboData
 	c.effect = ComboData.Effect.SWORN
 	c.power = SWORN_POWER
 	var move := hero.skill.display_name if hero.skill != null else "绝招"
-	c.description = "主角先对单体造成 %d%% 伤害，%s紧接着放出强化过的「%s」（不占冷却）。" % [roundi(SWORN_POWER * 100), hero.display_name, move]
+	c.description = "统领在阵外一声号令，%s先对单体造成 %d%% 伤害，紧接着放出强化过的「%s」（不占冷却）。%s怒气满就能放。" % [hero.display_name, roundi(SWORN_POWER * 100), move, hero.display_name]
 	return c

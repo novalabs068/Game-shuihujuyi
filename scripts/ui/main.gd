@@ -1,6 +1,9 @@
 extends Control
 ## 游戏入口：在开始界面、创建角色、江湖大地图、地点场景、编队、战斗之间切换画面。
 
+## 统领不上阵：一个好汉都没有的时候打不了仗
+const NO_TEAM_TEXT := "身边还没有好汉随行，统领一个人上不了阵。先去聚义厅招募，再在「编队」里选人。"
+
 var _screen: Control
 
 
@@ -149,6 +152,9 @@ func _start_story(story: StoryData, start_at := 0) -> void:
 
 ## 列传里的一仗：赢了拿普通战斗的经验银两，接着演；输了回大地图，这一段下次从头来。
 func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> void:
+	if GameState.team().is_empty():
+		_show_map(&"", 0.0, NO_TEAM_TEXT)
+		return
 	var screen := BattleView.new()
 	screen.stage = stage
 	screen.team = GameState.battle_team()
@@ -255,6 +261,12 @@ func _show_team_select() -> void:
 ## bonus 是打赢后额外的奖励（悬赏、奇遇、支线）：tokens、silver、experience、flag、text。
 ## return_scene 非空时，打完回到这个地点场景，否则回大地图。
 func _start_battle(stage: StageData, destination: StringName, progress: float, bonus := {}, return_scene := "") -> void:
+	if GameState.team().is_empty():
+		if return_scene != "":
+			_show_scene(return_scene, NO_TEAM_TEXT)
+		else:
+			_show_map(&"", 0.0, NO_TEAM_TEXT)
+		return
 	var screen := BattleView.new()
 	screen.stage = stage if bonus.has("arena_round") else GameState.prepare_stage(stage)
 	screen.team = GameState.battle_team()

@@ -1,5 +1,5 @@
 class_name Factions
-## 山头：出战的两位好汉出自同一个山头时，全队得到一条加成（主角不算山头）。纯规则，不碰画面。
+## 山头：出战的好汉里有两位（或三位）出自同一个山头时，全队得到一条加成。纯规则，不碰画面。
 
 ## 山头 → [名字, 好汉, 加成说明]
 const ALL := {
@@ -22,17 +22,17 @@ static func of(hero_id: StringName) -> StringName:
 	return &""
 
 
-## 两位好汉（不算主角）同出一个山头时的山头，否则为空。
+## 至少两位好汉同出的山头，没有为空。
 static func shared(hero_ids: Array[StringName]) -> StringName:
-	if hero_ids.size() < 2:
-		return &""
-	var f := of(hero_ids[0])
-	if f == &"":
-		return &""
+	var count := {}
 	for id in hero_ids:
-		if of(id) != f:
-			return &""
-	return f
+		var f := of(id)
+		if f != &"":
+			count[f] = int(count.get(f, 0)) + 1
+	for f: StringName in count:
+		if count[f] >= 2:
+			return f
+	return &""
 
 
 static func display_name(f: StringName) -> String:
@@ -62,4 +62,5 @@ static func apply(f: StringName, player_units: Array[BattleUnit]) -> String:
 			&"jian_kang":
 				if not &"regen" in u.extra_effects:
 					u.extra_effects.append(&"regen")
-	return "%s同出%s：%s" % ["、".join(player_units.slice(1).map(func(u: BattleUnit) -> String: return u.display_name())), display_name(f), bonus_text(f)]
+	var members := player_units.filter(func(u: BattleUnit) -> bool: return of(u.data.id) == f).map(func(u: BattleUnit) -> String: return u.display_name())
+	return "%s同出%s：%s" % ["、".join(members), display_name(f), bonus_text(f)]

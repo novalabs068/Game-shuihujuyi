@@ -151,11 +151,11 @@ func _spawn_objects() -> void:
 		_chest_at[chest.cell] = chest
 		_chest_actors[chest.cell] = actor
 		_astar.set_point_solid(chest.cell, true)
-	var team := GameState.team()
+	var me := GameState.protagonist()
 	_player = MapActor.new()
-	_player.sprite = team[0].map_sprite if not team.is_empty() else null
+	_player.sprite = me.map_sprite if me != null else null
 	_player.sprite_scale = MapActor.CHARACTER_SCALE
-	_player.setup(team[0].face if not team.is_empty() else null, "我", UiKit.ACCENT, "")
+	_player.setup(me.face if me != null else null, "我", UiKit.ACCENT, "")
 	# 打完仗回来：站回原来的位置
 	var memory := GameState.scene_state(scene_data.id)
 	var back: Variant = memory["cell"]
@@ -429,8 +429,7 @@ func _fight(r: SceneRoamer) -> void:
 
 func _talk(npc: NpcData) -> void:
 	_busy = true
-	var team := GameState.team()
-	var speakers := {npc.display_name: npc.unit, "我": team[0] if not team.is_empty() else null}
+	var speakers := {npc.display_name: npc.unit, "我": GameState.protagonist()}
 	await _dialogue.run(npc.lines, speakers)
 	if npc.event != null and not GameState.has_flag("event_" + String(npc.event.id)):
 		GameState.set_flag("event_" + String(npc.event.id))

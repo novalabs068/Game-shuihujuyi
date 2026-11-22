@@ -18,6 +18,7 @@ func _initialize() -> void:
 		"test_pursuit",
 		"test_miji",
 		"test_formations_and_factions",
+		"test_commander_off_field",
 		"test_opening_events",
 		"test_same_buffs_do_not_stack",
 		"test_expose_and_boss_resist",
@@ -382,6 +383,25 @@ func test_formations_and_factions() -> bool:
 	# 不摆阵、不同山头：什么也不加
 	var plain := BattleModel.new(stage, [lead, h1, unit_data(&"x", [1000, 100, 50, 100])] as Array[UnitData], 1, [], 1)
 	check(plain.opening_events.is_empty(), "no formation, no 山头, nothing to show")
+	return true
+
+
+func test_commander_off_field() -> bool:
+	# 结义同心：统领不在阵上，结义的好汉一个人怒气满就能放
+	var hero := unit_data(&"h", [5000, 100, 0, 200], skill(SkillData.Effect.DAMAGE, {"power": 2.0}))
+	var sworn := Bonds.sworn_combo(hero, BattleModel.COMMANDER_ID)
+	var m := battle([hero, unit_data(&"x", [5000, 10, 0, 50])], [unit_data(&"e", [100000, 1, 0, 1])], [sworn])
+	advance_to(m, &"h")
+	var h := by_id(m, &"h")
+	check(m.available_combo(h) == null, "needs full rage")
+	h.rage = BattleUnit.RAGE_MAX
+	check(m.available_combo(h) == sworn, "the sworn hero alone can call 结义同心")
+	var ev := m.act(BattleModel.Action.COMBO, by_id(m, &"e"))
+	check(ev.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").size() >= 2, "hit + upgraded skill")
+	check_eq(h.rage, 0 + BattleModel.RAGE_ON_SKILL, "rage is spent")
+	# 山头：三人里有两人同出就算
+	check_eq(Factions.shared([&"lin_chong", &"lu_zhishen", &"yang_zhi"] as Array[StringName]), &"er_long_shan", "two of three from 二龙山")
+	check_eq(Factions.shared([&"lin_chong", &"lu_zhishen", &"hua_rong"] as Array[StringName]), &"", "all different")
 	return true
 
 

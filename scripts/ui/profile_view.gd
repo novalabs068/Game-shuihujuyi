@@ -1,6 +1,6 @@
 class_name ProfileView
 extends Control
-## 主角页：立绘和出身、等级和家当、属性（算上武学和装备）、主修副修、身上装备、江湖履历。
+## 主角页：立绘和出身、等级和家当、统领光环（主修武学）、坐骑、江湖履历。
 ## 换武学和装备在「好汉」页主角那里做，这里有按钮直接过去。
 
 signal back_requested
@@ -86,31 +86,14 @@ func _ready() -> void:
 	right.add_child(bar)
 	right.add_child(UiKit.label("银两 %d　聚义令 %d　义气 %d" % [GameState.silver, GameState.tokens, GameState.yiqi], 20, UiKit.TEXT_DIM))
 
-	# 属性：算上副修武学和装备，和战斗里一样
-	var unit := Equipment.apply(me, GameState.effective_gear(GameState.PROTAGONIST_ID))
-	_section(right, "属性")
-	var at := func(base: int) -> int: return roundi(base * pow(BattleUnit.LEVEL_GROWTH, lv - 1))
-	right.add_child(UiKit.label("生命 %d　攻击 %d　防御 %d　速度 %d" % [at.call(unit.base_hp), at.call(unit.base_atk), at.call(unit.base_def), at.call(unit.base_spd)], 22))
-	if not unit.gear_effects.is_empty():
-		right.add_child(UiKit.label("特效：" + "、".join(unit.gear_effects.map(func(e: StringName) -> String: return "%s（%s）" % EquipData.EFFECTS[e])), 17, UiKit.TEXT_DIM))
-
-	# 武学
-	_section(right, "武学")
+	# 统领：不上阵，主修武学给出战好汉全队加成
+	_section(right, "统领")
 	var main := GameState.martial(GameState.martial_main)
-	var side := GameState.martial(GameState.martial_side)
-	right.add_child(_line("主修", "%s：%s" % [main.display_name, main.skill.description] if main != null else "（无）"))
-	right.add_child(_line("副修", "%s：%s" % [side.display_name, side.side_summary()] if side != null else "（空着，学会第二门武学后填上）"))
-	right.add_child(UiKit.label("已学会 %d 门武学" % GameState.martials.size(), 16, UiKit.TEXT_DIM))
-
-	# 装备
-	_section(right, "装备")
-	for slot in EquipData.Slot.values():
-		var it := GameState.equipped(GameState.PROTAGONIST_ID, slot)
-		var text := "（空）"
-		if not it.is_empty():
-			var data := GameState.item_data(it)
-			text = "%s · %s　%s" % [data.display_name, data.quality_name(), data.summary()]
-		right.add_child(_line(EquipData.SLOT_NAMES[slot], text))
+	var aura := GameState.commander_aura()
+	right.add_child(_line("主修", "%s：出战的每位好汉 %s" % [main.display_name, aura.summary()] if main != null else "（无）"))
+	right.add_child(UiKit.label("已学会 %d 门武学，在「好汉」页换主修" % GameState.martials.size(), 16, UiKit.TEXT_DIM))
+	var mount := GameState.mount()
+	right.add_child(_line("坐骑", "%s · %s　%s" % [mount.display_name, mount.quality_name(), mount.summary()] if mount != null else "（无，集市有马卖）"))
 
 	# 江湖履历
 	_section(right, "江湖履历")
