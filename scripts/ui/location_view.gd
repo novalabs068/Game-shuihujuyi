@@ -8,6 +8,10 @@ signal exit_requested
 signal battle_requested(stage: StageData, bonus: Dictionary)
 ## 走进门里，换到另一个场景
 signal scene_requested(scene_id: String)
+## 在场景里打开编队、好汉、招募（看完回到场景原地）
+signal team_requested
+signal heroes_requested
+signal recruit_requested
 
 ## 像素瓦片放大倍数：16 像素的瓦片在画面上是 48 像素一格
 const PIXEL_SCALE := 3
@@ -37,6 +41,8 @@ var _roamers: Array[SceneRoamer] = []
 ## 刚从战斗回来的几秒里小怪不追人，免得一回来又被碰上
 var _grace := 0.0
 const RETURN_GRACE := 2.5
+## 有小怪离主角这么多格以内就不能歇脚
+const CAMP_SAFE_CELLS := 5.0
 
 
 func _ready() -> void:
@@ -179,9 +185,21 @@ func _build_ui() -> void:
 	bar.add_child(row)
 	var title := UiKit.label(scene_data.title, 26, UiKit.GOLD)
 	row.add_child(title)
-	var hint := UiKit.label("点地面走动，点人物对话；碰到游荡的小怪就开打", 17, UiKit.TEXT_DIM)
+	var hint := UiKit.label("点地面走动，点人物对话", 17, UiKit.TEXT_DIM)
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hint.clip_text = true
 	row.add_child(hint)
+	var camp := UiKit.button("歇脚", Vector2(80, 40), 20)
+	camp.pressed.connect(_camp)
+	row.add_child(camp)
+	for entry: Array in [["编队", team_requested], ["好汉", heroes_requested], ["招募", recruit_requested]]:
+		var b := UiKit.button(entry[0], Vector2(80, 40), 20)
+		var sig: Signal = entry[1]
+		b.pressed.connect(func() -> void:
+			if not _busy:
+				_remember()
+				sig.emit())
+		row.add_child(b)
 	var leave := UiKit.button("离开", Vector2(100, 40), 20)
 	leave.pressed.connect(func() -> void:
 		if not _busy:
@@ -332,31 +350,40 @@ func _go_to_scene(scene_id: String, cell: Variant) -> void:
 
 # --- 场景小怪 ---
 
+## 摆出场景里的小怪。上次离开时记下了的（打仗、看菜单回来），照原来的人马和位置摆。
 func _spawn_roamers(cleared: Array) -> void:
 	if scene_data.region == &"" or scene_data.roam_spots.is_empty():
 		return
-	var loc: LocationData = GameDB.maps[GameState.DEFAULT_MAP].location(scene_data.region)
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+	var saved: Dictionary = GameState.scene_state(scene_data.id).get("roamers", {})
 	for i in scene_data.roam_spots.size():
 		if i in cleared:
 			continue
+		_spawn_roamer(i, saved.get(i, {}))
+
+
+func _spawn_roamer(i: int, saved: Dictionary) -> void:
+	var loc: LocationData = GameDB.maps[GameState.DEFAULT_MAP].location(scene_data.region)
+	var stage: StageData = saved.get("stage")
+	if stage == null:
+		var rng := RandomNumberGenerator.new()
+		rng.randomize()
 		var groups := scene_data.roam_groups if not scene_data.roam_groups.is_empty() else loc.encounter_groups
 		var bonus := scene_data.roam_bonus[i] if i < scene_data.roam_bonus.size() else 0
-		var stage := Encounters.build_from(groups, loc.level_min, loc.level_max, GameState.level, rng, bonus, loc.danger)
-		var lead: UnitData = stage.enemies[0]
-		var actor := MapActor.new()
-		for e in stage.enemies:
-			if e.map_sprite != null:
-				actor.sprite = e.map_sprite
-				break
-		actor.sprite_scale = MapActor.CHARACTER_SCALE
-		var elite := lead.elite_trait != &""
-		actor.setup(lead.face, lead.display_name.left(1), UiKit.ENEMY, "%s %d级" % [lead.display_name, stage.enemy_level])
-		actor.caption_color = UiKit.BOSS if elite else Color("ffb0a0")
-		actor.position = _feet(scene_data.roam_spots[i])
-		_actors.add_child(actor)
-		_roamers.append(SceneRoamer.new(i, stage, actor, scene_data.roam_spots[i]))
+		stage = Encounters.build_from(groups, loc.level_min, loc.level_max, GameState.level, rng, bonus, loc.danger)
+	var lead: UnitData = stage.enemies[0]
+	var actor := MapActor.new()
+	for e in stage.enemies:
+		if e.map_sprite != null:
+			actor.sprite = e.map_sprite
+			break
+	actor.sprite_scale = MapActor.CHARACTER_SCALE
+	var elite := lead.elite_trait != &""
+	actor.setup(lead.face, lead.display_name.left(1), UiKit.ENEMY, "%s %d级" % [lead.display_name, stage.enemy_level])
+	actor.caption_color = UiKit.BOSS if elite else Color("ffb0a0")
+	var cell: Vector2i = saved.get("cell", scene_data.roam_spots[i])
+	actor.position = _feet(cell)
+	_actors.add_child(actor)
+	_roamers.append(SceneRoamer.new(i, stage, actor, scene_data.roam_spots[i]))
 
 
 func _step_roamers(delta: float) -> void:
@@ -412,17 +439,120 @@ func _path_between(from: Vector2i, to: Vector2i) -> Array[Vector2]:
 	return out
 
 
+## 离开这个画面一会儿（开打、看菜单）之前，记下主角和每只小怪站在哪、是哪伙人，回来时原样摆回去。
+func _remember() -> void:
+	var memory := GameState.scene_state(scene_data.id)
+	memory["cell"] = _cell_at(_player.position)
+	var saved := {}
+	for r in _roamers:
+		saved[r.index] = {"cell": _cell_at(r.actor.position), "stage": r.stage}
+	memory["roamers"] = saved
+
+
 ## 碰上小怪：记下主角站的位置，开打；打赢后 main 会把它记成已打败。
 func _fight(r: SceneRoamer) -> void:
 	_busy = true
 	_path.clear()
 	_player.moving = false
-	var memory := GameState.scene_state(scene_data.id)
-	memory["cell"] = _cell_at(_player.position)
+	_remember()
 	GameState.pending_roamer = [scene_data.id, r.index]
 	_flash("%s 冲了上来！" % r.stage.enemies[0].display_name)
 	await get_tree().create_timer(0.5).timeout
 	battle_requested.emit(r.stage, {})
+
+
+# --- 歇脚 ---
+
+## 随地歇一宿：天黑下来，身边生起篝火，头上飘「Zzz」，天亮后全队回一截气血；被打退的小怪也回来了。
+## 附近有小怪就歇不了。
+func _camp() -> void:
+	if _busy:
+		return
+	for r in _roamers:
+		if r.actor.position.distance_to(_player.position) / _tile < CAMP_SAFE_CELLS:
+			_flash("附近有强人出没，没法安心歇脚")
+			return
+	_busy = true
+	_path.clear()
+	_player.moving = false
+	# 天色：一层盖在场景上、在顶栏下面的颜色
+	var sky := ColorRect.new()
+	sky.color = Color(0.04, 0.06, 0.16, 0.0)
+	sky.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(sky)
+	move_child(sky, _world.get_index() + 1)
+	sky.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# 篝火、火光、「Zzz」画在天色上面（不被夜色压暗），和场景用同一个镜头位置
+	var lit := Node2D.new()
+	lit.transform = _world.transform
+	add_child(lit)
+	move_child(lit, sky.get_index() + 1)
+	var glow := _campfire_glow()
+	glow.position = _player.position + Vector2(_tile * 0.7, 0)
+	lit.add_child(glow)
+	var fire := FxSprite.spawn(lit, "burning", glow.position, 2.2, false, 1)
+	fire.modulate.a = 0.0
+	glow.modulate.a = 0.0
+	var dusk := create_tween().set_parallel()
+	dusk.tween_property(sky, "color:a", 0.62, 0.9)
+	dusk.tween_property(fire, "modulate:a", 1.0, 0.6).set_delay(0.3)
+	dusk.tween_property(glow, "modulate:a", 1.0, 0.6).set_delay(0.3)
+	await dusk.finished
+	# 睡着了：头上一个接一个飘「Z」
+	for i in 4:
+		_float_z(lit, i)
+		await get_tree().create_timer(0.45).timeout
+	await get_tree().create_timer(0.6).timeout
+	# 天亮：先一抹暖色，再回到白天
+	GameState.camp_rest()
+	var memory := GameState.scene_state(scene_data.id)
+	var came_back: Array = memory["cleared"].duplicate()
+	memory["cleared"].clear()
+	var dawn := create_tween()
+	dawn.tween_property(sky, "color", Color(1.0, 0.72, 0.45, 0.28), 0.9)
+	dawn.parallel().tween_property(fire, "modulate:a", 0.0, 0.9)
+	dawn.parallel().tween_property(glow, "modulate:a", 0.0, 0.9)
+	dawn.tween_property(sky, "color:a", 0.0, 0.7)
+	await dawn.finished
+	sky.queue_free()
+	lit.queue_free()
+	for i in came_back:
+		_spawn_roamer(i, {})
+	_grace = RETURN_GRACE
+	_busy = false
+	var text := "歇了一宿，全队气血回复 %d%%。" % roundi(Vitality.CAMP_REGEN * 100)
+	if not came_back.is_empty():
+		text += "被打退的强人又回来了。"
+	_flash(text)
+
+
+## 篝火照亮的一圈暖光（叠加混合）。
+func _campfire_glow() -> Sprite2D:
+	var size := 96
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var r := size / 2.0
+	for y in size:
+		for x in size:
+			var t := clampf(1.0 - Vector2(x + 0.5 - r, y + 0.5 - r).length() / r, 0.0, 1.0)
+			img.set_pixel(x, y, Color(1.0, 0.62, 0.25, t * t * 0.55))
+	var glow := Sprite2D.new()
+	glow.texture = ImageTexture.create_from_image(img)
+	glow.scale = Vector2(5, 3.2)
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	glow.material = mat
+	return glow
+
+
+## 主角头上飘起一个「Z」，一个比一个大、往右上飘。
+func _float_z(layer: Node2D, i: int) -> void:
+	var z := UiKit.outlined("Z" if i % 2 == 0 else "z", 26 + i * 6, Color("e8f0ff"))
+	layer.add_child(z)
+	z.position = _player.position + Vector2(10 + i * 8, -_tile * 2.2)
+	var t := z.create_tween().set_parallel()
+	t.tween_property(z, "position", z.position + Vector2(40, -70), 1.6)
+	t.tween_property(z, "modulate:a", 0.0, 1.6).set_delay(0.5)
+	t.chain().tween_callback(z.queue_free)
 
 
 # --- 互动 ---

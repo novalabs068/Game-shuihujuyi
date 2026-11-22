@@ -682,6 +682,13 @@ func rest() -> bool:
 	return true
 
 
+## 野外歇一宿：不花钱，每人回 Vitality.CAMP_REGEN。
+func camp_rest() -> void:
+	for id in vitality:
+		vitality[id] = minf(vitality[id] + Vitality.CAMP_REGEN, 1.0)
+	save_game()
+
+
 func buy_medicine(id: StringName) -> bool:
 	var price := Vitality.medicine_price(id)
 	if silver < price:

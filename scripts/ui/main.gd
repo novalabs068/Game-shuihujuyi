@@ -5,6 +5,8 @@ extends Control
 const NO_TEAM_TEXT := "身边还没有好汉随行，统领一个人上不了阵。先去聚义厅招募，再在「编队」里选人。"
 
 var _screen: Control
+## 从场景里打开菜单（编队、好汉、招募……）时记下场景，关掉菜单回到那里；在大地图上打开的为空
+var _menu_scene := ""
 
 
 ## 在大地图上按返回键：这么多秒内再按一次才退出
@@ -52,7 +54,7 @@ func _go_back() -> void:
 	elif _screen.has_signal("back_requested"):
 		_screen.emit_signal("back_requested")
 	else:
-		_show_map()
+		_back_from_menu()
 
 
 func _ask_quit() -> void:
@@ -92,6 +94,7 @@ func _show_character_create() -> void:
 
 
 func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, notice := "", focus_location: StringName = &"") -> void:
+	_menu_scene = ""
 	var screen := WorldMapView.new()
 	screen.notice = notice
 	screen.focus_location = focus_location
@@ -227,17 +230,18 @@ func _finish_story(story: StoryData) -> void:
 
 func _show_heroes() -> void:
 	var screen := HeroesView.new()
-	screen.back_requested.connect(_show_map)
+	screen.back_requested.connect(_back_from_menu.bind(""))
 	_set_screen(screen)
 
 
 func _show_recruit() -> void:
 	var screen := RecruitView.new()
-	screen.back_requested.connect(_show_map)
+	screen.back_requested.connect(_back_from_menu.bind(""))
 	_set_screen(screen)
 
 
 func _show_scene(scene_id: String, notice := "") -> void:
+	_menu_scene = scene_id
 	var screen := LocationView.new()
 	screen.scene_data = GameDB.scenes[scene_id]
 	screen.notice = notice
@@ -245,7 +249,18 @@ func _show_scene(scene_id: String, notice := "") -> void:
 	screen.scene_requested.connect(_show_scene)
 	screen.battle_requested.connect(func(stage: StageData, bonus: Dictionary) -> void:
 		_start_battle(stage, &"", 0.0, bonus, scene_id))
+	screen.team_requested.connect(_show_team_select)
+	screen.heroes_requested.connect(_show_heroes)
+	screen.recruit_requested.connect(_show_recruit)
 	_set_screen(screen)
+
+
+## 关掉菜单：从场景里打开的回场景（站回原地），否则回大地图。
+func _back_from_menu(notice := "") -> void:
+	if _menu_scene != "":
+		_show_scene(_menu_scene, notice)
+	else:
+		_show_map(&"", 0.0, notice)
 
 
 func _show_team_select() -> void:
@@ -253,7 +268,7 @@ func _show_team_select() -> void:
 	screen.start_requested.connect(func(heroes: Array[UnitData]) -> void:
 		GameState.set_heroes(heroes)
 		GameState.save_game()
-		_show_map())
+		_back_from_menu())
 	_set_screen(screen)
 
 

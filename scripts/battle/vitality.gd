@@ -7,6 +7,8 @@ const WOUNDED := 0.1
 ## 赶路每走完一段路回多少；队里有「神医」天赋的人时翻倍
 const ROAD_REGEN := 0.1
 const ROAD_REGEN_HEALER := 0.2
+## 在野外随地歇一宿回多少（不花钱，但被打退的小怪会回来）
+const CAMP_REGEN := 0.35
 ## 歇脚：每一级队伍等级要多少银两（最少 REST_MIN）
 const REST_PER_LEVEL := 2
 const REST_MIN := 10
