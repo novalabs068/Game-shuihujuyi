@@ -14,9 +14,23 @@ const AUTO_ACTION := -1
 ## 我方三个站位：脚底的位置和远近（后排画小一点），沿一条斜线排开——2 号在最后、1 号居中、3 号最前；
 ## 敌方左右镜像。越靠下越近，画在上层
 const SLOTS: Array[Vector2] = [Vector2(290, 420), Vector2(150, 340), Vector2(430, 500)]
-const SLOT_DEPTH: Array[float] = [0.93, 0.85, 1.0]
-## 画的层次：后排 1、中间 2、前排 3；天气 4、前景草 5、目标箭头 6，都在背景之上
-const SLOT_LAYER: Array[int] = [2, 1, 3]
+## 画的层次：人物 1～3（越靠下越上层）；天气 4、前景草 5、目标箭头 6，都在背景之上
+## 我方按阵法站位（第一个是主将）；x 越大越靠前（离敌人越近），y 越大越近镜头
+const FORMATION_SLOTS := {
+	# 鱼鳞阵：主将在最前当鱼头，两位在后面左右错开
+	&"yu_lin": [Vector2(470, 420), Vector2(320, 340), Vector2(250, 505)],
+	# 长蛇阵：一字长蛇，主将打头，后面两位一个跟一个
+	&"chang_she": [Vector2(490, 440), Vector2(320, 405), Vector2(150, 370)],
+	# 八卦阵：三人斜列、互为犄角，主将居中（和默认的斜线方向相反）
+	&"ba_gua": [Vector2(330, 420), Vector2(460, 340), Vector2(200, 505)],
+	# 偃月阵：月牙形，两翼前出，主将收在中间靠后
+	&"yan_yue": [Vector2(210, 420), Vector2(480, 335), Vector2(430, 510)],
+	# 混天阵：前出压上，主将冲在最前排
+	&"hun_tian": [Vector2(450, 505), Vector2(540, 370), Vector2(320, 395)],
+}
+## 站位远近：脚底 y 在这个范围里，人物从小（后排）画到大（前排）
+const DEPTH_Y := Vector2(340, 500)
+const DEPTH_RANGE := Vector2(0.85, 1.0)
 ## 顶栏和底栏在天气、前景之上
 const BAR_LAYER := 7
 ## 特效放大倍数（pixelfx 按 24×38 的小人画的，我们的人物大得多）
@@ -80,11 +94,14 @@ var _skill_button: Button
 var _guard_button: Button
 var _combo_button: Button
 var _skill_sub: Label
+## 我方的阵法（决定站位）
+var _formation: StringName = &""
 var _combo_sub: Label
 
 
 func _ready() -> void:
-	model = BattleModel.new(stage, team, hero_level, GameState.combos(), -1, GameState.current_formation())
+	_formation = GameState.current_formation()
+	model = BattleModel.new(stage, team, hero_level, GameState.combos(), -1, _formation)
 	Vitality.apply_start(model, start_hp)
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG
@@ -126,9 +143,9 @@ func _ready() -> void:
 		add_child(card)
 		card.setup(u)
 		card.tapped.connect(_on_card_tapped)
-		card.set_depth(SLOT_DEPTH[u.slot])
+		card.set_depth(_slot_depth(u))
 		# 前排盖住后排
-		card.z_index = SLOT_LAYER[u.slot]
+		card.z_index = _slot_layer(u)
 		_cards[u] = card
 	# 最前面一层虚化的草，底栏上方
 	var fore := TextureRect.new()
@@ -677,10 +694,33 @@ func _add_log(text: String) -> void:
 	_log_label.text = "\n".join(_log_lines)
 
 
+## 这个人站在哪：我方按阵法，敌方按默认的斜线。
+func _slot_feet(u: BattleUnit) -> Vector2:
+	if u.side == BattleUnit.Side.PLAYER and FORMATION_SLOTS.has(_formation):
+		return FORMATION_SLOTS[_formation][u.slot]
+	return SLOTS[u.slot]
+
+
+## 远近按脚底的高低算：越靠下越近、画得越大。
+func _slot_depth(u: BattleUnit) -> float:
+	var t := clampf(inverse_lerp(DEPTH_Y.x, DEPTH_Y.y, _slot_feet(u).y), 0.0, 1.0)
+	return lerpf(DEPTH_RANGE.x, DEPTH_RANGE.y, t)
+
+
+## 同一方里越靠下的画在越上层（1～3）。
+func _slot_layer(u: BattleUnit) -> int:
+	var y := _slot_feet(u).y
+	var layer := 1
+	for other in model.units:
+		if other != u and other.side == u.side and _slot_feet(other).y < y:
+			layer += 1
+	return mini(layer, 3)
+
+
 func _layout() -> void:
 	for u in _cards:
 		var card := _cards[u]
-		var feet := SLOTS[u.slot]
+		var feet := _slot_feet(u)
 		var p := Vector2(feet.x - UnitCard.CARD_SIZE.x / 2, feet.y - UnitCard.FEET.y)
 		if u.side == BattleUnit.Side.PLAYER:
 			card.place(p)

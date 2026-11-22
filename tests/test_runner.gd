@@ -363,22 +363,23 @@ func test_formations_and_factions() -> bool:
 	var foe := unit_data(&"e", [1000, 100, 50, 100])
 	var stage := StageData.new()
 	stage.enemies = [foe]
-	var team: Array[UnitData] = [lead, h1, h2]
+	var team: Array[UnitData] = [unit_data(&"wu_song", [1000, 100, 50, 100]), h1, h2]
+	lead = team[0]
 	# 鱼鳞阵：好汉防御 +20%，主角不变
 	var m := BattleModel.new(stage, team, 1, [], 1, &"yu_lin")
 	check_eq(roundi(by_id(m, &"lu_zhishen").def()), 60, "鱼鳞阵 raises a hero's defense")
-	check_eq(roundi(by_id(m, &"p").def()), 50, "the protagonist is unchanged")
+	check_eq(roundi(by_id(m, &"wu_song").def()), 50, "the 主将 is unchanged")
 	check(m.opening_events.any(func(e: Dictionary) -> bool: return String(e["log"]).begins_with("阵法")), "the formation shows in the 准备回合")
 	# 鲁智深 + 杨志 同出二龙山：全队生命 +8%
-	check_eq(Factions.shared([&"lu_zhishen", &"yang_zhi"] as Array[StringName]), &"er_long_shan", "both from 二龙山")
-	check_eq(Factions.shared([&"lu_zhishen", &"lin_chong"] as Array[StringName]), &"", "different 山头")
-	check_eq(by_id(m, &"p").max_hp, 1080, "山头 bonus reaches the whole team")
+	check_eq(Factions.shared([&"lu_zhishen", &"yang_zhi", &"wu_song"] as Array[StringName]), &"er_long_shan", "all three from 二龙山")
+	check_eq(Factions.shared([&"lu_zhishen", &"yang_zhi"] as Array[StringName]), &"", "two are not enough")
+	check_eq(by_id(m, &"wu_song").max_hp, 1080, "山头 bonus reaches the whole team")
 	# 八卦阵：敌方减攻 3 回合
 	var mb := BattleModel.new(stage, team, 1, [], 1, &"ba_gua")
 	check(by_id(mb, &"e").atk() < 100.0, "八卦阵 weakens the enemy")
 	# 长蛇阵：主角多挨打
 	var mc := BattleModel.new(stage, team, 1, [], 1, &"chang_she")
-	check(is_equal_approx(by_id(mc, &"p").taken_mult, 1.15), "长蛇阵 lead takes more")
+	check(is_equal_approx(by_id(mc, &"wu_song").taken_mult, 1.15), "长蛇阵 lead takes more")
 	check(is_equal_approx(by_id(mc, &"yang_zhi").taken_mult, 0.9), "长蛇阵 heroes take less")
 	# 不摆阵、不同山头：什么也不加
 	var plain := BattleModel.new(stage, [lead, h1, unit_data(&"x", [1000, 100, 50, 100])] as Array[UnitData], 1, [], 1)
@@ -400,7 +401,7 @@ func test_commander_off_field() -> bool:
 	check(ev.filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").size() >= 2, "hit + upgraded skill")
 	check_eq(h.rage, 0 + BattleModel.RAGE_ON_SKILL, "rage is spent")
 	# 山头：三人里有两人同出就算
-	check_eq(Factions.shared([&"lin_chong", &"lu_zhishen", &"yang_zhi"] as Array[StringName]), &"er_long_shan", "two of three from 二龙山")
+	check_eq(Factions.shared([&"lin_chong", &"lu_zhishen", &"yang_zhi"] as Array[StringName]), &"", "two of three is not enough")
 	check_eq(Factions.shared([&"lin_chong", &"lu_zhishen", &"hua_rong"] as Array[StringName]), &"", "all different")
 	return true
 

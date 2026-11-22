@@ -227,7 +227,17 @@ func _refresh() -> void:
 		hero_ids.append(hero.id)
 	var faction := Factions.shared(hero_ids)
 	if faction != &"":
-		lines.append("◆ 同出%s：%s" % [Factions.display_name(faction), Factions.bonus_text(faction)])
+		lines.append("◆ 三人同出%s：%s" % [Factions.display_name(faction), Factions.bonus_text(faction)])
+	else:
+		# 差一个人就凑齐一个山头时提醒一下
+		var tally := {}
+		for id in hero_ids:
+			var f := Factions.of(id)
+			if f != &"":
+				tally[f] = int(tally.get(f, 0)) + 1
+		for f: StringName in tally:
+			if tally[f] == Factions.TEAM_SIZE - 1:
+				lines.append("☆ 三人都出自%s才有山头加成（%s）" % [Factions.display_name(f), Factions.bonus_text(f)])
 	for combo in GameState.combos():
 		# 主角一定上场，所以结义同心只看好汉在不在
 		var a := GameDB.hero(combo.hero_a)

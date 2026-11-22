@@ -209,7 +209,7 @@ func _show_detail() -> void:
 		info.add_child(marks)
 		var faction := Factions.of(hero.id)
 		if faction != &"":
-			info.add_child(UiKit.label("山头：%s（和同山头的好汉一起出战：%s）" % [Factions.display_name(faction), Factions.bonus_text(faction)], 17, UiKit.TEXT_DIM))
+			info.add_child(UiKit.label("山头：%s（出战三人都出自%s时：%s）" % [Factions.display_name(faction), Factions.display_name(faction), Factions.bonus_text(faction)], 17, UiKit.TEXT_DIM))
 	if protagonist:
 		var aura := GameState.commander_aura()
 		var m := GameState.martial(GameState.martial_main)

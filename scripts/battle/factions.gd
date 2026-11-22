@@ -1,5 +1,5 @@
 class_name Factions
-## 山头：出战的好汉里有两位（或三位）出自同一个山头时，全队得到一条加成。纯规则，不碰画面。
+## 山头：出战的三位好汉全部出自同一个山头时，全队得到一条加成。纯规则，不碰画面。
 
 ## 山头 → [名字, 好汉, 加成说明]
 const ALL := {
@@ -10,6 +10,8 @@ const ALL := {
 	&"xiang_jiang": ["朝廷降将", [&"huyan_zhuo", &"ling_zhen"], "全队攻击 +8%"],
 	&"jian_kang": ["建康府", [&"an_daoquan", &"wang_dingliu"], "全队每次轮到自己回复 2% 生命"],
 }
+## 要几位好汉全部同出才算（出战满员的人数）
+const TEAM_SIZE := 3
 const BONUS := 0.08
 const RAGE := 20
 
@@ -22,17 +24,15 @@ static func of(hero_id: StringName) -> StringName:
 	return &""
 
 
-## 至少两位好汉同出的山头，没有为空。
+## 满员（三位）且全部同出的山头，否则为空。
 static func shared(hero_ids: Array[StringName]) -> StringName:
-	var count := {}
+	if hero_ids.size() < TEAM_SIZE:
+		return &""
+	var f := of(hero_ids[0])
 	for id in hero_ids:
-		var f := of(id)
-		if f != &"":
-			count[f] = int(count.get(f, 0)) + 1
-	for f: StringName in count:
-		if count[f] >= 2:
-			return f
-	return &""
+		if of(id) != f:
+			return &""
+	return f
 
 
 static func display_name(f: StringName) -> String:
