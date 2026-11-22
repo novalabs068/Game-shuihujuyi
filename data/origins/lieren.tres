@@ -3,6 +3,7 @@
 [ext_resource type="Resource" path="res://data/martial/chuan_lin_zhui_hun_jian.tres" id="1_fx6um"]
 [ext_resource type="Script" path="res://scripts/data/origin_data.gd" id="1_jtk5r"]
 [ext_resource type="Texture2D" path="res://art/busts/hero_lieren.png" id="2_fx6um"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_lieren_sit.png" id="3_by7k2"]
 [ext_resource type="Texture2D" path="res://art/pixel/battle/hero_lieren.png" id="3_mdv2h"]
 [ext_resource type="Texture2D" path="res://art/faces/hero_lieren.png" id="3_red7e"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/hero_lieren.png" id="4_mdv2h"]
@@ -44,3 +45,4 @@ sort_order = 2
 unit = SubResource("Resource_6qvw8")
 start_location = &"yezhulin"
 martial = ExtResource("1_fx6um")
+sit_sprite = ExtResource("3_by7k2")

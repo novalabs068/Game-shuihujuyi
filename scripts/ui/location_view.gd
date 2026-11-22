@@ -463,7 +463,8 @@ func _fight(r: SceneRoamer) -> void:
 
 # --- 歇脚 ---
 
-## 随地歇一宿：天黑下来，身边生起篝火，头上飘「Zzz」，天亮后全队回一截气血；被打退的小怪也回来了。
+## 随地歇一宿：主角盘腿坐下打坐，天黑下来、身边生起篝火，身上一圈气息随呼吸明暗、光点往上飘；
+## 天亮后站起来，全队回一截气血；被打退的小怪也回来了。
 ## 附近有小怪就歇不了。
 func _camp() -> void:
 	if _busy:
@@ -488,21 +489,32 @@ func _camp() -> void:
 	add_child(lit)
 	move_child(lit, sky.get_index() + 1)
 	var glow := _campfire_glow()
-	glow.position = _player.position + Vector2(_tile * 0.7, 0)
+	glow.position = _player.position + Vector2(_tile * 1.5, 4)
 	lit.add_child(glow)
 	var fire := FxSprite.spawn(lit, "burning", glow.position, 2.2, false, 1)
 	fire.modulate.a = 0.0
 	glow.modulate.a = 0.0
+	# 盘腿坐下：身子一沉，换成打坐的样子
+	var standing := _player.sprite
+	var sit := GameState.origin().sit_sprite if GameState.origin() != null else null
+	await _sink(sit)
 	var dusk := create_tween().set_parallel()
 	dusk.tween_property(sky, "color:a", 0.62, 0.9)
 	dusk.tween_property(fire, "modulate:a", 1.0, 0.6).set_delay(0.3)
 	dusk.tween_property(glow, "modulate:a", 1.0, 0.6).set_delay(0.3)
 	await dusk.finished
-	# 睡着了：头上一个接一个飘「Z」
-	for i in 4:
-		_float_z(lit, i)
-		await get_tree().create_timer(0.45).timeout
-	await get_tree().create_timer(0.6).timeout
+	# 运气调息：身上一圈气息随呼吸明暗，光点从身边往上飘
+	var qi := _qi_aura()
+	qi.position = _player.position + Vector2(0, -_tile * 0.7)
+	lit.add_child(qi)
+	var motes := _qi_motes()
+	motes.position = _player.position + Vector2(0, -_tile * 0.3)
+	lit.add_child(motes)
+	var breathe := qi.create_tween().set_loops()
+	breathe.tween_property(qi, "modulate:a", 0.9, 0.8).set_trans(Tween.TRANS_SINE)
+	breathe.tween_property(qi, "modulate:a", 0.35, 0.8).set_trans(Tween.TRANS_SINE)
+	await get_tree().create_timer(2.6).timeout
+	motes.emitting = false
 	# 天亮：先一抹暖色，再回到白天
 	GameState.camp_rest()
 	var memory := GameState.scene_state(scene_data.id)
@@ -512,10 +524,14 @@ func _camp() -> void:
 	dawn.tween_property(sky, "color", Color(1.0, 0.72, 0.45, 0.28), 0.9)
 	dawn.parallel().tween_property(fire, "modulate:a", 0.0, 0.9)
 	dawn.parallel().tween_property(glow, "modulate:a", 0.0, 0.9)
+	dawn.parallel().tween_property(qi, "modulate:a", 0.0, 0.9)
 	dawn.tween_property(sky, "color:a", 0.0, 0.7)
 	await dawn.finished
+	breathe.kill()
 	sky.queue_free()
 	lit.queue_free()
+	# 站起来
+	await _sink(standing)
 	for i in came_back:
 		_spawn_roamer(i, {})
 	_grace = RETURN_GRACE
@@ -544,15 +560,59 @@ func _campfire_glow() -> Sprite2D:
 	return glow
 
 
-## 主角头上飘起一个「Z」，一个比一个大、往右上飘。
-func _float_z(layer: Node2D, i: int) -> void:
-	var z := UiKit.outlined("Z" if i % 2 == 0 else "z", 26 + i * 6, Color("e8f0ff"))
-	layer.add_child(z)
-	z.position = _player.position + Vector2(10 + i * 8, -_tile * 2.2)
-	var t := z.create_tween().set_parallel()
-	t.tween_property(z, "position", z.position + Vector2(40, -70), 1.6)
-	t.tween_property(z, "modulate:a", 0.0, 1.6).set_delay(0.5)
-	t.chain().tween_callback(z.queue_free)
+## 坐下或站起：身子往下一沉，换成 to 这张图，再回弹。to 为空就只沉一下。
+func _sink(to: Texture2D) -> void:
+	var t := _player.create_tween()
+	t.tween_property(_player, "scale", Vector2(1.08, 0.86), 0.14).set_ease(Tween.EASE_IN)
+	await t.finished
+	if to != null:
+		_player.sprite = to
+		_player.queue_redraw()
+	var back := _player.create_tween()
+	back.tween_property(_player, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await back.finished
+
+
+## 打坐时身上的一团气：青白色、中间亮边上淡（叠加混合），夜里也把人照亮。
+func _qi_aura() -> Sprite2D:
+	var size := 64
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var r := size / 2.0
+	for y in size:
+		for x in size:
+			var d := Vector2(x + 0.5 - r, y + 0.5 - r).length() / r
+			var a := clampf(1.0 - d, 0.0, 1.0)
+			img.set_pixel(x, y, Color(0.7, 0.88, 1.0, a * a * 0.5))
+	var qi := Sprite2D.new()
+	qi.texture = ImageTexture.create_from_image(img)
+	qi.scale = Vector2(_tile / 22.0, _tile / 20.0)
+	qi.modulate.a = 0.35
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	qi.material = mat
+	return qi
+
+
+## 打坐时从身边慢慢往上飘的光点。
+func _qi_motes() -> CPUParticles2D:
+	var p := CPUParticles2D.new()
+	p.amount = 18
+	p.lifetime = 1.8
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.emission_rect_extents = Vector2(_tile * 0.5, 4)
+	p.direction = Vector2(0, -1)
+	p.spread = 12.0
+	p.gravity = Vector2.ZERO
+	p.initial_velocity_min = 20.0
+	p.initial_velocity_max = 45.0
+	p.scale_amount_min = 2.0
+	p.scale_amount_max = 4.0
+	p.color = Color(0.8, 0.95, 1.0)
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
+	fade.colors = PackedColorArray([Color(1, 1, 1, 0), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0)])
+	p.color_ramp = fade
+	return p
 
 
 # --- 互动 ---

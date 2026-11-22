@@ -11,3 +11,5 @@ extends Resource
 @export var start_location: StringName
 ## 出身自带的武学（开局主修）
 @export var martial: MartialData
+## 场景里歇脚时盘腿打坐的像素小人（脸朝右，和 unit.map_sprite 同样的像素比例）
+@export var sit_sprite: Texture2D

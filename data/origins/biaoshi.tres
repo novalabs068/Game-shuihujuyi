@@ -4,6 +4,7 @@
 [ext_resource type="Resource" path="res://data/martial/ya_biao_heng_dao.tres" id="1_qf3mf"]
 [ext_resource type="Texture2D" path="res://art/busts/hero_biaoshi.png" id="2_qf3mf"]
 [ext_resource type="Texture2D" path="res://art/pixel/battle/hero_biaoshi.png" id="3_3axxw"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_biaoshi_sit.png" id="3_gn8rf"]
 [ext_resource type="Texture2D" path="res://art/faces/hero_biaoshi.png" id="3_jx0uc"]
 [ext_resource type="Texture2D" path="res://art/pixel/characters/hero_biaoshi.png" id="4_3axxw"]
 [ext_resource type="Texture2D" path="res://art/portraits/hero_biaoshi.png" id="5_gn8rf"]
@@ -43,3 +44,4 @@ sort_order = 1
 unit = SubResource("Resource_66qdh")
 start_location = &"dongjing"
 martial = ExtResource("1_qf3mf")
+sit_sprite = ExtResource("3_gn8rf")
