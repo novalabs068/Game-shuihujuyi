@@ -28,7 +28,11 @@ const FORMATION_SLOTS := {
 	# 混天阵：前出压上，主将冲在最前排
 	&"hun_tian": [Vector2(450, 505), Vector2(540, 370), Vector2(320, 395)],
 }
-## 站位远近：脚底 y 在这个范围里，人物从小（后排）画到大（前排）
+## 背景放大倍数（贴底边对齐，裁掉上面的天空，把地面抬到人脚下）
+const BG_ZOOM := 1.3
+## 所有站位整体往下挪这么多，踩在地面上
+const FEET_DROP := 30.0
+## 站位远近：脚底 y（挪之前）在这个范围里，人物从小（后排）画到大（前排）
 const DEPTH_Y := Vector2(340, 500)
 const DEPTH_RANGE := Vector2(0.85, 1.0)
 ## 顶栏和底栏在天气、前景之上
@@ -96,6 +100,8 @@ var _combo_button: Button
 var _skill_sub: Label
 ## 我方的阵法（决定站位）
 var _formation: StringName = &""
+## 战场背景（按 BG_ZOOM 放大、贴底边摆）
+var _scene: TextureRect
 var _combo_sub: Label
 
 
@@ -108,15 +114,14 @@ func _ready() -> void:
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if background != null:
-		var scene := TextureRect.new()
-		scene.texture = background
-		scene.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		scene.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		_scene = TextureRect.new()
+		_scene.texture = background
+		_scene.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_scene.stretch_mode = TextureRect.STRETCH_SCALE
 		# 压暗一些，人物和数字才看得清
-		scene.modulate = Color(0.62, 0.6, 0.58)
-		scene.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(scene)
-		scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_scene.modulate = Color(0.62, 0.6, 0.58)
+		_scene.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_scene)
 	# 下半部压暗：远处亮、脚下暗，人站得住
 	var shade := TextureRect.new()
 	var grad := Gradient.new()
@@ -696,6 +701,10 @@ func _add_log(text: String) -> void:
 
 ## 这个人站在哪：我方按阵法，敌方按默认的斜线。
 func _slot_feet(u: BattleUnit) -> Vector2:
+	return _slot_spot(u) + Vector2(0, FEET_DROP)
+
+
+func _slot_spot(u: BattleUnit) -> Vector2:
 	if u.side == BattleUnit.Side.PLAYER and FORMATION_SLOTS.has(_formation):
 		return FORMATION_SLOTS[_formation][u.slot]
 	return SLOTS[u.slot]
@@ -703,7 +712,7 @@ func _slot_feet(u: BattleUnit) -> Vector2:
 
 ## 远近按脚底的高低算：越靠下越近、画得越大。
 func _slot_depth(u: BattleUnit) -> float:
-	var t := clampf(inverse_lerp(DEPTH_Y.x, DEPTH_Y.y, _slot_feet(u).y), 0.0, 1.0)
+	var t := clampf(inverse_lerp(DEPTH_Y.x, DEPTH_Y.y, _slot_spot(u).y), 0.0, 1.0)
 	return lerpf(DEPTH_RANGE.x, DEPTH_RANGE.y, t)
 
 
@@ -718,6 +727,12 @@ func _slot_layer(u: BattleUnit) -> int:
 
 
 func _layout() -> void:
+	# 背景放大、贴底边：水墨画的空地都在下面三成，抬上来铺到人脚下，人就不会站到树上、房上
+	if _scene != null and _scene.texture != null:
+		var tex := _scene.texture.get_size()
+		var k := maxf(size.x / tex.x, size.y / tex.y) * BG_ZOOM
+		_scene.size = tex * k
+		_scene.position = Vector2((size.x - _scene.size.x) / 2, size.y - _scene.size.y)
 	for u in _cards:
 		var card := _cards[u]
 		var feet := _slot_feet(u)
