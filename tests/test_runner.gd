@@ -27,6 +27,7 @@ func _initialize() -> void:
 		"test_defense_scales_with_level",
 		"test_danger_and_boss_power",
 		"test_guard_halves_damage",
+		"test_events_carry_hp",
 		"test_faster_unit_acts_first",
 		"test_taunt_forces_target",
 		"test_stun_skips_turn",
@@ -600,6 +601,18 @@ func test_danger_and_boss_power() -> bool:
 	var grown: Array[UnitData] = [unit_data(&"x", [200, 20, 20, 100])]
 	check(is_equal_approx(Encounters.boss_power(raw, raw), 1.0), "no growth, no boss boost")
 	check(is_equal_approx(Encounters.boss_power(raw, grown), 1.0 + Encounters.BOSS_GROWTH_SHARE), "boss keeps up with growth")
+	return true
+
+
+func test_events_carry_hp() -> bool:
+	# 连击三下：每一下的 damage 事件都带着那一刻目标还剩的血，一下比一下少，最后一下就是最终血量
+	var multi := skill(SkillData.Effect.MULTI_HIT, {"power": 1.0, "hits": 3})
+	var m := battle([unit_data(&"a", [500, 100, 0, 100], multi)], [unit_data(&"e", [100000, 1, 0, 1])])
+	advance_to(m, &"a")
+	var hits := m.act(BattleModel.Action.SKILL, by_id(m, &"e")).filter(func(e: Dictionary) -> bool: return e["kind"] == "damage")
+	check_eq(hits.size(), 3, "three hits")
+	check(hits[0]["hp"] > hits[1]["hp"] and hits[1]["hp"] > hits[2]["hp"], "hp goes down hit by hit")
+	check_eq(hits[2]["hp"], by_id(m, &"e").hp, "the last hit shows the final hp")
 	return true
 
 

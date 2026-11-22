@@ -819,4 +819,5 @@ func _acts_before(a: BattleUnit, a_time: float, b: BattleUnit, b_time: float) ->
 
 
 func _emit(kind: String, unit: BattleUnit, popup: String, log_text: String, big := false, source: BattleUnit = null) -> void:
-	_events.append({"kind": kind, "unit": unit, "popup": popup, "log": log_text, "big": big, "source": source, "fx": _hit_fx if kind == "damage" else ""})
+	# hp：这一刻这个人还剩多少血。整个动作是一口气算完的，画面播到这一条时才按它更新血条
+	_events.append({"kind": kind, "unit": unit, "popup": popup, "log": log_text, "big": big, "source": source, "fx": _hit_fx if kind == "damage" else "", "hp": unit.hp})

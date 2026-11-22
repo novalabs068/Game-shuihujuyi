@@ -12,9 +12,9 @@
 [sub_resource type="Resource" id="Resource_eu0yy"]
 script = ExtResource("2_5l5uw")
 display_name = "百步穿杨"
-description = "必中必暴击，单体 200% 伤害。"
+description = "必中必暴击，单体 170% 伤害。"
 effect = 3
-power = 2.0
+power = 1.7
 
 [sub_resource type="Resource" id="Resource_6y1fp"]
 script = ExtResource("7_rqoek")
@@ -32,9 +32,9 @@ role = 2
 tier = 1
 sort_order = 4
 base_hp = 400
-base_atk = 88
+base_atk = 76
 base_def = 26
-base_spd = 112
+base_spd = 108
 portrait = ExtResource("3_rqoek")
 bust = ExtResource("1_f5s86")
 face = ExtResource("2_pjhaw")

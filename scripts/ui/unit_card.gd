@@ -16,6 +16,12 @@ const PLATE_WIDTH := 126.0
 const PLATE_PAPER := Color("eee4cd")
 const PLATE_INK := Color("2a2420")
 const PLATE_RED := Color("b0261e")
+## 余血白条：掉血后停这么久再开始缩，缩这么久
+const GHOST_HOLD := 0.35
+const GHOST_DRAIN := 0.45
+const GHOST_WHITE := Color("fffaf0")
+## 血条的底槽：深墨色，红条和白条在纸色腰牌上才看得清
+const HP_TRACK := Color("3a2f26")
 ## 头顶意图小圆标的直径
 const INTENT_SIZE := 34
 ## 像素小人放大几倍（按整数放大，像素才不糊）；太高放不下时少放一倍
@@ -33,6 +39,12 @@ var _figure: TextureRect
 var _plate: PanelContainer
 var _name_label: Label
 var _hp_bar: ProgressBar
+## 血条后面的白条：掉血时停一下再慢慢跟上，看得出刚掉了多少
+var _hp_ghost: ProgressBar
+var _ghost_tween: Tween
+## 画面上显示的血量和是否已倒下：播到命中、倒下那一刻才变（模型里早就算完了）
+var _shown_hp := 0
+var _shown_dead := false
 var _status_label: Label
 var _rage_bar: ProgressBar
 var _bubble: PanelContainer
@@ -103,8 +115,24 @@ func setup(p_unit: BattleUnit) -> void:
 	_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_name_label.clip_text = true
 	top.add_child(_name_label)
+	# 血条：白色的「余血」条垫在下面，红条叠在上面（红条底色透明）
+	var hp_row := Control.new()
+	hp_row.custom_minimum_size.y = 5
+	v.add_child(hp_row)
+	_hp_ghost = _bar(GHOST_WHITE, 5)
+	var track := UiKit.box(HP_TRACK, Color(0, 0, 0, 0), 0, 1)
+	track.set_content_margin_all(0)
+	_hp_ghost.add_theme_stylebox_override("background", track)
+	hp_row.add_child(_hp_ghost)
+	_hp_ghost.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hp_bar = _bar(PLATE_RED, 5)
-	v.add_child(_hp_bar)
+	_hp_bar.add_theme_stylebox_override("background", StyleBoxEmpty.new())
+	hp_row.add_child(_hp_bar)
+	_hp_bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_shown_hp = unit.hp
+	_shown_dead = not unit.is_alive()
+	_hp_ghost.max_value = unit.max_hp
+	_hp_ghost.value = unit.hp
 	_rage_bar = _bar(UiKit.RAGE, 3)
 	v.add_child(_rage_bar)
 	_status_label = UiKit.label("", 12, PLATE_RED)
@@ -128,11 +156,33 @@ func setup(p_unit: BattleUnit) -> void:
 	_start_idle()
 
 
+## 命中、回血播到这一刻：红条立刻变，白条（掉血时）停一下再跟上。
+func show_hp(hp: int) -> void:
+	var before := _shown_hp
+	_shown_hp = hp
+	_hp_ghost.max_value = unit.max_hp
+	if _ghost_tween != null and _ghost_tween.is_valid():
+		_ghost_tween.kill()
+	if hp < before:
+		_ghost_tween = create_tween()
+		_ghost_tween.tween_interval(GHOST_HOLD)
+		_ghost_tween.tween_property(_hp_ghost, "value", float(hp), GHOST_DRAIN).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	else:
+		_hp_ghost.value = hp
+	refresh()
+
+
+## 倒下播到这一刻。
+func mark_dead() -> void:
+	_shown_dead = true
+	refresh()
+
+
 func refresh() -> void:
-	var dead := not unit.is_alive()
+	var dead := _shown_dead
 	_name_label.text = unit.display_name()
 	_hp_bar.max_value = unit.max_hp
-	_hp_bar.value = unit.hp
+	_hp_bar.value = _shown_hp
 	_rage_bar.max_value = BattleUnit.RAGE_MAX
 	_rage_bar.value = unit.rage
 	_status_label.text = " ".join(unit.status_tags())

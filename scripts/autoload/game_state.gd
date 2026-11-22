@@ -372,9 +372,10 @@ func recruit_with_souls(hero: UnitData) -> bool:
 
 
 ## 战斗用的队伍：三位好汉带上星级、羁绊、装备、秘籍，再加上统领（主角）的光环。
-func battle_team() -> Array[UnitData]:
+## with_aura 为 false 时不算光环（头目按养成变强时用：光环是补主角下场的，不算养成）。
+func battle_team(with_aura := true) -> Array[UnitData]:
 	var out: Array[UnitData] = []
-	var aura := commander_aura()
+	var aura := commander_aura() if with_aura else null
 	for u in team():
 		var unit := Bonds.apply(Stars.apply(u, star_of(u.id)), bond_of(u.id))
 		var gear := effective_gear(u.id)
@@ -389,7 +390,7 @@ func battle_team() -> Array[UnitData]:
 ## 开打前的关卡：头目按队伍的养成程度加强（复制一份，不改原关卡）。
 func prepare_stage(stage: StageData) -> StageData:
 	var st: StageData = stage.duplicate()
-	st.boss_power = Encounters.boss_power(team(), battle_team())
+	st.boss_power = Encounters.boss_power(team(), battle_team(false))
 	return st
 
 

@@ -294,6 +294,7 @@ func _play(events: Array[Dictionary]) -> void:
 					FxSprite.spawn(self, fx, card.feet_point(), 1.1, not from_left)
 					_shake_screen(6.0)
 				FxSprite.spawn(self, "crit_hit" if big else "hit_spark", card.hit_point(), FX_SCALE * (0.8 if big else 1.0), not from_left)
+				card.show_hp(e.get("hp", unit.hp))
 				card.flash()
 				card.shake()
 				_hit_sound(source, big)
@@ -305,9 +306,11 @@ func _play(events: Array[Dictionary]) -> void:
 				await _hitstop(0.1 if big else 0.045)
 				wait = 0.16
 			"heal":
+				card.show_hp(e.get("hp", unit.hp))
 				FxSprite.spawn(self, "heal", card.feet_point(), FX_SCALE)
 				card.popup(popup, UiKit.HEAL)
 			"death":
+				card.mark_dead()
 				FxSprite.spawn(self, "poof", card.hit_point() + Vector2(0, 40), FX_SCALE)
 				card.popup(popup, UiKit.TEXT_DIM)
 				wait = 0.25
