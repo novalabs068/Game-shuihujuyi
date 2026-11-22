@@ -1,6 +1,7 @@
 extends Node
 ## 背景音乐（自动加载为 Music）：play(曲名) 换曲时两首交叉淡入淡出，同一首在放就不打断。
-## 曲子在 audio/music/<曲名>.ogg，由 tools/music/compose.py 生成；开关和音量存在设置里（Prefs）。
+## 曲子在 audio/music/<曲名>.ogg（tools/music/compose.py 合成）；一个曲名下有 <曲名>_1、_2……几首的
+## （战斗配乐，真录音，作者见设置页的鸣谢），每次切到这个曲名时随机挑一首。开关和音量存在设置里（Prefs）。
 
 const FADE := 1.2
 const VOLUME_DB := -6.0
@@ -44,14 +45,28 @@ func _ready() -> void:
 	volume = Prefs.get_value("audio", "volume", 0.8)
 
 
+## 曲名对应的文件：有 <曲名>_1、_2……的随机挑一首，否则就是 <曲名>.ogg；都没有返回空。
+func _pick(track: StringName) -> String:
+	var variants: Array[String] = []
+	for i in range(1, 10):
+		var path := "res://audio/music/%s_%d.ogg" % [track, i]
+		if not ResourceLoader.exists(path):
+			break
+		variants.append(path)
+	if not variants.is_empty():
+		return variants.pick_random()
+	var single := "res://audio/music/%s.ogg" % track
+	return single if ResourceLoader.exists(single) else ""
+
+
 func play(track: StringName) -> void:
 	if track == &"" or track == _current:
 		return
 	_current = track
 	if not enabled:
 		return
-	var path := "res://audio/music/%s.ogg" % track
-	if not ResourceLoader.exists(path):
+	var path := _pick(track)
+	if path == "":
 		return
 	var stream: AudioStream = load(path)
 	if stream is AudioStreamOggVorbis:

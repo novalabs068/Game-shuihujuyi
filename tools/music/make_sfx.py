@@ -3,7 +3,8 @@
     python tools/music/make_sfx.py [名字 ...]     # 默认全部生成，输出 audio/sfx/<名字>.ogg
 
 招募：令牌呼啸、大鼓「咚」、纸片轻落、翻牌、上扬的铃音、铜锣。
-战斗：刀光、闷击、箭矢破空、放绝招的鼓点、胜利的锣鼓。界面：木鱼一声。
+战斗：箭矢破空、放绝招的鼓点、胜利的锣鼓。界面：木鱼一声。
+刀剑、重击、拳脚、暴击这些命中声用真实录音叠，见 real_sfx.py。
 乐器函数借 compose.py 的大鼓、木鱼和混响。需要 numpy、ffmpeg（带 libvorbis）。
 """
 
@@ -123,20 +124,6 @@ def jia_gong() -> np.ndarray:
     return reverb(gong(2.8), 1.8, 0.3)
 
 
-def hit_slash() -> np.ndarray:
-    t = t_of(0.18)
-    swish = bandsweep(noise(0.18), 3, 1) * np.exp(-t * 18)
-    ring = np.sin(2 * np.pi * 2400 * t) * np.exp(-t * 30) * 0.15
-    return swish * 0.8 + ring
-
-
-def hit_blunt() -> np.ndarray:
-    t = t_of(0.25)
-    thud = np.sin(2 * np.pi * np.cumsum(70 + 60 * np.exp(-t * 30)) / SR) * np.exp(-t * 16)
-    crack = highpass(noise(0.25), 5) * np.exp(-t * 60) * 0.4
-    return thud + crack
-
-
 def arrow() -> np.ndarray:
     t = t_of(0.22)
     swell = np.sin(np.pi * t / 0.22)
@@ -159,7 +146,7 @@ def ui_click() -> np.ndarray:
 
 SOUNDS = {
     "token_whoosh": token_whoosh, "token_slam": token_slam, "card_drop": card_drop, "card_flip": card_flip,
-    "rare_shimmer": rare_shimmer, "jia_gong": jia_gong, "hit_slash": hit_slash, "hit_blunt": hit_blunt,
+    "rare_shimmer": rare_shimmer, "jia_gong": jia_gong,
     "arrow": arrow, "skill_drum": skill_drum, "victory": victory, "ui_click": ui_click,
 }
 

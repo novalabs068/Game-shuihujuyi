@@ -9,6 +9,9 @@ signal restart_requested
 ## 在开始界面打开时没有存档可清，不显示「重新开始」
 var allow_restart := true
 
+## 鸣谢：CC-BY 授权要求写明作者、曲名和授权（素材都从 OpenGameArt、Kenney 来）
+const CREDITS := "鸣谢　战斗配乐：Blackmoor Ninjas（Matthew Pablo，CC-BY 3.0）、Drums of Dawn（magnesus，CC-BY 3.0）、Samurai（tad，CC-BY 4.0），均来自 OpenGameArt.org。战斗音效录音：Kenney（CC0）。字体：思源黑体 Noto Sans SC（SIL OFL 1.1）。"
+
 var _restart: Button
 var _armed := false
 
@@ -31,7 +34,7 @@ func _ready() -> void:
 		margin.add_theme_constant_override("margin_" + side, 24)
 	panel.add_child(margin)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 18)
+	v.add_theme_constant_override("separation", 10)
 	margin.add_child(v)
 	v.add_child(UiKit.label("设置", 32, UiKit.GOLD))
 
@@ -92,6 +95,10 @@ func _ready() -> void:
 		v.add_child(_restart)
 
 	v.add_child(UiKit.label("《水浒聚义》 版本 %s　单机离线，没有任何付费" % UiKit.version(), 17, UiKit.TEXT_DIM))
+	var credits := UiKit.label(CREDITS, 14, UiKit.TEXT_DIM)
+	credits.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	credits.custom_minimum_size.x = 560
+	v.add_child(credits)
 	var close := UiKit.button("返回", Vector2(180, 56), 24)
 	close.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void: closed.emit())

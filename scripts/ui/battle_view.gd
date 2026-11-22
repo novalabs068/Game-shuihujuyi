@@ -328,6 +328,7 @@ func _play(events: Array[Dictionary]) -> void:
 func _skill_cutin(unit: BattleUnit, skill_name: String) -> void:
 	var from_left := unit.side == BattleUnit.Side.PLAYER
 	Sfx.play(&"skill_drum", -2.0)
+	Sfx.play(&"skill_draw", -1.0)
 	var layer := Control.new()
 	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.z_index = 30
@@ -389,6 +390,7 @@ func _combo_cutin(a: BattleUnit, b: BattleUnit, combo_name: String) -> void:
 	if a == b and GameState.protagonist() != null:
 		a = BattleUnit.new(GameState.protagonist(), BattleUnit.Side.PLAYER, -1, 1)
 	Sfx.play(&"skill_drum")
+	Sfx.play(&"skill_draw")
 	var layer := Control.new()
 	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.z_index = 30
@@ -470,10 +472,18 @@ func _style_hit_fx(style: StringName, card: UnitCard, from_left: bool) -> void:
 
 ## 命中顿帧：时间几乎停一下再走（按真实时间算，2 倍速下也一样长）。
 ## 命中声：斧棒拳脚是闷击，其余是刀光；暴击更响。
+## 命中声按兵器分：刀剑枪矛「砍」、斧棒禅杖「砸」、拳脚爪牙「打」；暴击是金铁交鸣。
 func _hit_sound(source: BattleUnit, big: bool) -> void:
+	if big:
+		Sfx.play(&"hit_crit", 1.0, 0.08)
+		return
 	var style := source.data.attack_style if source != null else &""
-	var blunt := style in [&"heavy", &"fist"]
-	Sfx.play(&"hit_blunt" if blunt else &"hit_slash", 2.0 if big else -3.0, 0.12)
+	var sound := &"hit_slash"
+	if style == &"heavy":
+		sound = &"hit_blunt"
+	elif style in [&"fist", &"claw"]:
+		sound = &"hit_fist"
+	Sfx.play(sound, -3.0, 0.12)
 
 
 func _hitstop(seconds: float) -> void:
