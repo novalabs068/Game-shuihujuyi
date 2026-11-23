@@ -1014,6 +1014,16 @@ func _corner_caption(spot: Vector3) -> Label:
 # --- 结算 ---
 
 ## 结算：赢了「咚」地盖下一枚朱红「胜」字大印，输了一团墨晕开一个「败」字；下面展开一卷宣纸写三星条件和奖励。
+## 战斗统计：每人、每回合的输出、承伤、治疗等。
+func _open_stats() -> void:
+	var panel := BattleStatsPanel.new()
+	panel.model = model
+	panel.z_index = 60
+	add_child(panel)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.closed.connect(panel.queue_free)
+
+
 func _show_result() -> void:
 	var won := model.result == BattleModel.Result.WIN
 	_banner.text = ""
@@ -1093,6 +1103,9 @@ func _show_result() -> void:
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 20)
 	v.add_child(buttons)
+	var stats_button := UiKit.button("战斗统计", Vector2(160, 60))
+	stats_button.pressed.connect(_open_stats)
+	buttons.add_child(stats_button)
 	var retry := UiKit.button("再打一次", Vector2(180, 60))
 	retry.pressed.connect(func() -> void: retry_requested.emit())
 	buttons.add_child(retry)

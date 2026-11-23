@@ -28,6 +28,7 @@ func _initialize() -> void:
 		"test_danger_and_boss_power",
 		"test_guard_halves_damage",
 		"test_events_carry_hp",
+		"test_battle_stats",
 		"test_faster_unit_acts_first",
 		"test_taunt_forces_target",
 		"test_stun_skips_turn",
@@ -613,6 +614,37 @@ func test_events_carry_hp() -> bool:
 	check_eq(hits.size(), 3, "three hits")
 	check(hits[0]["hp"] > hits[1]["hp"] and hits[1]["hp"] > hits[2]["hp"], "hp goes down hit by hit")
 	check_eq(hits[2]["hp"], by_id(m, &"e").hp, "the last hit shows the final hp")
+	return true
+
+
+func test_battle_stats() -> bool:
+	var m := battle([unit_data(&"a", [500, 100, 0, 100])], [unit_data(&"e", [150, 1, 0, 1])])
+	var a := by_id(m, &"a")
+	var e := by_id(m, &"e")
+	advance_to(m, &"a")
+	m.act(BattleModel.Action.ATTACK, e)
+	var dealt := m.stats.total(a, "dealt")
+	check(dealt > 0, "attack damage counts as dealt")
+	check_eq(m.stats.total(e, "taken"), dealt, "the same damage counts as taken")
+	check_eq(m.stats.total(a, "attacks"), 1, "one attack")
+	check_eq(m.stats.at_round(a, "dealt", 1), dealt, "recorded in round 1")
+	while e.is_alive():
+		advance_to(m, &"a")
+		m.act(BattleModel.Action.ATTACK, e)
+	check_eq(m.stats.total(a, "kills"), 1, "the killing blow counts")
+	# 治疗、护盾、控制
+	var heal := skill(SkillData.Effect.HEAL, {"amount": 0.5})
+	var mh := battle([unit_data(&"h", [1000, 1, 0, 100], heal)], [unit_data(&"e", [1000, 1, 0, 1])])
+	by_id(mh, &"h").hp = 400
+	advance_to(mh, &"h")
+	mh.act(BattleModel.Action.SKILL)
+	check_eq(mh.stats.total(by_id(mh, &"h"), "healed"), 500, "healing counts")
+	check_eq(mh.stats.total(by_id(mh, &"h"), "skills"), 1, "one skill")
+	var stun := skill(SkillData.Effect.STUN, {"turns": 1})
+	var ms := battle([unit_data(&"s", [1000, 1, 0, 100], stun)], [unit_data(&"e", [1000, 1, 0, 1])])
+	advance_to(ms, &"s")
+	ms.act(BattleModel.Action.SKILL, by_id(ms, &"e"))
+	check_eq(ms.stats.total(by_id(ms, &"s"), "controls"), 1, "control counts")
 	return true
 
 

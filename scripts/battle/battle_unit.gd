@@ -68,6 +68,8 @@ var enraged := false
 ## 灼烧：每次轮到自己时掉 burn_damage 血，还剩 burn_turns 次
 var burn_damage := 0
 var burn_turns := 0
+## 是谁放的火：他在 BattleModel.units 里的序号（统计时灼烧伤害记在他头上；不直接存人，免得互相引用）
+var burn_source := -1
 ## 别人的天赋给的特效（比如安道全让全队回春），和 data.gear_effects 一起算
 var extra_effects: Array[StringName] = []
 ## 「首击必暴」天赋：还没出过手

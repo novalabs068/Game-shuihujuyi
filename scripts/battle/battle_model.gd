@@ -54,6 +54,10 @@ var time := 0.0
 var player_deaths := 0
 var rng := RandomNumberGenerator.new()
 
+## 这一仗的统计（每人输出、承伤、治疗……按回合分开），结算页看
+var stats := BattleStats.new()
+## 正在结算追击时为 true，伤害记成追击
+var _in_pursuit := false
 ## 准备回合：开战时结算的开局效果（阵法、天赋、装备……），由 BattleView 在第一回合前逐条亮出来
 var opening_events: Array[Dictionary] = []
 
@@ -181,11 +185,13 @@ func start_next_turn() -> Array[Dictionary]:
 	if actor.has_gear(&"regen") and actor.hp < actor.max_hp:
 		var amount := mini(roundi(actor.max_hp * Equipment.REGEN_RATIO), actor.max_hp - actor.hp)
 		actor.hp += amount
+		stats.add(actor, "healed", amount, round_number())
 		_emit("heal", actor, "+%d" % amount, "%s 回春，回复 %d 生命" % [actor.display_name(), amount])
 	if actor.has_talent(&"cleanse_regen"):
 		var heal := mini(roundi(actor.max_hp * actor.talent(&"cleanse_regen")), actor.max_hp - actor.hp)
 		if heal > 0:
 			actor.hp += heal
+			stats.add(actor, "healed", heal, round_number())
 			_emit("heal", actor, "+%d" % heal, "%s 运功疗伤，回复 %d 生命" % [actor.display_name(), heal])
 		for field: String in ["stun_turns", "disarm_turns", "silence_turns"]:
 			if actor.get(field) > 0:
@@ -196,6 +202,7 @@ func start_next_turn() -> Array[Dictionary]:
 		actor.burn_turns -= 1
 		var burn := mini(actor.burn_damage, actor.hp)
 		actor.hp -= burn
+		stats.damage(units[actor.burn_source] if actor.burn_source >= 0 else null, actor, burn, round_number())
 		_emit("damage", actor, "灼烧 -%d" % burn, "%s 被火烧，损失 %d 生命" % [actor.display_name(), burn])
 		if not actor.is_alive():
 			_on_death(actor)
@@ -317,6 +324,7 @@ func _do_attack(actor: BattleUnit, wanted: BattleUnit) -> void:
 	if target == null:
 		return
 	_emit("action", actor, "普攻", "%s 普攻 %s" % [actor.display_name(), target.display_name()])
+	stats.add(actor, "attacks")
 	_deal(actor, target, 1.0, false, true)
 	actor.add_rage(RAGE_ON_ATTACK)
 	_try_pursuit(actor, target)
@@ -335,10 +343,14 @@ func _try_pursuit(actor: BattleUnit, target: BattleUnit) -> void:
 		if t == null or not t.is_alive():
 			return
 		_emit("info", actor, "追击", "%s「%s」追击" % [actor.display_name(), p.name])
+		if not p.kind in [&"hit", &"snipe"]:
+			stats.add(actor, "pursuits")
 		match p.kind:
 			&"hit", &"snipe":
 				_hit_fx = "sword_slash"
+				_in_pursuit = true
 				_deal(actor, t, p.power)
+				_in_pursuit = false
 				_hit_fx = ""
 			&"slow":
 				t.add_buff(BattleUnit.Buff.new(p.name, 0.0, -p.power, Pursuit.SLOW_TURNS))
@@ -362,6 +374,8 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 		actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
 		actor.skill_cooldown_total = actor.skill_cooldown
 	_emit("skill", actor, s.display_name, "%s 使用「%s」" % [actor.display_name(), s.display_name])
+	if skill == null:
+		stats.add(actor, "skills")
 	_hit_fx = SKILL_FX.get(s.effect, "")
 	match s.effect:
 		SkillData.Effect.DAMAGE:
@@ -414,6 +428,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			for ally in allies_of(actor):
 				var amount := mini(roundi(ally.max_hp * s.amount), ally.max_hp - ally.hp)
 				ally.hp += amount
+				stats.add(actor, "healed", amount, round_number())
 				ally.stun_turns = 0
 				ally.disarm_turns = 0
 				ally.silence_turns = 0
@@ -424,6 +439,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			var shield := roundi(actor.max_hp * s.amount)
 			for ally in allies_of(actor):
 				ally.shield += shield
+				stats.add(actor, "shielded", shield)
 				_emit("info", ally, "护盾 +%d" % shield, "")
 		SkillData.Effect.PIERCE:
 			_deal(actor, _pick_foe(actor, wanted), s.power, false, false, true)
@@ -449,6 +465,7 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 				if foe.is_alive():
 					foe.burn_damage = maxi(foe.burn_damage if foe.burn_turns > 0 else 0, burn)
 					foe.burn_turns = maxi(foe.burn_turns, s.turns)
+					foe.burn_source = units.find(actor)
 					_emit("info", foe, "灼烧", "")
 		SkillData.Effect.ALL_FOES_MULTI:
 			for i in s.hits:
@@ -498,12 +515,16 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 		a = b
 	a.rage = 0
 	b.rage = 0
+	stats.add(a, "combos")
+	if b != a:
+		stats.add(b, "combos")
 	_emit("combo", a, combo.display_name, "%s + %s 发动组合技「%s」" % [a.display_name(), b.display_name(), combo.display_name], false, b)
 	match combo.effect:
 		ComboData.Effect.SHIELD_STRIKE:
 			for ally in allies_of(actor):
 				var amount := roundi(ally.max_hp * combo.amount)
 				ally.shield += amount
+				stats.add(a, "shielded", amount)
 				_emit("info", ally, "护盾 +%d" % amount, "")
 			_deal(b, _pick_foe(b, wanted), combo.power)
 		ComboData.Effect.STUN_ALL_COMBO:
@@ -536,6 +557,7 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 			for ally in allies_of(actor):
 				var healed := mini(roundi(ally.max_hp * combo.amount), ally.max_hp - ally.hp)
 				ally.hp += healed
+				stats.add(a, "healed", healed, round_number())
 				ally.stun_turns = 0
 				ally.disarm_turns = 0
 				ally.silence_turns = 0
@@ -583,6 +605,7 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	var absorbed := mini(target.shield, amount)
 	target.shield -= absorbed
 	target.hp = maxi(target.hp - (amount - absorbed), 0)
+	stats.damage(attacker, target, amount, round_number(), crit, _in_pursuit)
 	var countered := Roles.beats(attacker.data.role, target.data.role)
 	var popup := ("克 " if countered else "") + ("绽 " if exposed else "") + ("暴击 -%d" if crit else "-%d") % amount
 	var log_text := "%s 对 %s 造成 %d 伤害" % [attacker.display_name(), target.display_name(), amount]
@@ -595,6 +618,7 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 			attacker.add_buff(BattleUnit.Buff.new(t.display_name, 0.0, attacker.talent(&"crit_haste"), WHOLE_BATTLE))
 			_emit("info", attacker, "加速", "%s「%s」，越打越快" % [attacker.display_name(), t.display_name])
 	if not target.is_alive():
+		stats.add(attacker, "kills")
 		_on_death(target)
 	elif target.data.is_boss and not target.enraged and target.hp_ratio() < ENRAGE_THRESHOLD:
 		target.enraged = true
@@ -621,6 +645,7 @@ func _control(actor: BattleUnit, target: BattleUnit, kind: StringName, turns: in
 		_emit("info", target, "定力", "%s 定力未失，%s无效" % [target.display_name(), CONTROL_NAMES[kind]])
 		return false
 	var n := Roles.control_turns(actor.data.role, target.data.role, turns)
+	stats.add(actor, "controls")
 	if target.data.is_boss:
 		n = mini(n, BattleUnit.BOSS_MAX_CONTROL)
 	match kind:
