@@ -40,6 +40,8 @@ var bonds: Dictionary[StringName, int] = {}
 var vitality: Dictionary[StringName, float] = {}
 ## 身上带的药：id → 数量
 var medicines: Dictionary[StringName, int] = {}
+## 干粮：野外歇脚一次吃一份
+var rations := 0
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
 ## 主角学会的武学和主修（主修那门就是统领光环）
@@ -672,9 +674,13 @@ func road_regen() -> void:
 		_set_vitality(id, vitality[id])
 
 
-## 在有店的地方歇脚：花银两，全队回满。
+## 在有店的地方歇脚：按伤势花银两，全队回满。
+func rest_price() -> int:
+	return Vitality.rest_price(level, vitality)
+
+
 func rest() -> bool:
-	var price := Vitality.rest_price(level)
+	var price := rest_price()
 	if vitality.is_empty() or silver < price:
 		return false
 	silver -= price
@@ -683,15 +689,32 @@ func rest() -> bool:
 	return true
 
 
-## 野外歇一宿：不花钱，每人回 Vitality.CAMP_REGEN。
-func camp_rest() -> void:
+## 野外歇一宿：吃一份干粮，每人回 Vitality.CAMP_REGEN。没有干粮返回 false。
+func camp_rest() -> bool:
+	if rations <= 0:
+		return false
+	rations -= 1
 	for id in vitality:
 		vitality[id] = minf(vitality[id] + Vitality.CAMP_REGEN, 1.0)
 	save_game()
+	return true
+
+
+func ration_price() -> int:
+	return Vitality.ration_price(level)
+
+
+func buy_ration() -> bool:
+	if silver < ration_price():
+		return false
+	silver -= ration_price()
+	rations += 1
+	save_game()
+	return true
 
 
 func buy_medicine(id: StringName) -> bool:
-	var price := Vitality.medicine_price(id)
+	var price := Vitality.medicine_price(id, level)
 	if silver < price:
 		return false
 	silver -= price
@@ -745,6 +768,7 @@ func reset() -> void:
 	bonds.clear()
 	vitality.clear()
 	medicines.clear()
+	rations = Vitality.STARTING_RATIONS
 	items.clear()
 	scrolls.clear()
 	formation = Formations.DEFAULT
@@ -822,6 +846,7 @@ func save_game() -> void:
 		"bonds": _ids_to_json(bonds),
 		"vitality": _floats_to_json(vitality),
 		"medicines": _ids_to_json(medicines),
+		"rations": rations,
 		"yiqi": yiqi,
 		"record": record,
 		"jobs": jobs,
@@ -880,6 +905,7 @@ func load_game() -> void:
 	var saved_vitality: Dictionary = data.get("vitality", {})
 	for id: String in saved_vitality:
 		vitality[StringName(id)] = float(saved_vitality[id])
+	rations = int(data.get("rations", Vitality.STARTING_RATIONS))
 	var saved_medicines: Dictionary = data.get("medicines", {})
 	for id: String in saved_medicines:
 		if Vitality.MEDICINES.has(StringName(id)):

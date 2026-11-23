@@ -542,10 +542,10 @@ func _show_panel(loc: LocationData) -> void:
 					story_requested.emit(story))
 			_panel_buttons.add_child(button)
 	if loc.has_inn and loc.id == GameState.location_id:
-		var price := Vitality.rest_price(GameState.level)
-		var inn := UiKit.button("歇脚（%d 两）" % price, Vector2(170, 52), 22)
+		var price := GameState.rest_price()
+		var inn := UiKit.button("住店（%d 两）" % price if not GameState.vitality.is_empty() else "住店", Vector2(170, 52), 22)
 		inn.disabled = GameState.vitality.is_empty() or GameState.silver < price
-		inn.tooltip_text = "住一晚，全队气血回满" if not GameState.vitality.is_empty() else "全队气血都是满的"
+		inn.tooltip_text = "住一晚，全队气血回满；伤得越重越贵" if not GameState.vitality.is_empty() else "全队气血都是满的"
 		inn.pressed.connect(func() -> void:
 			if GameState.rest():
 				_flash_toast("住了一晚，全队气血回满")

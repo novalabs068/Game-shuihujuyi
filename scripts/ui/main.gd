@@ -337,6 +337,9 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			var scroll_text := Rewards.grant_scroll(mj)
 			if scroll_text != "":
 				parts.append(scroll_text)
+			if bonus.get("rations", 0) > 0:
+				GameState.rations += int(bonus["rations"])
+				parts.append("干粮 ×%d" % bonus["rations"])
 			GameState.set_flag(bonus.get("flag", ""))
 			if bonus.has("arena_round"):
 				GameState.record["arena"] = maxi(Arena.best(), bonus["arena_round"])

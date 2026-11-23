@@ -44,6 +44,8 @@ const RETURN_GRACE := 2.5
 ## 有小怪离主角这么多格以内就不能歇脚
 const CAMP_SAFE_CELLS := 5.0
 
+var _camp_button: Button
+
 
 func _ready() -> void:
 	_tile = scene_data.tile_pixels * PIXEL_SCALE
@@ -189,9 +191,10 @@ func _build_ui() -> void:
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.clip_text = true
 	row.add_child(hint)
-	var camp := UiKit.button("歇脚", Vector2(80, 40), 20)
-	camp.pressed.connect(_camp)
-	row.add_child(camp)
+	_camp_button = UiKit.button("", Vector2(80, 40), 18)
+	_camp_button.pressed.connect(_camp)
+	row.add_child(_camp_button)
+	_update_camp_button()
 	for entry: Array in [["编队", team_requested], ["好汉", heroes_requested], ["招募", recruit_requested]]:
 		var b := UiKit.button(entry[0], Vector2(80, 40), 20)
 		var sig: Signal = entry[1]
@@ -469,6 +472,9 @@ func _fight(r: SceneRoamer) -> void:
 func _camp() -> void:
 	if _busy:
 		return
+	if GameState.rations <= 0:
+		_flash("没有干粮了，去集市买些再歇脚（或者到有客栈的地方住店）")
+		return
 	for r in _roamers:
 		if r.actor.position.distance_to(_player.position) / _tile < CAMP_SAFE_CELLS:
 			_flash("附近有强人出没，没法安心歇脚")
@@ -517,6 +523,7 @@ func _camp() -> void:
 	motes.emitting = false
 	# 天亮：先一抹暖色，再回到白天
 	GameState.camp_rest()
+	_update_camp_button()
 	var memory := GameState.scene_state(scene_data.id)
 	var came_back: Array = memory["cleared"].duplicate()
 	memory["cleared"].clear()
@@ -536,10 +543,15 @@ func _camp() -> void:
 		_spawn_roamer(i, {})
 	_grace = RETURN_GRACE
 	_busy = false
-	var text := "歇了一宿，全队气血回复 %d%%。" % roundi(Vitality.CAMP_REGEN * 100)
+	var text := "吃了一份干粮，歇了一宿，全队气血回复 %d%%（还剩干粮 %d 份）。" % [roundi(Vitality.CAMP_REGEN * 100), GameState.rations]
 	if not came_back.is_empty():
 		text += "被打退的强人又回来了。"
 	_flash(text)
+
+
+func _update_camp_button() -> void:
+	_camp_button.text = "歇脚 %d" % GameState.rations
+	_camp_button.tooltip_text = "吃一份干粮歇一宿，全队回复 %d%% 气血；身上有 %d 份" % [roundi(Vitality.CAMP_REGEN * 100), GameState.rations]
 
 
 ## 篝火照亮的一圈暖光（叠加混合）。

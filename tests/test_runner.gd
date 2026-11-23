@@ -1099,8 +1099,14 @@ func test_vitality() -> bool:
 	check(is_equal_approx(r[&"a"], 0.6) and is_equal_approx(r[&"b"], 1.0), "road regen +10%, capped")
 	Vitality.road_regen(r, true)
 	check(is_equal_approx(r[&"a"], 0.8), "healer doubles road regen")
-	check_eq(Vitality.rest_price(1), Vitality.REST_MIN, "rest has a floor price")
-	check_eq(Vitality.rest_price(20), 40, "rest price grows with level")
+	# 客栈按伤势收钱：伤得越重越贵，等级越高越贵，轻伤有底价
+	check_eq(Vitality.rest_price(1, {&"a": 0.9}), Vitality.INN_MIN, "a scratch costs the floor price")
+	check_eq(Vitality.rest_price(15, {&"a": 0.1, &"b": 0.1, &"c": 0.1}), 205, "three wounded at Lv15: 2.7 × 15 × 5 ≈ 205")
+	check(Vitality.rest_price(15, {&"a": 0.1}) > Vitality.rest_price(15, {&"a": 0.6}), "worse wounds cost more")
+	check(Vitality.rest_price(20, {&"a": 0.1}) > Vitality.rest_price(10, {&"a": 0.1}), "higher level costs more")
+	check(Vitality.ration_price(15) > Vitality.ration_price(1), "rations cost more later")
+	check(Vitality.medicine_price(&"jin_chuang_yao", 15) > Vitality.medicine_price(&"jin_chuang_yao", 1), "medicine costs more later")
+	check_eq(Vitality.medicine_price(&"jin_chuang_yao", 1), 30, "Lv1 keeps the base price")
 	for id: StringName in Vitality.MEDICINES:
 		check(Vitality.medicine_heal(id) > 0.0 and Vitality.medicine_price(id) > 0, "%s heals and costs" % Vitality.medicine_name(id))
 	return true
