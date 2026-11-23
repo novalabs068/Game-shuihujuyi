@@ -40,8 +40,10 @@ var bonds: Dictionary[StringName, int] = {}
 var vitality: Dictionary[StringName, float] = {}
 ## 身上带的药：id → 数量
 var medicines: Dictionary[StringName, int] = {}
-## 干粮：野外歇脚一次吃一份
-var rations := 0
+## 野外歇脚：正在歇的 {"scene": 场景, "cell": [x, y], "started": 开始的时刻}（没在歇就是空），上次歇完的时刻。
+## 时刻都是真实时间（秒），关掉游戏也照算
+var camp: Dictionary = {}
+var last_camp_done := 0
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
 ## 主角学会的武学和主修（主修那门就是统领光环）
@@ -373,6 +375,21 @@ func recruit_with_souls(hero: UnitData) -> bool:
 	return true
 
 
+## 这位好汉现在等级下的生命上限（带上勾玉、羁绊、装备、秘籍；在队里的再带上统领光环），药按它折算比例。
+func max_hp_of(id: StringName) -> int:
+	var hero := GameDB.hero(id)
+	if hero == null:
+		return 1
+	var unit := Bonds.apply(Stars.apply(hero, star_of(id)), bond_of(id))
+	var gear := effective_gear(id)
+	if id in team_ids and commander_aura() != null:
+		gear.append(commander_aura())
+	unit = Equipment.apply(unit, gear)
+	var sc := scroll_of(id)
+	unit = Miji.apply(unit, scroll_data(sc) if not sc.is_empty() else null)
+	return maxi(1, roundi(unit.base_hp * pow(BattleUnit.LEVEL_GROWTH, level - 1)))
+
+
 ## 战斗用的队伍：三位好汉带上星级、羁绊、装备、秘籍，再加上统领（主角）的光环。
 ## with_aura 为 false 时不算光环（头目按养成变强时用：光环是补主角下场的，不算养成）。
 func battle_team(with_aura := true) -> Array[UnitData]:
@@ -689,32 +706,52 @@ func rest() -> bool:
 	return true
 
 
-## 野外歇一宿：吃一份干粮，每人回 Vitality.CAMP_REGEN。没有干粮返回 false。
+# --- 野外歇脚（真实时间） ---
+
+static func now() -> int:
+	return int(Time.get_unix_time_from_system())
+
+
+## 还要等几秒才能再歇（0 = 现在就能歇）。
+func camp_cooldown_left() -> int:
+	return maxi(0, last_camp_done + Vitality.CAMP_COOLDOWN - now())
+
+
+func start_camp(scene_id: String, cell: Vector2i) -> void:
+	camp = {"scene": scene_id, "cell": [cell.x, cell.y], "started": now()}
+	save_game()
+
+
+## 这一次歇脚还要打坐几秒（0 = 歇好了）。
+func camp_time_left() -> int:
+	if camp.is_empty():
+		return 0
+	return maxi(0, int(camp["started"]) + Vitality.CAMP_SECONDS - now())
+
+
+## 中途起身：不回血，也不算歇过。
+func cancel_camp() -> void:
+	camp = {}
+	save_game()
+
+
+## 歇好了：每人回 Vitality.CAMP_REGEN，记下歇完的时刻。
+func finish_camp() -> void:
+	camp = {}
+	last_camp_done = now()
+	camp_rest()
+
+
+## 每人回 Vitality.CAMP_REGEN。
 func camp_rest() -> bool:
-	if rations <= 0:
-		return false
-	rations -= 1
 	for id in vitality:
 		vitality[id] = minf(vitality[id] + Vitality.CAMP_REGEN, 1.0)
 	save_game()
 	return true
 
 
-func ration_price() -> int:
-	return Vitality.ration_price(level)
-
-
-func buy_ration() -> bool:
-	if silver < ration_price():
-		return false
-	silver -= ration_price()
-	rations += 1
-	save_game()
-	return true
-
-
 func buy_medicine(id: StringName) -> bool:
-	var price := Vitality.medicine_price(id, level)
+	var price := Vitality.medicine_price(id)
 	if silver < price:
 		return false
 	silver -= price
@@ -732,11 +769,11 @@ func use_medicine(id: StringName, target: StringName) -> bool:
 		if vitality.is_empty():
 			return false
 		for k in vitality.keys():
-			_set_vitality(k, vitality[k] + heal)
+			_set_vitality(k, vitality[k] + float(heal) / max_hp_of(k))
 	else:
 		if vitality_of(target) >= 0.999:
 			return false
-		_set_vitality(target, minf(vitality_of(target) + heal, 1.0))
+		_set_vitality(target, minf(vitality_of(target) + float(heal) / max_hp_of(target), 1.0))
 	medicines[id] -= 1
 	if medicines[id] <= 0:
 		medicines.erase(id)
@@ -768,7 +805,8 @@ func reset() -> void:
 	bonds.clear()
 	vitality.clear()
 	medicines.clear()
-	rations = Vitality.STARTING_RATIONS
+	camp = {}
+	last_camp_done = 0
 	items.clear()
 	scrolls.clear()
 	formation = Formations.DEFAULT
@@ -846,7 +884,8 @@ func save_game() -> void:
 		"bonds": _ids_to_json(bonds),
 		"vitality": _floats_to_json(vitality),
 		"medicines": _ids_to_json(medicines),
-		"rations": rations,
+		"camp": camp,
+		"last_camp_done": last_camp_done,
 		"yiqi": yiqi,
 		"record": record,
 		"jobs": jobs,
@@ -905,7 +944,9 @@ func load_game() -> void:
 	var saved_vitality: Dictionary = data.get("vitality", {})
 	for id: String in saved_vitality:
 		vitality[StringName(id)] = float(saved_vitality[id])
-	rations = int(data.get("rations", Vitality.STARTING_RATIONS))
+	camp = data.get("camp", {})
+	last_camp_done = int(data.get("last_camp_done", 0))
+	# 老存档里已经下架的药名不认
 	var saved_medicines: Dictionary = data.get("medicines", {})
 	for id: String in saved_medicines:
 		if Vitality.MEDICINES.has(StringName(id)):

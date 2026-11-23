@@ -1,30 +1,28 @@
 class_name Vitality
 ## 气血：战斗里剩多少血会带到下一仗（按百分比记）。纯规则，存档里的数据在 GameState.vitality。
-## 倒下的人「重伤」，下一仗只剩一成血；打输了全队一成血；赶路每段回一点，金疮药之类的药也能回；
-## 客栈按伤势收钱回满，野外歇脚吃一份干粮回一截。
+## 倒下的人「重伤」，下一仗只剩一成血；打输了全队一成血；赶路每段回一点；药按固定点数回血；
+## 客栈按伤势收钱回满；野外歇脚要打坐真实的 5 分钟（关掉游戏也算），一小时只能歇一次。
 
 ## 重伤、战败后剩的血
 const WOUNDED := 0.1
 ## 赶路每走完一段路回多少；队里有「神医」天赋的人时翻倍
 const ROAD_REGEN := 0.1
 const ROAD_REGEN_HEALER := 0.2
-## 在野外随地歇一宿回多少：要吃一份干粮，被打退的小怪也会回来
-const CAMP_REGEN := 0.3
-## 干粮的价钱：底价 + 每级队伍等级加一点；开新档送几份
-const RATION_BASE_PRICE := 10
-const RATION_PRICE_PER_LEVEL := 2
-const STARTING_RATIONS := 3
+## 野外歇脚：打坐多少秒（真实时间）、歇完回多少、隔多少秒才能再歇（从上次歇完算）。被打退的小怪也会回来
+const CAMP_SECONDS := 300
+const CAMP_REGEN := 0.5
+const CAMP_COOLDOWN := 3600
 ## 客栈：按伤势收钱，每人每少一整条血收「队伍等级 × INN_PER_LEVEL」两；最少 INN_MIN
 const INN_PER_LEVEL := 5
 const INN_MIN := 20
-## 药价随队伍等级涨：每级多 LEVEL_PRICE_RATE 倍底价
-const LEVEL_PRICE_RATE := 0.1
-
-## 药：id → [名字, 说明, 回多少（比例）, 全队？, 集市价钱]
+## 药：id → [名字, 说明, 回多少点气血, 全队？, 集市价钱]。回的是固定点数，不是比例：
+## 前期一份金疮药能回大半条血，到后期血条长了就得换高档的药。价钱不随等级变。
 const MEDICINES := {
-	&"jin_chuang_yao": ["金疮药", "敷在伤口上，一人回复 40% 气血。", 0.4, false, 30],
-	&"hui_chun_san": ["回春散", "冲水服下，全队回复 25% 气血。", 0.25, true, 60],
-	&"xu_ming_gao": ["续命膏", "吊命的膏药，一人气血回满，重伤也能救回来。", 1.0, false, 90],
+	&"zhi_xue_cao": ["止血草", "嚼碎了敷上，止住血。", 300, false, 15],
+	&"jin_chuang_yao": ["金疮药", "江湖上最常见的刀伤药。", 800, false, 40],
+	&"hui_chun_san": ["回春散", "冲水服下，大家分着喝。", 600, true, 90],
+	&"xu_ming_gao": ["续命膏", "吊命的膏药，重伤也能救回来。", 2000, false, 110],
+	&"huan_hun_dan": ["九转还魂丹", "道观里炼的灵丹，一颗顶半条命。", 6000, false, 250],
 }
 
 
@@ -66,15 +64,11 @@ static func rest_price(level: int, ratios: Dictionary) -> int:
 	return maxi(INN_MIN, roundi(price / 5.0) * 5)
 
 
-static func ration_price(level: int) -> int:
-	return RATION_BASE_PRICE + level * RATION_PRICE_PER_LEVEL
-
-
 static func medicine_name(id: StringName) -> String:
 	return MEDICINES[id][0]
 
 
-static func medicine_heal(id: StringName) -> float:
+static func medicine_heal(id: StringName) -> int:
 	return MEDICINES[id][2]
 
 
@@ -82,7 +76,10 @@ static func medicine_for_team(id: StringName) -> bool:
 	return MEDICINES[id][3]
 
 
-## 药价：底价随队伍等级涨，取整到 5 两。
-static func medicine_price(id: StringName, level := 1) -> int:
-	var base: int = MEDICINES[id][4]
-	return roundi(base * (1.0 + LEVEL_PRICE_RATE * (level - 1)) / 5.0) * 5
+static func medicine_price(id: StringName) -> int:
+	return MEDICINES[id][4]
+
+
+## 「一人回复 800 点气血」「全队每人回复 600 点气血」。
+static func medicine_effect(id: StringName) -> String:
+	return ("全队每人回复 %d 点气血" if medicine_for_team(id) else "一人回复 %d 点气血") % medicine_heal(id)

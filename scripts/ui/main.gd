@@ -80,7 +80,14 @@ func _ask_quit() -> void:
 func _show_title() -> void:
 	var screen := TitleScreen.new()
 	screen.new_game_requested.connect(_show_character_create)
-	screen.continue_requested.connect(_show_map)
+	# 关掉游戏前在场景里坐下歇脚的：直接回到那个场景接着歇
+	screen.continue_requested.connect(func() -> void:
+		var scene_id: String = GameState.camp.get("scene", "")
+		if scene_id != "" and GameDB.scenes.has(scene_id):
+			_show_scene(scene_id)
+		else:
+			GameState.camp = {}
+			_show_map())
 	_set_screen(screen)
 
 
@@ -337,9 +344,6 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			var scroll_text := Rewards.grant_scroll(mj)
 			if scroll_text != "":
 				parts.append(scroll_text)
-			if bonus.get("rations", 0) > 0:
-				GameState.rations += int(bonus["rations"])
-				parts.append("干粮 ×%d" % bonus["rations"])
 			GameState.set_flag(bonus.get("flag", ""))
 			if bonus.has("arena_round"):
 				GameState.record["arena"] = maxi(Arena.best(), bonus["arena_round"])

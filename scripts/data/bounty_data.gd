@@ -7,8 +7,6 @@ enum Grade { BING, YI, JIA }
 const GRADE_NAMES: Array[String] = ["丙", "乙", "甲"]
 ## 各等级悬赏给的聚义令，见设计文档「地区与数值」
 const GRADE_TOKENS: Array[int] = [1, 3, 6]
-## 各等级悬赏送的干粮
-const RATIONS: Array[int] = [1, 2, 3]
 
 @export var id: StringName
 @export var location: StringName
@@ -47,7 +45,6 @@ func battle_bonus() -> Dictionary:
 	var bonus := {"tokens": tokens(), "equip_quality": equip_quality(), "medicine": medicine(), "flag": "bounty_" + String(id), "text": "揭下了「%s」的悬赏。" % target}
 	if miji_quality() >= 0:
 		bonus["miji_quality"] = miji_quality()
-	bonus["rations"] = RATIONS[grade]
 	return bonus
 
 

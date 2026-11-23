@@ -378,7 +378,9 @@ func _open_medicines(hero: UnitData) -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 12)
 	panel.add_child(v)
-	v.add_child(UiKit.label("给%s用药　气血 %d%%" % [hero.display_name, roundi(GameState.vitality_of(hero.id) * 100)], 26, UiKit.GOLD))
+	var max_hp := GameState.max_hp_of(hero.id)
+	var vit := GameState.vitality_of(hero.id)
+	v.add_child(UiKit.label("给%s用药　气血 %d / %d" % [hero.display_name, roundi(vit * max_hp), max_hp], 26, UiKit.GOLD))
 	var close := func() -> void:
 		overlay.queue_free()
 		_refresh_list()
@@ -388,7 +390,7 @@ func _open_medicines(hero: UnitData) -> void:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 12)
 		v.add_child(row)
-		var text := UiKit.label("%s ×%d　%s" % [Vitality.medicine_name(id), GameState.medicines[id], Vitality.MEDICINES[id][1]], 18)
+		var text := UiKit.label("%s ×%d　%s" % [Vitality.medicine_name(id), GameState.medicines[id], Vitality.medicine_effect(id)], 18)
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(text)

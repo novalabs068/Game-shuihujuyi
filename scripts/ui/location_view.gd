@@ -44,7 +44,13 @@ const RETURN_GRACE := 2.5
 ## 有小怪离主角这么多格以内就不能歇脚
 const CAMP_SAFE_CELLS := 5.0
 
-var _camp_button: Button
+## 正在歇脚时的天色、火光层、倒计时面板、站着时的小人图
+var _resting := false
+var _rest_sky: ColorRect
+var _rest_lit: Node2D
+var _rest_panel: PanelContainer
+var _rest_label: Label
+var _rest_standing: Texture2D
 
 
 func _ready() -> void:
@@ -67,6 +73,11 @@ func _ready() -> void:
 	_spawn_objects()
 
 	_build_ui()
+	# 关掉游戏前在这里坐下歇脚的：站回原地接着歇（时间到了就直接歇好）
+	if GameState.camp.get("scene", "") == scene_data.id:
+		var c: Array = GameState.camp["cell"]
+		_player.position = _feet(Vector2i(c[0], c[1]))
+		_enter_rest.call_deferred()
 	# 刚加进场景树时尺寸还是 0，等铺满屏幕后再把镜头对准主角
 	resized.connect(_center_camera.bind(true))
 	_center_camera(true)
@@ -75,6 +86,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_step_rest()
 	_step_player(delta)
 	_step_roamers(delta)
 	_center_camera(false)
@@ -191,10 +203,10 @@ func _build_ui() -> void:
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.clip_text = true
 	row.add_child(hint)
-	_camp_button = UiKit.button("", Vector2(80, 40), 18)
-	_camp_button.pressed.connect(_camp)
-	row.add_child(_camp_button)
-	_update_camp_button()
+	var camp := UiKit.button("歇脚", Vector2(80, 40), 20)
+	camp.tooltip_text = "就地打坐 %d 分钟，全队回复 %d%% 气血；一小时只能歇一次" % [Vitality.CAMP_SECONDS / 60, roundi(Vitality.CAMP_REGEN * 100)]
+	camp.pressed.connect(_camp)
+	row.add_child(camp)
 	for entry: Array in [["编队", team_requested], ["好汉", heroes_requested], ["招募", recruit_requested]]:
 		var b := UiKit.button(entry[0], Vector2(80, 40), 20)
 		var sig: Signal = entry[1]
@@ -466,92 +478,138 @@ func _fight(r: SceneRoamer) -> void:
 
 # --- 歇脚 ---
 
-## 随地歇一宿：主角盘腿坐下打坐，天黑下来、身边生起篝火，身上一圈气息随呼吸明暗、光点往上飘；
-## 天亮后站起来，全队回一截气血；被打退的小怪也回来了。
-## 附近有小怪就歇不了。
+## 随地歇脚：主角盘腿坐下打坐，天黑下来、身边生起篝火，身上一团气息随呼吸明暗。
+## 要打坐真实的 5 分钟（Vitality.CAMP_SECONDS）：可以一直看着，也可以关掉游戏，回来时接着坐、到时间自动歇好；
+## 中途点「起身」就不算。歇好了全队回一截气血，被打退的小怪也回来了；之后一小时内不能再歇。附近有小怪就歇不了。
 func _camp() -> void:
 	if _busy:
 		return
-	if GameState.rations <= 0:
-		_flash("没有干粮了，去集市买些再歇脚（或者到有客栈的地方住店）")
+	var wait := GameState.camp_cooldown_left()
+	if wait > 0:
+		_flash("刚歇过不久，还要再过 %s 才能歇" % _clock(wait))
 		return
 	for r in _roamers:
 		if r.actor.position.distance_to(_player.position) / _tile < CAMP_SAFE_CELLS:
 			_flash("附近有强人出没，没法安心歇脚")
 			return
+	GameState.start_camp(scene_data.id, _cell_at(_player.position))
+	_enter_rest()
+
+
+## 坐下、入夜、生火、运气，挂上倒计时。进场景时发现还在歇（关掉游戏前坐下的）也走这里。
+func _enter_rest() -> void:
 	_busy = true
 	_path.clear()
 	_player.moving = false
 	# 天色：一层盖在场景上、在顶栏下面的颜色
-	var sky := ColorRect.new()
-	sky.color = Color(0.04, 0.06, 0.16, 0.0)
-	sky.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(sky)
-	move_child(sky, _world.get_index() + 1)
-	sky.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# 篝火、火光、「Zzz」画在天色上面（不被夜色压暗），和场景用同一个镜头位置
-	var lit := Node2D.new()
-	lit.transform = _world.transform
-	add_child(lit)
-	move_child(lit, sky.get_index() + 1)
+	_rest_sky = ColorRect.new()
+	_rest_sky.color = Color(0.04, 0.06, 0.16, 0.0)
+	_rest_sky.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(_rest_sky)
+	move_child(_rest_sky, _world.get_index() + 1)
+	_rest_sky.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# 篝火、火光、气息画在天色上面（不被夜色压暗），和场景用同一个镜头位置
+	_rest_lit = Node2D.new()
+	_rest_lit.transform = _world.transform
+	add_child(_rest_lit)
+	move_child(_rest_lit, _rest_sky.get_index() + 1)
 	var glow := _campfire_glow()
 	glow.position = _player.position + Vector2(_tile * 1.5, 4)
-	lit.add_child(glow)
-	var fire := FxSprite.spawn(lit, "burning", glow.position, 2.2, false, 1)
-	fire.modulate.a = 0.0
-	glow.modulate.a = 0.0
+	_rest_lit.add_child(glow)
+	var fire := FxSprite.spawn(_rest_lit, "burning", glow.position, 2.2, false, 1)
+	_rest_lit.modulate.a = 0.0
 	# 盘腿坐下：身子一沉，换成打坐的样子
-	var standing := _player.sprite
+	_rest_standing = _player.sprite
 	var sit := GameState.origin().sit_sprite if GameState.origin() != null else null
 	await _sink(sit)
 	var dusk := create_tween().set_parallel()
-	dusk.tween_property(sky, "color:a", 0.62, 0.9)
-	dusk.tween_property(fire, "modulate:a", 1.0, 0.6).set_delay(0.3)
-	dusk.tween_property(glow, "modulate:a", 1.0, 0.6).set_delay(0.3)
+	dusk.tween_property(_rest_sky, "color:a", 0.62, 0.9)
+	dusk.tween_property(_rest_lit, "modulate:a", 1.0, 0.6).set_delay(0.3)
 	await dusk.finished
-	# 运气调息：身上一圈气息随呼吸明暗，光点从身边往上飘
+	# 运气调息：身上一团气息随呼吸明暗，光点从身边往上飘
 	var qi := _qi_aura()
 	qi.position = _player.position + Vector2(0, -_tile * 0.7)
-	lit.add_child(qi)
+	_rest_lit.add_child(qi)
 	var motes := _qi_motes()
 	motes.position = _player.position + Vector2(0, -_tile * 0.3)
-	lit.add_child(motes)
+	_rest_lit.add_child(motes)
 	var breathe := qi.create_tween().set_loops()
 	breathe.tween_property(qi, "modulate:a", 0.9, 0.8).set_trans(Tween.TRANS_SINE)
 	breathe.tween_property(qi, "modulate:a", 0.35, 0.8).set_trans(Tween.TRANS_SINE)
-	await get_tree().create_timer(2.6).timeout
-	motes.emitting = false
+	# 倒计时和「起身」
+	_rest_panel = PanelContainer.new()
+	_rest_panel.add_theme_stylebox_override("panel", UiKit.box(Color(0.08, 0.07, 0.1, 0.82), UiKit.GOLD, 2, 10))
+	add_child(_rest_panel)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	_rest_panel.add_child(row)
+	_rest_label = UiKit.label("", 24, Color("e8f0ff"))
+	row.add_child(_rest_label)
+	var up := UiKit.button("起身", Vector2(110, 48), 22)
+	up.pressed.connect(func() -> void: _end_rest(false))
+	row.add_child(up)
+	# 放在顶栏下面：主角常常站在画面下半截，放底下会挡住打坐的人
+	_rest_panel.z_index = 20
+	_rest_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_rest_panel.offset_top = 80
+	_rest_panel.offset_bottom = 140
+	_rest_panel.offset_left = -260
+	_rest_panel.offset_right = 260
+	_resting = true
+
+
+func _step_rest() -> void:
+	if _rest_lit != null and is_instance_valid(_rest_lit):
+		_rest_lit.transform = _world.transform
+	if not _resting:
+		return
+	var left := GameState.camp_time_left()
+	_rest_label.text = "打坐调息　%s　（关掉游戏也照算）" % _clock(left)
+	if left <= 0:
+		_end_rest(true)
+
+
+## 歇好（healed）或中途起身：天亮、熄火、站起来。歇好的才回血，被打退的小怪也回来。
+func _end_rest(healed: bool) -> void:
+	if not _resting:
+		return
+	_resting = false
+	_rest_panel.queue_free()
+	var came_back: Array = []
+	if healed:
+		GameState.finish_camp()
+		var memory := GameState.scene_state(scene_data.id)
+		came_back = memory["cleared"].duplicate()
+		memory["cleared"].clear()
+	else:
+		GameState.cancel_camp()
 	# 天亮：先一抹暖色，再回到白天
-	GameState.camp_rest()
-	_update_camp_button()
-	var memory := GameState.scene_state(scene_data.id)
-	var came_back: Array = memory["cleared"].duplicate()
-	memory["cleared"].clear()
 	var dawn := create_tween()
-	dawn.tween_property(sky, "color", Color(1.0, 0.72, 0.45, 0.28), 0.9)
-	dawn.parallel().tween_property(fire, "modulate:a", 0.0, 0.9)
-	dawn.parallel().tween_property(glow, "modulate:a", 0.0, 0.9)
-	dawn.parallel().tween_property(qi, "modulate:a", 0.0, 0.9)
-	dawn.tween_property(sky, "color:a", 0.0, 0.7)
+	dawn.tween_property(_rest_sky, "color", Color(1.0, 0.72, 0.45, 0.28) if healed else Color(0.04, 0.06, 0.16, 0.3), 0.9)
+	dawn.parallel().tween_property(_rest_lit, "modulate:a", 0.0, 0.9)
+	dawn.tween_property(_rest_sky, "color:a", 0.0, 0.7)
 	await dawn.finished
-	breathe.kill()
-	sky.queue_free()
-	lit.queue_free()
-	# 站起来
-	await _sink(standing)
+	_rest_sky.queue_free()
+	_rest_lit.queue_free()
+	await _sink(_rest_standing)
 	for i in came_back:
 		_spawn_roamer(i, {})
 	_grace = RETURN_GRACE
 	_busy = false
-	var text := "吃了一份干粮，歇了一宿，全队气血回复 %d%%（还剩干粮 %d 份）。" % [roundi(Vitality.CAMP_REGEN * 100), GameState.rations]
-	if not came_back.is_empty():
-		text += "被打退的强人又回来了。"
-	_flash(text)
+	if healed:
+		var text := "歇好了，全队气血回复 %d%%。一个时辰（一小时）后才能再歇。" % roundi(Vitality.CAMP_REGEN * 100)
+		if not came_back.is_empty():
+			text += "被打退的强人又回来了。"
+		_flash(text)
+	else:
+		_flash("起身了，这次没歇成")
 
 
-func _update_camp_button() -> void:
-	_camp_button.text = "歇脚 %d" % GameState.rations
-	_camp_button.tooltip_text = "吃一份干粮歇一宿，全队回复 %d%% 气血；身上有 %d 份" % [roundi(Vitality.CAMP_REGEN * 100), GameState.rations]
+## 「4:32」「1 小时 05 分」这样的时长。
+static func _clock(seconds: int) -> String:
+	if seconds >= 3600:
+		return "%d 小时 %02d 分" % [seconds / 3600, (seconds % 3600) / 60]
+	return "%d:%02d" % [seconds / 60, seconds % 60]
 
 
 ## 篝火照亮的一圈暖光（叠加混合）。

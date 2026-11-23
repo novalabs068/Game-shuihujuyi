@@ -1104,11 +1104,18 @@ func test_vitality() -> bool:
 	check_eq(Vitality.rest_price(15, {&"a": 0.1, &"b": 0.1, &"c": 0.1}), 205, "three wounded at Lv15: 2.7 × 15 × 5 ≈ 205")
 	check(Vitality.rest_price(15, {&"a": 0.1}) > Vitality.rest_price(15, {&"a": 0.6}), "worse wounds cost more")
 	check(Vitality.rest_price(20, {&"a": 0.1}) > Vitality.rest_price(10, {&"a": 0.1}), "higher level costs more")
-	check(Vitality.ration_price(15) > Vitality.ration_price(1), "rations cost more later")
-	check(Vitality.medicine_price(&"jin_chuang_yao", 15) > Vitality.medicine_price(&"jin_chuang_yao", 1), "medicine costs more later")
-	check_eq(Vitality.medicine_price(&"jin_chuang_yao", 1), 30, "Lv1 keeps the base price")
+	# 药：固定价钱、按点数回血，档次越高回得越多
+	var prev := 0
+	for id: StringName in [&"zhi_xue_cao", &"jin_chuang_yao", &"xu_ming_gao", &"huan_hun_dan"]:
+		check(Vitality.medicine_heal(id) > prev, "%s heals more than the tier below" % Vitality.medicine_name(id))
+		prev = Vitality.medicine_heal(id)
+	check(Vitality.medicine_effect(&"jin_chuang_yao").contains("800"), "effect text shows the points")
+	check(Vitality.medicine_effect(&"hui_chun_san").begins_with("全队"), "team medicine says 全队")
+	# 野外歇脚：打坐的时长、冷却
+	check_eq(Vitality.CAMP_SECONDS, 300, "camp takes 5 minutes")
+	check_eq(Vitality.CAMP_COOLDOWN, 3600, "one camp per hour")
 	for id: StringName in Vitality.MEDICINES:
-		check(Vitality.medicine_heal(id) > 0.0 and Vitality.medicine_price(id) > 0, "%s heals and costs" % Vitality.medicine_name(id))
+		check(Vitality.medicine_heal(id) > 0 and Vitality.medicine_price(id) > 0, "%s heals and costs" % Vitality.medicine_name(id))
 	return true
 
 
