@@ -3,7 +3,7 @@ extends Control
 ## 江湖榜：没有主线时，玩家从这里看「接下来能做什么」。三页：可以做的事、悬赏榜、好汉图鉴。
 
 signal back_requested
-## 点「前往」：回大地图并走向这个地点
+## 点「在哪」：打开大地图看这个地点（怎么走过去）
 signal travel_requested(location_id: StringName)
 ## 点图鉴里的好汉或「去升星」：打开好汉页
 signal heroes_requested
@@ -175,7 +175,7 @@ func _todo_row(item: Dictionary) -> PanelContainer:
 		h.add_child(_level_label(level))
 	var location: StringName = item["location"]
 	if location != &"":
-		var go := UiKit.button("就在这里" if location == GameState.location_id else "前往", Vector2(120, 46), 20)
+		var go := UiKit.button("就在这里" if location == GameState.location_id else "在哪", Vector2(120, 46), 20)
 		go.pressed.connect(func() -> void: travel_requested.emit(location))
 		h.add_child(go)
 	elif kind == "养成" or kind == "列传":
@@ -226,7 +226,7 @@ func _show_bounties() -> void:
 		if taken:
 			h.add_child(UiKit.label("已揭", 20, UiKit.TEXT_DIM))
 		else:
-			var go := UiKit.button("就在这里" if b.location == GameState.location_id else "前往", Vector2(120, 46), 20)
+			var go := UiKit.button("就在这里" if b.location == GameState.location_id else "在哪", Vector2(120, 46), 20)
 			go.pressed.connect(func() -> void: travel_requested.emit(b.location))
 			h.add_child(go)
 

@@ -23,6 +23,8 @@ var origin_id: StringName = &""
 var team_ids: Array[StringName] = []
 var flags: Dictionary[String, bool] = {}
 var location_id: StringName = &""
+## 现在在哪张场景里（地点的场景或者野外路图）；游戏以它为家，打完仗、看完菜单都回这里
+var scene_id := ""
 ## 主角和随行好汉共用的队伍等级（M3 前的简化）
 var level := 1
 var experience := 0
@@ -789,6 +791,39 @@ func use_medicine(id: StringName, target: StringName) -> bool:
 	return true
 
 
+## 主角现在所在的场景（存档里没有就用所在地点的场景）。
+func home_scene() -> String:
+	if scene_id != "" and GameDB.scenes.has(scene_id):
+		return scene_id
+	var loc := GameDB.maps[DEFAULT_MAP].location(location_id)
+	return loc.scene_id if loc != null else ""
+
+
+## 走进一张场景：记下位置。是某个地点的场景就算到了那个地点——第一次来给聚义令、讲那里的事；
+## 从野外路上走过来的，路上缓过一口气（气血回一点）。返回要给玩家看的提示（没有就是空）。
+func enter_scene(id: String) -> String:
+	var previous := scene_id
+	scene_id = id
+	var parts := PackedStringArray()
+	for loc: LocationData in GameDB.maps[DEFAULT_MAP].locations:
+		if loc.scene_id != id:
+			continue
+		location_id = loc.id
+		if previous != id and previous.begins_with("road_"):
+			road_regen()
+		var visit_flag := "visited_" + String(loc.id)
+		if not has_flag(visit_flag):
+			set_flag(visit_flag)
+			tokens += WorldMapView.FIRST_VISIT_TOKENS
+			parts.append("初到%s，聚义令 +%d" % [loc.display_name, WorldMapView.FIRST_VISIT_TOKENS])
+		if loc.arrive_flag != "" and not has_flag(loc.arrive_flag):
+			set_flag(loc.arrive_flag)
+			if loc.arrive_text != "":
+				parts.append(loc.arrive_text)
+	save_game()
+	return "　".join(parts)
+
+
 func has_flag(flag: String) -> bool:
 	if flag == "":
 		return true
@@ -815,6 +850,7 @@ func reset() -> void:
 	medicines.clear()
 	camp = {}
 	last_camp_done = 0
+	scene_id = ""
 	items.clear()
 	scrolls.clear()
 	formation = Formations.DEFAULT
@@ -893,6 +929,7 @@ func save_game() -> void:
 		"vitality": _floats_to_json(vitality),
 		"medicines": _ids_to_json(medicines),
 		"camp": camp,
+		"scene": scene_id,
 		"level_scale": LEVEL_SCALE,
 		"last_camp_done": last_camp_done,
 		"yiqi": yiqi,
@@ -958,6 +995,7 @@ func load_game() -> void:
 	for id: String in saved_vitality:
 		vitality[StringName(id)] = float(saved_vitality[id])
 	camp = data.get("camp", {})
+	scene_id = data.get("scene", "")
 	last_camp_done = int(data.get("last_camp_done", 0))
 	# 老存档里已经下架的药名不认
 	var saved_medicines: Dictionary = data.get("medicines", {})

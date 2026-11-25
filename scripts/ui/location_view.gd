@@ -8,10 +8,13 @@ signal exit_requested
 signal battle_requested(stage: StageData, bonus: Dictionary)
 ## 走进门里，换到另一个场景
 signal scene_requested(scene_id: String)
+## 打开江湖大地图看看（只能看，地点之间要从路口走过去）
+signal map_requested
 ## 在场景里打开编队、好汉、招募（看完回到场景原地）
 signal team_requested
 signal heroes_requested
 signal recruit_requested
+signal jianghu_requested
 
 ## 像素瓦片放大倍数：16 像素的瓦片在画面上是 48 像素一格
 const PIXEL_SCALE := 3
@@ -199,27 +202,30 @@ func _build_ui() -> void:
 	bar.add_child(row)
 	var title := UiKit.label(scene_data.title, 26, UiKit.GOLD)
 	row.add_child(title)
-	var hint := UiKit.label("点地面走动，点人物对话", 17, UiKit.TEXT_DIM)
-	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hint.clip_text = true
-	row.add_child(hint)
+	# 等级、经验、银两、聚义令
+	var status := UiKit.label("Lv%d　经验 %d/%d　银两 %d　聚义令 %d" % [GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver, GameState.tokens], 16, UiKit.TEXT_DIM)
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.clip_text = true
+	row.add_child(status)
 	var camp := UiKit.button("歇脚", Vector2(80, 40), 20)
 	camp.tooltip_text = "就地打坐 %d 分钟，全队回复 %d%% 气血；一小时只能歇一次" % [Vitality.CAMP_SECONDS / 60, roundi(Vitality.CAMP_REGEN * 100)]
 	camp.pressed.connect(_camp)
 	row.add_child(camp)
-	for entry: Array in [["编队", team_requested], ["好汉", heroes_requested], ["招募", recruit_requested]]:
-		var b := UiKit.button(entry[0], Vector2(80, 40), 20)
+	var guide_targets := {}
+	for entry: Array in [["江湖榜", jianghu_requested, 5], ["招募", recruit_requested, 1], ["好汉", heroes_requested, 4], ["编队", team_requested, 2]]:
+		var b := UiKit.button(entry[0], Vector2(80 if entry[0].length() == 2 else 96, 40), 20)
 		var sig: Signal = entry[1]
 		b.pressed.connect(func() -> void:
 			if not _busy:
 				_remember()
 				sig.emit())
 		row.add_child(b)
-	var leave := UiKit.button("离开", Vector2(100, 40), 20)
-	leave.pressed.connect(func() -> void:
-		if not _busy:
-			_leave())
-	row.add_child(leave)
+		guide_targets[entry[2]] = b
+	var world := UiKit.button("地图", Vector2(100, 40), 20)
+	world.pressed.connect(go_back)
+	row.add_child(world)
+
+	_build_guide(guide_targets)
 
 	_toast = UiKit.label("", 28, UiKit.GOLD)
 	_toast.add_theme_constant_override("outline_size", 8)
@@ -228,7 +234,7 @@ func _build_ui() -> void:
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_toast)
 	_toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_toast.offset_top = 90
+	_toast.offset_top = 140
 	_toast.offset_left = -400
 	_toast.offset_right = 400
 
@@ -243,6 +249,46 @@ func _build_ui() -> void:
 	_event_panel = EventPanel.new()
 	add_child(_event_panel)
 	_event_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
+## 新手引导：顶栏下面一条提示，对应的按钮一闪一闪。
+const GUIDE_TEXTS := {
+	1: "新手引导 1/5：点右上角「招募」，用开局送的聚义令来一次十连，招几位好汉。",
+	2: "新手引导 2/5：点「编队」，挑 3 位好汉出战（主角当统领，不上阵）。",
+	3: "新手引导 3/5：去打一仗。点地面走动，碰到游荡的小怪就开打；走到地图边上的路口，就能上路去别的地方。",
+	4: "新手引导 4/5：打赢了！点「好汉」看看：重复抽到的好汉会变成将魂，攒够了点亮勾玉；还能换装备、看天赋和组合技。",
+	5: "新手引导 5/5：点「江湖榜」，里面列着眼下能做的事：悬赏、列传、宝箱、没去过的地方。看完之后，江湖就随你闯了！",
+}
+
+
+func _build_guide(targets: Dictionary) -> void:
+	var step := GameState.tutorial_step()
+	if step == 0:
+		return
+	var bar := PanelContainer.new()
+	bar.add_theme_stylebox_override("panel", UiKit.box(Color(0.12, 0.11, 0.1, 0.92), UiKit.GOLD, 2, 8))
+	add_child(bar)
+	bar.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	bar.offset_top = 62
+	bar.offset_left = 16
+	bar.offset_right = -16
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	bar.add_child(row)
+	var text := UiKit.label(GUIDE_TEXTS[step], 20, UiKit.GOLD)
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text)
+	var skip := UiKit.button("跳过引导", Vector2(110, 40), 16)
+	skip.pressed.connect(func() -> void:
+		GameState.mark_tutorial("tut_done")
+		bar.queue_free())
+	row.add_child(skip)
+	var target: Button = targets.get(step)
+	if target != null:
+		var pulse := target.create_tween().set_loops()
+		pulse.tween_property(target, "modulate", Color(1.8, 1.5, 0.6), 0.5)
+		pulse.tween_property(target, "modulate", Color.WHITE, 0.5)
 
 
 func _make_marker() -> Node2D:
@@ -315,7 +361,7 @@ func _step_player(delta: float) -> void:
 	var to := next - _player.position
 	if absf(to.x) > 1.0:
 		_player.facing_left = to.x < 0
-	var step := WALK_SPEED * delta
+	var step := _walk_speed() * delta
 	if to.length() <= step:
 		_player.position = next
 		_path.remove_at(0)
@@ -335,7 +381,7 @@ func _arrived() -> void:
 	else:
 		var here := _cell_at(_player.position)
 		if scene_data.doors.has(here):
-			_go_to_scene(scene_data.doors[here], null)
+			_go_to_scene(scene_data.doors[here], scene_data.door_arrivals.get(here, null))
 		elif scene_data.terrain_at(here) == "E":
 			if scene_data.exit_scene != "":
 				_go_to_scene(scene_data.exit_scene, scene_data.exit_cell)
@@ -343,10 +389,11 @@ func _arrived() -> void:
 				_leave()
 
 
-## 手机返回键：正在对话、开箱这类事情时不响应，否则离开场景。
+## 手机返回键：正在对话、开箱这类事情时不响应，否则打开大地图。
 func go_back() -> void:
 	if not _busy:
-		_leave()
+		_remember()
+		map_requested.emit()
 
 
 ## 离开场景回大地图；小怪下次进来重新出现。
@@ -361,6 +408,17 @@ func _go_to_scene(scene_id: String, cell: Variant) -> void:
 	if cell != null:
 		GameState.scene_state(scene_id)["cell"] = cell
 	scene_requested.emit(scene_id)
+
+
+## 骑着马走得快，小怪也不容易注意到（坐骑的「赶路」「遇敌」加成）。
+func _walk_speed() -> float:
+	var mount := GameState.mount()
+	return WALK_SPEED * (1.0 + (mount.travel_speed if mount != null else 0.0))
+
+
+func _aggro_cells() -> float:
+	var mount := GameState.mount()
+	return SceneRoamer.AGGRO_CELLS * (1.0 - (mount.encounter_cut if mount != null else 0.0))
 
 
 # --- 场景小怪 ---
@@ -412,7 +470,7 @@ func _step_roamers(delta: float) -> void:
 		if _grace <= 0.0 and dist < SceneRoamer.CONTACT_CELLS:
 			_fight(r)
 			return
-		if _grace <= 0.0 and (dist < SceneRoamer.AGGRO_CELLS or (r.chasing and dist < SceneRoamer.GIVE_UP_CELLS)):
+		if _grace <= 0.0 and (dist < _aggro_cells() or (r.chasing and dist < SceneRoamer.GIVE_UP_CELLS)):
 			if not r.chasing:
 				r.chasing = true
 				r.actor.alert(true)
@@ -696,7 +754,7 @@ func _talk(npc: NpcData) -> void:
 		var choice := await _event_panel.ask(npc.event)
 		if choice.battle != null:
 			_event_panel.close()
-			battle_requested.emit(choice.battle, WorldMapView._choice_bonus(choice))
+			battle_requested.emit(choice.battle, Rewards.choice_bonus(choice))
 			return
 		var gained := Rewards.apply_choice(choice)
 		GameState.save_game()

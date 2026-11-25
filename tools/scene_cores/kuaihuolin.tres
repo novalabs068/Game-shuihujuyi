@@ -1,0 +1,306 @@
+[gd_resource type="Resource" script_class="SceneData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/props/chest_closed.png" id="1_5rwgx"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/chest_open.png" id="2_y8x8r"]
+[ext_resource type="Script" path="res://scripts/data/chest_data.gd" id="3_wg6c0"]
+[ext_resource type="Script" path="res://scripts/data/npc_data.gd" id="4_1w5cy"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/jiu_bao.png" id="5_6tdh0"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/xiao_fan.png" id="6_grgdu"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/gao_shi_lan.png" id="7_3j88o"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/mai_hua.png" id="8_8xbq6"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/fence.png" id="9_v6oge"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/willow.png" id="10_5p745"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/well.png" id="11_ns7da"]
+[ext_resource type="Script" path="res://scripts/data/prop_data.gd" id="12_nsej3"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/jiu_lou.png" id="13_4witn"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/du_fang.png" id="14_ufgjk"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/ke_zhan.png" id="15_nqgoh"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/min_zhai_a.png" id="16_snyy2"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/jiu_dian.png" id="17_q7oxk"]
+[ext_resource type="Texture2D" path="res://art/pixel/buildings/min_zhai_b.png" id="18_arytt"]
+[ext_resource type="Texture2D" path="res://art/pixel/props/jiu_gang.png" id="19_ds8hd"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="20_6g7ie"]
+[ext_resource type="Resource" path="res://data/encounters/du_fang_nao_shi.tres" id="21_5n6cq"]
+[ext_resource type="Resource" path="res://data/encounters/tu_di_ba_shi.tres" id="22_05itb"]
+[ext_resource type="Resource" path="res://data/encounters/jia_ding_heng_xing.tres" id="23_egcrh"]
+[ext_resource type="Resource" path="res://data/encounters/ya_yi_xun_jie.tres" id="24_3vsja"]
+[ext_resource type="Script" path="res://scripts/data/scene_data.gd" id="25_bmm1l"]
+[ext_resource type="Texture2D" path="res://art/tiles/xiangguosi.png" id="26_7mjyy"]
+
+[sub_resource type="Resource" id="Resource_h3p5j"]
+script = ExtResource("3_wg6c0")
+id = &"khl_lin_shen"
+cell = Vector2i(62, 5)
+reward_text = "聚义令 ×2"
+tokens = 2
+silver = 60
+
+[sub_resource type="Resource" id="Resource_v4u6s"]
+script = ExtResource("3_wg6c0")
+id = &"khl_jiu_jiao"
+cell = Vector2i(4, 33)
+reward_text = "聚义令 ×1"
+tokens = 1
+silver = 40
+
+[sub_resource type="Resource" id="Resource_sbmb5"]
+script = ExtResource("4_1w5cy")
+id = &"jiu_bao"
+display_name = "酒保"
+sprite = ExtResource("5_6tdh0")
+cell = Vector2i(12, 17)
+lines = PackedStringArray("客官里边请！这快活林原是施管营家小官人的，后来被蒋门神占了，前些日子又给夺了回来。", "如今蒋门神的徒弟还常来闹事，赌坊那边更是乌烟瘴气。")
+
+[sub_resource type="Resource" id="Resource_8jglg"]
+script = ExtResource("4_1w5cy")
+id = &"xiao_fan"
+display_name = "货郎"
+sprite = ExtResource("6_grgdu")
+cell = Vector2i(38, 22)
+lines = PackedStringArray("快活林的货，比孟州城里还全！要什么？")
+action = &"market"
+
+[sub_resource type="Resource" id="Resource_enl20"]
+script = ExtResource("4_1w5cy")
+id = &"gao_shi_lan"
+display_name = "告示栏"
+sprite = ExtResource("7_3j88o")
+cell = Vector2i(28, 22)
+lines = PackedStringArray("告示栏上贴着孟州的海捕文书和各家的悬赏。")
+action = &"bounties"
+still = true
+
+[sub_resource type="Resource" id="Resource_a3hc2"]
+script = ExtResource("4_1w5cy")
+id = &"mai_hua"
+display_name = "卖花姑娘"
+sprite = ExtResource("8_8xbq6")
+cell = Vector2i(52, 22)
+lines = PackedStringArray("北边那条小道通到林子深处，赌坊的人常在那里分赃。")
+
+[sub_resource type="Resource" id="Resource_brjrp"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(4, 18)
+
+[sub_resource type="Resource" id="Resource_bmx01"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(4, 23)
+
+[sub_resource type="Resource" id="Resource_su5oy"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(9, 18)
+
+[sub_resource type="Resource" id="Resource_runnm"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(9, 23)
+
+[sub_resource type="Resource" id="Resource_x2enn"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(14, 18)
+
+[sub_resource type="Resource" id="Resource_si52f"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(14, 23)
+
+[sub_resource type="Resource" id="Resource_1on4y"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(19, 18)
+
+[sub_resource type="Resource" id="Resource_n6c4h"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(19, 23)
+
+[sub_resource type="Resource" id="Resource_f184v"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(24, 18)
+
+[sub_resource type="Resource" id="Resource_7rh3u"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(24, 23)
+
+[sub_resource type="Resource" id="Resource_u4jd5"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(29, 18)
+
+[sub_resource type="Resource" id="Resource_re3l5"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(29, 23)
+
+[sub_resource type="Resource" id="Resource_f5uof"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(34, 18)
+
+[sub_resource type="Resource" id="Resource_ybwxn"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(34, 23)
+
+[sub_resource type="Resource" id="Resource_q8ip7"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(39, 18)
+
+[sub_resource type="Resource" id="Resource_uqkgo"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(39, 23)
+
+[sub_resource type="Resource" id="Resource_0bnft"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(44, 18)
+
+[sub_resource type="Resource" id="Resource_8non5"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(44, 23)
+
+[sub_resource type="Resource" id="Resource_52faa"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(49, 18)
+
+[sub_resource type="Resource" id="Resource_ah24b"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(49, 23)
+
+[sub_resource type="Resource" id="Resource_rsc0c"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(54, 18)
+
+[sub_resource type="Resource" id="Resource_fnc73"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(54, 23)
+
+[sub_resource type="Resource" id="Resource_08x5u"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(59, 18)
+
+[sub_resource type="Resource" id="Resource_ug2de"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("10_5p745")
+cell = Vector2i(59, 23)
+
+[sub_resource type="Resource" id="Resource_ma0f4"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("13_4witn")
+cell = Vector2i(12, 15)
+
+[sub_resource type="Resource" id="Resource_iircs"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("14_ufgjk")
+cell = Vector2i(24, 15)
+
+[sub_resource type="Resource" id="Resource_1lhog"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("15_nqgoh")
+cell = Vector2i(44, 15)
+
+[sub_resource type="Resource" id="Resource_6it20"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("16_snyy2")
+cell = Vector2i(56, 15)
+
+[sub_resource type="Resource" id="Resource_iskr6"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("17_q7oxk")
+cell = Vector2i(14, 30)
+
+[sub_resource type="Resource" id="Resource_fsx6e"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("14_ufgjk")
+cell = Vector2i(46, 30)
+
+[sub_resource type="Resource" id="Resource_234kq"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("18_arytt")
+cell = Vector2i(56, 30)
+
+[sub_resource type="Resource" id="Resource_5hceb"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("19_ds8hd")
+cell = Vector2i(20, 27)
+
+[sub_resource type="Resource" id="Resource_iulnb"]
+script = ExtResource("12_nsej3")
+texture = ExtResource("19_ds8hd")
+cell = Vector2i(40, 27)
+
+[resource]
+script = ExtResource("25_bmm1l")
+id = "kuaihuolin"
+title = "快活林"
+tileset_texture = ExtResource("26_7mjyy")
+tile_block = 4
+layout = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+T..T..T...T......T......T...T..T......TT.....T....T.T......T.T...T
+TT....T.....TT......T..T...T......T......T...T..T......TT.....T..T
+T.T....T.T......T.T....T.....TT......T..T...T......T......T...T..T
+T...............................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,T
+T...............................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,T
+T...............................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T........HHHHHHH................,,,..............................T
+T........HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.......T
+T........HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.......T
+T........HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.......T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T...h....h....h....h....h....h..,,h....h....h....h....h....h.....T
+E________________________________________________________________T
+E________________________________________________________________T
+E________________________________________________________________T
+T...............................,,,..............................T
+T...h....h....h....h....h....h..,,h....h....h....h....h....h.....T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T...................h...........,,,.....h........................T
+T...............................,,,.........HHHHH......HHH.......T
+T...........hhhh................,,,.........HHHHH......HHH.......T
+T...........hhhh................,,,.........HHHHH......HHH.......T
+T...............................,,,..............................T
+T...............................,,,..............................T
+T.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,..............................T
+T.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,T.T......T.T....T.....TT......T
+T...T..T......TT.....T....T.T...,,,T.T....T.....TT......T..T...T.T
+T....TT.....T....T.T......T.T....T.....TT......T..T...T......T...T
+T..T....T.T......T.T....T.....TT......T..T...T......T......T...T.T
+TT......T.T....T.....TT......T..T...T......T......T...T..T......TT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+spawn_cell = Vector2i(2, 20)
+npcs = Array[ExtResource("4_1w5cy")]([SubResource("Resource_sbmb5"), SubResource("Resource_8jglg"), SubResource("Resource_enl20"), SubResource("Resource_a3hc2")])
+chests = Array[ExtResource("3_wg6c0")]([SubResource("Resource_h3p5j"), SubResource("Resource_v4u6s")])
+region = &"kuaihuolin"
+roam_spots = Array[Vector2i]([Vector2i(18, 20), Vector2i(30, 20), Vector2i(33, 10), Vector2i(33, 28), Vector2i(50, 20), Vector2i(46, 5), Vector2i(58, 5), Vector2i(10, 33), Vector2i(24, 33), Vector2i(60, 20)])
+roam_groups = Array[ExtResource("20_6g7ie")]([ExtResource("21_5n6cq"), ExtResource("22_05itb"), ExtResource("23_egcrh"), ExtResource("24_3vsja")])
+roam_bonus = Array[int]([0, 0, 3, 3, 3, 7, 10, 7, 10, 7])
+overlays = Dictionary[String, Texture2D]({
+"=": ExtResource("9_v6oge"),
+"T": ExtResource("10_5p745"),
+"W": ExtResource("11_ns7da")
+})
+props = Array[ExtResource("12_nsej3")]([SubResource("Resource_brjrp"), SubResource("Resource_bmx01"), SubResource("Resource_su5oy"), SubResource("Resource_runnm"), SubResource("Resource_x2enn"), SubResource("Resource_si52f"), SubResource("Resource_1on4y"), SubResource("Resource_n6c4h"), SubResource("Resource_f184v"), SubResource("Resource_7rh3u"), SubResource("Resource_u4jd5"), SubResource("Resource_re3l5"), SubResource("Resource_f5uof"), SubResource("Resource_ybwxn"), SubResource("Resource_q8ip7"), SubResource("Resource_uqkgo"), SubResource("Resource_0bnft"), SubResource("Resource_8non5"), SubResource("Resource_52faa"), SubResource("Resource_ah24b"), SubResource("Resource_rsc0c"), SubResource("Resource_fnc73"), SubResource("Resource_08x5u"), SubResource("Resource_ug2de"), SubResource("Resource_ma0f4"), SubResource("Resource_iircs"), SubResource("Resource_1lhog"), SubResource("Resource_6it20"), SubResource("Resource_iskr6"), SubResource("Resource_fsx6e"), SubResource("Resource_234kq"), SubResource("Resource_5hceb"), SubResource("Resource_iulnb")])
+chest_closed = ExtResource("1_5rwgx")
+chest_open = ExtResource("2_y8x8r")

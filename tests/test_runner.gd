@@ -40,6 +40,7 @@ func _initialize() -> void:
 		"test_ai_guards_when_threatened",
 		"test_map_routes",
 		"test_scene_layout",
+		"test_world_links",
 		"test_guard_strike_shields_team",
 		"test_origins_load",
 		"test_iron_halves_basic_attacks",
@@ -1223,6 +1224,40 @@ func test_scene_layout() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	for res in GameDB.load_dir("res://data/scenes/"):
 		_check_scene_layout(res as SceneData)
+	return true
+
+
+## 走遍江湖：每扇门通到存在的场景、进门站的格子能站；只靠走门，从东京能走到大地图上的每个地点。
+func test_world_links() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var scenes := {}
+	for sd: SceneData in GameDB.load_dir("res://data/scenes/"):
+		scenes[sd.id] = sd
+	for sd: SceneData in scenes.values():
+		for d: Vector2i in sd.doors:
+			var target: String = sd.doors[d]
+			check(scenes.has(target), "%s door %s leads to existing %s" % [sd.id, d, target])
+			if scenes.has(target):
+				var arrive: Vector2i = sd.door_arrivals.get(d, scenes[target].spawn_cell)
+				check(scenes[target].is_walkable(arrive), "%s door %s arrives on walkable %s in %s" % [sd.id, d, arrive, target])
+		if sd.exit_scene != "":
+			check(scenes.has(sd.exit_scene) and scenes[sd.exit_scene].is_walkable(sd.exit_cell), "%s exit lands on walkable %s" % [sd.id, sd.exit_cell])
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	var seen := {"dongjing_street": true}
+	var queue: Array = ["dongjing_street"]
+	while not queue.is_empty():
+		var sd: SceneData = scenes[queue.pop_back()]
+		var nexts: Array = sd.doors.values()
+		if sd.exit_scene != "":
+			nexts.append(sd.exit_scene)
+		for n: String in nexts:
+			if not seen.has(n) and scenes.has(n):
+				seen[n] = true
+				queue.append(n)
+	for loc in map.locations:
+		check(seen.has(loc.scene_id), "%s reachable on foot from 东京" % loc.display_name)
+	for road in map.roads:
+		check(scenes.has("road_%s_%s" % [road.a, road.b]), "road %s—%s has a map" % [road.a, road.b])
 	return true
 
 

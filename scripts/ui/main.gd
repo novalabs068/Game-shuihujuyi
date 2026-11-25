@@ -5,8 +5,6 @@ extends Control
 const NO_TEAM_TEXT := "身边还没有好汉随行，统领一个人上不了阵。先去聚义厅招募，再在「编队」里选人。"
 
 var _screen: Control
-## 从场景里打开菜单（编队、好汉、招募……）时记下场景，关掉菜单回到那里；在大地图上打开的为空
-var _menu_scene := ""
 
 
 ## 在大地图上按返回键：这么多秒内再按一次才退出
@@ -81,13 +79,8 @@ func _show_title() -> void:
 	var screen := TitleScreen.new()
 	screen.new_game_requested.connect(_show_character_create)
 	# 关掉游戏前在场景里坐下歇脚的：直接回到那个场景接着歇
-	screen.continue_requested.connect(func() -> void:
-		var scene_id: String = GameState.camp.get("scene", "")
-		if scene_id != "" and GameDB.scenes.has(scene_id):
-			_show_scene(scene_id)
-		else:
-			GameState.camp = {}
-			_show_map())
+	# 继续：回到上次所在的场景（在场景里坐下歇脚的，那张场景会接着歇）
+	screen.continue_requested.connect(func() -> void: _go_home())
 	_set_screen(screen)
 
 
@@ -96,21 +89,28 @@ func _show_character_create() -> void:
 	screen.back_requested.connect(_show_title)
 	screen.created.connect(func(player_name: String, origin: OriginData) -> void:
 		GameState.new_game(player_name, origin)
-		_show_map())
+		_go_home())
 	_set_screen(screen)
 
 
-func _show_map(resume_destination: StringName = &"", resume_progress := 0.0, notice := "", focus_location: StringName = &"") -> void:
-	_menu_scene = ""
+## 回「家」：主角现在所在的那张场景（地点或野外路）。打完仗、看完菜单、演完列传都回这里。
+func _go_home(notice := "") -> void:
+	var home := GameState.home_scene()
+	if home == "":
+		_show_map(notice)
+		return
+	_show_scene(home, notice)
+
+
+## 江湖大地图：只能看、在所在地点用店铺和列传，不能点了就走（地点之间要从场景的路口走过去）。
+func _show_map(notice := "", focus_location: StringName = &"") -> void:
 	var screen := WorldMapView.new()
 	screen.notice = notice
 	screen.focus_location = focus_location
 	screen.map = GameDB.maps[GameState.DEFAULT_MAP]
-	screen.resume_destination = resume_destination
-	screen.resume_progress = resume_progress
-	screen.battle_requested.connect(_start_battle)
+	screen.back_requested.connect(_go_home.bind(""))
+	screen.battle_requested.connect(func(stage: StageData, bonus: Dictionary) -> void: _start_battle(stage, &"", 0.0, bonus))
 	screen.team_requested.connect(_show_team_select)
-	screen.scene_requested.connect(_show_scene)
 	screen.recruit_requested.connect(_show_recruit)
 	screen.heroes_requested.connect(_show_heroes)
 	screen.story_requested.connect(_start_story)
@@ -136,16 +136,16 @@ func _play_music_for(screen: Control) -> void:
 
 func _show_profile() -> void:
 	var screen := ProfileView.new()
-	screen.back_requested.connect(_show_map)
+	screen.back_requested.connect(_go_home.bind(""))
 	screen.heroes_requested.connect(_show_heroes)
 	_set_screen(screen)
 
 
 func _show_jianghu() -> void:
 	var screen := JiangHuView.new()
-	screen.back_requested.connect(_show_map)
+	screen.back_requested.connect(_go_home.bind(""))
 	screen.heroes_requested.connect(_show_heroes)
-	screen.travel_requested.connect(func(id: StringName) -> void: _show_map(&"", 0.0, "", id))
+	screen.travel_requested.connect(func(id: StringName) -> void: _show_map("", id))
 	_set_screen(screen)
 
 
@@ -154,7 +154,7 @@ func _start_story(story: StoryData, start_at := 0) -> void:
 	var screen := StoryView.new()
 	screen.story = story
 	screen.start_at = start_at
-	screen.quit_requested.connect(_show_map)
+	screen.quit_requested.connect(_go_home.bind(""))
 	screen.battle_requested.connect(_start_story_battle.bind(story))
 	screen.finished.connect(_finish_story.bind(story))
 	_set_screen(screen)
@@ -163,7 +163,7 @@ func _start_story(story: StoryData, start_at := 0) -> void:
 ## 列传里的一仗：赢了拿普通战斗的经验银两，接着演；输了回大地图，这一段下次从头来。
 func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> void:
 	if GameState.team().is_empty():
-		_show_map(&"", 0.0, NO_TEAM_TEXT)
+		_go_home(NO_TEAM_TEXT)
 		return
 	var screen := BattleView.new()
 	screen.stage = stage
@@ -180,12 +180,12 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 	screen.exit_requested.connect(func() -> void:
 		GameState.record_battle(screen.model)
 		GameState.save_game()
-		_show_map())
+		_go_home())
 	screen.finished.connect(func(won: bool) -> void:
 		GameState.record_battle(screen.model)
 		if not won:
 			GameState.save_game()
-			_show_map(&"", 0.0, "「%s」没能打赢，下次从这一段开头再来。" % story.title)
+			_go_home("「%s」没能打赢，下次从这一段开头再来。" % story.title)
 			return
 		var r: Dictionary = Encounters.rewards(screen.model)
 		GameState.add_rewards(r["exp"], r["silver"])
@@ -232,42 +232,42 @@ func _finish_story(story: StoryData) -> void:
 	if learned != "":
 		parts.append("%s传授了%s" % [hero.display_name, learned.trim_prefix("学会")])
 	GameState.save_game()
-	_show_map(&"", 0.0, "　".join(parts))
+	_go_home("　".join(parts))
 
 
 func _show_heroes() -> void:
 	var screen := HeroesView.new()
-	screen.back_requested.connect(_back_from_menu.bind(""))
+	screen.back_requested.connect(_go_home.bind(""))
 	_set_screen(screen)
 
 
 func _show_recruit() -> void:
 	var screen := RecruitView.new()
-	screen.back_requested.connect(_back_from_menu.bind(""))
+	screen.back_requested.connect(_go_home.bind(""))
 	_set_screen(screen)
 
 
+## 走进一张场景（到了某个地点会有第一次来的奖励、路上缓口气，见 GameState.enter_scene）。
 func _show_scene(scene_id: String, notice := "") -> void:
-	_menu_scene = scene_id
+	var arrival := GameState.enter_scene(scene_id)
 	var screen := LocationView.new()
 	screen.scene_data = GameDB.scenes[scene_id]
-	screen.notice = notice
-	screen.exit_requested.connect(_show_map)
+	screen.notice = arrival + ("　" if arrival != "" and notice != "" else "") + notice
+	screen.exit_requested.connect(_show_map.bind("", &""))
+	screen.map_requested.connect(_show_map.bind("", &""))
 	screen.scene_requested.connect(_show_scene)
 	screen.battle_requested.connect(func(stage: StageData, bonus: Dictionary) -> void:
 		_start_battle(stage, &"", 0.0, bonus, scene_id))
 	screen.team_requested.connect(_show_team_select)
 	screen.heroes_requested.connect(_show_heroes)
 	screen.recruit_requested.connect(_show_recruit)
+	screen.jianghu_requested.connect(_show_jianghu)
 	_set_screen(screen)
 
 
-## 关掉菜单：从场景里打开的回场景（站回原地），否则回大地图。
+## 关掉菜单：回到所在的场景（站回原地）。
 func _back_from_menu(notice := "") -> void:
-	if _menu_scene != "":
-		_show_scene(_menu_scene, notice)
-	else:
-		_show_map(&"", 0.0, notice)
+	_go_home(notice)
 
 
 func _show_team_select() -> void:
@@ -284,10 +284,7 @@ func _show_team_select() -> void:
 ## return_scene 非空时，打完回到这个地点场景，否则回大地图。
 func _start_battle(stage: StageData, destination: StringName, progress: float, bonus := {}, return_scene := "") -> void:
 	if GameState.team().is_empty():
-		if return_scene != "":
-			_show_scene(return_scene, NO_TEAM_TEXT)
-		else:
-			_show_map(&"", 0.0, NO_TEAM_TEXT)
+		_go_home(NO_TEAM_TEXT)
 		return
 	var screen := BattleView.new()
 	screen.stage = stage if bonus.has("arena_round") else GameState.prepare_stage(stage)
@@ -305,10 +302,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		screen.start_hp = GameState.vitality.duplicate()
 	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress, bonus, return_scene))
 	var leave := func(notice: String) -> void:
-		if return_scene != "":
-			_show_scene(return_scene, notice)
-		else:
-			_show_map(&"", 0.0, notice)
+		_go_home(notice)
 	screen.exit_requested.connect(func() -> void:
 		if not arena:
 			GameState.record_battle(screen.model)
@@ -365,10 +359,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		elif not won:
 			notice = "败下阵来，全队都受了重伤。先歇歇脚、吃点药再走。"
 			GameState.save_game()
-		if won and destination != &"":
-			_show_map(destination, progress, notice)
-		else:
-			leave.call(notice))
+		leave.call(notice))
 	_set_screen(screen)
 
 

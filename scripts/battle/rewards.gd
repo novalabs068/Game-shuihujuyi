@@ -45,6 +45,12 @@ static func learn(m: MartialData) -> String:
 	return "学会武学「%s」（在「好汉」页主角那里换主修，统领光环就跟着换）" % m.display_name
 
 
+## 奇遇里选了要打仗的选项：打赢后给的奖励（交给 main 的 _start_battle）。
+static func choice_bonus(choice: EventChoice) -> Dictionary:
+	return {"tokens": choice.tokens, "silver": choice.silver - choice.cost_silver, "experience": choice.experience,
+		"flag": choice.flag, "text": choice.result_text}
+
+
 ## 选了一个不打仗的选项：扣银两、给奖励、设标记，返回奖励说明。
 static func apply_choice(choice: EventChoice) -> String:
 	GameState.set_flag(choice.flag)

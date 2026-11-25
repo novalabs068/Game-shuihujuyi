@@ -30,7 +30,7 @@
 [sub_resource type="Resource" id="Resource_h3p5j"]
 script = ExtResource("3_wg6c0")
 id = &"khl_lin_shen"
-cell = Vector2i(62, 5)
+cell = Vector2i(85, 25)
 reward_text = "聚义令 ×2"
 tokens = 2
 silver = 60
@@ -38,17 +38,46 @@ silver = 60
 [sub_resource type="Resource" id="Resource_v4u6s"]
 script = ExtResource("3_wg6c0")
 id = &"khl_jiu_jiao"
-cell = Vector2i(4, 33)
+cell = Vector2i(27, 53)
 reward_text = "聚义令 ×1"
 tokens = 1
 silver = 40
+
+[sub_resource type="Resource" id="Resource_ila8n"]
+script = ExtResource("3_wg6c0")
+id = &"kuaihuolin_wild_0"
+cell = Vector2i(6, 35)
+tokens = 1
+silver = 91
+medicine = &"jin_chuang_yao"
+
+[sub_resource type="Resource" id="Resource_dhnym"]
+script = ExtResource("3_wg6c0")
+id = &"kuaihuolin_wild_1"
+cell = Vector2i(97, 59)
+silver = 92
+medicine = &"jin_chuang_yao"
+
+[sub_resource type="Resource" id="Resource_bmth8"]
+script = ExtResource("3_wg6c0")
+id = &"kuaihuolin_wild_2"
+cell = Vector2i(17, 47)
+silver = 93
+medicine = &"jin_chuang_yao"
+
+[sub_resource type="Resource" id="Resource_5eoug"]
+script = ExtResource("3_wg6c0")
+id = &"kuaihuolin_wild_3"
+cell = Vector2i(7, 62)
+silver = 94
+medicine = &"jin_chuang_yao"
 
 [sub_resource type="Resource" id="Resource_sbmb5"]
 script = ExtResource("4_1w5cy")
 id = &"jiu_bao"
 display_name = "酒保"
 sprite = ExtResource("5_6tdh0")
-cell = Vector2i(12, 17)
+cell = Vector2i(35, 37)
 lines = PackedStringArray("客官里边请！这快活林原是施管营家小官人的，后来被蒋门神占了，前些日子又给夺了回来。", "如今蒋门神的徒弟还常来闹事，赌坊那边更是乌烟瘴气。")
 
 [sub_resource type="Resource" id="Resource_8jglg"]
@@ -56,7 +85,7 @@ script = ExtResource("4_1w5cy")
 id = &"xiao_fan"
 display_name = "货郎"
 sprite = ExtResource("6_grgdu")
-cell = Vector2i(38, 22)
+cell = Vector2i(61, 42)
 lines = PackedStringArray("快活林的货，比孟州城里还全！要什么？")
 action = &"market"
 
@@ -65,7 +94,7 @@ script = ExtResource("4_1w5cy")
 id = &"gao_shi_lan"
 display_name = "告示栏"
 sprite = ExtResource("7_3j88o")
-cell = Vector2i(28, 22)
+cell = Vector2i(51, 42)
 lines = PackedStringArray("告示栏上贴着孟州的海捕文书和各家的悬赏。")
 action = &"bounties"
 still = true
@@ -75,173 +104,173 @@ script = ExtResource("4_1w5cy")
 id = &"mai_hua"
 display_name = "卖花姑娘"
 sprite = ExtResource("8_8xbq6")
-cell = Vector2i(52, 22)
+cell = Vector2i(75, 42)
 lines = PackedStringArray("北边那条小道通到林子深处，赌坊的人常在那里分赃。")
 
 [sub_resource type="Resource" id="Resource_brjrp"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(4, 18)
+cell = Vector2i(27, 38)
 
 [sub_resource type="Resource" id="Resource_bmx01"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(4, 23)
+cell = Vector2i(27, 43)
 
 [sub_resource type="Resource" id="Resource_su5oy"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(9, 18)
+cell = Vector2i(32, 38)
 
 [sub_resource type="Resource" id="Resource_runnm"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(9, 23)
+cell = Vector2i(32, 43)
 
 [sub_resource type="Resource" id="Resource_x2enn"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(14, 18)
+cell = Vector2i(37, 38)
 
 [sub_resource type="Resource" id="Resource_si52f"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(14, 23)
+cell = Vector2i(37, 43)
 
 [sub_resource type="Resource" id="Resource_1on4y"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(19, 18)
+cell = Vector2i(42, 38)
 
 [sub_resource type="Resource" id="Resource_n6c4h"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(19, 23)
+cell = Vector2i(42, 43)
 
 [sub_resource type="Resource" id="Resource_f184v"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(24, 18)
+cell = Vector2i(47, 38)
 
 [sub_resource type="Resource" id="Resource_7rh3u"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(24, 23)
+cell = Vector2i(47, 43)
 
 [sub_resource type="Resource" id="Resource_u4jd5"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(29, 18)
+cell = Vector2i(52, 38)
 
 [sub_resource type="Resource" id="Resource_re3l5"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(29, 23)
+cell = Vector2i(52, 43)
 
 [sub_resource type="Resource" id="Resource_f5uof"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(34, 18)
+cell = Vector2i(57, 38)
 
 [sub_resource type="Resource" id="Resource_ybwxn"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(34, 23)
+cell = Vector2i(57, 43)
 
 [sub_resource type="Resource" id="Resource_q8ip7"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(39, 18)
+cell = Vector2i(62, 38)
 
 [sub_resource type="Resource" id="Resource_uqkgo"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(39, 23)
+cell = Vector2i(62, 43)
 
 [sub_resource type="Resource" id="Resource_0bnft"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(44, 18)
+cell = Vector2i(67, 38)
 
 [sub_resource type="Resource" id="Resource_8non5"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(44, 23)
+cell = Vector2i(67, 43)
 
 [sub_resource type="Resource" id="Resource_52faa"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(49, 18)
+cell = Vector2i(72, 38)
 
 [sub_resource type="Resource" id="Resource_ah24b"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(49, 23)
+cell = Vector2i(72, 43)
 
 [sub_resource type="Resource" id="Resource_rsc0c"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(54, 18)
+cell = Vector2i(77, 38)
 
 [sub_resource type="Resource" id="Resource_fnc73"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(54, 23)
+cell = Vector2i(77, 43)
 
 [sub_resource type="Resource" id="Resource_08x5u"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(59, 18)
+cell = Vector2i(82, 38)
 
 [sub_resource type="Resource" id="Resource_ug2de"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("10_5p745")
-cell = Vector2i(59, 23)
+cell = Vector2i(82, 43)
 
 [sub_resource type="Resource" id="Resource_ma0f4"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("13_4witn")
-cell = Vector2i(12, 15)
+cell = Vector2i(35, 35)
 
 [sub_resource type="Resource" id="Resource_iircs"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("14_ufgjk")
-cell = Vector2i(24, 15)
+cell = Vector2i(47, 35)
 
 [sub_resource type="Resource" id="Resource_1lhog"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("15_nqgoh")
-cell = Vector2i(44, 15)
+cell = Vector2i(67, 35)
 
 [sub_resource type="Resource" id="Resource_6it20"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("16_snyy2")
-cell = Vector2i(56, 15)
+cell = Vector2i(79, 35)
 
 [sub_resource type="Resource" id="Resource_iskr6"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("17_q7oxk")
-cell = Vector2i(14, 30)
+cell = Vector2i(37, 50)
 
 [sub_resource type="Resource" id="Resource_fsx6e"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("14_ufgjk")
-cell = Vector2i(46, 30)
+cell = Vector2i(69, 50)
 
 [sub_resource type="Resource" id="Resource_234kq"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("18_arytt")
-cell = Vector2i(56, 30)
+cell = Vector2i(79, 50)
 
 [sub_resource type="Resource" id="Resource_5hceb"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("19_ds8hd")
-cell = Vector2i(20, 27)
+cell = Vector2i(43, 47)
 
 [sub_resource type="Resource" id="Resource_iulnb"]
 script = ExtResource("12_nsej3")
 texture = ExtResource("19_ds8hd")
-cell = Vector2i(40, 27)
+cell = Vector2i(63, 47)
 
 [resource]
 script = ExtResource("25_bmm1l")
@@ -249,53 +278,109 @@ id = "kuaihuolin"
 title = "快活林"
 tileset_texture = ExtResource("26_7mjyy")
 tile_block = 4
-layout = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-T..T..T...T......T......T...T..T......TT.....T....T.T......T.T...T
-TT....T.....TT......T..T...T......T......T...T..T......TT.....T..T
-T.T....T.T......T.T....T.....TT......T..T...T......T......T...T..T
-T...............................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,T
-T...............................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,T
-T...............................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T........HHHHHHH................,,,..............................T
-T........HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.......T
-T........HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.......T
-T........HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.......T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T...h....h....h....h....h....h..,,h....h....h....h....h....h.....T
-E________________________________________________________________T
-E________________________________________________________________T
-E________________________________________________________________T
-T...............................,,,..............................T
-T...h....h....h....h....h....h..,,h....h....h....h....h....h.....T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T...................h...........,,,.....h........................T
-T...............................,,,.........HHHHH......HHH.......T
-T...........hhhh................,,,.........HHHHH......HHH.......T
-T...........hhhh................,,,.........HHHHH......HHH.......T
-T...............................,,,..............................T
-T...............................,,,..............................T
-T.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,..............................T
-T.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,T.T......T.T....T.....TT......T
-T...T..T......TT.....T....T.T...,,,T.T....T.....TT......T..T...T.T
-T....TT.....T....T.T......T.T....T.....TT......T..T...T......T...T
-T..T....T.T......T.T....T.....TT......T..T...T......T......T...T.T
-TT......T.T....T.....TT......T..T...T......T......T...T..T......TT
-TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
-spawn_cell = Vector2i(2, 20)
+layout = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTDDDTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT,,,TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTT...................TT,,,...............................TTTTTTTTTTTT........................TT
+TTTTTTTTTTTTTTTTTT.....................T.,,...............................TTTTTTTTTTTT........................TT
+TTTTTTTTTTTTTTTTTT.......................,,...............................TTTTT.TTTTT.......~~.......TT.......TT
+TTTTTTTTTTTTTTTTTTT............~~........,,...................TT..........TTTT..TTTT.......~~~~...TTTTTTTTT...TT
+TTTTTTTTTTTTTTTTTTTT...........~~~.......,,..TTTT..........TTTTTT.........TTTT..TT........~~~~TT.TTTTTTTTTTTTTTT
+TTTTTTT~TTTTT...TTTT.....................,,..TTTT.........TTTTTTTTT........TTT..TT..T.....~~~~TTTTTTTTTTTTTTTTTT
+TT~~TTT~........TTTT.....................,,...TTT.........TTTTTTTTTT.......TTT......T.......~~TTTTTTTTTTTTTTTTTT
+TT~~~TT~~.......TTTT.....T.TTT...~~~....,,,....T..........TTTTTTTTTTT........................TTTTTTTTTTTTTTTTTTT
+TT~~~~~~........TTT.....TTTTTTTTTTTT~..,,,....TTT.......TTTTTTTTTTTTTT.......................TTTTTTTTTTTTTTTTTTT
+TT~T~~~~........TT.....TTTTTTTTTTTT~T.,,,......TTTT......TTTTTTTTTTTTTT......................TTTTTTTTTTTTTTTTTTT
+TTTTT~~~.........T.....TTTTTT..~~~~~.,,,........TTT.....TTTTTTTTTTTTTT.....................TTTTTTTTTT.....TTTTTT
+TTTTTT~~.............T.TTTT....~~..~.,,.................TTTTTTTTTT......................TTTTTTTTTTTT.........TTT
+TTTTTTT............TTT...............,,.TT................TTTTTTTTT...................TTTTTTTTTTTTTT..........TT
+TTTTTTT............TTTTT.............,,.TTTT...............TTTTTTTT...................TTTTTTTTTTTTTT..........TT
+TTTTTTT............TTTTT.............,,.TTTT.................TTTTT..............~.....TTTTT..TTTT.TT..........TT
+TT..T.............TTTTTTT............,,.TTTT...................................~.......TTT....................TT
+TT..T............TTTTTTTT............,,...TTT.............................TT..~.........T.....................TT
+TT...............TTTTT..............,,,.......................................................................TT
+TT..............TTTTTT........................................................................~~~..........T..TT
+TT...............T..TT....T..T...T......T......T...T..T......TT.....T....T.T......T.T.....................TTT.TT
+TT..................TT..T....T.....TT......T..T...T......T......T...T..T......TT.....T...................TTTT.TT
+TT..................TT...T....T.T......T.T....T.....TT......T..T...T......T......T...T...................TTT..TT
+TT...................T.................................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,..................TT..TT
+TT.................T.T.................................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.......T..............TT
+TT...............TTTTT.................................,,,.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,...TT...........TTTT..TT
+TT..............TTTTTT.................................,,,................................TTT...........TTTTT.TT
+TT..............TTTTT..................................,,,................................TTTT...........TTTT.TT
+TT..............TTTT...................................,,,................................TTTTT....TTT......T.TT
+TT...............TT....................................,,,................................TTTTTTT..TTT....T...TT
+TT.....................................................,,,................................TTTTTTTTTTT.........TT
+TT..............................HHHHHHH................,,,................................TTTTTTTTTT.........TTT
+TT........~T....................HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.........TTTTTTTTTT.........TTT
+TTTT~.....TTT...................HHHHHHH......HHHHH.....,,,......HHHHHH........HHH.........TTTTTTTTTT........TTTT
+TTTTT.....TTT...................HHHHHHH......HHHHH.....,,,......HHHHHH........HHH..........TTTTTTTTT........TTTT
+TTTTTT....TT...........................................,,,......................................TTTT..........TT
+TTTTTTT..TTTTTTTT...T..................................,,,........................................TT..........TT
+TTTTTT...TT.TTTTTTTTTT.....h....h....h....h....h....h..,,h....h....h....h....h....h...........................TT
+TTTTT........~TTTTTTTT.,________________________________________________________________.....................,,D
+TTTT.........~TTTTTTTT.,________________________________________________________________.,,,,,,,,,,,,,,,,,,,,,,D
+TTTT.........~TTTTTTTT.,________________________________________________________________.,,,,,,,,,,,,,,,,,,,,,,D
+TT.........~~TTTTTTTT..................................,,,....................................................TT
+TT..........~TTTTTTT.......h....h....h....h....h....h..,,h....h....h....h....h....h.......T.......TTTT........TT
+TT..........~~TTTTTT...................................,,,................................TTTTT..TTTTT........TT
+TT..........~~~TTTTT...................................,,,................................TTTTTTTTTTTT........TT
+TT..TTTT....~~TTTTTT...................................,,,................................TTTTTTTTTTTT........TT
+TT.TTTTT....~~~TT..........................h...........,,,.....h...........................TTTTTTTTTT.........TT
+TT.TTTTT.....~~~.......................................,,,.........HHHHH......HHH...........TTT...TT..........TT
+TT.TTTTT.....~~....................hhhh................,,,.........HHHHH......HHH.............................TT
+TTTTTTT............................hhhh................,,,.........HHHHH......HHH...........................TTTT
+TTTTTTT................................................,,,................................................TTTTTT
+TTTTTTT................................................,,,...............................................TTTTTTT
+TTTTTTT..................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,............................................TTTTTTTTTT
+TT~~TT............TTTT...,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,T.T......T.T....T.....TT...................TTTTTTTTTTT
+TT.................TTT.....T..T......TT.....T....T.T...,,,T.T....T.....TT......T..T...T.............TTTTTTTTTTTT
+TT.............TTTTTTT......TT.....T....T.T......T.T....T.....TT......T..T...T......T.....T...........TTTTTTTTTT
+TT.............TTTTTTT....T....T.T......T.T....T.....TT......T..T...T......T......T...T...TT..........TTTTTTTTTT
+TT...............TTT....T......T.T....T.....TT......T..T...T......T......T...T..T......T..TT..........TTTTTTTTTT
+TT........................................................................................TTT.........TTTTTTTTTT
+TT........................................................................................TTTTT......TTTTTTTTTTT
+TT..............................TTT............~~~...................TTTTTT...............TTTTT......TTTT.TTTTTT
+TT.......T.T..................TTTTT.......TTT...~~......................TTT................TTT.....TTTTT..TTTTTT
+TT......TTTT..................TTTTT.......TTT..TT~~~....................TT..................T.....TTTTTT...TTTTT
+TT...TTTTTTTT.................TTTT.........T...T~~~~~~..................TTTT...............TT...TTTTTT......TTTT
+TT..TTTTTTTTTT..............TTTTTT..............~~~~~~..................TTT.....................TTTTTT........TT
+TT.TTTTTTTTTTT.............TTTTTTT..............~~~~~~.................TTT.......................TTTTT........TT
+TTTTTTTTTTTTTT............TTTTTTTT..............~~~~~~~...TT..........TTT...........................TT........TT
+TTTTTTTTTTTTT.............TTTTTTTT...............~~~~~~...TTT...TTT.TTT............T................TT........TT
+TTTTTTTTTTTTT.............TTTTTTT.................~~~.....TTTTTTTTTTTTT............T............~~~.T.........TT
+TTTTTTTTTTT.............TTTTTTTTT.........................TTTT..TTTTTT............T.............~~~~..........TT
+TTTTTTTTTTT............TTTTTTTTT...........................TTT...................TT.............~~............TT
+TT..TT.TTT.............TTTTTTTT...........................TTTT...................TT...........................TT
+TT......T.............TTTTTTTTTT..........................TT....................TTTT......................T...TT
+TT...................TTTTTTTTTTT..........T...........TTTTT....................TTTT~..........................TT
+TT.................TTTTTTTTTTTTT.........T.........T.TTTTT....................TTTTT~~.........................TT
+TT...TTT...........TTTTTTTTTTTTT........TT..TT..TTTTTTTT.....................TTTTTT~~.~~......................TT
+TT...TTTTTTTTT......TTTTTTTTTTT.........TTTTTTTTTTTTTTTT.....TT.........TTTTTTTTTTTTTTTT.TTT..................TT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+spawn_cell = Vector2i(25, 40)
 npcs = Array[ExtResource("4_1w5cy")]([SubResource("Resource_sbmb5"), SubResource("Resource_8jglg"), SubResource("Resource_enl20"), SubResource("Resource_a3hc2")])
-chests = Array[ExtResource("3_wg6c0")]([SubResource("Resource_h3p5j"), SubResource("Resource_v4u6s")])
+chests = Array[ExtResource("3_wg6c0")]([SubResource("Resource_h3p5j"), SubResource("Resource_v4u6s"), SubResource("Resource_ila8n"), SubResource("Resource_dhnym"), SubResource("Resource_bmth8"), SubResource("Resource_5eoug")])
 region = &"kuaihuolin"
-roam_spots = Array[Vector2i]([Vector2i(18, 20), Vector2i(30, 20), Vector2i(33, 10), Vector2i(33, 28), Vector2i(50, 20), Vector2i(46, 5), Vector2i(58, 5), Vector2i(10, 33), Vector2i(24, 33), Vector2i(60, 20)])
+roam_spots = Array[Vector2i]([Vector2i(41, 40), Vector2i(53, 40), Vector2i(56, 30), Vector2i(56, 48), Vector2i(73, 40), Vector2i(69, 25), Vector2i(81, 25), Vector2i(33, 53), Vector2i(47, 53), Vector2i(83, 40), Vector2i(11, 13), Vector2i(18, 73), Vector2i(47, 14), Vector2i(96, 22), Vector2i(97, 37), Vector2i(107, 75), Vector2i(66, 66), Vector2i(84, 11), Vector2i(105, 30), Vector2i(91, 11), Vector2i(109, 23)])
 roam_groups = Array[ExtResource("20_6g7ie")]([ExtResource("21_5n6cq"), ExtResource("22_05itb"), ExtResource("23_egcrh"), ExtResource("24_3vsja")])
-roam_bonus = Array[int]([0, 0, 3, 3, 3, 7, 10, 7, 10, 7])
+roam_bonus = Array[int]([0, 0, 3, 3, 3, 7, 10, 7, 10, 7, 10, 10, 6, 9, 9, 12, 6, 8, 10, 9, 11])
+doors = Dictionary[Vector2i, String]({
+Vector2i(40, 0): "road_shizipo_kuaihuolin",
+Vector2i(41, 0): "road_shizipo_kuaihuolin",
+Vector2i(42, 0): "road_shizipo_kuaihuolin",
+Vector2i(111, 39): "road_kuaihuolin_huangnigang",
+Vector2i(111, 40): "road_kuaihuolin_huangnigang",
+Vector2i(111, 41): "road_kuaihuolin_huangnigang"
+})
+door_arrivals = Dictionary[Vector2i, Vector2i]({
+Vector2i(40, 0): Vector2i(142, 26),
+Vector2i(41, 0): Vector2i(142, 26),
+Vector2i(42, 0): Vector2i(142, 26),
+Vector2i(111, 39): Vector2i(3, 25),
+Vector2i(111, 40): Vector2i(3, 25),
+Vector2i(111, 41): Vector2i(3, 25)
+})
 overlays = Dictionary[String, Texture2D]({
 "=": ExtResource("9_v6oge"),
 "T": ExtResource("10_5p745"),

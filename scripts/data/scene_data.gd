@@ -40,8 +40,10 @@ const TERRAIN := {
 @export var roam_groups: Array[StageData] = []
 ## 每个出生点额外加几级（和 roam_spots 一一对应，缺的算 0）：场景越深处越强
 @export var roam_bonus: Array[int] = []
-## 门格子（地形 D）→ 进哪个场景（出现在那个场景的 spawn_cell）
+## 门格子（地形 D）→ 进哪个场景（出现在那个场景的 spawn_cell，或者 door_arrivals 里写的格子）
 @export var doors: Dictionary[Vector2i, String] = {}
+## 门格子 → 进了那个场景站在哪一格（地点和野外路之间的路口用；没写就站在对方的 spawn_cell）
+@export var door_arrivals: Dictionary[Vector2i, Vector2i] = {}
 ## 走到出口（地形 E）去哪个场景、出现在哪一格；为空就回江湖大地图
 @export var exit_scene: String
 ## 这个场景的配乐（audio/music/ 下的曲名）
@@ -58,12 +60,19 @@ const TERRAIN := {
 @export var chest_open: Texture2D
 
 
+var _rows_cache := PackedStringArray()
+var _rows_source := ""
+
+
+## 地图的每一行（切好后缓存起来：大地图有上万格，每查一格都重新切太慢）。
 func rows() -> PackedStringArray:
-	var out := PackedStringArray()
-	for line in layout.split("\n"):
-		if line.strip_edges() != "":
-			out.append(line.strip_edges())
-	return out
+	if _rows_source != layout or (_rows_cache.is_empty() and layout != ""):
+		_rows_cache = PackedStringArray()
+		for line in layout.split("\n"):
+			if line.strip_edges() != "":
+				_rows_cache.append(line.strip_edges())
+		_rows_source = layout
+	return _rows_cache
 
 
 func size() -> Vector2i:
