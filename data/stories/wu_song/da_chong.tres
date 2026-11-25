@@ -9,5 +9,5 @@ script = ExtResource("3_gcss6")
 id = "wu_song_da_chong"
 title = "景阳冈"
 enemies = Array[ExtResource("1_6mm2y")]([ExtResource("2_ctp8g")])
-enemy_level = 12
-recommended_level = 12
+enemy_level = 38
+recommended_level = 38

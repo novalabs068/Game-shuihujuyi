@@ -65,8 +65,8 @@ script = ExtResource("11_46cpb")
 id = "garden_brawl"
 title = "菜园泼皮"
 enemies = Array[ExtResource("8_1rfvs")]([ExtResource("9_npk5w"), ExtResource("10_d7yj5"), ExtResource("9_npk5w")])
-enemy_level = 4
-recommended_level = 4
+enemy_level = 11
+recommended_level = 11
 
 [sub_resource type="Resource" id="Resource_anb1j"]
 script = ExtResource("7_ao81w")

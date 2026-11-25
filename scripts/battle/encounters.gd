@@ -5,17 +5,18 @@ class_name Encounters
 const ELITE_CHANCE := 0.15
 const ELITE_CHANCE_PER_DANGER := 0.1
 ## 危险度每高一颗星，敌人生命、攻击多 15%（后期地区的小怪不再是换了等级的泼皮）
-const POWER_PER_DANGER := 0.15
+const POWER_PER_DANGER := 0.2
 ## 危险度达到这么高的地区，敌人等级不封顶：至少是队伍等级 - LEVEL_FOLLOW_GAP
 const LEVEL_FOLLOW_DANGER := 3
-const LEVEL_FOLLOW_GAP := 2
+const LEVEL_FOLLOW_GAP := 6
 ## 头目跟着队伍的养成变强：队伍因养成（勾玉、羁绊、装备）变强了多少倍，头目就跟上这么多比例
 const BOSS_GROWTH_SHARE := 1.3
 const ELITE_HP_BONUS := 0.3
 const ELITE_TRAITS: Array[StringName] = [&"iron", &"berserk"]
 const ELITE_PREFIX := {&"iron": "铁甲·", &"berserk": "狂暴·"}
-const EXP_PER_LEVEL := 15
-const SILVER_PER_LEVEL := 3
+## 每个敌人给的经验、银两 = 它的等级 × 这个数（精英加倍）
+const EXP_PER_LEVEL := 5
+const SILVER_PER_LEVEL := 0.8
 
 
 ## 按地点的遭遇组合生成一场战斗：随机挑一个组合，敌人等级在地区区间内贴近队伍等级，偶尔把一个敌人换成精英。
@@ -88,5 +89,5 @@ static func rewards(model: BattleModel) -> Dictionary:
 			continue
 		var mult := 2 if u.data.elite_trait != &"" else 1
 		gained_exp += u.level * EXP_PER_LEVEL * mult
-		gained_silver += u.level * SILVER_PER_LEVEL * mult
+		gained_silver += roundi(u.level * SILVER_PER_LEVEL) * mult
 	return {"exp": gained_exp, "silver": gained_silver}

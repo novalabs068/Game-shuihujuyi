@@ -11,8 +11,8 @@ script = ExtResource("5_qdwjx")
 id = "bounty_diao_wu"
 title = "悬赏：邓龙余党刁五"
 enemies = Array[ExtResource("2_shoys")]([ExtResource("3_e5a7s"), ExtResource("4_f24du"), ExtResource("3_e5a7s")])
-enemy_level = 20
-recommended_level = 20
+enemy_level = 65
+recommended_level = 65
 
 [resource]
 script = ExtResource("1_1tdr7")

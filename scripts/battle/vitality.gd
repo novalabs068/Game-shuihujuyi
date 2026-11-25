@@ -13,7 +13,7 @@ const CAMP_SECONDS := 300
 const CAMP_REGEN := 0.5
 const CAMP_COOLDOWN := 3600
 ## 客栈：按伤势收钱，每人每少一整条血收「队伍等级 × INN_PER_LEVEL」两；最少 INN_MIN
-const INN_PER_LEVEL := 5
+const INN_PER_LEVEL := 1.5
 const INN_MIN := 20
 ## 药：id → [名字, 说明, 回多少点气血, 全队？, 集市价钱]。回的是固定点数，不是比例：
 ## 前期一份金疮药能回大半条血，到后期血条长了就得换高档的药。价钱不随等级变。

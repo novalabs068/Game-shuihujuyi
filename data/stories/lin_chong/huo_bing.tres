@@ -10,5 +10,5 @@ script = ExtResource("4_u2pqv")
 id = "lin_chong_huo_bing"
 title = "火并王伦"
 enemies = Array[ExtResource("1_aa80l")]([ExtResource("2_8sbgx"), ExtResource("3_r7wnp"), ExtResource("2_8sbgx")])
-enemy_level = 18
-recommended_level = 18
+enemy_level = 58
+recommended_level = 58

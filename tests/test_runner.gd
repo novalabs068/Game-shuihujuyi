@@ -1133,8 +1133,8 @@ func test_vitality() -> bool:
 	check(is_equal_approx(r[&"a"], 0.8), "healer doubles road regen")
 	# 客栈按伤势收钱：伤得越重越贵，等级越高越贵，轻伤有底价
 	check_eq(Vitality.rest_price(1, {&"a": 0.9}), Vitality.INN_MIN, "a scratch costs the floor price")
-	check_eq(Vitality.rest_price(15, {&"a": 0.1, &"b": 0.1, &"c": 0.1}), 205, "three wounded at Lv15: 2.7 × 15 × 5 ≈ 205")
-	check(Vitality.rest_price(15, {&"a": 0.1}) > Vitality.rest_price(15, {&"a": 0.6}), "worse wounds cost more")
+	check_eq(Vitality.rest_price(50, {&"a": 0.1, &"b": 0.1, &"c": 0.1}), 205, "three wounded at Lv50: 2.7 × 50 × 1.5 ≈ 205")
+	check(Vitality.rest_price(50, {&"a": 0.1}) > Vitality.rest_price(50, {&"a": 0.6}), "worse wounds cost more")
 	check(Vitality.rest_price(20, {&"a": 0.1}) > Vitality.rest_price(10, {&"a": 0.1}), "higher level costs more")
 	# 药：固定价钱、按点数回血，档次越高回得越多
 	var prev := 0
@@ -1343,7 +1343,7 @@ func test_rewards() -> bool:
 	m.result = BattleModel.Result.WIN
 	var r := Encounters.rewards(m)
 	check_eq(r["exp"], 4 * Encounters.EXP_PER_LEVEL * 3, "elite counts double for exp")
-	check_eq(r["silver"], 4 * Encounters.SILVER_PER_LEVEL * 3, "elite counts double for silver")
+	check_eq(r["silver"], roundi(4 * Encounters.SILVER_PER_LEVEL) * 3, "elite counts double for silver")
 	return true
 
 

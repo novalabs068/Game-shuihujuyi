@@ -14,7 +14,9 @@ const STARTING_TOKENS := 10
 const DEFAULT_MAP := "ch1"
 const PROTAGONIST_ID := &"protagonist"
 ## 队伍等级上限（M3 做养成时再细分到每个人）
-const MAX_LEVEL := 30
+const MAX_LEVEL := 99
+## 存档里的等级是哪一套：旧存档（1～30 级）读档时换算成 1～99 级
+const LEVEL_SCALE := 99
 
 var player_name := ""
 var origin_id: StringName = &""
@@ -635,8 +637,14 @@ func set_heroes(list: Array[UnitData]) -> void:
 
 
 ## 从 level 升到下一级需要的经验。
+## 一场仗（三个同级敌人）给 15 × 等级 的经验：早期一两场升一级，60 级左右要三场，越往后越慢。
 static func exp_to_next(at_level: int) -> int:
-	return 40 + 30 * at_level
+	return 20 + 15 * at_level + at_level * at_level / 2
+
+
+## 旧存档（最高 30 级）的等级换算到 1～99 级。
+static func rescale_old_level(old: int) -> int:
+	return clampi(roundi(1 + (old - 1) * 98.0 / 29.0), 1, MAX_LEVEL)
 
 
 ## 加经验和银两，返回升了几级。
@@ -885,6 +893,7 @@ func save_game() -> void:
 		"vitality": _floats_to_json(vitality),
 		"medicines": _ids_to_json(medicines),
 		"camp": camp,
+		"level_scale": LEVEL_SCALE,
 		"last_camp_done": last_camp_done,
 		"yiqi": yiqi,
 		"record": record,
@@ -929,6 +938,10 @@ func load_game() -> void:
 		location_id = StringName(saved_location)
 	level = data.get("level", 1)
 	experience = data.get("exp", 0)
+	# 1～30 级时代的旧存档：等级换算过来，经验从头攒
+	if int(data.get("level_scale", 30)) != LEVEL_SCALE:
+		level = rescale_old_level(level)
+		experience = 0
 	silver = data.get("silver", 0)
 	tokens = data.get("tokens", 0)
 	var saved_owned: Array = data.get("owned", saved_team)

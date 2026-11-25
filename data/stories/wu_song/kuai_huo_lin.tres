@@ -10,5 +10,5 @@ script = ExtResource("4_u4lo1")
 id = "wu_song_kuai_huo_lin"
 title = "快活林"
 enemies = Array[ExtResource("1_sxyid")]([ExtResource("2_5fgvr"), ExtResource("3_e11fo"), ExtResource("2_5fgvr")])
-enemy_level = 16
-recommended_level = 16
+enemy_level = 52
+recommended_level = 52

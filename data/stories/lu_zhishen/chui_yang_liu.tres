@@ -11,5 +11,5 @@ script = ExtResource("5_jhiw4")
 id = "lu_zhishen_chui_yang_liu"
 title = "相国寺菜园"
 enemies = Array[ExtResource("1_xsoaq")]([ExtResource("2_wh6ob"), ExtResource("3_ykiuw"), ExtResource("4_x41oj")])
-enemy_level = 15
-recommended_level = 15
+enemy_level = 48
+recommended_level = 48

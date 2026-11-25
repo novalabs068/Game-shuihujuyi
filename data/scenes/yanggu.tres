@@ -196,7 +196,7 @@ chests = Array[ExtResource("3_bd3cx")]([SubResource("Resource_vy5cs"), SubResour
 region = &"yanggu"
 roam_spots = Array[Vector2i]([Vector2i(18, 23), Vector2i(38, 23), Vector2i(52, 23), Vector2i(31, 14), Vector2i(31, 30), Vector2i(8, 34), Vector2i(56, 34)])
 roam_groups = Array[ExtResource("19_mx25k")]([ExtResource("20_keksb"), ExtResource("21_n3owp"), ExtResource("22_hjd6q")])
-roam_bonus = Array[int]([0, 0, 1, 1, 1, 2, 2])
+roam_bonus = Array[int]([0, 0, 3, 3, 3, 7, 7])
 overlays = Dictionary[String, Texture2D]({
 "=": ExtResource("8_877a0"),
 "T": ExtResource("9_csi4s"),

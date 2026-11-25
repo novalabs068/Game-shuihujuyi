@@ -4,16 +4,16 @@ class_name Arena
 
 ## 每关：[敌人 id（data/enemies 下的文件名）, 敌人等级]
 const ROUNDS := [
-	[["po_pi", "po_pi"], 3],
-	[["po_pi_tou", "po_pi"], 5],
-	[["gao_fu_jia_ding", "gao_fu_jia_ding", "gao_fu_jia_ding"], 7],
-	[["xun_jie_ya_yi", "xun_jie_ya_yi"], 9],
-	[["lin_zhong_qiang_ren", "shan_zei_tou_mu"], 11],
-	[["ma_zei", "ma_zei", "ma_zei"], 13],
-	[["guan_bing_gong_shou", "qin_bing", "guan_bing_gong_shou"], 15],
-	[["dao_mu_zei", "ye_lang", "ye_lang"], 17],
-	[["shui_kou", "shan_zei_tou_mu", "shui_kou"], 19],
-	[["lin_zhong_qiang_ren", "lei_tai_jiao_tou", "lin_zhong_qiang_ren"], 21],
+	[["po_pi", "po_pi"], 8],
+	[["po_pi_tou", "po_pi"], 15],
+	[["gao_fu_jia_ding", "gao_fu_jia_ding", "gao_fu_jia_ding"], 21],
+	[["xun_jie_ya_yi", "xun_jie_ya_yi"], 28],
+	[["lin_zhong_qiang_ren", "shan_zei_tou_mu"], 35],
+	[["ma_zei", "ma_zei", "ma_zei"], 42],
+	[["guan_bing_gong_shou", "qin_bing", "guan_bing_gong_shou"], 48],
+	[["dao_mu_zei", "ye_lang", "ye_lang"], 55],
+	[["shui_kou", "shan_zei_tou_mu", "shui_kou"], 62],
+	[["lin_zhong_qiang_ren", "lei_tai_jiao_tou", "lin_zhong_qiang_ren"], 69],
 ]
 ## 从这一关起，上台的都是精英（铁甲、狂暴轮着来）：擂台上没有庸手
 const ELITE_FROM := 3

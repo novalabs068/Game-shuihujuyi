@@ -7,8 +7,8 @@ extends RefCounted
 
 enum Side { PLAYER, ENEMY }
 
-## 每升一级属性乘这个倍数（复利成长：每差 7 级约差 2 倍，前期后期一样明显）
-const LEVEL_GROWTH := 1.1
+## 每升一级属性乘这个倍数（复利成长：每差 23 级约差 2 倍；1 级到 99 级一共约 18 倍）
+const LEVEL_GROWTH := 1.03
 const RAGE_MAX := 100
 const BERSERK_THRESHOLD := 0.3
 const BERSERK_BONUS := 1.0
