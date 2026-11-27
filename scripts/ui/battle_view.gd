@@ -54,6 +54,31 @@ const PAPER := Color("ecdcbc")
 const ENEMY_RED := Color("b0261e")
 const ALLY_BLUE := Color("4a6a9a")
 const ENEMY_THINK_DELAY := 0.2
+## 结算：背景压暗到多少；大字（繁体「胜」「败」）中心的高度和边长；后面那笔横刷的大小；「大捷」小印的边长；手卷宽度
+const RESULT_DIM := 0.72
+const RESULT_MARK_Y := 128.0
+const RESULT_MARK_SIZE := 220.0
+const RESULT_STROKE_SIZE := Vector2(620, 126)
+const RESULT_SEAL_SIZE := 74.0
+const RESULT_SCROLL_WIDTH := 640.0
+## 手卷各部分的大小：两头锦缎包首的宽、木轴的粗细、木轴比纸上下各长出多少、轴头大小、纸上下米色窄边的高
+const SCROLL_BROCADE_W := 34.0
+const SCROLL_ROD_W := 24.0
+const SCROLL_ROD_OVER := 6.0
+const SCROLL_CAP := Vector2(32, 16)
+const SCROLL_EDGE_H := 8.0
+## 星印的直径；云头木牌按钮和红穗的大小
+const STAR_SEAL := 40.0
+const PLAQUE_SIZE := Vector2(190, 60)
+const TASSEL_SIZE := Vector2(20, 55)
+## 结算的颜色：输了的淡墨字、没达成的淡字、纸上下的米色窄边和它的细线、锦缎接缝的金线
+const DEFEAT_INK := Color("9a8e7e")
+const RESULT_FADED := Color("9a8a74")
+const SCROLL_EDGE := Color("c8b48c")
+const SCROLL_EDGE_LINE := Color("967850")
+const RESULT_GOLD := Color("cea656")
+## 结算卷轴和木牌上的毛笔字体
+const BRUSH_FONT_PATH := "res://art/fonts/MaShanZheng.ttf"
 
 var stage: StageData
 var team: Array[UnitData] = []
@@ -1437,7 +1462,6 @@ func _corner_caption(spot: Vector3) -> Label:
 
 # --- 结算 ---
 
-## 结算：赢了「咚」地盖下一枚朱红「胜」字大印，输了一团墨晕开一个「败」字；下面展开一卷宣纸写三星条件和奖励。
 ## 战斗统计：每人、每回合的输出、承伤、治疗等。
 func _open_stats() -> void:
 	var panel := BattleStatsPanel.new()
@@ -1448,6 +1472,10 @@ func _open_stats() -> void:
 	panel.closed.connect(panel.queue_free)
 
 
+## 结算（宋朝风味，图都由 tools/result_marks.py 生成）：
+## 赢了，一笔朱红横刷扫过去，繁体「胜」字毛笔大字砸下来，右下角盖一方「大捷」小印；
+## 输了，淡墨的繁体「败」字慢慢晕开。下面展开一卷宣纸手卷（靛青锦边、木轴），
+## 三星条件达成的用朱笔画个圈，再写奖励；最下面一排木牌按钮，「继续」是朱漆的。
 func _show_result() -> void:
 	var won := model.result == BattleModel.Result.WIN
 	_banner.text = ""
@@ -1456,95 +1484,323 @@ func _show_result() -> void:
 	dim.z_index = 40
 	add_child(dim)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	create_tween().tween_property(dim, "color:a", 0.62, 0.2)
+	create_tween().tween_property(dim, "color:a", RESULT_DIM, 0.25)
 
-	# 大印
-	var seal_size := 168.0
-	var seal := PanelContainer.new()
-	var seal_style := StyleBoxFlat.new()
-	seal_style.bg_color = ENEMY_RED if won else INK
-	seal_style.set_corner_radius_all(10 if won else int(seal_size / 2))
-	seal_style.set_border_width_all(5)
-	seal_style.border_color = PAPER if won else Color("5a1a14")
-	seal.add_theme_stylebox_override("panel", seal_style)
-	seal.custom_minimum_size = Vector2(seal_size, seal_size)
-	seal.size = Vector2(seal_size, seal_size)
-	seal.z_index = 41
-	var mark := UiKit.label("胜" if won else "败", 118, PAPER if won else Color("c8b8a0"))
-	mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	seal.add_child(mark)
-	add_child(seal)
-	seal.position = Vector2((size.x - seal_size) / 2, size.y * 0.06)
-	seal.pivot_offset = seal.size / 2
-	seal.rotation = -0.08 if won else 0.0
-	seal.modulate.a = 0.0
-	var st := create_tween().set_parallel()
+	var mark_center := Vector2(size.x / 2, RESULT_MARK_Y)
 	if won:
-		seal.scale = Vector2(2.4, 2.4)
-		st.tween_property(seal, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
-		st.tween_property(seal, "modulate:a", 1.0, 0.12)
+		await _victory_mark(mark_center)
 	else:
-		# 墨慢慢晕开
-		seal.scale = Vector2(0.4, 0.4)
-		st.tween_property(seal, "scale", Vector2.ONE, 0.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
-		st.tween_property(seal, "modulate:a", 1.0, 0.5)
-	await st.finished
-	if won:
-		_shake_screen(14.0)
-		Sfx.play(&"victory")
+		await _defeat_mark(mark_center)
+	_result_scroll(won, mark_center.y + RESULT_MARK_SIZE / 2 + 22)
 
-	# 宣纸卷：从中间往两边展开
-	var scroll := PanelContainer.new()
-	var paper := UiKit.box(Color("ece0c4"), INK, 2, 4)
-	paper.content_margin_left = 48
-	paper.content_margin_right = 48
-	paper.content_margin_top = 18
-	paper.content_margin_bottom = 20
-	scroll.add_theme_stylebox_override("panel", paper)
-	scroll.custom_minimum_size = Vector2(560, 0)
-	# 宣纸和两头的木轴放在一个普通节点里一起展开（木轴不能放进容器，会被拉伸）
+
+## 赢：朱红横刷从左往右扫开 →「胜」字从大到小砸下来、震屏 → 小印「咚」地盖上。
+func _victory_mark(center: Vector2) -> void:
+	var stroke := TextureRect.new()
+	stroke.texture = load("res://art/ui/result_stroke.png")
+	stroke.modulate = STROKE_RED
+	stroke.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	stroke.stretch_mode = TextureRect.STRETCH_SCALE
+	stroke.size = RESULT_STROKE_SIZE
+	stroke.position = center - RESULT_STROKE_SIZE / 2 + Vector2(0, 14)
+	stroke.pivot_offset = Vector2(0, RESULT_STROKE_SIZE.y / 2)
+	stroke.scale = Vector2(0, 1)
+	stroke.z_index = 41
+	stroke.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(stroke)
+	Sfx.play(&"skill_draw")
+	var st := create_tween()
+	st.tween_property(stroke, "scale:x", 1.0, 0.26).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	await st.finished
+
+	var mark := _result_picture("res://art/ui/result_win.png", Vector2.ONE * RESULT_MARK_SIZE, PAPER)
+	mark.position = center - mark.size / 2
+	add_child(mark)
+	mark.scale = Vector2(1.9, 1.9)
+	mark.modulate.a = 0.0
+	var mt := create_tween().set_parallel()
+	mt.tween_property(mark, "scale", Vector2.ONE, 0.18).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	mt.tween_property(mark, "modulate:a", 1.0, 0.1)
+	await mt.finished
+	_shake_screen(14.0)
+	Sfx.play(&"victory")
+
+	var seal := _result_picture("res://art/ui/result_seal.png", Vector2.ONE * RESULT_SEAL_SIZE, Color.WHITE)
+	seal.position = center + Vector2(RESULT_MARK_SIZE * 0.34, RESULT_MARK_SIZE * 0.2)
+	seal.rotation = 0.1
+	add_child(seal)
+	seal.scale = Vector2(1.7, 1.7)
+	seal.modulate.a = 0.0
+	var sl := create_tween().set_parallel()
+	sl.tween_property(seal, "scale", Vector2.ONE, 0.12).set_delay(0.12).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	sl.tween_property(seal, "modulate:a", 1.0, 0.08).set_delay(0.12)
+	await sl.finished
+	Sfx.play(&"token_slam", -6.0)
+
+
+## 输：淡墨「败」字从小慢慢晕开。
+func _defeat_mark(center: Vector2) -> void:
+	var mark := _result_picture("res://art/ui/result_lose.png", Vector2.ONE * RESULT_MARK_SIZE, DEFEAT_INK)
+	mark.position = center - mark.size / 2
+	add_child(mark)
+	mark.scale = Vector2(0.82, 0.82)
+	mark.modulate.a = 0.0
+	var t := create_tween().set_parallel()
+	t.tween_property(mark, "scale", Vector2.ONE, 0.7).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+	t.tween_property(mark, "modulate:a", 1.0, 0.6)
+	await t.finished
+
+
+## 结算用的一张图（白色的图在这里染色），中心为轴，便于缩放、旋转。
+func _result_picture(path: String, picture_size: Vector2, color: Color) -> TextureRect:
+	var r := TextureRect.new()
+	r.texture = load(path)
+	r.modulate = color
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	r.size = picture_size
+	r.pivot_offset = picture_size / 2
+	r.z_index = 41
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return r
+
+
+## 手卷：宣纸心子、上下米色窄边，两头靛青锦缎包首，再外面是木轴和玉色轴头（图见 tools/result_marks.py）。
+## 两根木轴从中间往两边滚开，纸跟着露出来；下面一排云头木牌按钮淡入，「继续」下面的红穗轻轻摆。
+func _result_scroll(won: bool, top: float) -> void:
 	var holder := Control.new()
 	holder.z_index = 41
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.modulate.a = 0.0
 	add_child(holder)
-	holder.add_child(scroll)
+	# 纸和锦缎放在一个裁切框里，框从中间往两边变宽，就像纸被展开
+	var clip := Control.new()
+	clip.clip_contents = true
+	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(clip)
+	var inner := Control.new()
+	inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clip.add_child(inner)
+
+	var scroll := PanelContainer.new()
+	var paper := StyleBoxTexture.new()
+	paper.texture = load("res://art/ui/result_paper.png")
+	paper.content_margin_left = 40
+	paper.content_margin_right = 40
+	paper.content_margin_top = 22
+	paper.content_margin_bottom = 26
+	scroll.add_theme_stylebox_override("panel", paper)
+	scroll.custom_minimum_size = Vector2(RESULT_SCROLL_WIDTH, 0)
+	scroll.position = Vector2(SCROLL_BROCADE_W, 0)
+	inner.add_child(scroll)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
+	v.add_theme_constant_override("separation", 4)
 	scroll.add_child(v)
-	var stars := UiKit.label("★".repeat(model.stars()) + "☆".repeat(3 - model.stars()), 44, ENEMY_RED)
-	stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(stars)
+
+	# 三颗星：三方小圆印，拿到的朱红实心，没拿到的只剩淡淡一个圈
+	var star_row := HBoxContainer.new()
+	star_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	star_row.add_theme_constant_override("separation", 16)
+	v.add_child(star_row)
+	for i in 3:
+		star_row.add_child(_star_seal(i < model.stars()))
+
+	# 三星条件：一列左对齐，整列居中；达成的前面朱笔画圈
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	list.add_theme_constant_override("separation", 0)
+	v.add_child(list)
 	var conditions := model.star_conditions()
 	var texts := ["获胜", "无人倒下", "%d 回合内获胜（用了 %d 回合）" % [model.round_limit(), model.round_number()]]
 	for i in texts.size():
-		v.add_child(UiKit.label(("● " if conditions[i] else "○ ") + texts[i], 20, INK if conditions[i] else Color("8a7a66")))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		row.add_child(_check_mark(conditions[i]))
+		row.add_child(_brush_label(texts[i], 28, INK if conditions[i] else RESULT_FADED))
+		list.add_child(row)
 	if won:
 		var r := Encounters.rewards(model)
-		var gain := UiKit.label("获得：经验 +%d　银两 +%d" % [r["exp"], r["silver"]], 22, ENEMY_RED)
+		var gain := _brush_label("所得　经验 +%d　银两 +%d" % [r["exp"], r["silver"]], 28, ENEMY_RED)
 		gain.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(gain)
+
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
-	buttons.add_theme_constant_override("separation", 20)
-	v.add_child(buttons)
-	var stats_button := UiKit.button("战斗统计", Vector2(160, 60))
+	buttons.add_theme_constant_override("separation", 26)
+	buttons.z_index = 41
+	add_child(buttons)
+	var stats_button := _plaque_button("战斗统计", false)
 	stats_button.pressed.connect(_open_stats)
 	buttons.add_child(stats_button)
-	var retry := UiKit.button("再打一次", Vector2(180, 60))
+	var retry := _plaque_button("再打一次", false)
 	retry.pressed.connect(func() -> void: retry_requested.emit())
 	buttons.add_child(retry)
-	var back := UiKit.button("继续", Vector2(180, 60))
+	var back := _plaque_button("继续", true)
 	back.pressed.connect(func() -> void: finished.emit(won))
 	buttons.add_child(back)
-	# 内容撑开尺寸后再摆位置、加两头的木轴
+	buttons.modulate.a = 0.0
+
+	# 内容撑开纸的高度后，再加上下窄边、两头锦缎和木轴
 	await get_tree().process_frame
-	holder.position = Vector2((size.x - scroll.size.x) / 2, seal.position.y + seal_size + 26)
+	var paper_h := scroll.size.y
+	var paper_w := scroll.size.x
+	for at_top in [true, false]:
+		var edge := ColorRect.new()
+		edge.color = SCROLL_EDGE
+		edge.size = Vector2(paper_w, SCROLL_EDGE_H)
+		edge.position = Vector2(SCROLL_BROCADE_W, 0.0 if at_top else paper_h - SCROLL_EDGE_H)
+		edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		inner.add_child(edge)
+		var line := ColorRect.new()
+		line.color = SCROLL_EDGE_LINE
+		line.size = Vector2(paper_w, 1)
+		line.position = Vector2(SCROLL_BROCADE_W, SCROLL_EDGE_H if at_top else paper_h - SCROLL_EDGE_H - 1)
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		inner.add_child(line)
 	for left in [true, false]:
-		var rod := ColorRect.new()
-		rod.color = Color("5c3a22")
-		rod.size = Vector2(16, scroll.size.y + 24)
-		rod.position = Vector2(-16 if left else scroll.size.x, -12)
+		var brocade := TextureRect.new()
+		brocade.texture = load("res://art/ui/result_brocade.png")
+		brocade.stretch_mode = TextureRect.STRETCH_TILE
+		brocade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		brocade.size = Vector2(SCROLL_BROCADE_W, paper_h)
+		brocade.position = Vector2(0.0 if left else SCROLL_BROCADE_W + paper_w, 0)
+		brocade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		inner.add_child(brocade)
+		# 锦缎和纸接缝处一道金线
+		var seam := ColorRect.new()
+		seam.color = RESULT_GOLD
+		seam.size = Vector2(2, paper_h)
+		seam.position = Vector2(SCROLL_BROCADE_W - 2 if left else SCROLL_BROCADE_W + paper_w, 0)
+		seam.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		inner.add_child(seam)
+	var spread := paper_w + 2 * SCROLL_BROCADE_W
+	var rods: Array[Control] = [_scroll_rod(paper_h), _scroll_rod(paper_h)]
+	for rod in rods:
 		holder.add_child(rod)
-	holder.pivot_offset = Vector2(scroll.size.x / 2, 0)
-	holder.scale = Vector2(0.02, 1)
-	create_tween().tween_property(holder, "scale:x", 1.0, 0.32).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	clip.size = Vector2(spread, paper_h)
+	holder.position = Vector2((size.x - spread) / 2, top)
+	holder.modulate.a = 1.0
+	buttons.position = Vector2((size.x - buttons.size.x) / 2, top + paper_h + SCROLL_CAP.y + 24)
+
+	# 展开：t 从 0 到 1，纸从中间往两边露出来，两根木轴贴着纸边往外滚
+	var unroll := func(t: float) -> void:
+		var w := spread * t
+		clip.position.x = (spread - w) / 2
+		clip.size.x = w
+		inner.position.x = -clip.position.x
+		rods[0].position.x = clip.position.x - SCROLL_ROD_W
+		rods[1].position.x = clip.position.x + w
+	unroll.call(0.0)
+	Sfx.play(&"card_flip", -4.0)
+	var t := create_tween()
+	t.tween_method(unroll, 0.0, 1.0, 0.45).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(buttons, "modulate:a", 1.0, 0.2)
+
+
+## 一根木轴：竖着的木头圆柱比纸上下各长出一点，两头套玉色轴头。返回的节点左上角对齐纸的上边、木轴的左边。
+func _scroll_rod(paper_h: float) -> Control:
+	var rod := Control.new()
+	rod.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var wood := TextureRect.new()
+	wood.texture = load("res://art/ui/result_rod.png")
+	wood.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	wood.stretch_mode = TextureRect.STRETCH_SCALE
+	wood.size = Vector2(SCROLL_ROD_W, paper_h + 2 * SCROLL_ROD_OVER)
+	wood.position = Vector2(0, -SCROLL_ROD_OVER)
+	wood.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rod.add_child(wood)
+	for y in [-SCROLL_ROD_OVER - SCROLL_CAP.y, paper_h + SCROLL_ROD_OVER]:
+		var cap := TextureRect.new()
+		cap.texture = load("res://art/ui/result_cap.png")
+		cap.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		cap.stretch_mode = TextureRect.STRETCH_SCALE
+		cap.size = SCROLL_CAP
+		cap.position = Vector2((SCROLL_ROD_W - SCROLL_CAP.x) / 2, y)
+		cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		rod.add_child(cap)
+	return rod
+
+
+## 一颗星：小圆印。拿到的朱红底、宣纸色星；没拿到的只有淡淡的圈和星。
+func _star_seal(got: bool) -> PanelContainer:
+	var seal := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = ENEMY_RED if got else Color(0, 0, 0, 0)
+	style.border_color = ENEMY_RED if got else RESULT_FADED
+	style.set_border_width_all(0 if got else 2)
+	style.set_corner_radius_all(int(STAR_SEAL / 2))
+	seal.add_theme_stylebox_override("panel", style)
+	seal.custom_minimum_size = Vector2(STAR_SEAL, STAR_SEAL)
+	var star := UiKit.label("★", 22, PAPER if got else RESULT_FADED)
+	star.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	star.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	seal.add_child(star)
+	return seal
+
+
+## 毛笔字（马善政毛笔楷书，只收了结算画面用到的字，见 art/fonts/brush_chars.txt）；
+## 没收的字和数字落到思源黑体。
+static var _brush_font: Font
+
+
+static func _brush() -> Font:
+	if _brush_font == null:
+		var font: FontFile = load(BRUSH_FONT_PATH)
+		font.fallbacks = [UiKit.cjk_font()]
+		_brush_font = font
+	return _brush_font
+
+
+func _brush_label(text: String, font_size: int, color: Color) -> Label:
+	var l := UiKit.label(text, font_size, color)
+	l.add_theme_font_override("font", _brush())
+	return l
+
+
+## 条件前的小记号：达成的是一个朱笔圈（不封口，像手画的），没达成的是一个淡墨点。
+func _check_mark(done: bool) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(28, 36)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.draw.connect(func() -> void:
+		var o := c.size / 2
+		if done:
+			c.draw_arc(o, 11.0, -2.2, -2.2 + TAU * 0.93, 28, ENEMY_RED, 3.5, true)
+		else:
+			c.draw_circle(o, 3.0, RESULT_FADED))
+	return c
+
+
+## 云头木牌按钮：两头像如意云头，金边木纹，毛笔字；主按钮（继续）是朱漆的，下面垂一缕红穗轻轻摆。
+func _plaque_button(text: String, primary: bool) -> Button:
+	var b := UiKit.button(text, PLAQUE_SIZE, 28)
+	var texture: Texture2D = load("res://art/ui/result_plaque_red.png" if primary else "res://art/ui/result_plaque.png")
+	for state: String in ["normal", "hover", "pressed", "focus"]:
+		var style := StyleBoxTexture.new()
+		style.texture = texture
+		match state:
+			"hover":
+				style.modulate_color = Color(1.15, 1.12, 1.08)
+			"pressed":
+				style.modulate_color = Color(0.78, 0.74, 0.7)
+			"focus":
+				style.modulate_color = Color(1, 1, 1, 0)
+		b.add_theme_stylebox_override(state, style)
+	b.add_theme_font_override("font", _brush())
+	for c in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		b.add_theme_color_override(c, PAPER)
+	if primary:
+		var tassel := TextureRect.new()
+		tassel.texture = load("res://art/ui/result_tassel.png")
+		tassel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tassel.stretch_mode = TextureRect.STRETCH_SCALE
+		tassel.size = TASSEL_SIZE
+		tassel.position = Vector2((PLAQUE_SIZE.x - TASSEL_SIZE.x) / 2, PLAQUE_SIZE.y - 6)
+		tassel.pivot_offset = Vector2(TASSEL_SIZE.x / 2, 0)
+		tassel.show_behind_parent = true
+		tassel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(tassel)
+		var sway := tassel.create_tween().set_loops()
+		sway.tween_property(tassel, "rotation", 0.09, 1.1).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+		sway.tween_property(tassel, "rotation", -0.09, 1.1).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	return b
