@@ -17,6 +17,17 @@ const FAN_PRICE := 120
 ## 效果，写法和天赋一样（按 1 档算）
 @export var effect: TalentData
 
+@export_group("技能书")
+## 技能书：按原著故事线用好汉的将魂合成（见 Books）。story 是那段故事，recipe 是要谁的将魂
+@export var story := ""
+@export var recipe: Array[StringName] = []
+## 统领研读这本书学会的武学（研读后书没了）
+@export var martial: MartialData
+
+
+func is_book() -> bool:
+	return not recipe.is_empty()
+
 
 func quality_name() -> String:
 	return QUALITY_NAMES[quality]

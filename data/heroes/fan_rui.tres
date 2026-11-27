@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/fan_rui.png" id="1_b"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/fan_rui.png" id="1_bs"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_u"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+[ext_resource type="Texture2D" path="res://art/faces/fan_rui.png" id="2_f"]
+[ext_resource type="Texture2D" path="res://art/portraits/fan_rui.png" id="3_p"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/fan_rui.png" id="3_m"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_t"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/yin_bing.png" id="8_sb"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/yin_bing.png" id="8_sm"]
+
+[sub_resource type="Resource" id="Resource_summon"]
+script = ExtResource("1_u")
+id = &"yin_bing"
+display_name = "阴兵"
+role = 1
+base_hp = 100
+base_atk = 10
+base_def = 12
+base_spd = 120
+map_sprite = ExtResource("8_sm")
+battle_sprite = ExtResource("8_sb")
+attack_style = &"thrust"
+
+[sub_resource type="Resource" id="Resource_skill"]
+script = ExtResource("2_s")
+display_name = "混世魔王"
+description = "召唤：作法唤出两名阴兵（前排先放），阴兵是刺客，能越过前排扑人；攻击按樊瑞五成、生命三成，持续 3 回合。"
+effect = 23
+power = 0.5
+hits = 2
+turns = 3
+amount = 0.3
+cooldown = 4
+summon = SubResource("Resource_summon")
+
+[sub_resource type="Resource" id="Resource_talent"]
+script = ExtResource("7_t")
+display_name = "呼风唤雨"
+kind = &"skill_power"
+amount = 0.2
+text = "绝招伤害 +{x}（召出来的阴兵更凶）"
+
+[resource]
+script = ExtResource("1_u")
+id = &"fan_rui"
+display_name = "樊瑞"
+nickname = "混世魔王"
+rarity = 1
+role = 3
+tier = 2
+sort_order = 27
+base_hp = 340
+base_atk = 62
+base_def = 13
+base_spd = 104
+base_res = 40
+base_agi = 40
+portrait = ExtResource("3_p")
+bust = ExtResource("1_b")
+face = ExtResource("2_f")
+map_sprite = ExtResource("3_m")
+battle_sprite = ExtResource("1_bs")
+attack_style = &"throw"
+skill = SubResource("Resource_skill")
+talent = SubResource("Resource_talent")

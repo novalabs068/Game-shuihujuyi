@@ -11,7 +11,7 @@
 script = ExtResource("2_kiyfo")
 id = &"lin_zhong_qiang_ren"
 display_name = "林中强人"
-role = 4
+role = 1
 base_hp = 364
 base_atk = 85
 base_def = 20

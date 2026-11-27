@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "五雷轰顶"
+description = "五雷天心正法：雷火劈落敌方全体，各受 90% 法术伤害。"
+effect = 12
+power = 0.9
+cooldown = 3
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_mang_dang_xiang_mo"
+display_name = "五雷轰顶"
+flavor = "樊瑞在山寨里作法飞砂走石，公孙胜一道五雷天心正法破了他的妖法，樊瑞从此拜他为师。"
+source = "研读技能书《降魔录》"
+role = 3
+skill = SubResource("Resource_sk")

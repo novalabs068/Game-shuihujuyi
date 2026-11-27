@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "三山义旗"
+description = "单体 150% 伤害，全队获得自身 12% 生命的护盾。"
+effect = 10
+power = 1.5
+amount = 0.12
+cooldown = 3
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_san_shan_yi_qi"
+display_name = "三山义旗"
+flavor = "二龙山、桃花山、白虎山三山的人马合在一处打青州，一面大旗底下谁也不退。"
+source = "研读技能书《三山义旗》"
+role = 0
+skill = SubResource("Resource_sk")

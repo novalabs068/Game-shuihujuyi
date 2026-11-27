@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "建康医经"
+description = "恢复全队 22% 生命，解除眩晕、缴械、计穷和灼烧。"
+effect = 8
+amount = 0.22
+cooldown = 3
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_jian_kang_yi_jing"
+display_name = "建康医经"
+flavor = "张顺星夜去建康请安道全，活闪婆王定六一路帮衬，救了宋江背上的疮。"
+source = "研读技能书《建康医经》"
+role = 4
+skill = SubResource("Resource_sk")

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "八阵图解"
+kind = &"team_guard_open"
+amount = 0.12
+text = "开战时全队受到的伤害 -{x}，持续 2 回合"
+
+[resource]
+script = ExtResource("2_m")
+id = &"ba_zhen_tu_jie"
+display_name = "八阵图解"
+quality = 3
+flavor = "朱武在少华山上推演的阵图，前后左右都有照应。"
+owner = &"zhu_wu"
+effect = SubResource("Resource_e")

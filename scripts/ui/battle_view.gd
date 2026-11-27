@@ -11,30 +11,23 @@ signal retry_requested
 signal finished(won: bool)
 
 const AUTO_ACTION := -1
-## 我方三个站位：脚底的位置和远近（后排画小一点），沿一条斜线排开——2 号在最后、1 号居中、3 号最前；
-## 敌方左右镜像。越靠下越近，画在上层
-const SLOTS: Array[Vector2] = [Vector2(290, 420), Vector2(150, 340), Vector2(430, 500)]
+## 棋盘站位：每方 2 排 × 3 路。我方在左：前排（离敌人近）脚底 x 在 GRID_FRONT_X、后排在 GRID_BACK_X；
+## 上中下三路脚底 y 在 LANE_Y，越上越远（往中间收一点、画小一点）。敌方左右镜像。
+const GRID_FRONT_X := 470.0
+const GRID_BACK_X := 290.0
+const LANE_Y: Array[float] = [276.0, 382.0, 488.0]
+## 远处的路往中间收多少（透视）
+const LANE_SKEW := 36.0
+## 大体型（占一路两格）画大多少
+const BIG_SCALE := 1.3
 ## 画的层次：人物 1～3（越靠下越上层）；天气 4、前景草 5、目标箭头 6，都在背景之上
-## 我方按阵法站位（第一个是主将）；x 越大越靠前（离敌人越近），y 越大越近镜头
-const FORMATION_SLOTS := {
-	# 鱼鳞阵：主将在最前当鱼头，两位在后面左右错开
-	&"yu_lin": [Vector2(470, 420), Vector2(320, 340), Vector2(250, 505)],
-	# 长蛇阵：一字长蛇，主将打头，后面两位一个跟一个
-	&"chang_she": [Vector2(490, 440), Vector2(320, 405), Vector2(150, 370)],
-	# 八卦阵：三人斜列、互为犄角，主将居中（和默认的斜线方向相反）
-	&"ba_gua": [Vector2(330, 420), Vector2(460, 340), Vector2(200, 505)],
-	# 偃月阵：月牙形，两翼前出，主将收在中间靠后
-	&"yan_yue": [Vector2(210, 420), Vector2(480, 335), Vector2(430, 510)],
-	# 混天阵：前出压上，主将冲在最前排
-	&"hun_tian": [Vector2(450, 505), Vector2(540, 370), Vector2(320, 395)],
-}
 ## 背景放大倍数（贴底边对齐，裁掉上面的天空，把地面抬到人脚下）
 const BG_ZOOM := 1.3
 ## 所有站位整体往下挪这么多，踩在地面上
 const FEET_DROP := 30.0
-## 站位远近：脚底 y（挪之前）在这个范围里，人物从小（后排）画到大（前排）
-const DEPTH_Y := Vector2(340, 500)
-const DEPTH_RANGE := Vector2(0.85, 1.0)
+## 站位远近：脚底 y（挪之前）在这个范围里，人物从小（远处的路）画到大（近处的路）
+const DEPTH_Y := Vector2(276, 488)
+const DEPTH_RANGE := Vector2(0.72, 0.92)
 ## 顶栏和底栏在天气、前景之上
 const BAR_LAYER := 7
 ## 特效放大倍数（pixelfx 按 24×38 的小人画的，我们的人物大得多）
@@ -46,6 +39,9 @@ const ATTACK_SPOT := Vector3(110, 112, 124)
 const SKILL_SPOT := Vector3(252, 72, 86)
 const GUARD_SPOT := Vector3(236, 206, 72)
 const COMBO_SPOT := Vector3(112, 258, 64)
+const MOVE_SPOT := Vector3(358, 62, 62)
+## 法术伤害的数字颜色（青）
+const MAGIC_CYAN := Color("8fe3f0")
 ## 出手顺序头像的直径：当前出手的、后面排着的
 const BEAD_BIG := 54.0
 const BEAD_SMALL := 40.0
@@ -102,16 +98,26 @@ var _skill_sub: Label
 var _cooldown_ring: CooldownRing
 var _ring_actor: BattleUnit
 var _ring_seen: Dictionary[BattleUnit, int] = {}
-## 我方的阵法（决定站位）
+## 我方的阵法和每人站的格子（GameState 里存的；空的按阵法、按职业自动摆）
 var _formation: StringName = &""
+var placement: Array = []
 ## 战场背景（按 BG_ZOOM 放大、贴底边摆）
 var _scene: TextureRect
 var _combo_sub: Label
+var _move_button: Button
+## 补位：点了「补位」后在等玩家点一个空格子
+var _move_mode := false
+var _move_cell := Grid.NONE
+var _board: BattleBoard
+var _boss_bar: BossBar
+## 正在播的这一招打几格、已经打到了谁（画穿透、连锁、横扫、全屏的特效用）
+var _area := SkillData.Area.SINGLE
+var _area_hits: Array[BattleUnit] = []
 
 
 func _ready() -> void:
 	_formation = GameState.current_formation()
-	model = BattleModel.new(stage, team, hero_level, GameState.combos(), -1, _formation)
+	model = BattleModel.new(stage, team, hero_level, GameState.combos(), -1, _formation, placement)
 	Vitality.apply_start(model, start_hp)
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG
@@ -140,6 +146,11 @@ func _ready() -> void:
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_board = BattleBoard.new()
+	_board.cell_center = _cell_center
+	_board.cell_tapped.connect(_on_cell_tapped)
+	add_child(_board)
+	_board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var weather := BattleWeather.make(place, Vector2(1280, 720))
 	if weather != null:
 		weather.z_index = 4
@@ -148,14 +159,16 @@ func _ready() -> void:
 	_build_center()
 	_build_bottom_bar()
 	for u in model.units:
-		var card := UnitCard.new()
-		add_child(card)
-		card.setup(u)
-		card.tapped.connect(_on_card_tapped)
-		card.set_depth(_slot_depth(u))
-		# 前排盖住后排
-		card.z_index = _slot_layer(u)
-		_cards[u] = card
+		if u.side == BattleUnit.Side.ENEMY and u.data.is_boss and _boss_bar == null:
+			_boss_bar = BossBar.new()
+			_boss_bar.z_index = BAR_LAYER
+			add_child(_boss_bar)
+			_boss_bar.setup(u)
+			_boss_bar.position = Vector2((1280 - _boss_bar.size.x) / 2, 92)
+			_boss_bar.scale = Vector2(0.02, 1)
+			_banner.offset_top = 166
+	for u in model.units:
+		_add_card(u)
 	# 最前面一层虚化的草，底栏上方
 	var fore := TextureRect.new()
 	fore.texture = load("res://art/ui/battle_foreground.png")
@@ -183,6 +196,23 @@ func _ready() -> void:
 	_run()
 
 
+func _add_card(u: BattleUnit) -> UnitCard:
+	var card := UnitCard.new()
+	add_child(card)
+	card.setup(u)
+	card.tapped.connect(_on_card_tapped)
+	_cards[u] = card
+	_restack()
+	return card
+
+
+## 按站的格子重新定远近和层次（补位、召唤之后）。
+func _restack() -> void:
+	for u in _cards:
+		_cards[u].set_depth(_slot_depth(u) * (BIG_SCALE if u.data.big else 1.0))
+		_cards[u].z_index = _slot_layer(u)
+
+
 func _exit_tree() -> void:
 	Engine.time_scale = 1.0
 
@@ -191,6 +221,8 @@ func _exit_tree() -> void:
 
 func _run() -> void:
 	await get_tree().create_timer(0.3).timeout
+	if _boss_bar != null:
+		await _boss_entrance(_boss_bar.unit)
 	# 准备回合：开局效果一条一条亮出来
 	if not model.opening_events.is_empty():
 		_banner.text = "准备回合"
@@ -212,7 +244,9 @@ func _run() -> void:
 			if choice == AUTO_ACTION:
 				events = model.act_ai()
 			else:
-				events = model.act(choice as BattleModel.Action, _target)
+				events = model.act(choice as BattleModel.Action, _target, _move_cell)
+			_move_cell = Grid.NONE
+			_move_mode = false
 		else:
 			_refresh()
 			await get_tree().create_timer(ENEMY_THINK_DELAY).timeout
@@ -229,7 +263,8 @@ func _run() -> void:
 
 
 func _play(events: Array[Dictionary]) -> void:
-	for e in events:
+	for index in events.size():
+		var e := events[index]
 		if not is_inside_tree():
 			return
 		var kind: String = e["kind"]
@@ -238,6 +273,9 @@ func _play(events: Array[Dictionary]) -> void:
 		var log_text: String = e["log"]
 		var big: bool = e["big"]
 		var source: BattleUnit = e["source"]
+		if not _cards.has(unit):
+			_add_card(unit)
+			_layout()
 		var card := _cards[unit]
 		if log_text != "":
 			_add_log(log_text)
@@ -249,21 +287,30 @@ func _play(events: Array[Dictionary]) -> void:
 				_update_turn_order()
 			"action":
 				_banner.text = "%s · %s" % [unit.display_name(), popup]
+				_area = e.get("area", SkillData.Area.SINGLE)
+				_area_hits.clear()
 				wait = 0.0
 			"skill":
 				_banner.text = ""
+				_area = e.get("area", SkillData.Area.SINGLE)
+				_area_hits.clear()
+				if unit.data.is_boss and e.get("charged", false):
+					await _boss_ultimate(unit, e.get("cells", []))
 				await _skill_cutin(unit, popup)
 				wait = 0.0
 			"combo":
 				_banner.text = ""
+				_area = SkillData.Area.SINGLE
+				_area_hits.clear()
 				await _combo_cutin(unit, source, popup)
 				wait = 0.0
 			"charge":
-				_banner.text = "%s 蓄力！" % unit.display_name()
+				_banner.text = "%s 蓄力！地上的红格就是要砸的地方" % unit.display_name()
 				FxSprite.spawn(self, "cursed", card.feet_point(), FX_SCALE, false, 0)
 				card.popup(popup, CRIT_RED, true)
 				Sfx.play(&"skill_drum", -6.0)
-				wait = 0.6
+				_refresh()
+				wait = 0.8
 			"prep":
 				_banner.text = "准备回合 · %s" % log_text.get_slice("：", 0)
 				FxSprite.spawn(self, "blessing", card.feet_point(), FX_SCALE * 0.9, false, 0)
@@ -271,18 +318,38 @@ func _play(events: Array[Dictionary]) -> void:
 				wait = 0.55
 			"banner":
 				_banner.text = "「%s」" % popup
-				card.popup(popup, UiKit.GOLD, true)
+				if popup in ["破绽", "破阵", "士气受挫"]:
+					await _big_text(popup, UiKit.GOLD if popup == "破绽" else CRIT_RED)
+				else:
+					card.popup(popup, UiKit.GOLD, true)
 				_shake_screen(10.0)
-				wait = 0.6
+				wait = 0.4
+			"phase":
+				_banner.text = "「%s」" % popup
+				await _big_text(popup, CRIT_RED)
+				_shake_screen(14.0)
+				wait = 0.3
+			"bar":
+				if _boss_bar != null:
+					_boss_bar.shatter()
+				_shake_screen(8.0)
+				Sfx.play(&"hit_crit", -2.0)
+				wait = 0.15
 			"damage":
 				var from_left := source == null or source.side == BattleUnit.Side.PLAYER
 				var fx: String = e.get("fx", "")
-				if source != null and source != unit:
+				var magic: bool = e.get("magic", false)
+				_area_hits.append(unit)
+				# 一招打几个人：只在打第一个人时冲上去 / 射过去，后面的用范围特效连起来
+				var follow_up := _area_hits.size() > 1 and _area != SkillData.Area.SINGLE
+				if follow_up or _area == SkillData.Area.ROW or _area == SkillData.Area.ALL:
+					_area_fx(unit)
+				if source != null and source != unit and not follow_up:
 					var style := source.data.attack_style
-					if style in RANGED_STYLES:
+					if style in RANGED_STYLES or not source.is_melee():
 						await _cards[source].shoot()
 						Sfx.play(&"arrow", -4.0, 0.1)
-						await Projectile.fly(self, _cards[source].muzzle_point(), card.hit_point(), style)
+						await Projectile.fly(self, _cards[source].muzzle_point(), card.hit_point(), style if style in RANGED_STYLES else &"throw")
 					else:
 						await _cards[source].lunge(card.position)
 					if fx == "":
@@ -294,22 +361,54 @@ func _play(events: Array[Dictionary]) -> void:
 					FxSprite.spawn(self, fx, card.feet_point(), 1.1, not from_left)
 					_shake_screen(6.0)
 				FxSprite.spawn(self, "crit_hit" if big else "hit_spark", card.hit_point(), FX_SCALE * (0.8 if big else 1.0), not from_left)
+				if magic:
+					FxSprite.spawn(self, "cursed", card.hit_point(), FX_SCALE * 0.5, false, 0)
 				card.show_hp(e.get("hp", unit.hp))
 				card.flash()
 				card.shake()
 				_hit_sound(source, big)
 				_ink_splash(card.hit_point(), from_left, big)
-				card.popup(popup, CRIT_RED if big else UiKit.DAMAGE, big)
+				card.popup(popup, CRIT_RED if big else (MAGIC_CYAN if magic else UiKit.DAMAGE), big)
+				if _boss_bar != null and unit == _boss_bar.unit:
+					_boss_bar.show_hp(e.get("hp", unit.hp))
 				if big:
 					_shake_screen(10.0)
 					_punch_zoom(card.hit_point())
 				await _hitstop(0.1 if big else 0.045)
 				wait = 0.16
+			"dodge":
+				if source != null and source != unit and source.is_melee():
+					await _cards[source].lunge(card.position)
+				card.dodge()
+				card.popup(popup, Color("bfe3ff"), true)
+				Sfx.play(&"arrow", -8.0, 0.2)
+				wait = 0.2
+			"move":
+				_restack()
+				var to := _card_position(unit)
+				var mt := create_tween()
+				mt.tween_property(card, "position", to, 0.28).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+				await mt.finished
+				card.place(to)
+				FxSprite.spawn(self, "poof", card.feet_point(), FX_SCALE * 0.6)
+				card.popup(popup, UiKit.GOLD)
+				wait = 0.1
+			"summon":
+				await _summon_fx(card)
+				card.popup(popup, UiKit.GOLD, true)
+				wait = 0.3
+			"steal":
+				if source != null and _cards.has(source):
+					await _steal_fx(_cards[source], card)
+				card.popup(popup, UiKit.GOLD, true)
+				wait = 0.25
 			"heal":
 				card.show_hp(e.get("hp", unit.hp))
 				FxSprite.spawn(self, "heal", card.feet_point(), FX_SCALE)
 				card.popup(popup, UiKit.HEAL)
 			"death":
+				if unit.side == BattleUnit.Side.ENEMY and model.result == BattleModel.Result.WIN and not _more_deaths(events, index):
+					await _finishing_blow(card)
 				card.mark_dead()
 				FxSprite.spawn(self, "poof", card.hit_point() + Vector2(0, 40), FX_SCALE)
 				card.popup(popup, UiKit.TEXT_DIM)
@@ -319,11 +418,259 @@ func _play(events: Array[Dictionary]) -> void:
 				if popup in ["加速", "增攻"] or popup.begins_with("护盾"):
 					FxSprite.spawn(self, "blessing", card.feet_point(), FX_SCALE * 0.9, false, 0)
 				if popup != "":
-					card.popup(popup, UiKit.GOLD if popup in ["追击", "定力", "缴械", "计穷", "破绽"] else UiKit.TEXT)
+					card.popup(popup, UiKit.GOLD if popup in ["追击", "缴械", "计穷", "破绽", "尾应", "夹击", "扑空"] or popup.begins_with("韧性") else UiKit.TEXT, popup == "扑空")
 					wait = 0.15
+		if _boss_bar != null:
+			_boss_bar.refresh()
 		_refresh()
 		if wait > 0.0:
 			await get_tree().create_timer(wait).timeout
+
+
+## 后面还有没有别人倒下（最后一个倒下的才放慢镜头）。
+func _more_deaths(events: Array[Dictionary], from: int) -> bool:
+	for k in range(from + 1, events.size()):
+		if events[k]["kind"] == "death" and events[k]["unit"].side == BattleUnit.Side.ENEMY:
+			return true
+	return false
+
+
+## 范围招的特效：穿透一道墨线贯穿一路；连锁一道光弧从上一个人跳到这个人；多人一道冲击波扫过一排；
+## 全范围镜头先拉远、整片敌阵上墨团炸开。
+func _area_fx(unit: BattleUnit) -> void:
+	var card := _cards[unit]
+	match _area:
+		SkillData.Area.LANE:
+			if _area_hits.size() == 2:
+				_streak(_cards[_area_hits[0]].hit_point(), card.hit_point(), Color(0.06, 0.04, 0.03, 0.9), 16.0)
+		SkillData.Area.CHAIN:
+			if _area_hits.size() >= 2:
+				_streak(_cards[_area_hits[_area_hits.size() - 2]].hit_point(), card.hit_point(), Color("9fe8ff"), 6.0, true)
+		SkillData.Area.ROW:
+			if _area_hits.size() == 1:
+				var y := card.feet_point().y
+				var from_x := size.x * (0.55 if unit.side == BattleUnit.Side.ENEMY else 0.05)
+				_streak(Vector2(from_x, y), Vector2(from_x + size.x * 0.4, y - 60), Color(0.95, 0.85, 0.6, 0.85), 26.0)
+				_shake_screen(8.0)
+		SkillData.Area.ALL:
+			if _area_hits.size() == 1:
+				var center := Vector2(size.x * (0.72 if unit.side == BattleUnit.Side.ENEMY else 0.28), size.y * 0.55)
+				pivot_offset = center
+				var t := create_tween()
+				t.tween_property(self, "scale", Vector2(0.94, 0.94), 0.12).set_ease(Tween.EASE_OUT)
+				t.tween_property(self, "scale", Vector2.ONE, 0.35).set_ease(Tween.EASE_IN_OUT)
+				FxSprite.spawn(self, "explosion", center + Vector2(0, 40), 2.2)
+				_ink_splash(center, unit.side == BattleUnit.Side.ENEMY, true)
+				_shake_screen(16.0)
+
+
+## 一道笔触：从 a 拉到 b，停一下淡掉。jagged 为 true 画成折线（连锁的光弧）。
+func _streak(a: Vector2, b: Vector2, color: Color, width: float, jagged := false) -> void:
+	var line := Line2D.new()
+	line.width = width
+	line.default_color = color
+	line.z_index = 14
+	line.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	line.end_cap_mode = Line2D.LINE_CAP_ROUND
+	if jagged:
+		var steps := 6
+		for k in steps + 1:
+			var p := a.lerp(b, float(k) / steps)
+			if k > 0 and k < steps:
+				p += Vector2(randf_range(-14, 14), randf_range(-14, 14))
+			line.add_point(p)
+	else:
+		line.add_point(a)
+		line.add_point(b)
+	add_child(line)
+	line.modulate.a = 0.0
+	var t := line.create_tween()
+	t.tween_property(line, "modulate:a", 1.0, 0.05)
+	t.tween_interval(0.18)
+	t.tween_property(line, "modulate:a", 0.0, 0.3)
+	t.tween_callback(line.queue_free)
+
+
+## 召唤：格子上亮起一圈金色符阵，召唤物从烟里显出来。
+func _summon_fx(card: UnitCard) -> void:
+	var ring := Line2D.new()
+	ring.width = 5.0
+	ring.default_color = Color("f0c060")
+	ring.z_index = 0
+	for k in 33:
+		var ang := TAU * k / 32
+		ring.add_point(card.feet_point() + Vector2(cos(ang) * 70, sin(ang) * 22))
+	add_child(ring)
+	card.modulate.a = 0.0
+	FxSprite.spawn(self, "poof", card.feet_point() + Vector2(0, -40), FX_SCALE)
+	Sfx.play(&"skill_draw", -6.0)
+	var t := create_tween()
+	t.tween_property(card, "modulate:a", 1.0, 0.35)
+	t.parallel().tween_property(ring, "rotation", 0.3, 0.6)
+	t.tween_property(ring, "modulate:a", 0.0, 0.3)
+	t.tween_callback(ring.queue_free)
+	await t.finished
+
+
+## 偷取：一团金光从被偷的人头上飞进出手的人手里。
+func _steal_fx(thief: UnitCard, target: UnitCard) -> void:
+	var orb := ColorRect.new()
+	orb.color = Color("f0c060")
+	orb.size = Vector2(18, 18)
+	orb.pivot_offset = orb.size / 2
+	orb.rotation = PI / 4
+	orb.z_index = 15
+	orb.position = target.hit_point() - orb.size / 2
+	add_child(orb)
+	var mid := (target.hit_point() + thief.hit_point()) / 2 + Vector2(0, -120)
+	var t := create_tween()
+	t.tween_method(func(k: float) -> void:
+		var p := target.hit_point().lerp(mid, k).lerp(mid.lerp(thief.hit_point(), k), k)
+		orb.position = p - orb.size / 2, 0.0, 1.0, 0.4)
+	t.tween_callback(orb.queue_free)
+	await t.finished
+
+
+## 最后一击：时间放慢、镜头推近，四周压暗一下。
+func _finishing_blow(card: UnitCard) -> void:
+	var vignette := ColorRect.new()
+	vignette.color = Color(0, 0, 0, 0)
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vignette.z_index = 25
+	add_child(vignette)
+	vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pivot_offset = card.hit_point()
+	var t := create_tween().set_parallel()
+	t.tween_property(self, "scale", Vector2(1.12, 1.12), 0.25).set_ease(Tween.EASE_OUT)
+	t.tween_property(vignette, "color:a", 0.35, 0.25)
+	Engine.time_scale = 0.3
+	await get_tree().create_timer(0.55, true, false, true).timeout
+	if not is_inside_tree():
+		return
+	Engine.time_scale = 2.0 if _fast else 1.0
+	var back := create_tween().set_parallel()
+	back.tween_property(self, "scale", Vector2.ONE, 0.3).set_ease(Tween.EASE_IN_OUT)
+	back.tween_property(vignette, "color:a", 0.0, 0.3)
+	back.chain().tween_callback(vignette.queue_free)
+
+
+## 屏幕正中砸下两个大字（破绽、破阵、第二阶段……），带金色裂纹。
+func _big_text(text: String, color: Color) -> void:
+	var l := UiKit.outlined(text, 96, color)
+	l.add_theme_constant_override("outline_size", 14)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.z_index = 32
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l.size = Vector2(size.x, 130)
+	l.position = Vector2(0, size.y * 0.3)
+	l.pivot_offset = l.size / 2
+	l.scale = Vector2(2.0, 2.0)
+	l.modulate.a = 0.0
+	add_child(l)
+	var cracks := Line2D.new()
+	cracks.width = 3.0
+	cracks.default_color = Color(color, 0.9)
+	cracks.z_index = 31
+	var c := Vector2(size.x / 2, size.y * 0.3 + 65)
+	for k in 7:
+		cracks.add_point(c)
+		var ang := TAU * k / 7 + randf_range(-0.2, 0.2)
+		cracks.add_point(c + Vector2(cos(ang), sin(ang) * 0.5) * randf_range(140, 260))
+	cracks.modulate.a = 0.0
+	add_child(cracks)
+	var t := create_tween().set_parallel()
+	t.tween_property(l, "scale", Vector2.ONE, 0.16).set_ease(Tween.EASE_IN)
+	t.tween_property(l, "modulate:a", 1.0, 0.1)
+	t.tween_property(cracks, "modulate:a", 1.0, 0.1).set_delay(0.14)
+	await t.finished
+	Sfx.play(&"hit_crit", 0.0)
+	await get_tree().create_timer(0.45).timeout
+	var out := create_tween().set_parallel()
+	out.tween_property(l, "modulate:a", 0.0, 0.25)
+	out.tween_property(cracks, "modulate:a", 0.0, 0.25)
+	await out.finished
+	l.queue_free()
+	cracks.queue_free()
+
+
+## 头目登场：黑屏，竖排大字写名号，盖一方朱印；然后血条从中间往两边展开。
+func _boss_entrance(boss: BattleUnit) -> void:
+	var layer := Control.new()
+	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.z_index = 35
+	add_child(layer)
+	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.015, 0.01, 0.0)
+	layer.add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var fig := _portrait(boss, size.y * 0.9, true)
+	fig.position = Vector2(size.x * 0.52, size.y * 0.1)
+	fig.modulate.a = 0.0
+	layer.add_child(fig)
+	var name_text := "\n".join(Array(boss.display_name().split("")))
+	var title := UiKit.outlined(name_text, 64, Color("f4e8cc"))
+	title.add_theme_constant_override("outline_size", 10)
+	title.add_theme_constant_override("line_spacing", -10)
+	title.position = Vector2(size.x * 0.3, size.y * 0.08)
+	title.visible_ratio = 0.0
+	layer.add_child(title)
+	var seal := PanelContainer.new()
+	seal.add_theme_stylebox_override("panel", UiKit.box(ENEMY_RED, PAPER, 3, 6))
+	var mark := UiKit.label("头目", 30, PAPER)
+	seal.add_child(mark)
+	seal.position = Vector2(size.x * 0.3 - 90, size.y * 0.6)
+	seal.modulate.a = 0.0
+	layer.add_child(seal)
+	Sfx.play(&"skill_drum", 0.0)
+	var t := create_tween().set_parallel()
+	t.tween_property(dim, "color:a", 0.82, 0.25)
+	t.tween_property(fig, "modulate:a", 1.0, 0.35)
+	t.tween_property(title, "visible_ratio", 1.0, 0.5).set_delay(0.15)
+	await t.finished
+	seal.pivot_offset = seal.size / 2
+	seal.scale = Vector2(2.0, 2.0)
+	var st := create_tween().set_parallel()
+	st.tween_property(seal, "modulate:a", 1.0, 0.08)
+	st.tween_property(seal, "scale", Vector2.ONE, 0.14).set_ease(Tween.EASE_IN)
+	await st.finished
+	_shake_screen(12.0)
+	await get_tree().create_timer(0.7).timeout
+	var out := create_tween()
+	out.tween_property(layer, "modulate:a", 0.0, 0.25)
+	await out.finished
+	layer.queue_free()
+	if _boss_bar != null:
+		_boss_bar.pivot_offset = Vector2(_boss_bar.size.x / 2, 0)
+		_boss_bar.scale = Vector2(0.02, 1)
+		create_tween().tween_property(_boss_bar, "scale:x", 1.0, 0.35).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+
+
+## 头目放蓄满的大招：画面压暗只剩红格在闪，一声吼震屏；然后接绝招切入。
+func _boss_ultimate(boss: BattleUnit, cells: Array) -> void:
+	var m := {}
+	for c: Vector2i in cells:
+		m[_board.key(BattleUnit.Side.PLAYER, c)] = ["danger"]
+	_board.set_marks(m)
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.0, 0.0, 0.0)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dim.z_index = 8
+	add_child(dim)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_board.z_index = 9
+	var t := create_tween()
+	t.tween_property(dim, "color:a", 0.6, 0.2)
+	await t.finished
+	_cards[boss].popup("吼——", CRIT_RED, true)
+	Sfx.play(&"skill_drum", 2.0)
+	_shake_screen(16.0)
+	await get_tree().create_timer(0.45).timeout
+	var out := create_tween()
+	out.tween_property(dim, "color:a", 0.0, 0.15)
+	await out.finished
+	dim.queue_free()
+	_board.z_index = 0
 
 
 ## 放技能：一条色带从出手者那一侧滑进来，带着半身像和技能名。
@@ -543,7 +890,26 @@ func _shake_screen(strength: float) -> void:
 
 func _choose(action: int) -> void:
 	if _awaiting_input:
+		_move_mode = false
 		_action_chosen.emit(action)
+
+
+## 「补位」：再点一下取消；点了之后在我方空格子里挑一格。
+func _toggle_move() -> void:
+	if not _awaiting_input or model.current == null:
+		return
+	_move_mode = not _move_mode
+	_hint_label.text = "点一个发青光的空格子挪过去（这一回合防御）；再点「补位」取消" if _move_mode else ""
+	_refresh()
+
+
+func _on_cell_tapped(side: BattleUnit.Side, c: Vector2i) -> void:
+	if not _move_mode or side != BattleUnit.Side.PLAYER or model.current == null:
+		return
+	if model.can_move_to(model.current, c):
+		_move_cell = c
+		_move_mode = false
+		_action_chosen.emit(BattleModel.Action.MOVE)
 
 
 func _on_card_tapped(card: UnitCard) -> void:
@@ -551,6 +917,11 @@ func _on_card_tapped(card: UnitCard) -> void:
 	if not u.is_alive():
 		return
 	if u.side == BattleUnit.Side.ENEMY:
+		var actor := model.current
+		if _awaiting_input and actor != null and actor.side == BattleUnit.Side.PLAYER and not model.can_reach(actor, u):
+			_hint_label.text = "%s被前排挡着，%s近战够不着（刺客、远程才打得到，或者先打开这一路）" % [u.display_name(), actor.display_name()]
+			card.popup("挡", UiKit.TEXT_DIM)
+			return
 		_target = u
 		_refresh()
 	elif u.data.skill != null:
@@ -610,9 +981,13 @@ func _refresh() -> void:
 	if player and _target != null:
 		_intent_label.text = "%s %s" % [_target.display_name(), _intent_text(_target)]
 
+	_refresh_board(actor, input and player)
+
 	# 右下：圆钮
-	for b: Button in [_attack_button, _skill_button, _guard_button, _combo_button]:
+	for b: Button in [_attack_button, _skill_button, _guard_button, _combo_button, _move_button]:
 		b.disabled = not input
+	_move_button.disabled = not input or not player or actor.data.big or model.free_cells(actor.side).is_empty()
+	_set_lit(_move_button, _move_mode)
 	var skill_name := actor.data.skill.display_name if player and actor.data.skill != null else ""
 	_skill_button.text = skill_name.left(1) if skill_name != "" else "技"
 	_skill_sub.text = skill_name if skill_name != "" else "绝招"
@@ -626,6 +1001,48 @@ func _refresh() -> void:
 	_combo_button.disabled = not input or combo == null
 	_combo_sub.text = combo.display_name if combo != null else "组合技"
 	_set_lit(_combo_button, combo != null and input)
+
+
+## 地面格子上色：头目要砸的红格；轮到玩家时，普攻会打到的格子金色、绝招的范围朱红描边；补位时能去的空格青色。
+## 近战够不着的敌人压暗。
+func _refresh_board(actor: BattleUnit, my_turn: bool) -> void:
+	var marks := {}
+	var add := func(side: BattleUnit.Side, c: Vector2i, mark: String) -> void:
+		var k := _board.key(side, c)
+		if not marks.has(k):
+			marks[k] = []
+		if not mark in marks[k]:
+			marks[k].append(mark)
+	for e in model.alive(BattleUnit.Side.ENEMY):
+		if e.charging:
+			for c in e.charge_cells:
+				add.call(BattleUnit.Side.PLAYER, c, "danger")
+	if my_turn and _move_mode:
+		for c in model.free_cells(actor.side):
+			add.call(BattleUnit.Side.PLAYER, c, "move")
+	elif my_turn and _target != null and _target.is_alive():
+		var primary := model._pick_foe(actor, _target)
+		for h in model.area_targets(actor, primary, actor.data.basic_area):
+			for c in h[0].cells():
+				add.call(BattleUnit.Side.ENEMY, c, "gold")
+		var sk := actor.data.skill
+		if sk != null and actor.skill_ready() and (sk.needs_enemy_target() or sk.effect in SkillData.ALL_EFFECTS):
+			var hits := model.area_targets(actor, primary, sk.area) if sk.needs_enemy_target() else model.foes_of(actor).map(func(f: BattleUnit) -> Array: return [f, 1.0])
+			for h in hits:
+				for c in h[0].cells():
+					add.call(BattleUnit.Side.ENEMY, c, "skill")
+	_board.set_marks(marks)
+	for u in _cards:
+		if u.side == BattleUnit.Side.ENEMY:
+			_cards[u].set_reachable(not my_turn or not u.is_alive() or model.can_reach(actor, u))
+
+
+## 一格在屏幕上的中心（脚底）：我方按 _cell_spot，敌方左右镜像。
+func _cell_center(side: BattleUnit.Side, c: Vector2i) -> Vector2:
+	var p := _cell_spot(c) + Vector2(0, FEET_DROP - 8)
+	if side == BattleUnit.Side.ENEMY:
+		p.x = size.x - p.x
+	return p
 
 
 ## 头顶小圆标的字：敌人普攻「攻」、要放绝招「技」、眩晕「晕」；好汉被敌人绝招瞄准「危」。
@@ -655,7 +1072,7 @@ func _intent_text(u: BattleUnit) -> String:
 		if t == null:
 			return ""
 		if u.charging:
-			return "蓄力中！下一步：「%s」→ %s，伤害 ×%.1f。用眩晕、缴械、计穷打断" % [u.data.skill.display_name, t.display_name(), BattleModel.CHARGE_BONUS]
+			return "蓄力中！下一步「%s」砸地上的红格，伤害 ×%.1f：挪出红格、防御，或者打空它的韧性" % [u.data.skill.display_name, BattleModel.CHARGE_BONUS]
 		if u.intent_skill and u.data.skill != null and u.data.is_boss:
 			return "下一步：蓄力，准备「%s」" % u.data.skill.display_name
 		if u.intent_skill and u.data.skill != null:
@@ -746,15 +1163,21 @@ func _update_cooldown_ring(actor: BattleUnit) -> void:
 		_cooldown_ring.recovered = target
 
 
-## 这个人站在哪：我方按阵法，敌方按默认的斜线。
+## 这个人脚底站在哪（我方坐标，敌方在 _layout 里左右镜像）：按格子算，越远的路往中间收；大体型站在前后两格中间。
 func _slot_feet(u: BattleUnit) -> Vector2:
 	return _slot_spot(u) + Vector2(0, FEET_DROP)
 
 
 func _slot_spot(u: BattleUnit) -> Vector2:
-	if u.side == BattleUnit.Side.PLAYER and FORMATION_SLOTS.has(_formation):
-		return FORMATION_SLOTS[_formation][u.slot]
-	return SLOTS[u.slot]
+	return _cell_spot(Vector2i(maxi(u.row, 0), u.lane), u.data.big)
+
+
+## 一格的脚底位置（我方坐标）。
+func _cell_spot(c: Vector2i, big := false) -> Vector2:
+	var x := GRID_FRONT_X if c.x == 0 else GRID_BACK_X
+	if big:
+		x = (GRID_FRONT_X + GRID_BACK_X) / 2
+	return Vector2(x + (1 - c.y) * LANE_SKEW, LANE_Y[c.y])
 
 
 ## 远近按脚底的高低算：越靠下越近、画得越大。
@@ -763,14 +1186,18 @@ func _slot_depth(u: BattleUnit) -> float:
 	return lerpf(DEPTH_RANGE.x, DEPTH_RANGE.y, t)
 
 
-## 同一方里越靠下的画在越上层（1～3）。
+## 越靠下的画在越上层（1～3，三路各一层）。
 func _slot_layer(u: BattleUnit) -> int:
-	var y := _slot_feet(u).y
-	var layer := 1
-	for other in model.units:
-		if other != u and other.side == u.side and _slot_feet(other).y < y:
-			layer += 1
-	return mini(layer, 3)
+	return 1 + u.lane
+
+
+## 卡片左上角该在哪（敌方左右镜像）。
+func _card_position(u: BattleUnit) -> Vector2:
+	var feet := _slot_feet(u)
+	var p := Vector2(feet.x - UnitCard.CARD_SIZE.x / 2, feet.y - UnitCard.FEET.y)
+	if u.side == BattleUnit.Side.ENEMY:
+		p.x = size.x - p.x - UnitCard.CARD_SIZE.x
+	return p
 
 
 func _layout() -> void:
@@ -781,13 +1208,7 @@ func _layout() -> void:
 		_scene.size = tex * k
 		_scene.position = Vector2((size.x - _scene.size.x) / 2, size.y - _scene.size.y)
 	for u in _cards:
-		var card := _cards[u]
-		var feet := _slot_feet(u)
-		var p := Vector2(feet.x - UnitCard.CARD_SIZE.x / 2, feet.y - UnitCard.FEET.y)
-		if u.side == BattleUnit.Side.PLAYER:
-			card.place(p)
-		else:
-			card.place(Vector2(size.x - p.x - UnitCard.CARD_SIZE.x, p.y))
+		_cards[u].place(_card_position(u))
 
 
 # --- 搭界面 ---
@@ -971,6 +1392,9 @@ func _build_bottom_bar() -> void:
 	_skill_button = _corner_button("技", SKILL_SPOT, ENEMY_RED, PAPER, 38)
 	_guard_button = _corner_button("守", GUARD_SPOT, Color(INK, 0.9), PAPER, 32)
 	_combo_button = _corner_button("合", COMBO_SPOT, Color(INK, 0.9), PAPER, 28)
+	_move_button = _corner_button("位", MOVE_SPOT, Color("2f5a54"), PAPER, 28)
+	_corner_caption(MOVE_SPOT).text = "补位"
+	_move_button.pressed.connect(_toggle_move)
 	_skill_sub = _corner_caption(SKILL_SPOT)
 	_cooldown_ring = CooldownRing.new()
 	_skill_button.add_child(_cooldown_ring)
@@ -1091,7 +1515,7 @@ func _show_result() -> void:
 	stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(stars)
 	var conditions := model.star_conditions()
-	var texts := ["获胜", "无人倒下", "%d 回合内获胜（用了 %d 回合）" % [stage.star_round_limit, model.round_number()]]
+	var texts := ["获胜", "无人倒下", "%d 回合内获胜（用了 %d 回合）" % [model.round_limit(), model.round_number()]]
 	for i in texts.size():
 		v.add_child(UiKit.label(("● " if conditions[i] else "○ ") + texts[i], 20, INK if conditions[i] else Color("8a7a66")))
 	if won:

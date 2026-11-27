@@ -11,7 +11,7 @@
 script = ExtResource("5_d48i2")
 id = &"jiang_men_tu_di"
 display_name = "蒋门神徒弟"
-role = 1
+role = 0
 base_hp = 400
 base_atk = 112
 base_def = 22

@@ -16,7 +16,7 @@ const RAGE := Color("f08a24")
 const DAMAGE := Color("ff6b5b")
 const HEAL := Color("7be07f")
 
-const ROLE_NAMES: Array[String] = ["猛将", "武将", "射手", "谋士", "奇人"]
+const ROLE_NAMES: Array[String] = ["战士", "刺客", "射手", "道士", "治疗"]
 const RARITY_NAMES: Array[String] = ["", "地煞", "天罡", "主角"]
 ## 内部和设计文档里的品级名；界面上不显示，品级只用勾玉数（MagatamaRow）和名字颜色表示
 const TIER_NAMES: Array[String] = ["甲", "乙", "丙", "丁"]
@@ -26,12 +26,12 @@ const TIER_COLORS: Array[Color] = [Color("e0b040"), Color("a070e0"), Color("5a9a
 const QUALITY_COLORS: Array[Color] = [Color("c8c4b8"), Color("6aa8f0"), Color("e0b040"), Color("e8604a")]
 const QUALITY_INK: Array[Color] = [Color("6a6458"), Color("2f63a8"), Color("a8741a"), Color("b0301e")]
 ## 职业小标签上的单字
-const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
+const ROLE_TAGS: Array[String] = ["战", "刺", "射", "道", "医"]
 ## 卡面统一用墨色底、深色框，颜色只留给印章、名字、勾玉这些小标记
 const CARD_BG := Color("221d18")
 const CARD_FRAME := Color("4a3f33")
 ## 职业底色（旧卡面用，新卡面统一墨色底）：猛将蓝、武将红、射手绿、谋士紫、奇人青
-const ROLE_COLORS: Array[Color] = [Color("34465f"), Color("5a3434"), Color("3d5634"), Color("4a3d5e"), Color("2f5252")]
+const ROLE_COLORS: Array[Color] = [Color("34465f"), Color("4e3560"), Color("3d5634"), Color("2a5452"), Color("6a5220")]
 
 
 static var _font: Font

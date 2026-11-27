@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "快活林醉步"
+description = "单体 180% 伤害，目标血量低于 30% 时翻倍。"
+effect = 1
+power = 1.8
+cooldown = 3
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_kuai_huo_lin_zui_bu"
+display_name = "快活林醉步"
+flavor = "武松一路吃了三十五碗酒，醉里使出玉环步、鸳鸯脚，打得蒋门神跪地求饶。"
+source = "研读技能书《快活林醉步》"
+role = 1
+skill = SubResource("Resource_sk")

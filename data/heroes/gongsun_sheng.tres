@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/gongsun_sheng.png" id="1_b"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/gongsun_sheng.png" id="1_bs"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_u"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+[ext_resource type="Texture2D" path="res://art/faces/gongsun_sheng.png" id="2_f"]
+[ext_resource type="Texture2D" path="res://art/portraits/gongsun_sheng.png" id="3_p"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/gongsun_sheng.png" id="3_m"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_t"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/tian_jiang.png" id="8_sb"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/tian_jiang.png" id="8_sm"]
+
+[sub_resource type="Resource" id="Resource_summon"]
+script = ExtResource("1_u")
+id = &"tian_jiang"
+display_name = "天将"
+role = 0
+base_hp = 100
+base_atk = 10
+base_def = 40
+base_spd = 95
+map_sprite = ExtResource("8_sm")
+battle_sprite = ExtResource("8_sb")
+attack_style = &"heavy"
+
+[sub_resource type="Resource" id="Resource_skill"]
+script = ExtResource("2_s")
+display_name = "五雷天将"
+description = "召唤：念动五雷天心正法，召一员天将站进空格（前排先放）。天将攻击按公孙胜九成、生命六成，打死为止，能替身后的人挡路。"
+effect = 23
+power = 0.9
+hits = 1
+turns = 0
+amount = 0.6
+cooldown = 4
+summon = SubResource("Resource_summon")
+
+[sub_resource type="Resource" id="Resource_talent"]
+script = ExtResource("7_t")
+display_name = "入云龙"
+kind = &"open_weaken"
+amount = 0.15
+text = "开战时敌方全体攻击 -{x}，持续 2 回合"
+
+[resource]
+script = ExtResource("1_u")
+id = &"gongsun_sheng"
+display_name = "公孙胜"
+nickname = "入云龙"
+rarity = 2
+role = 3
+tier = 0
+sort_order = 25
+base_hp = 400
+base_atk = 72
+base_def = 16
+base_spd = 112
+base_res = 50
+base_agi = 50
+portrait = ExtResource("3_p")
+bust = ExtResource("1_b")
+face = ExtResource("2_f")
+map_sprite = ExtResource("3_m")
+battle_sprite = ExtResource("1_bs")
+attack_style = &"throw"
+skill = SubResource("Resource_skill")
+talent = SubResource("Resource_talent")

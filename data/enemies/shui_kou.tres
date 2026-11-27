@@ -11,7 +11,7 @@
 script = ExtResource("2_j6nm2")
 id = &"shui_kou"
 display_name = "水寇"
-role = 4
+role = 1
 base_hp = 392
 base_atk = 95
 base_def = 22

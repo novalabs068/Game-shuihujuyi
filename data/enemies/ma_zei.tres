@@ -11,7 +11,7 @@
 script = ExtResource("1_55vce")
 id = &"ma_zei"
 display_name = "马贼"
-role = 1
+role = 0
 base_hp = 336
 base_atk = 92
 base_def = 18

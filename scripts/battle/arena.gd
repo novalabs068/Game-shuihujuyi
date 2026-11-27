@@ -21,7 +21,7 @@ const ELITE_FROM := 3
 const FIRST_TOKENS := {3: 2, 6: 2, 9: 2, 10: 5}
 const FIRST_SILVER_PER_ROUND := 30
 const FIRST_EQUIP := {5: EquipData.Quality.LIANG, 10: EquipData.Quality.JING}
-## 第一次打赢给的秘籍：第 4、8 关精品
+## 第一次打赢给残页（按精品秘籍折算 6 张，见 main）：第 4、8 关
 const FIRST_MIJI := {4: MijiData.Quality.JING, 8: MijiData.Quality.JING}
 
 
@@ -71,5 +71,5 @@ static func first_reward_text(n: int) -> String:
 	if FIRST_EQUIP.has(n):
 		parts.append("%s装备一件" % EquipData.QUALITY_NAMES[FIRST_EQUIP[n]])
 	if FIRST_MIJI.has(n):
-		parts.append("%s秘籍一本" % MijiData.QUALITY_NAMES[FIRST_MIJI[n]])
+		parts.append("残页 6 张")
 	return "、".join(parts)

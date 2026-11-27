@@ -31,7 +31,7 @@ static func after_battle(model: BattleModel) -> Dictionary[StringName, float]:
 	var out: Dictionary[StringName, float] = {}
 	var lost := model.result == BattleModel.Result.LOSE
 	for u in model.units:
-		if u.side != BattleUnit.Side.PLAYER:
+		if u.side != BattleUnit.Side.PLAYER or u.is_summon():
 			continue
 		out[u.data.id] = WOUNDED if lost or not u.is_alive() else maxf(u.hp_ratio(), WOUNDED)
 	return out

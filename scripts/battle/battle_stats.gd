@@ -5,7 +5,7 @@ extends RefCounted
 ## 每个人总数的项目（键 → 显示名），顺序就是统计表的列
 const TOTALS := {
 	"dealt": "输出", "taken": "承伤", "healed": "治疗", "shielded": "护盾",
-	"crits": "暴击", "pursuits": "追击", "kills": "击倒", "controls": "控制",
+	"crits": "暴击", "dodges": "闪避", "pursuits": "追击", "kills": "击倒", "controls": "控制",
 	"attacks": "普攻", "skills": "绝招", "combos": "组合技",
 }
 ## 按回合记的项目

@@ -12,8 +12,9 @@
 [sub_resource type="Resource" id="Resource_dnmna"]
 script = ExtResource("5_k1f1m")
 display_name = "摸天一击"
-description = "单体 180% 伤害。"
+description = "穿透：长枪一搠一路两格，前一格 180%、后一格打八折。"
 power = 1.8
+area = 2
 
 [sub_resource type="Resource" id="Resource_djps8"]
 script = ExtResource("6_bdjsl")
@@ -34,6 +35,8 @@ base_hp = 470
 base_atk = 50
 base_def = 36
 base_spd = 90
+base_res = 14
+base_agi = 20
 portrait = ExtResource("3_djps8")
 bust = ExtResource("1_cuwwa")
 face = ExtResource("2_bdjsl")

@@ -168,6 +168,7 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 	var screen := BattleView.new()
 	screen.stage = stage
 	screen.team = GameState.battle_team()
+	screen.placement = GameState.placement()
 	screen.hero_level = GameState.level
 	# 在剧本里打仗前最后换的那张背景下打（五台山、瓦罐寺这些不是大地图上的地点）
 	var where := StoryScript.background_before(StoryScript.load_file(story.script_path), resume_at)
@@ -289,6 +290,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 	var screen := BattleView.new()
 	screen.stage = stage if bonus.has("arena_round") else GameState.prepare_stage(stage)
 	screen.team = GameState.battle_team()
+	screen.placement = GameState.placement()
 	screen.hero_level = GameState.level
 	var where := destination if destination != &"" else GameState.location_id
 	if return_scene != "":
@@ -329,13 +331,13 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			var extra := Rewards.grant(bonus.get("tokens", 0), bonus.get("silver", 0), bonus.get("experience", 0), drop, bonus.get("medicine", &""))
 			if extra != "":
 				parts.append(extra)
-			# 秘籍：乙甲等悬赏、擂台指定关给；普通遇敌偶尔掉一本凡品
-			var mj: MijiData = null
+			# 残页（合成技能书用）：乙甲等悬赏、擂台指定关给；普通遇敌偶尔掉一张
+			var page_count: int = bonus.get("pages", 0)
 			if bonus.has("miji_quality"):
-				mj = Miji.random_of(GameDB.mijis.values(), bonus["miji_quality"], screen.model.rng)
-			elif bonus.is_empty() and screen.model.rng.randf() < Miji.ENCOUNTER_DROP_CHANCE:
-				mj = Miji.random_of(GameDB.mijis.values(), MijiData.Quality.FAN, screen.model.rng)
-			var scroll_text := Rewards.grant_scroll(mj)
+				page_count += [1, 3, 6, 10][int(bonus["miji_quality"])]
+			elif bonus.is_empty() and screen.model.rng.randf() < Books.ENCOUNTER_PAGE_CHANCE:
+				page_count += 1
+			var scroll_text := Rewards.grant_pages(page_count)
 			if scroll_text != "":
 				parts.append(scroll_text)
 			GameState.set_flag(bonus.get("flag", ""))

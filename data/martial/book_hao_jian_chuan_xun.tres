@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "号箭传讯"
+description = "连锁：响箭在敌阵里连跳 3 次，第一下 120%，每跳打七五折。"
+effect = 0
+power = 1.2
+area = 3
+cooldown = 3
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_hao_jian_chuan_xun"
+display_name = "号箭传讯"
+flavor = "朱贵在旱地忽律酒店朝芦苇里射一支响箭，对岸就摇出船来接人上山。"
+source = "研读技能书《号箭传讯》"
+role = 2
+skill = SubResource("Resource_sk")

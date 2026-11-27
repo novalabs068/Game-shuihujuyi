@@ -12,9 +12,10 @@
 [sub_resource type="Resource" id="Resource_0wtma"]
 script = ExtResource("2_6s73u")
 display_name = "风雪夜枪"
-description = "单体 300% 伤害，目标血量低于 30% 时伤害翻倍。"
+description = "穿透：一枪扎穿一路，前一格 300%、后一格打八折，目标血量低于 30% 时伤害翻倍。普攻也能扎穿一路。"
 effect = 1
 power = 3.0
+area = 2
 
 [sub_resource type="Resource" id="Resource_pqyly"]
 script = ExtResource("7_mqytj")
@@ -29,18 +30,21 @@ id = &"lin_chong"
 display_name = "林冲"
 nickname = "豹子头"
 rarity = 2
-role = 1
+role = 0
 tier = 0
 sort_order = 2
-base_hp = 470
-base_atk = 84
-base_def = 34
+base_hp = 559
+base_atk = 68
+base_def = 42
 base_spd = 108
+base_res = 13
+base_agi = 38
 portrait = ExtResource("3_mqytj")
 bust = ExtResource("1_0f42t")
 face = ExtResource("2_8jxta")
 map_sprite = ExtResource("3_8jxta")
 battle_sprite = ExtResource("1_pqyly")
 attack_style = &"thrust"
+basic_area = 2
 skill = SubResource("Resource_0wtma")
 talent = SubResource("Resource_pqyly")

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_e"]
+
+[resource]
+script = ExtResource("1_e")
+id = &"shen_ji_shuang_dao"
+display_name = "神机双刀"
+quality = 3
+flavor = "朱武腰间两口短刀，他不常出刀，出刀必是算好了的时候。"
+atk_pct = 0.08
+spd_pct = 0.08
+effects = Array[StringName]([&"swift"])
+owner = &"zhu_wu"
+source = "arena:6"
+source_text = "擂台第 6 关首次打赢"

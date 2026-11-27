@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "混世魔王咒"
+kind = &"open_silence"
+text = "开战时让敌方攻击最高的一人计穷 2 回合"
+
+[resource]
+script = ExtResource("2_m")
+id = &"hun_shi_mo_wang_zhou"
+display_name = "混世魔王咒"
+quality = 3
+flavor = "樊瑞在山寨里修的咒法，一念起来飞砂走石。"
+owner = &"fan_rui"
+effect = SubResource("Resource_e")

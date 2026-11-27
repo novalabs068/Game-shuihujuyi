@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+[ext_resource type="Resource" path="res://data/martial/book_san_shan_yi_qi.tres" id="3_w"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "三山义旗"
+kind = &"team_guard_open"
+amount = 0.15
+text = "开战时全队受到的伤害 -{x}，持续 2 回合"
+
+[resource]
+script = ExtResource("2_m")
+id = &"book_san_shan_yi_qi"
+display_name = "三山义旗"
+quality = 3
+flavor = "二龙山、桃花山、白虎山三山的人马合在一处打青州，一面大旗底下谁也不退。"
+effect = SubResource("Resource_e")
+story = "三山聚义打青州"
+recipe = Array[StringName]([&"lu_zhishen", &"yang_zhi", &"wu_song", &"cao_zheng", &"zhang_qing", &"sun_erniang", &"shi_en", &"li_zhong"])
+martial = ExtResource("3_w")

@@ -11,7 +11,7 @@
 script = ExtResource("4_aryjh")
 id = &"du_jian_qin_bing"
 display_name = "都监府亲兵"
-role = 1
+role = 0
 base_hp = 380
 base_atk = 124
 base_def = 22

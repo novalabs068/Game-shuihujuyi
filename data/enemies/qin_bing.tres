@@ -11,7 +11,7 @@
 script = ExtResource("1_2kahc")
 id = &"qin_bing"
 display_name = "太尉府亲兵"
-role = 1
+role = 0
 base_hp = 460
 base_atk = 106
 base_def = 26

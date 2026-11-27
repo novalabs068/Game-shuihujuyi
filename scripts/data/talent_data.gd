@@ -40,6 +40,7 @@ const KINDS := {
 	&"open_weaken": "开战时敌方全体攻击 -amount，持续 2 回合",
 	&"cleanse_regen": "每次轮到自己回复 amount 比例的生命，并解除一种控制",
 	&"anti_counter": "被克制时受到的伤害 -amount",
+	&"formation_boost": "在场时全队的阵法加成（攻、防、速、减伤、治疗、反击）再 +amount",
 	&"pursuit": "追击：普攻后有 chance 的机会追加一下，pursuit_kind 决定追加什么，amount 是伤害倍数（减速时是减速比例）",
 }
 const CRIT_HASTE_STACKS := 3

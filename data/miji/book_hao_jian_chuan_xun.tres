@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+[ext_resource type="Resource" path="res://data/martial/book_hao_jian_chuan_xun.tres" id="3_w"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "号箭传讯"
+kind = &"pursuit"
+amount = 0.6
+chance = 0.3
+pursuit_kind = &"snipe"
+text = "普攻后 30% 的机会补一箭，打血最少的敌人（{x} 伤害）"
+
+[resource]
+script = ExtResource("2_m")
+id = &"book_hao_jian_chuan_xun"
+display_name = "号箭传讯"
+quality = 2
+flavor = "朱贵在旱地忽律酒店朝芦苇里射一支响箭，对岸就摇出船来接人上山。"
+effect = SubResource("Resource_e")
+story = "王伦旧寨"
+recipe = Array[StringName]([&"lin_chong", &"du_qian", &"song_wan", &"zhu_gui"])
+martial = ExtResource("3_w")

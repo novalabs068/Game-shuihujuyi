@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+[ext_resource type="Resource" path="res://data/martial/book_mang_dang_xiang_mo.tres" id="3_w"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "降魔录"
+kind = &"skill_power"
+amount = 0.15
+text = "绝招伤害 +{x}"
+
+[resource]
+script = ExtResource("2_m")
+id = &"book_mang_dang_xiang_mo"
+display_name = "降魔录"
+quality = 1
+flavor = "樊瑞在山寨里作法飞砂走石，公孙胜一道五雷天心正法破了他的妖法，樊瑞从此拜他为师。"
+effect = SubResource("Resource_e")
+story = "公孙胜收樊瑞"
+recipe = Array[StringName]([&"gongsun_sheng", &"fan_rui"])
+martial = ExtResource("3_w")

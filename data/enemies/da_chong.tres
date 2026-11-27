@@ -10,11 +10,29 @@
 
 [sub_resource type="Resource" id="Resource_v0o6f"]
 script = ExtResource("6_wrxmv")
-display_name = "一扑一掀一剪"
-description = "连扑 3 次，每次 85% 伤害。"
-effect = 2
-power = 0.85
-hits = 3
+display_name = "一扑"
+description = "猛虎扑向一路，前后两格都中：前一格 170%、后一格打八折。"
+effect = 0
+power = 1.7
+area = 2
+cooldown = 3
+
+[sub_resource type="Resource" id="Resource_xian"]
+script = ExtResource("6_wrxmv")
+display_name = "一掀"
+description = "腰胯一掀，掀翻整排：一排三格各受 210% 的七成伤害。"
+effect = 0
+power = 2.1
+area = 1
+cooldown = 3
+
+[sub_resource type="Resource" id="Resource_jian"]
+script = ExtResource("6_wrxmv")
+display_name = "一剪"
+description = "铁尾倒竖一剪，我方全体各受 120% 伤害，只能硬扛或打断。"
+effect = 12
+power = 1.2
+cooldown = 3
 
 [resource]
 script = ExtResource("5_gnf56")
@@ -34,5 +52,8 @@ battle_sprite = ExtResource("1_odart")
 attack_style = &"claw"
 skill = SubResource("Resource_v0o6f")
 is_boss = true
+phase_skills = Array[ExtResource("6_wrxmv")]([SubResource("Resource_xian"), SubResource("Resource_jian")])
+boss_bars = 5
+big = true
 enrage_name = "负痛狂啸"
 enrage_atk_bonus = 0.5
