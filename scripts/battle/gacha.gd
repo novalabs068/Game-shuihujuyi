@@ -7,10 +7,12 @@ const RATES: Array[int] = [3, 12, 35, 50]
 const PITY_JIA := 50
 ## 重复抽到时给的将魂
 const DUPLICATE_SOULS := 10
+## 多抽一次抽几张（五连，参考三国志战略版）；五连保底一个乙或以上
+const MULTI := 5
 
 
 ## 抽 count 次。pulls_since_jia 是距上次出甲已经抽了几次；返回 {"heroes": [...], "pulls_since_jia": 新值}。
-## ten_pull 时保证至少一个乙或以上；guarantee_jia 时保证至少一个甲（新手第一次十连）。
+## 五连（count >= MULTI）时保证至少一个乙或以上；guarantee_jia 时保证至少一个甲（新手第一次五连）。
 static func pull(pool: Array[UnitData], count: int, pulls_since_jia: int, rng: RandomNumberGenerator, guarantee_jia := false) -> Dictionary:
 	var tiers: Array[int] = []
 	var since := pulls_since_jia
@@ -20,7 +22,7 @@ static func pull(pool: Array[UnitData], count: int, pulls_since_jia: int, rng: R
 		tiers.append(tier)
 		if tier == UnitData.Tier.JIA:
 			since = 0
-	if count >= 10 and tiers.min() > UnitData.Tier.YI:
+	if count >= MULTI and tiers.min() > UnitData.Tier.YI:
 		tiers[count - 1] = UnitData.Tier.YI
 	if guarantee_jia and not UnitData.Tier.JIA in tiers:
 		tiers[count - 1] = UnitData.Tier.JIA

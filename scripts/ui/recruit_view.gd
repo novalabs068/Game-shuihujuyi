@@ -1,13 +1,13 @@
 class_name RecruitView
 extends Control
-## 聚义厅招募：用聚义令单抽或十连。
+## 聚义厅招募：用聚义令单抽或五连（参考三国志战略版：五张竖卡排一排，不再两排挤着）。
 ## 演出：画面压暗，聚义令旋转砸下（光的颜色预示这一抽最好的品级）→ 卡背一张张落下 → 逐张翻开，
 ## 四玉、五玉翻开前颤动、升起光柱；五玉和第一次抽到的四玉翻开后全屏登场。翻牌时点屏幕跳过。
 
 signal back_requested
 
-## 十连两排卡片要和按钮一起放进 720 高的屏幕
-const CARD_SIZE := Vector2(190, 206)
+## 五连一排竖卡，和按钮一起放进 720 高的屏幕
+const CARD_SIZE := Vector2(220, 330)
 const REVEAL_DELAY := 0.12
 const CARD_BACK := Color("3a1d14")
 const SEAL_RED := Color("b0261e")
@@ -19,7 +19,7 @@ var _rng := RandomNumberGenerator.new()
 var _tokens_label: Label
 var _pity_label: Label
 var _single: Button
-var _ten: Button
+var _multi: Button
 var _back: Button
 var _cards: GridContainer
 var _revealing := false
@@ -79,23 +79,18 @@ func _ready() -> void:
 		rates.add_child(MagatamaRow.for_tier(i, 15))
 		rates.add_child(UiKit.label("%d%%　" % Gacha.RATES[i], 16, UiKit.TEXT_DIM))
 	v.add_child(rates)
-	v.add_child(UiKit.label("十连至少一个四玉或以上；%d 抽内必出五玉。重复的好汉变成将魂 +%d（升星用）。" % [Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 16, UiKit.TEXT_DIM))
+	v.add_child(UiKit.label("五连至少一个四玉或以上；%d 抽内必出五玉。重复的好汉变成将魂 +%d（升星用）。" % [Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 16, UiKit.TEXT_DIM))
 	_pity_label = UiKit.label("", 16, UiKit.TEXT_DIM)
 	v.add_child(_pity_label)
 
-	# 屏幕再矮也能滑动看到全部卡片，按钮固定在底部
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	v.add_child(scroll)
+	# 五张竖卡排成一排，按钮固定在底部
 	var stage := CenterContainer.new()
 	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.add_child(stage)
+	v.add_child(stage)
 	_cards = GridContainer.new()
-	_cards.columns = 5
-	_cards.add_theme_constant_override("h_separation", 14)
-	_cards.add_theme_constant_override("v_separation", 10)
+	_cards.columns = Gacha.MULTI
+	_cards.add_theme_constant_override("h_separation", 22)
 	stage.add_child(_cards)
 
 	var buttons := HBoxContainer.new()
@@ -105,9 +100,9 @@ func _ready() -> void:
 	_single = UiKit.button("单抽（1 枚）", Vector2(240, 60), 26)
 	_single.pressed.connect(_recruit.bind(1))
 	buttons.add_child(_single)
-	_ten = UiKit.button("十连（10 枚）", Vector2(240, 60), 26)
-	_ten.pressed.connect(_recruit.bind(10))
-	buttons.add_child(_ten)
+	_multi = UiKit.button("五连（%d 枚）" % Gacha.MULTI, Vector2(240, 60), 26)
+	_multi.pressed.connect(_recruit.bind(Gacha.MULTI))
+	buttons.add_child(_multi)
 
 	_fx = Control.new()
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -127,10 +122,10 @@ func _input(event: InputEvent) -> void:
 func _refresh() -> void:
 	_tokens_label.text = "聚义令 %d" % GameState.tokens
 	var left := Gacha.PITY_JIA - GameState.pulls_since_jia
-	var first := "（第一次十连必出五玉）" if not GameState.has_flag("first_ten_pull") else ""
+	var first := "（第一次五连必出五玉）" if not GameState.has_flag("first_ten_pull") else ""
 	_pity_label.text = "距保底五玉还有 %d 抽　已招募 %d / %d 位好汉 %s" % [left, GameState.owned.size(), GameDB.heroes.size(), first]
 	_single.disabled = _revealing or GameState.tokens < 1
-	_ten.disabled = _revealing or GameState.tokens < 10
+	_multi.disabled = _revealing or GameState.tokens < Gacha.MULTI
 	_back.disabled = _revealing
 
 
@@ -144,7 +139,7 @@ func _recruit(count: int) -> void:
 	for child in _cards.get_children():
 		_cards.remove_child(child)
 		child.queue_free()
-	_cards.columns = mini(count, 5)
+	_cards.columns = mini(count, Gacha.MULTI)
 	var best := UnitData.Tier.DING
 	for r in results:
 		best = mini(best, (r["hero"] as UnitData).tier)
@@ -411,8 +406,8 @@ func _flip(slot: Control, tier: int, rare: bool) -> void:
 	var front := slot.get_node("Front") as Control
 	front.visible = true
 	if rare:
-		front.self_modulate = Color(2.2, 2.0, 1.4)
-		create_tween().tween_property(front, "self_modulate", Color.WHITE, 0.35)
+		front.modulate = Color(2.2, 2.0, 1.4)
+		create_tween().tween_property(front, "modulate", Color.WHITE, 0.35)
 		if tier == UnitData.Tier.JIA:
 			_shake(10.0)
 			Sfx.play(&"jia_gong")
@@ -662,43 +657,9 @@ func _showcase_gold(hero: UnitData, is_new: bool) -> void:
 	_in_showcase = false
 
 
-func _make_card(hero: UnitData, is_new: bool) -> PanelContainer:
-	var card := PanelContainer.new()
-	card.custom_minimum_size = CARD_SIZE
-	var color := UiKit.TIER_COLORS[hero.tier]
-	# 甲级卡的框描一道金边，其余都是深色框
-	# 五玉金边、四玉紫边，其余深色框
-	var frame := UiKit.CARD_FRAME
-	if hero.tier <= UnitData.Tier.YI:
-		frame = UiKit.TIER_COLORS[hero.tier]
-	card.add_theme_stylebox_override("panel", UiKit.card_box(frame, 4 if hero.tier <= UnitData.Tier.YI else 2))
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 2)
-	card.add_child(v)
-	var head := HBoxContainer.new()
-	v.add_child(head)
-	head.add_child(IdentitySeal.make(hero.rarity, 30))
-	var tag := UiKit.label("新！" if is_new else "将魂 +%d" % Gacha.DUPLICATE_SOULS, 18, UiKit.GOLD if is_new else UiKit.TEXT_DIM)
-	tag.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	head.add_child(tag)
-	var bust := UiKit.unit_picture(hero, 108)
-	bust.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	v.add_child(bust)
-	var name := UiKit.label(hero.display_name, 26, color)
-	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(name)
-	var marks := HBoxContainer.new()
-	marks.alignment = BoxContainer.ALIGNMENT_CENTER
-	marks.add_theme_constant_override("separation", 6)
-	marks.add_child(MagatamaRow.for_tier(hero.tier, 21))
-	marks.add_child(UiKit.role_tag(hero, 13))
-	v.add_child(marks)
-	var sub := UiKit.label(hero.nickname, 15, UiKit.TEXT_DIM)
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(sub)
-	UiKit.ignore_mouse(card)
-	return card
+## 正面：竖长的好汉卡（见 HeroCard），右上角写「新」或「将魂 +10」。
+func _make_card(hero: UnitData, is_new: bool) -> Control:
+	return HeroCard.make(hero, CARD_SIZE, 0, "新！" if is_new else "将魂 +%d" % Gacha.DUPLICATE_SOULS, UiKit.GOLD if is_new else Color("d8ccb4"))
 
 
 ## 手机返回键：抽卡动画放完才能返回。

@@ -9,7 +9,7 @@ const SAVE_VERSION := 2
 const MAX_HEROES := 3
 ## 统领光环：主修武学的加成放大这么多倍给全队（统领不上阵，全靠这一条撑着）
 const COMMANDER_AURA_MULT := 3.0
-## 新开局送的聚义令，正好一次十连
+## 新开局送的聚义令，够两次五连
 const STARTING_TOKENS := 10
 const DEFAULT_MAP := "ch1"
 const PROTAGONIST_ID := &"protagonist"
@@ -289,15 +289,15 @@ func owns(id: StringName) -> bool:
 	return id in owned
 
 
-## 用聚义令招募 count 次（1 或 10）。返回每一抽的结果 [{hero, is_new}]；聚义令不够时返回空。
-## 队伍没满时，新招到的好汉按品级从高到低自动补进去；第一次十连保证出一个甲。
+## 用聚义令招募 count 次（1 或 Gacha.MULTI）。返回每一抽的结果 [{hero, is_new}]；聚义令不够时返回空。
+## 队伍没满时，新招到的好汉按品级从高到低自动补进去；第一次五连保证出一个甲（旗子沿用旧名 first_ten_pull，旧存档抽过十连的不再送）。
 func recruit(count: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	if tokens < count:
 		return results
 	tokens -= count
-	var first_ten := count >= 10 and not has_flag("first_ten_pull")
-	if count >= 10:
+	var first_ten := count >= Gacha.MULTI and not has_flag("first_ten_pull")
+	if count >= Gacha.MULTI:
 		set_flag("first_ten_pull")
 	var outcome := Gacha.pull(GameDB.heroes, count, pulls_since_jia, rng, first_ten)
 	pulls_since_jia = outcome["pulls_since_jia"]

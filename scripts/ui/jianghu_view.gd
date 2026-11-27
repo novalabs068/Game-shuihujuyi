@@ -10,6 +10,8 @@ signal heroes_requested
 
 enum Tab { TODO, BOUNTIES, ALBUM }
 
+## 图鉴竖卡的大小：一行 8 张
+const ALBUM_CARD := Vector2(140, 210)
 const TAB_NAMES: Array[String] = ["可以做的事", "悬赏榜", "好汉图鉴"]
 const KIND_COLORS := {
 	"列传": Color("e0b040"),
@@ -148,8 +150,8 @@ static func todo_items() -> Array[Dictionary]:
 	var can_up := GameDB.heroes.filter(func(h: UnitData) -> bool: return GameState.can_star_up(h))
 	for h: UnitData in can_up:
 		out.append({"kind": "养成", "text": "%s的将魂够升星了" % h.display_name, "detail": "去好汉页", "location": &"", "level": 0})
-	if GameState.tokens >= 10:
-		out.append({"kind": "养成", "text": "聚义令有 %d 枚，够一次十连" % GameState.tokens, "detail": "去聚义厅招募", "location": &"", "level": 0})
+	if GameState.tokens >= Gacha.MULTI:
+		out.append({"kind": "养成", "text": "聚义令有 %d 枚，够一次五连" % GameState.tokens, "detail": "去聚义厅招募", "location": &"", "level": 0})
 	return out
 
 
@@ -246,9 +248,9 @@ func _show_album() -> void:
 	var parts := PackedStringArray()
 	for r in counts:
 		parts.append("%s %d/%d" % [UiKit.RARITY_NAMES[r], counts[r][0], counts[r][1]])
-	_body.add_child(UiKit.label("已招募 %d / %d 位（%s）。108 将会陆续加入卡池。点头像看详情。" % [owned, GameDB.heroes.size(), "、".join(parts)], 20, UiKit.TEXT_DIM))
+	_body.add_child(UiKit.label("已招募 %d / %d 位（%s）。108 将会陆续加入卡池。点卡片看详情。" % [owned, GameDB.heroes.size(), "、".join(parts)], 20, UiKit.TEXT_DIM))
 	var grid := GridContainer.new()
-	grid.columns = 5
+	grid.columns = 8
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	_body.add_child(grid)
@@ -258,29 +260,10 @@ func _show_album() -> void:
 		grid.add_child(_album_cell(h))
 
 
-func _album_cell(hero: UnitData) -> PanelContainer:
+## 图鉴里一张竖卡：招到的照常显示（勾玉按星级点亮），没招到的只露一个黑影。
+func _album_cell(hero: UnitData) -> Control:
 	var owned := GameState.owns(hero.id)
-	var cell := PanelContainer.new()
-	cell.custom_minimum_size = Vector2(232, 96)
-	cell.add_theme_stylebox_override("panel", UiKit.card_box(UiKit.GOLD if owned and hero.tier == UnitData.Tier.JIA else UiKit.CARD_FRAME, 2))
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 8)
-	cell.add_child(h)
-	var face := UiKit.unit_picture(hero, 84, false, true)
-	# 没招到的只露一个黑影
-	face.modulate = Color.WHITE if owned else Color(0.08, 0.08, 0.08)
-	h.add_child(face)
-	var info := VBoxContainer.new()
-	info.add_theme_constant_override("separation", 0)
-	h.add_child(info)
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 6)
-	info.add_child(top)
-	top.add_child(IdentitySeal.make(hero.rarity, 22))
-	top.add_child(UiKit.label(hero.display_name if owned else "？？？", 22, UiKit.TIER_COLORS[hero.tier] if owned else UiKit.TEXT_DIM))
-	info.add_child(MagatamaRow.for_hero(hero, GameState.star_of(hero.id), 15) if owned else MagatamaRow.for_tier(hero.tier, 15))
-	if owned:
-		info.add_child(UiKit.label(hero.nickname, 16, UiKit.TEXT_DIM))
+	var cell := HeroCard.make(hero, ALBUM_CARD, Stars.lit(GameState.star_of(hero.id)) if owned else 0, "", UiKit.GOLD, not owned)
 	UiKit.ignore_mouse(cell)
 	cell.mouse_filter = Control.MOUSE_FILTER_PASS
 	var pressed_at := [Vector2.INF]
