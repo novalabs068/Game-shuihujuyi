@@ -2,6 +2,7 @@ shader_type canvas_item;
 render_mode blend_add;
 // 放射的光：中心一团白热的光核，外面一圈柔和光晕，再往外是粗细不一、慢慢流转、会呼吸的光芒。
 // 叠加混合（越叠越亮），像真实的光而不是贴上去的色块。挂在 ColorRect 上（color 用白色，modulate.a 控制整体明暗）。
+// 光在矩形内切圆的边上淡到 0，所以全屏用时矩形要比屏幕大（见 recruit_view.gd 的 FULL_RAYS）。
 // 手机（兼容渲染器）上浮点精度低、屏幕颜色只有 8 位：噪声用整数哈希（不会碎成色块），最后加一点抖动抹掉渐变的色阶。
 
 uniform vec4 color : source_color = vec4(1.0, 0.8, 0.4, 1.0);
@@ -53,7 +54,10 @@ void fragment() {
 	float ray_fall = pow(clamp(1.0 - d / reach, 0.0, 1.0), 1.6) * smoothstep(0.0, core * 1.2, d);
 	float glow_core = exp(-d * d / (core * core));
 	float halo = exp(-d / (core * 3.0)) * 0.55 + exp(-d / (core * 9.0)) * 0.15;
-	float v = (glow_core * 1.3 + halo + rays * ray_fall * ray_strength * 1.6) * intensity * fade;
+	// 离矩形边还有一段距离就淡到 0：光是圆的，不会被矩形切出方块（全屏用时矩形要比屏幕大得多）
+	float r_max = 0.5 * min(aspect, 1.0);
+	float window = smoothstep(r_max, r_max * 0.55, d);
+	float v = (glow_core * 1.3 + halo + rays * ray_fall * ray_strength * 1.6) * intensity * fade * window;
 	// 越靠中心越接近白色（太亮的光看起来发白）
 	vec3 c = mix(color.rgb, vec3(1.0), clamp(glow_core * 0.8, 0.0, 1.0));
 	vec3 rgb = c * v;

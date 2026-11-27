@@ -3,23 +3,26 @@ extends Control
 ## 聚义厅招募：用聚义令单抽或五连（参考三国志战略版：五张竖卡排一排，不再两排挤着）。
 ## 演出：画面压暗，做旧的聚义令旋转砸下（光的颜色预示这一抽最好的品级，出五玉时只亮紫光，留个悬念）→
 ## 锦缎卡背一张张落下 → 逐张翻开。四玉翻开前颤动、卡边冒紫光；五玉翻开前卡飞到屏幕正中，全屏的光一涨一退，
-## 白、蓝、紫轮着来，呼之欲出又迟迟不出，最后炸成金光，翻开后全屏登场（只有五玉有全屏）。翻牌时点屏幕跳过（五玉的变色和登场照放）。
+## 先白光、再紫光，呼之欲出又迟迟不出，最后炸成金光，翻开后全屏登场（只有五玉有全屏）。翻牌时点屏幕跳过（五玉的变色和登场照放）。
 
 signal back_requested
 
 ## 五连一排竖卡，和按钮一起放进 720 高的屏幕
 const CARD_SIZE := Vector2(220, 330)
 const REVEAL_DELAY := 0.12
-## 五玉翻开前的全屏变色：白、蓝、紫三种光，每种「涨上去、像要炸开、又退回来」几次（心跳一样），
-## 最后涨到最高、突然全收回去静一下，再炸成金光。蓝、紫比品级色更饱和，叠加在亮处也看得出颜色
-const GOLD_PHASES: Array[Color] = [Color(1, 0.97, 0.9), Color("3d7dff"), Color("a35cff")]
-const SWELLS_PER_PHASE := 2
+## 五玉翻开前的全屏变色：先白光、再紫光，每次「涨上去、像要炸开、又退回来」（心跳一样），
+## 最后涨到最高、突然全收回去静一下，再炸成金光。紫光比品级色更饱和，叠加在亮处也看得出颜色
+const GOLD_PHASES: Array[Color] = [Color(1, 0.97, 0.9), Color("a35cff")]
+## 每种光涨几次（和 GOLD_PHASES 一一对应）：白光 1 次，紫光 2 次
+const GOLD_SWELLS: Array[int] = [1, 2]
 ## 一次涨、退各用几秒，退完停多久
-const SWELL_UP := 0.55
-const SWELL_DOWN := 0.35
+const SWELL_UP := 0.5
+const SWELL_DOWN := 0.3
 const SWELL_REST := 0.1
 ## 炸开前全收回去后，静多久
-const GOLD_HUSH := 0.5
+const GOLD_HUSH := 0.45
+## 全屏光芒的矩形是屏幕的几倍（光在矩形内切圆边上淡到 0，要比屏幕对角线大，四角才不发暗）
+const FULL_RAYS := 2.8
 ## 卡飞到正中后放大多少
 const GOLD_LIFT_SCALE := 1.45
 ## 卡背后的光比卡大出的边（左右、下、上；上面留得多，好放光柱）
@@ -447,7 +450,7 @@ func _build_up(slot: Control, tier: int) -> void:
 
 
 ## 五玉翻开前（全屏）：整屏压暗，这张卡背飞到正中放大；全屏的光芒和卡边的光跟着心跳一涨一退，
-## 每次都像要炸开又缩回去，白光、蓝光、紫光各涨几次，越涨越亮、卡抖得越凶，四周的光点往卡上聚。
+## 每次都像要炸开又缩回去，先白光、再紫光，越涨越亮、卡抖得越凶，四周的光点往卡上聚。
 ## 最后一次涨到最高，突然全收回去、静一下，再一闪炸成金光。之后原位的卡带着金光，接着翻开。
 func _build_up_gold(slot: Control) -> void:
 	var layer := Control.new()
@@ -460,7 +463,7 @@ func _build_up_gold(slot: Control) -> void:
 	layer.add_child(dim)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var center := Vector2(size.x / 2, size.y * 0.5)
-	var rays := _rays(size * 1.9, GOLD_PHASES[0], 0.16, 0.85)
+	var rays := _rays(size * FULL_RAYS, GOLD_PHASES[0], 0.16 / FULL_RAYS * 1.9, 0.85)
 	rays.position = center - rays.size / 2
 	var rays_mat := rays.material as ShaderMaterial
 	rays_mat.set_shader_parameter("intensity", 0.0)
@@ -504,13 +507,14 @@ func _build_up_gold(slot: Control) -> void:
 	await t.finished
 
 	var level := 0.25
-	for color in GOLD_PHASES:
+	for k in GOLD_PHASES.size():
+		var color := GOLD_PHASES[k]
 		var shift := create_tween().set_parallel()
 		shift.tween_method(_set_param.bind(rays_mat, "color"), rays_mat.get_shader_parameter("color") as Color, color, 0.2)
 		shift.tween_property(gather, "color", color.lightened(0.3), 0.2)
 		_aura_to(aura, color, level, 0.2)
-		for n in SWELLS_PER_PHASE:
-			level += 0.1
+		for n in GOLD_SWELLS[k]:
+			level += 0.15
 			await _swell(rays_mat, aura, lift, level + 0.55, level)
 	# 最后一次涨到最高，突然全收回去，静一下……
 	gather.emitting = false
@@ -613,7 +617,7 @@ func _showcase_gold(hero: UnitData, is_new: bool) -> void:
 	var center := Vector2(size.x / 2, size.y * 0.46)
 
 	# 背后的金光：白热的光核、柔和光晕、粗细不一慢慢流转的光芒（叠加混合）
-	var rays := _rays(Vector2(size.x * 1.6, size.y * 1.6), gold, 0.14, 0.7)
+	var rays := _rays(size * FULL_RAYS, gold, 0.14 / FULL_RAYS * 1.6, 0.7)
 	rays.position = center - rays.size / 2
 	layer.add_child(rays)
 
