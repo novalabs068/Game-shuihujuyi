@@ -8,16 +8,19 @@ extends RefCounted
 ##
 ## 出手顺序：每个单位的「下次行动时间」= 上次 + 1000 / 速度，时间最小的先动，
 ## 速度 100 的单位每回合（ROUND_TIME）正好动一次。
+##
+## 站位：每方 2 排 × 3 路（见 Grid）。近战只能打到每一路最前面的人（卡位），刺客和远程不受限。
 
-enum Action { ATTACK, SKILL, GUARD, COMBO }
+## MOVE 是「补位」：走到己方一个空格子，这一回合顺便防御
+enum Action { ATTACK, SKILL, GUARD, COMBO, MOVE }
 enum Result { ONGOING, WIN, LOSE }
 
-## 统领（主角）不上场；以他为一方的组合技（结义同心）只看另一位好汉
+## 统领（主角）：和好汉一起上场；他倒下全队士气受挫
 const COMMANDER_ID := &"protagonist"
+## 统领倒下：全队攻击 -10%
+const MORALE_LOSS := 0.1
 const TIME_PER_ACTION := 1000.0
 const ROUND_TIME := 10.0
-const CRIT_CHANCE := 0.05
-const CRIT_MULTIPLIER := 1.5
 const RAGE_ON_ATTACK := 20
 const RAGE_ON_SKILL := 10
 const RAGE_ON_GUARD := 25
@@ -28,10 +31,34 @@ const IRON_BASIC_MULTIPLIER := 0.5
 const EXPOSE_BONUS := 0.2
 ## 头目蓄满的绝招伤害倍数
 const CHARGE_BONUS := 1.4
+## 头目的韧性：普攻削、技能削、控制削多少；打中弱点（克）削双倍
+const TOUGHNESS_BASIC := 5
+const TOUGHNESS_SKILL := 8
+const TOUGHNESS_CONTROL := 25
+## 破绽（韧性打空）：跪地一回合，受到的伤害 +30%
+const BROKEN_TAKEN := 0.3
+## 头目换阶段的血量线：60% 进第二阶段，30% 进第三阶段
+const PHASE_LINES: Array[float] = [0.6, 0.3]
+## 攻击范围的伤害倍数：多人每人 ×0.7；穿透后一格 ×0.8；连锁每跳 ×0.75、最多跳 3 次；全范围每人 ×0.55
+const ROW_MULT := 0.7
+const LANE_BACK_MULT := 0.8
+const CHAIN_DECAY := 0.75
+const CHAIN_HOPS := 3
+const ALL_MULT := 0.55
+## 统领上场后我方是四个人：我方满四人时，敌人的生命、攻击都乘上这两个数（关卡数据还是按三人编的）
+const SQUAD_SIZE := 4
+const SQUAD_HP_SCALE := 1.6
+const SQUAD_ATK_SCALE := 1.65
+## 四人仗打得久一些：三星的回合限制多给这么多回合
+const SQUAD_EXTRA_ROUNDS := 3
+## 每方最多几个召唤物
+const MAX_SUMMONS := 2
+## 偷属性：偷走对方攻击、速度各两成，持续 3 回合
+const STEAL_STAT := 0.2
+const STEAL_TURNS := 3
 ## 伤害公式里防御的基准（1 级时）：伤害 = 攻击 × 倍率 × 基准 ÷ (基准 + 防御)
 const DEF_BASE := 100.0
 const EXECUTE_THRESHOLD := 0.3
-const ENRAGE_THRESHOLD := 0.5
 const TURN_PREVIEW_COUNT := 6
 ## 自动战斗时，有队友血量低于这个比例才用治疗技能
 const AI_HEAL_THRESHOLD := 0.6
@@ -67,33 +94,56 @@ var _extra_action := false
 var _hit_fx := ""
 ## 正在放蓄满的绝招时为 CHARGE_BONUS，伤害都乘上它
 var _charge_mult := 1.0
+## 正在结算阵法的反击（蛇尾追击、月角夹击）时为 true，免得反击再引出反击
+var _reacting := false
+## 选用的阵法（破阵时用来清加成）
+var formation_id: StringName = &""
+## 我方满四人（统领 + 三位好汉）：敌人按四人加强，三星回合多给几回合
+var squad := false
 
 
-## formation 是玩家选的阵法（Formations 的 id，空 = 不摆阵）。
-func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1, formation: StringName = &"") -> void:
+## formation 是玩家选的阵法（Formations 的 id，空 = 不摆阵）。placement 是我方每人站的格子（和 team 对应，
+## Vector2i(排, 路)；空着、不合法或重复的按阵法的阵位顺序、再按职业自动摆）。
+func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1, formation: StringName = &"", placement: Array = []) -> void:
 	stage = p_stage
 	combos = p_combos
+	formation_id = formation
 	if seed_value >= 0:
 		rng.seed = seed_value
 	else:
 		rng.randomize()
+	var players: Array[BattleUnit] = []
 	for i in team.size():
-		units.append(BattleUnit.new(team[i], BattleUnit.Side.PLAYER, i, hero_level))
+		players.append(BattleUnit.new(team[i], BattleUnit.Side.PLAYER, i, hero_level))
+	var wanted: Array = placement.duplicate()
+	if wanted.is_empty():
+		wanted.assign(Formations.cells(formation))
+	_place(players, wanted, Formations.cells(formation))
+	var foes: Array[BattleUnit] = []
 	for i in stage.enemies.size():
 		var e := BattleUnit.new(stage.enemies[i], BattleUnit.Side.ENEMY, i, stage.enemy_level)
 		var boss_k := stage.boss_power if e.data.is_boss else 1.0
 		if not is_equal_approx(stage.enemy_power * boss_k, 1.0):
 			e.strengthen(stage.enemy_power * boss_k, boss_k)
-		units.append(e)
+		squad = players.size() >= SQUAD_SIZE
+		if squad:
+			e.scale_squad(SQUAD_HP_SCALE, SQUAD_ATK_SCALE)
+		foes.append(e)
+	_place(foes, stage.enemy_cells)
+	for u in players + foes:
+		if u.row >= 0:
+			units.append(u)
 	_events = []
-	var players := alive(BattleUnit.Side.PLAYER)
+	players = alive(BattleUnit.Side.PLAYER)
 	if not players.is_empty():
 		var formation_text := Formations.apply(formation, players, alive(BattleUnit.Side.ENEMY))
 		if formation_text != "":
-			_emit("prep", players[0], Formations.display_name(formation), "阵法%s" % formation_text)
+			var eye := players.filter(func(u: BattleUnit) -> bool: return u.formation_eye)
+			_emit("prep", eye[0] if not eye.is_empty() else players[0], Formations.display_name(formation), "阵法%s" % formation_text)
 		var hero_ids: Array[StringName] = []
 		for u in players:
-			hero_ids.append(u.data.id)
+			if u.data.id != COMMANDER_ID:
+				hero_ids.append(u.data.id)
 		var faction := Factions.shared(hero_ids)
 		if faction != &"":
 			var who := players.filter(func(u: BattleUnit) -> bool: return Factions.of(u.data.id) == faction)
@@ -107,6 +157,29 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 		u.next_time = TIME_PER_ACTION / u.spd()
 	for e in alive(BattleUnit.Side.ENEMY):
 		_plan_intent(e)
+
+
+## 摆位：先按 wanted 里的格子（和 list 一一对应；不合法、被占的跳过），没格子的人先去 fallback 里还空着的格子
+## （阵法的阵位），再按职业自动摆。
+func _place(list: Array[BattleUnit], wanted: Array, fallback: Array[Vector2i] = []) -> void:
+	var taken := {}
+	for i in list.size():
+		if i >= wanted.size():
+			break
+		var c: Vector2i = wanted[i] if wanted[i] is Vector2i else Grid.NONE
+		if not Grid.valid(c) or list[i].data.big:
+			continue
+		if taken.has(c):
+			continue
+		Grid._put(list[i], c, taken)
+	for u in list:
+		if u.row >= 0 or u.data.big:
+			continue
+		for c in fallback:
+			if not taken.has(c):
+				Grid._put(u, c, taken)
+				break
+	Grid.auto_place(list, taken)
 
 
 # --- 查询 ---
@@ -127,6 +200,106 @@ func allies_of(unit: BattleUnit) -> Array[BattleUnit]:
 
 func foes_of(unit: BattleUnit) -> Array[BattleUnit]:
 	return alive(BattleUnit.Side.ENEMY if unit.side == BattleUnit.Side.PLAYER else BattleUnit.Side.PLAYER)
+
+
+## 一方站在 c 格的人（大体型占两格都算），没有返回 null。
+func occupant(side: BattleUnit.Side, c: Vector2i) -> BattleUnit:
+	for u in alive(side):
+		if u.occupies(c):
+			return u
+	return null
+
+
+## 一方这一路最前面的人（前排有人就是前排的，否则后排的），没人返回 null。
+func lane_front(side: BattleUnit.Side, lane: int) -> BattleUnit:
+	var front := occupant(side, Vector2i(0, lane))
+	return front if front != null else occupant(side, Vector2i(1, lane))
+
+
+## 一方的空格子（前排在前、中路在前）。
+func free_cells(side: BattleUnit.Side) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for c in Grid.all_cells():
+		if occupant(side, c) == null:
+			out.append(c)
+	return out
+
+
+## actor 这一下打得到的敌人：近战（刺客除外）只打得到每一路最前面的人；远程、刺客都打得到。
+func reachable_foes(actor: BattleUnit) -> Array[BattleUnit]:
+	var foes := foes_of(actor)
+	if not actor.is_melee() or Roles.ignores_block(actor.data.role):
+		return foes
+	var out: Array[BattleUnit] = []
+	var foe_side := BattleUnit.Side.ENEMY if actor.side == BattleUnit.Side.PLAYER else BattleUnit.Side.PLAYER
+	for l in Grid.LANES:
+		var u := lane_front(foe_side, l)
+		if u != null and not u in out:
+			out.append(u)
+	return out
+
+
+func can_reach(actor: BattleUnit, target: BattleUnit) -> bool:
+	return target in reachable_foes(actor)
+
+
+## 一招从 primary 出发实际打到的人和各自的伤害倍数：[[人, 倍数], ...]。
+func area_targets(actor: BattleUnit, primary: BattleUnit, area: SkillData.Area) -> Array:
+	if primary == null:
+		return []
+	var foes := foes_of(actor)
+	match area:
+		SkillData.Area.ROW:
+			var out := []
+			for f in foes:
+				if f.cells().any(func(c: Vector2i) -> bool: return c.x == primary.row):
+					out.append([f, ROW_MULT])
+			return out
+		SkillData.Area.LANE:
+			var out := [[primary, 1.0]]
+			if primary.row == 0 and not primary.data.big:
+				var behind := occupant(primary.side, Vector2i(1, primary.lane))
+				if behind != null:
+					out.append([behind, LANE_BACK_MULT])
+			return out
+		SkillData.Area.CHAIN:
+			var out := [[primary, 1.0]]
+			var last := primary
+			var k := 1.0
+			for i in CHAIN_HOPS:
+				var next: BattleUnit = null
+				for f in foes:
+					if out.any(func(p: Array) -> bool: return p[0] == f):
+						continue
+					if next == null or Grid.distance(f.cell(), last.cell()) < Grid.distance(next.cell(), last.cell()):
+						next = f
+				if next == null:
+					break
+				k *= CHAIN_DECAY
+				out.append([next, k])
+				last = next
+			return out
+		SkillData.Area.ALL:
+			return foes.map(func(f: BattleUnit) -> Array: return [f, ALL_MULT])
+	return [[primary, 1.0]]
+
+
+## 头目蓄的大招要砸哪几格（对方那一边）：按绝招的范围从预告的目标展开。
+func charge_cells_for(skill: SkillData, target: BattleUnit) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if target == null:
+		return out
+	match skill.effective_area():
+		SkillData.Area.LANE:
+			out.assign([Vector2i(0, target.lane), Vector2i(1, target.lane)])
+		SkillData.Area.ROW:
+			for l in Grid.LANES:
+				out.append(Vector2i(target.row, l))
+		SkillData.Area.ALL:
+			out = Grid.all_cells()
+		_:
+			out = target.cells()
+	return out
 
 
 ## 接下来行动的 TURN_PREVIEW_COUNT 个单位（假设期间速度不变），第一个就是下一个行动者。
@@ -165,7 +338,12 @@ func available_combo(actor: BattleUnit) -> ComboData:
 ## 胜利后的三颗星：获胜、无人倒下、在限定回合内获胜。
 func star_conditions() -> Array[bool]:
 	var won := result == Result.WIN
-	return [won, won and player_deaths == 0, won and round_number() <= stage.star_round_limit]
+	return [won, won and player_deaths == 0, won and round_number() <= round_limit()]
+
+
+## 三星要在几回合内打赢。
+func round_limit() -> int:
+	return stage.star_round_limit + (SQUAD_EXTRA_ROUNDS if squad else 0)
 
 
 func stars() -> int:
@@ -218,7 +396,8 @@ func start_next_turn() -> Array[Dictionary]:
 	return _events
 
 
-func act(action: Action, target: BattleUnit = null) -> Array[Dictionary]:
+## cell 只给 MOVE（补位）用：走到哪一格。
+func act(action: Action, target: BattleUnit = null, cell := Grid.NONE) -> Array[Dictionary]:
 	_events = []
 	var actor := current
 	if actor == null:
@@ -226,6 +405,8 @@ func act(action: Action, target: BattleUnit = null) -> Array[Dictionary]:
 	current = null
 	_extra_action = false
 	match action:
+		Action.MOVE when can_move_to(actor, cell):
+			_do_move(actor, cell)
 		Action.SKILL when actor.skill_ready():
 			_do_skill(actor, target)
 		Action.ATTACK when not actor.can_attack():
@@ -244,8 +425,8 @@ func act(action: Action, target: BattleUnit = null) -> Array[Dictionary]:
 	return _events
 
 
-## 敌人照预告的意图出手。自动战斗：能放组合技就放；被敌人的技能瞄准就防御；
-## 技能值得用就用；否则普攻最弱的目标。
+## 敌人照预告的意图出手。自动战斗：能放组合技就放；站在头目大招的红格里就躲开（躲不开就防御）；
+## 被敌人的技能瞄准就防御；技能值得用就用；否则普攻打得到的人里最弱的。召唤物也走这里。
 func act_ai() -> Array[Dictionary]:
 	var actor := current
 	if actor == null:
@@ -255,27 +436,61 @@ func act_ai() -> Array[Dictionary]:
 		if use_skill and actor.data.is_boss and not actor.charging:
 			return _charge(actor)
 		return act(Action.SKILL if use_skill else Action.ATTACK, intent_target_of(actor))
-	var foes := foes_of(actor)
+	var foes := reachable_foes(actor)
 	var weakest := _weakest(foes)
 	if available_combo(actor) != null:
 		return act(Action.COMBO, weakest)
+	if in_danger(actor):
+		var safe := safe_cell(actor)
+		if safe != Grid.NONE:
+			return act(Action.MOVE, null, safe)
+		return act(Action.GUARD)
 	if not actor.can_attack() and not actor.skill_ready():
 		return act(Action.GUARD)
-	# 有头目在蓄力，手上有控制就先打断它
+	# 有头目在蓄力：手上有控制就去削它的韧性，削空了大招就散了
 	if actor.skill_ready() and actor.data.skill.effect in CONTROL_EFFECTS:
-		for f in foes:
-			if f.charging and not f.resists(CONTROL_EFFECTS[actor.data.skill.effect]):
+		for f in foes_of(actor):
+			if f.charging and (f in foes or actor.data.skill.effect == SkillData.Effect.STUN_ALL):
 				return act(Action.SKILL, f)
 	if is_threatened(actor) and not (actor.skill_ready() and actor.data.skill.effect in [SkillData.Effect.STUN, SkillData.Effect.STUN_ALL, SkillData.Effect.HEAL]):
 		return act(Action.GUARD)
-	if actor.skill_ready() and _skill_worth_using(actor, foes):
+	if actor.skill_ready() and _skill_worth_using(actor, foes_of(actor)):
 		return act(Action.SKILL, _skill_target(actor, foes, weakest))
 	return act(Action.ATTACK, weakest)
 
 
-## 敌人这一步实际会打谁：普攻会被嘲讽拉走，技能（背后捅刀）不会；原目标倒下就改打最弱的。
+## 站在某个头目下一步要砸的红格里。
+func in_danger(u: BattleUnit) -> bool:
+	for e in foes_of(u):
+		if e.charging and releases_skill_next(e) and u.cells().any(func(c: Vector2i) -> bool: return c in e.charge_cells):
+			return true
+	return false
+
+
+## 躲开红格能去的空格子：不在任何红格里，先挑宜站的那一排、离得近的。没有返回 Grid.NONE。
+func safe_cell(u: BattleUnit) -> Vector2i:
+	if u.data.big:
+		return Grid.NONE
+	var danger: Array[Vector2i] = []
+	for e in foes_of(u):
+		if e.charging:
+			danger.append_array(e.charge_cells)
+	var best := Grid.NONE
+	for c in free_cells(u.side):
+		if c in danger:
+			continue
+		if best == Grid.NONE or _cell_score(u, c) < _cell_score(u, best):
+			best = c
+	return best
+
+
+func _cell_score(u: BattleUnit, c: Vector2i) -> int:
+	return Grid.distance(u.cell(), c) + (0 if c.x == Roles.home_row(u.data.role) else 3)
+
+
+## 敌人这一步实际会打谁：普攻会被嘲讽拉走（打得到嘲讽的人才算），技能（背后捅刀）不会；原目标倒下或打不到就改打打得到的最弱的。
 func intent_target_of(enemy: BattleUnit) -> BattleUnit:
-	var foes := foes_of(enemy)
+	var foes := reachable_foes(enemy)
 	if foes.is_empty():
 		return null
 	# 「背后捅刀」这类技能、头目蓄满的绝招无视嘲讽，其他攻击都会被嘲讽拉走
@@ -284,15 +499,20 @@ func intent_target_of(enemy: BattleUnit) -> BattleUnit:
 		for f in foes:
 			if f.is_taunting():
 				return f
-	if enemy.intent_target != null and enemy.intent_target.is_alive():
+	if enemy.intent_target != null and enemy.intent_target.is_alive() and (enemy.intent_target in foes or ignores_taunt):
 		return enemy.intent_target
 	return _weakest(foes)
 
 
-## 有没有敌人预告下一步要用技能打这个好汉（头目还没蓄力的话，下一步只是蓄力，不算）。
+## 有没有敌人预告下一步要用技能打这个人（头目还没蓄力的话，下一步只是蓄力，不算；蓄满的看红格）。
 func is_threatened(hero: BattleUnit) -> bool:
-	for e in alive(BattleUnit.Side.ENEMY):
-		if releases_skill_next(e) and intent_target_of(e) == hero:
+	for e in foes_of(hero):
+		if not releases_skill_next(e):
+			continue
+		if e.charging and not e.charge_cells.is_empty():
+			if hero.cells().any(func(c: Vector2i) -> bool: return c in e.charge_cells):
+				return true
+		elif intent_target_of(e) == hero:
 			return true
 	return false
 
@@ -302,13 +522,31 @@ func releases_skill_next(e: BattleUnit) -> bool:
 	return e.intent_skill and e.stun_turns == 0 and e.silence_turns == 0 and (not e.data.is_boss or e.charging)
 
 
-## 头目开始蓄力：这一回合照常普攻，同时蓄力，下一回合放出 ×1.4 的绝招。
+## 头目开始蓄力：这一回合照常普攻，同时蓄力并在地上标出下一回合要砸的格子，下一回合放出 ×1.4 的绝招。
 func _charge(actor: BattleUnit) -> Array[Dictionary]:
 	actor.charging = true
 	var target := intent_target_of(actor)
+	var s := actor.data.skill
+	if s.needs_enemy_target() or s.effect in SkillData.ALL_EFFECTS or s.effect == SkillData.Effect.BACKSTAB:
+		actor.charge_cells = charge_cells_for(s, actor.intent_target if actor.intent_target != null and actor.intent_target.is_alive() else target)
 	var events := act(Action.ATTACK, target)
-	events.push_front({"kind": "charge", "unit": actor, "popup": "蓄力", "log": "%s 一边出手一边蓄力，下一步「%s」伤害 ×%.1f！用眩晕、缴械、计穷可以打断" % [actor.display_name(), actor.data.skill.display_name, CHARGE_BONUS], "big": false, "source": null, "fx": ""})
+	var where := "，地上红格就是要砸的地方，挪开或者打空它的韧性" if not actor.charge_cells.is_empty() else "，打空它的韧性能打断"
+	events.push_front({"kind": "charge", "unit": actor, "popup": "蓄力", "log": "%s 一边出手一边蓄力，下一步「%s」伤害 ×%.1f%s！" % [actor.display_name(), s.display_name, CHARGE_BONUS, where], "big": false, "source": null, "fx": "", "hp": actor.hp, "cells": actor.charge_cells.duplicate()})
 	return events
+
+
+## 能不能补位到这一格：己方的空格子，大体型不能动。
+func can_move_to(actor: BattleUnit, cell: Vector2i) -> bool:
+	return Grid.valid(cell) and not actor.data.big and cell in free_cells(actor.side)
+
+
+## 补位：走过去，这一回合顺便防御。
+func _do_move(actor: BattleUnit, cell: Vector2i) -> void:
+	var from := actor.cell()
+	actor.row = cell.x
+	actor.lane = cell.y
+	actor.guarding = true
+	_emit("move", actor, "补位", "%s 从%s挪到%s，摆出防御架势" % [actor.display_name(), Grid.cell_name(from), Grid.cell_name(cell)])
 
 
 # --- 行动结算 ---
@@ -324,8 +562,10 @@ func _do_attack(actor: BattleUnit, wanted: BattleUnit) -> void:
 	if target == null:
 		return
 	_emit("action", actor, "普攻", "%s 普攻 %s" % [actor.display_name(), target.display_name()])
+	_events.back()["area"] = actor.data.basic_area
 	stats.add(actor, "attacks")
-	_deal(actor, target, 1.0, false, true)
+	for h in area_targets(actor, target, actor.data.basic_area):
+		_deal(actor, h[0], h[1], false, true)
 	actor.add_rage(RAGE_ON_ATTACK)
 	_try_pursuit(actor, target)
 
@@ -364,38 +604,68 @@ func _try_pursuit(actor: BattleUnit, target: BattleUnit) -> void:
 
 
 ## 放绝招。组合技里借放的（skill 不为空）用传进来的那招，不进冷却。
+## 打单个敌人的效果按绝招的范围（多人、穿透、连锁、全范围）展开到几个人；头目蓄满的绝招打预警的格子里的人。
 func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -> void:
 	var s := skill if skill != null else actor.data.skill
+	var cells: Array[Vector2i] = []
 	if actor.charging and skill == null:
 		actor.charging = false
 		_charge_mult = CHARGE_BONUS
+		cells = actor.charge_cells
+		actor.charge_cells = []
 	if skill == null:
 		# 机变：冷却少 1 回合，最少 1 回合
 		actor.skill_cooldown = maxi(s.cooldown - 1, 1) if actor.has_gear(&"nimble") else s.cooldown
 		actor.skill_cooldown_total = actor.skill_cooldown
 	_emit("skill", actor, s.display_name, "%s 使用「%s」" % [actor.display_name(), s.display_name])
+	# 给画面用：这一招的范围、是不是蓄满的大招、砸哪几格
+	_events.back()["area"] = s.effective_area()
+	_events.back()["charged"] = _charge_mult > 1.0
+	_events.back()["cells"] = cells.duplicate()
 	if skill == null:
 		stats.add(actor, "skills")
 	_hit_fx = SKILL_FX.get(s.effect, "")
+	# 这一招打谁：[[人, 倍数], ...]
+	var hits := []
+	if _charge_mult > 1.0 and not cells.is_empty():
+		for f in foes_of(actor):
+			if f.cells().any(func(c: Vector2i) -> bool: return c in cells):
+				hits.append([f, 1.0])
+		if hits.is_empty() and s.effect not in [SkillData.Effect.TEAM_HASTE, SkillData.Effect.HEAL, SkillData.Effect.TEAM_ATK, SkillData.Effect.TAUNT, SkillData.Effect.SUMMON]:
+			_emit("info", actor, "扑空", "%s 的「%s」扑了个空" % [actor.display_name(), s.display_name])
+	elif s.effect in SkillData.ALL_EFFECTS:
+		hits = foes_of(actor).map(func(f: BattleUnit) -> Array: return [f, 1.0])
+	elif s.effect == SkillData.Effect.BACKSTAB:
+		# 绕过嘲讽和卡位，打预告里的目标（预告时血量比例最低的人）
+		var t := wanted if wanted != null and wanted.is_alive() else _weakest(foes_of(actor))
+		hits = area_targets(actor, t, s.area)
+	elif s.needs_enemy_target():
+		hits = area_targets(actor, _pick_foe(actor, wanted), s.area)
 	match s.effect:
-		SkillData.Effect.DAMAGE:
-			_deal(actor, _pick_foe(actor, wanted), s.power)
+		SkillData.Effect.DAMAGE, SkillData.Effect.BACKSTAB:
+			for h in hits:
+				_deal(actor, h[0], s.power * h[1])
 		SkillData.Effect.EXECUTE:
-			var target := _pick_foe(actor, wanted)
-			var low := target.hp_ratio() < EXECUTE_THRESHOLD
-			if low:
-				_emit("info", target, "残血", "%s 伤重难支，伤害翻倍" % target.display_name())
-			_deal(actor, target, s.power * (2.0 if low else 1.0))
+			for h in hits:
+				var target: BattleUnit = h[0]
+				var low := target.hp_ratio() < EXECUTE_THRESHOLD
+				if low:
+					_emit("info", target, "残血", "%s 伤重难支，伤害翻倍" % target.display_name())
+				_deal(actor, target, s.power * h[1] * (2.0 if low else 1.0))
 		SkillData.Effect.MULTI_HIT:
-			var target := _pick_foe(actor, wanted)
 			for i in s.hits:
-				if not target.is_alive():
-					target = _pick_foe(actor, null)
-					if target == null:
+				var live := hits.filter(func(h: Array) -> bool: return h[0].is_alive())
+				if live.is_empty():
+					var t := _pick_foe(actor, null)
+					if t == null:
 						break
-				_deal(actor, target, s.power)
+					hits = [[t, 1.0]]
+					live = hits
+				for h in live:
+					_deal(actor, h[0], s.power * h[1])
 		SkillData.Effect.SURE_CRIT:
-			_deal(actor, _pick_foe(actor, wanted), s.power, true)
+			for h in hits:
+				_deal(actor, h[0], s.power * h[1], true)
 		SkillData.Effect.TAUNT:
 			actor.taunt_turns = s.turns
 			actor.reduction = s.amount
@@ -408,47 +678,45 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 				_emit("info", ally, "加速", "")
 			_emit("info", actor, "", "全队速度提升，怒气 +%d" % s.rage_gain)
 		SkillData.Effect.STUN:
-			var target := _pick_foe(actor, wanted)
-			if _stun(actor, target, s.turns):
-				_emit("info", target, "眩晕", "%s 被放倒了" % target.display_name())
+			for h in hits:
+				if _stun(actor, h[0], s.turns):
+					_emit("info", h[0], "眩晕", "%s 被放倒了" % h[0].display_name())
 		SkillData.Effect.STEAL:
-			var target := _pick_foe(actor, wanted)
-			# 只偷增益，减益（减攻、减速）不偷
-			var gains := target.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.atk_bonus >= 0.0 and b.spd_bonus >= 0.0)
-			if gains.is_empty():
-				_emit("info", target, "空手", "%s 身上没什么可偷的" % target.display_name())
-			else:
-				var b: BattleUnit.Buff = gains.back()
-				target.buffs.erase(b)
-				actor.add_buff(b)
-				_emit("info", actor, "偷到 " + b.name, "%s 偷走了 %s 的「%s」" % [actor.display_name(), target.display_name(), b.name])
+			var target: BattleUnit = hits[0][0] if not hits.is_empty() else null
+			if target != null:
+				_steal(actor, target)
 			_extra_action = true
 			_emit("info", actor, "再动", "%s 立刻再行动一次" % actor.display_name())
 		SkillData.Effect.HEAL:
+			var k := 1.0 + float(actor.formation_mods.get("heal", 0.0))
 			for ally in allies_of(actor):
-				var amount := mini(roundi(ally.max_hp * s.amount), ally.max_hp - ally.hp)
+				var amount := mini(roundi(ally.max_hp * s.amount * k), ally.max_hp - ally.hp)
 				ally.hp += amount
 				stats.add(actor, "healed", amount, round_number())
 				ally.stun_turns = 0
 				ally.disarm_turns = 0
 				ally.silence_turns = 0
+				ally.burn_turns = 0
 				_emit("heal", ally, "+%d" % amount, "")
 			_emit("info", actor, "", "%s 为全队疗伤" % actor.display_name())
 		SkillData.Effect.GUARD_STRIKE:
-			_deal(actor, _pick_foe(actor, wanted), s.power)
+			for h in hits:
+				_deal(actor, h[0], s.power * h[1])
 			var shield := roundi(actor.max_hp * s.amount)
 			for ally in allies_of(actor):
 				ally.shield += shield
 				stats.add(actor, "shielded", shield)
 				_emit("info", ally, "护盾 +%d" % shield, "")
 		SkillData.Effect.PIERCE:
-			_deal(actor, _pick_foe(actor, wanted), s.power, false, false, true)
+			for h in hits:
+				_deal(actor, h[0], s.power * h[1], false, false, true)
 		SkillData.Effect.ALL_FOES:
-			for foe in foes_of(actor):
-				_deal(actor, foe, s.power)
+			for h in hits:
+				_deal(actor, h[0], s.power * h[1])
 		SkillData.Effect.ALL_FOES_SLOW:
-			for foe in foes_of(actor):
-				_deal(actor, foe, s.power)
+			for h in hits:
+				var foe: BattleUnit = h[0]
+				_deal(actor, foe, s.power * h[1])
 				if foe.is_alive():
 					foe.add_buff(BattleUnit.Buff.new("踩踏", 0.0, -s.amount, s.turns))
 					_emit("info", foe, "减速", "")
@@ -456,12 +724,13 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			var k := 1.0 + s.amount * actor.rage / BattleUnit.RAGE_MAX
 			if actor.rage >= BattleUnit.RAGE_MAX / 2:
 				_emit("info", actor, "怒火", "%s 怒火正盛，伤害 ×%.1f" % [actor.display_name(), k])
-			for foe in foes_of(actor):
-				_deal(actor, foe, s.power * k)
+			for h in hits:
+				_deal(actor, h[0], s.power * k * h[1])
 		SkillData.Effect.ALL_FOES_BURN:
 			var burn := maxi(1, roundi(actor.atk() * s.amount))
-			for foe in foes_of(actor):
-				_deal(actor, foe, s.power)
+			for h in hits:
+				var foe: BattleUnit = h[0]
+				_deal(actor, foe, s.power * h[1])
 				if foe.is_alive():
 					foe.burn_damage = maxi(foe.burn_damage if foe.burn_turns > 0 else 0, burn)
 					foe.burn_turns = maxi(foe.burn_turns, s.turns)
@@ -469,18 +738,19 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 					_emit("info", foe, "灼烧", "")
 		SkillData.Effect.ALL_FOES_MULTI:
 			for i in s.hits:
-				for foe in foes_of(actor):
-					_deal(actor, foe, s.power)
+				for h in hits:
+					_deal(actor, h[0], s.power * h[1])
 		SkillData.Effect.CRIPPLE:
-			var target := _pick_foe(actor, wanted)
-			_deal(actor, target, s.power)
-			if target.is_alive():
-				target.add_buff(BattleUnit.Buff.new("断筋", 0.0, -s.amount, s.turns))
-				_emit("info", target, "减速", "%s 行动变慢了" % target.display_name())
+			for h in hits:
+				var target: BattleUnit = h[0]
+				_deal(actor, target, s.power * h[1])
+				if target.is_alive():
+					target.add_buff(BattleUnit.Buff.new("断筋", 0.0, -s.amount, s.turns))
+					_emit("info", target, "减速", "%s 行动变慢了" % target.display_name())
 		SkillData.Effect.WEAKEN_ALL:
-			for foe in foes_of(actor):
-				foe.add_buff(BattleUnit.Buff.new("醉", -s.amount, 0.0, s.turns))
-				_emit("info", foe, "减攻", "")
+			for h in hits:
+				h[0].add_buff(BattleUnit.Buff.new("醉", -s.amount, 0.0, s.turns))
+				_emit("info", h[0], "减攻", "")
 			_emit("info", actor, "", "敌方全体攻击下降")
 		SkillData.Effect.TEAM_ATK:
 			for ally in allies_of(actor):
@@ -488,23 +758,69 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 				_emit("info", ally, "增攻", "")
 			_emit("info", actor, "", "全队攻击提升")
 		SkillData.Effect.STUN_ALL:
-			for foe in foes_of(actor):
-				if _stun(actor, foe, s.turns):
-					_emit("info", foe, "昏睡", "")
+			for h in hits:
+				if _stun(actor, h[0], s.turns):
+					_emit("info", h[0], "昏睡", "")
 			_emit("info", actor, "", "敌方全体被麻翻了")
 		SkillData.Effect.DISARM, SkillData.Effect.SILENCE:
-			var target := _pick_foe(actor, wanted)
-			if s.power > 0.0:
-				_deal(actor, target, s.power)
-			if target != null and target.is_alive():
-				_control(actor, target, &"disarm" if s.effect == SkillData.Effect.DISARM else &"silence", s.turns)
-		SkillData.Effect.BACKSTAB:
-			# 绕过嘲讽，打预告里的目标（预告时血量比例最低的人）
-			var target := wanted if wanted != null and wanted.is_alive() else _weakest(foes_of(actor))
-			_deal(actor, target, s.power)
+			for h in hits:
+				var target: BattleUnit = h[0]
+				if s.power > 0.0:
+					_deal(actor, target, s.power * h[1])
+				if target.is_alive():
+					_control(actor, target, &"disarm" if s.effect == SkillData.Effect.DISARM else &"silence", s.turns)
+		SkillData.Effect.SUMMON:
+			_summon(actor, s)
+	if s.exposes:
+		for h in hits:
+			if h[0].is_alive():
+				_expose(h[0])
 	_hit_fx = ""
 	_charge_mult = 1.0
 	actor.add_rage(RAGE_ON_SKILL)
+
+
+## 偷取：先偷对方身上的一个增益；没有增益就偷属性——对方攻击和速度各 -STEAL_STAT，自己各 +STEAL_STAT，持续 STEAL_TURNS 回合。
+func _steal(actor: BattleUnit, target: BattleUnit) -> void:
+	# 只偷增益，减益（减攻、减速）不偷
+	var gains := target.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.atk_bonus >= 0.0 and b.spd_bonus >= 0.0 and b.turns_left < BattleUnit.PERMANENT_TURNS)
+	if not gains.is_empty():
+		var b: BattleUnit.Buff = gains.back()
+		target.buffs.erase(b)
+		actor.add_buff(b)
+		_emit("steal", actor, "偷到 " + b.name, "%s 偷走了 %s 的「%s」" % [actor.display_name(), target.display_name(), b.name], false, target)
+		return
+	target.add_buff(BattleUnit.Buff.new("被偷", -STEAL_STAT, 0.0, STEAL_TURNS))
+	target.add_buff(BattleUnit.Buff.new("被偷", 0.0, -STEAL_STAT, STEAL_TURNS))
+	actor.add_buff(BattleUnit.Buff.new("偷来的力气", STEAL_STAT, 0.0, STEAL_TURNS))
+	actor.add_buff(BattleUnit.Buff.new("偷来的身法", 0.0, STEAL_STAT, STEAL_TURNS))
+	_emit("steal", actor, "偷到 攻击、速度", "%s 从 %s 身上偷走了两成攻击和速度" % [actor.display_name(), target.display_name()], false, target)
+
+
+## 召唤：把召唤物放进己方的空格子（前排先放），属性按施放者折算。每方最多 MAX_SUMMONS 个。
+func _summon(actor: BattleUnit, s: SkillData) -> void:
+	if s.summon == null:
+		return
+	var have := alive(actor.side).filter(func(u: BattleUnit) -> bool: return u.is_summon()).size()
+	var free := free_cells(actor.side)
+	var made := 0
+	for i in s.hits:
+		if have + made >= MAX_SUMMONS or free.is_empty():
+			break
+		var c: Vector2i = free.pop_front()
+		var data: UnitData = s.summon.duplicate()
+		var u := BattleUnit.new(data, actor.side, units.size(), actor.level)
+		u.set_summon_stats(roundi(actor.max_hp * s.amount), actor.atk() * s.power)
+		u.row = c.x
+		u.lane = c.y
+		u.summoner = actor
+		u.summon_turns = s.turns
+		u.next_time = time + TIME_PER_ACTION / u.spd()
+		units.append(u)
+		made += 1
+		_emit("summon", u, data.display_name, "%s 召出了%s，站在%s" % [actor.display_name(), data.display_name, Grid.cell_name(c)], false, actor)
+	if made == 0:
+		_emit("info", actor, "召不出", "格子满了，召不出来")
 
 
 func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
@@ -513,7 +829,9 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 	# 结义同心：统领在阵外，由结义兄弟一个人放
 	if a == null:
 		a = b
-	a.rage = 0
+	# 结义同心由好汉一个人怒气满就能放；统领怒气没满时不扣他的
+	if combo.effect != ComboData.Effect.SWORN or a.has_full_rage() or a == b:
+		a.rage = 0
 	b.rage = 0
 	stats.add(a, "combos")
 	if b != a:
@@ -569,21 +887,37 @@ func _do_combo(actor: BattleUnit, combo: ComboData, wanted: BattleUnit) -> void:
 				_do_skill(b, wanted if wanted != null and wanted.is_alive() else null, Stars.upgraded_skill(b.data.skill))
 
 
-## 按设计文档的公式结算一次伤害，返回造成的伤害（含被护盾吸收的部分）。basic 表示普攻（「铁甲」只减普攻）。
+## 按设计文档的公式结算一次伤害，返回造成的伤害（含被护盾吸收的部分；被闪开返回 0）。basic 表示普攻（「铁甲」只减普攻）。
+## 物理伤害看防御、能被闪避；道士的法术伤害看法抗、闪不开。force_crit（必中必暴）也闪不开。
 func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_crit := false, basic := false, pierce := false) -> int:
 	if target == null or not target.is_alive():
 		return 0
-	var crit_chance := CRIT_CHANCE + attacker.crit_bonus + (Equipment.KEEN_CRIT if attacker.has_gear(&"keen") else 0.0)
+	var magic := Roles.is_magic(attacker.data.role)
+	if not magic and not force_crit:
+		var dodge := Roles.dodge_chance(target.agi())
+		if attacker.data.role == UnitData.Role.ARCHER:
+			dodge *= Roles.ARCHER_DODGE_FACTOR
+		if dodge > 0.0 and rng.randf() < dodge:
+			stats.add(target, "dodges")
+			_emit("dodge", target, "闪", "%s 闪开了 %s 的攻击" % [target.display_name(), attacker.display_name()], false, attacker)
+			return 0
+	var role := attacker.data.role
+	var crit_chance := Roles.CRIT_CHANCE[role] + attacker.crit_bonus + (Equipment.KEEN_CRIT if attacker.has_gear(&"keen") else 0.0)
 	if attacker.hp_ratio() < 0.5:
 		crit_chance += attacker.talent(&"low_hp_crit")
 	var crit := force_crit or attacker.first_crit_ready or rng.randf() < crit_chance
 	attacker.first_crit_ready = false
-	var def := 0.0 if pierce else target.def()
+	var def := 0.0 if pierce else (target.res() if magic else target.def())
 	# 防御的「基准」跟着挨打的人的等级一起成长：防御挡掉的比例只看自己的防御，前期后期一样
 	var base := DEF_BASE * pow(BattleUnit.LEVEL_GROWTH, target.level - 1)
 	var raw := attacker.atk() * multiplier * _charge_mult * base / (base + def) * rng.randf_range(0.95, 1.05)
 	if crit:
-		raw *= CRIT_MULTIPLIER
+		raw *= Roles.CRIT_MULT[role]
+	if basic and role == UnitData.Role.ASSASSIN:
+		raw *= Roles.ASSASSIN_BASIC_MULT
+	raw *= Roles.melee_multiplier(role, target.data.role)
+	if attacker.misplaced():
+		raw *= 1.0 - Roles.MISPLACED_PENALTY
 	if target.guarding:
 		raw *= 1.0 - GUARD_REDUCTION
 	if target.reduction_turns >= 0:
@@ -593,9 +927,11 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	if target.data.is_boss:
 		raw *= 1.0 + attacker.talent(&"boss_slayer")
 	raw *= 1.0 - target.talent(&"tough")
-	raw *= target.taken_mult
-	raw *= Roles.damage_multiplier(attacker.data.role, target.data.role)
-	if Roles.beats(attacker.data.role, target.data.role):
+	raw *= target.taken_mult * (1.0 + float(target.formation_mods.get("taken", 0.0)))
+	if target.broken_turns > 0:
+		raw *= 1.0 + BROKEN_TAKEN
+	var countered := Roles.exploits(role, target.data.role)
+	if countered:
 		raw *= 1.0 - target.talent(&"anti_counter")
 	var exposed := target.expose_turns > 0
 	if exposed:
@@ -604,14 +940,15 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	var amount := maxi(1, roundi(raw))
 	var absorbed := mini(target.shield, amount)
 	target.shield -= absorbed
+	var bars_before := _bars_left(target)
 	target.hp = maxi(target.hp - (amount - absorbed), 0)
 	stats.damage(attacker, target, amount, round_number(), crit, _in_pursuit)
-	var countered := Roles.beats(attacker.data.role, target.data.role)
 	var popup := ("克 " if countered else "") + ("绽 " if exposed else "") + ("暴击 -%d" if crit else "-%d") % amount
-	var log_text := "%s 对 %s 造成 %d 伤害" % [attacker.display_name(), target.display_name(), amount]
+	var log_text := "%s 对 %s 造成 %d%s伤害" % [attacker.display_name(), target.display_name(), amount, "法术" if magic else ""]
 	if countered:
-		log_text += "（%s克%s）" % [UnitData.ROLE_TAGS[attacker.data.role], UnitData.ROLE_TAGS[target.data.role]]
+		log_text += Roles.matchup_text(role, target.data.role)
 	_emit("damage", target, popup, log_text, crit, attacker)
+	_events.back()["magic"] = magic
 	if crit and attacker.has_talent(&"crit_haste"):
 		var t := attacker.passive(&"crit_haste")
 		if attacker.buffs.filter(func(b: BattleUnit.Buff) -> bool: return b.name == t.display_name).size() < TalentData.CRIT_HASTE_STACKS:
@@ -620,16 +957,84 @@ func _deal(attacker: BattleUnit, target: BattleUnit, multiplier: float, force_cr
 	if not target.is_alive():
 		stats.add(attacker, "kills")
 		_on_death(target)
-	elif target.data.is_boss and not target.enraged and target.hp_ratio() < ENRAGE_THRESHOLD:
-		target.enraged = true
-		target.add_buff(BattleUnit.Buff.new(target.data.enrage_name, target.data.enrage_atk_bonus, 0.0, target.data.enrage_turns))
-		_emit("banner", target, target.data.enrage_name, "%s「%s」，攻击大幅提升！" % [target.display_name(), target.data.enrage_name])
+	elif target.data.is_boss:
+		if _bars_left(target) < bars_before:
+			_emit("bar", target, "", "%s 的血条又碎了一管" % target.display_name())
+		_wear_toughness(target, (TOUGHNESS_BASIC if basic else TOUGHNESS_SKILL) * (2 if countered else 1))
+		_check_phase(target)
+	if target.is_alive() and target.side == BattleUnit.Side.PLAYER and attacker.is_alive():
+		_formation_react(attacker, target)
 	return amount
+
+
+## 头目还剩几管血（向上取整）。
+func _bars_left(u: BattleUnit) -> int:
+	return ceili(float(u.hp) / u.max_hp * u.data.boss_bars) if u.data.is_boss else 0
+
+
+## 削头目的韧性，打空就破绽。
+func _wear_toughness(boss: BattleUnit, amount: int) -> void:
+	if boss.broken_turns > 0 or not boss.is_alive():
+		return
+	boss.toughness = maxi(boss.toughness - amount, 0)
+	if boss.toughness == 0:
+		_break(boss)
+
+
+## 破绽：韧性打空，跪地一回合（跳过）、受到伤害 +30%，正在蓄的大招作废、重新冷却。跪完韧性回满。
+func _break(boss: BattleUnit) -> void:
+	boss.broken_turns = 1
+	boss.stun_turns = maxi(boss.stun_turns, 1)
+	if boss.charging:
+		boss.charging = false
+		boss.charge_cells = []
+		if boss.data.skill != null:
+			boss.skill_cooldown = boss.data.skill.cooldown
+			boss.skill_cooldown_total = boss.skill_cooldown
+		boss.intent_skill = false
+		_emit("banner", boss, "破绽", "%s 韧性被打空，蓄的大招散了！跪地一回合，受到的伤害 +%d%%" % [boss.display_name(), roundi(BROKEN_TAKEN * 100)])
+	else:
+		_emit("banner", boss, "破绽", "%s 韧性被打空，跪地一回合，受到的伤害 +%d%%" % [boss.display_name(), roundi(BROKEN_TAKEN * 100)])
+
+
+## 头目血量过了 60%、30% 换阶段：第二阶段狂暴（原来的「半血狂暴」挪到这里），有备好的绝招就换上。
+func _check_phase(boss: BattleUnit) -> void:
+	while boss.phase <= PHASE_LINES.size() and boss.hp_ratio() < PHASE_LINES[boss.phase - 1]:
+		boss.phase += 1
+		var new_skill: SkillData = boss.data.phase_skills[boss.phase - 2] if boss.data.phase_skills.size() >= boss.phase - 1 else null
+		if new_skill != null:
+			boss.data = boss.data.duplicate()
+			boss.data.skill = new_skill
+		var text := "%s 进入第%s阶段" % [boss.display_name(), ["", "一", "二", "三"][boss.phase]]
+		if boss.phase == 2 and boss.data.enrage_name != "" and not boss.enraged:
+			boss.enraged = true
+			boss.add_buff(BattleUnit.Buff.new(boss.data.enrage_name, boss.data.enrage_atk_bonus, 0.0, boss.data.enrage_turns))
+			text += "，「%s」攻击大幅提升" % boss.data.enrage_name
+		if new_skill != null:
+			text += "，换上了「%s」" % new_skill.display_name
+		_emit("phase", boss, boss.data.enrage_name if boss.phase == 2 and boss.data.enrage_name != "" else "第%s阶段" % ["", "一", "二", "三"][boss.phase], text + "！")
+
+
+## 阵法的反击：长蛇阵蛇头（阵眼）挨打，蛇尾追击；偃月阵敌人近战打中路，两只月角各夹击一下。
+func _formation_react(attacker: BattleUnit, target: BattleUnit) -> void:
+	if _reacting:
+		return
+	_reacting = true
+	for ally in alive(target.side):
+		if ally == target or not attacker.is_alive():
+			continue
+		if ally.formation_mods.has("tail") and target.formation_eye:
+			_emit("info", ally, "尾应", "击首尾应：%s 追击 %s" % [ally.display_name(), attacker.display_name()])
+			_deal(ally, attacker, ally.formation_mods["tail"])
+		elif ally.formation_mods.has("horn") and target.lane == 1 and attacker.is_melee():
+			_emit("info", ally, "夹击", "月角夹击：%s 截住 %s" % [ally.display_name(), attacker.display_name()])
+			_deal(ally, attacker, ally.formation_mods["horn"])
+	_reacting = false
 
 
 # --- 内部工具 ---
 
-## 眩晕 turns 回合；克制对方职业时多 1 回合。
+## 眩晕 turns 回合。
 func _stun(actor: BattleUnit, target: BattleUnit, turns: int) -> bool:
 	return _control(actor, target, &"stun", turns)
 
@@ -638,16 +1043,16 @@ const CONTROL_NAMES := {&"stun": "眩晕", &"disarm": "缴械", &"silence": "计
 ## 能打断蓄力的技能 → 它上的控制
 const CONTROL_EFFECTS := {SkillData.Effect.STUN: &"stun", SkillData.Effect.STUN_ALL: &"stun", SkillData.Effect.DISARM: &"disarm", SkillData.Effect.SILENCE: &"silence"}
 
-## 上一种控制（眩晕、缴械、计穷）：同种不叠加，取较长的回合；克制对方职业时多 1 回合；
-## 头目的定力期间无效。返回是否生效。
+## 上一种控制（眩晕、缴械、计穷）：同种不叠加，取较长的回合；站在八卦阵太极上的人多 1 回合。
+## 头目不吃控制，改成削一大截韧性（打中弱点削双倍），削空就破绽。返回控制是否生效。
 func _control(actor: BattleUnit, target: BattleUnit, kind: StringName, turns: int) -> bool:
-	if target.resists(kind):
-		_emit("info", target, "定力", "%s 定力未失，%s无效" % [target.display_name(), CONTROL_NAMES[kind]])
-		return false
-	var n := Roles.control_turns(actor.data.role, target.data.role, turns)
 	stats.add(actor, "controls")
 	if target.data.is_boss:
-		n = mini(n, BattleUnit.BOSS_MAX_CONTROL)
+		var k := 2 if Roles.exploits(actor.data.role, target.data.role) else 1
+		_emit("info", target, "韧性 -%d" % (TOUGHNESS_CONTROL * k), "%s 不吃%s，韧性被削去一截" % [target.display_name(), CONTROL_NAMES[kind]])
+		_wear_toughness(target, TOUGHNESS_CONTROL * k)
+		return false
+	var n := turns + int(float(actor.formation_mods.get("control", 0)))
 	match kind:
 		&"stun":
 			target.stun_turns = maxi(target.stun_turns, n)
@@ -657,20 +1062,7 @@ func _control(actor: BattleUnit, target: BattleUnit, kind: StringName, turns: in
 		&"silence":
 			target.silence_turns = maxi(target.silence_turns, n)
 			_emit("info", target, "计穷", "%s 计穷，%d 回合放不了绝招" % [target.display_name(), n])
-	if target.charging:
-		_interrupt(target)
 	return true
-
-
-## 打断蓄力：绝招作废、重新冷却，露出破绽。
-func _interrupt(target: BattleUnit) -> void:
-	target.charging = false
-	if target.data.skill != null:
-		target.skill_cooldown = target.data.skill.cooldown
-		target.skill_cooldown_total = target.skill_cooldown
-	target.intent_skill = false
-	_emit("banner", target, "打断", "%s 的蓄力被打断了！" % target.display_name())
-	_expose(target)
 
 
 ## 让目标露出破绽：下一次挨打伤害 +20%。
@@ -680,10 +1072,28 @@ func _expose(target: BattleUnit, turns := 1) -> void:
 
 
 func _on_death(unit: BattleUnit) -> void:
-	if unit.side == BattleUnit.Side.PLAYER:
+	if unit.side == BattleUnit.Side.PLAYER and not unit.is_summon():
 		player_deaths += 1
 	unit.burn_turns = 0
 	_emit("death", unit, "倒下", "%s 倒下了" % unit.display_name())
+	# 召唤者倒下，召唤物一起消散
+	for u in alive(unit.side):
+		if u.summoner == unit:
+			_vanish(u)
+	if unit.formation_eye and not unit.formation_mods.is_empty():
+		Formations.break_formation(alive(unit.side))
+		unit.formation_mods.clear()
+		_emit("banner", unit, "破阵", "阵眼上的%s倒下，「%s」被破，阵法加成全部消失！" % [unit.display_name(), Formations.display_name(formation_id)])
+	if unit.data.id == COMMANDER_ID and unit.side == BattleUnit.Side.PLAYER:
+		for u in alive(unit.side):
+			u.add_buff(BattleUnit.Buff.new("士气受挫", -MORALE_LOSS, 0.0, WHOLE_BATTLE))
+		_emit("banner", unit, "士气受挫", "统领倒下，全队攻击 -%d%%" % roundi(MORALE_LOSS * 100))
+
+
+## 召唤物消散（时间到了，或者召唤者倒下）。
+func _vanish(u: BattleUnit) -> void:
+	u.hp = 0
+	_emit("death", u, "消散", "%s 消散了" % u.display_name())
 
 
 
@@ -739,6 +1149,10 @@ func _apply_opening_passive(u: BattleUnit, t: TalentData, rank: int) -> void:
 
 func _finish_turn(actor: BattleUnit) -> void:
 	actor.tick_turn_end()
+	if actor.is_summon() and actor.summon_turns > 0 and actor.is_alive():
+		actor.summon_turns -= 1
+		if actor.summon_turns == 0:
+			_vanish(actor)
 	if not _extra_action:
 		actor.next_time = time + TIME_PER_ACTION / actor.spd()
 	_extra_action = false
@@ -750,10 +1164,10 @@ func _finish_turn(actor: BattleUnit) -> void:
 		result = Result.LOSE
 
 
-## 定下敌人下一回合要做什么，让玩家提前应对。技能在下回合能用就预告技能，
-## 背后捅刀瞄准此刻血量比例最低的好汉，普攻随机挑一个。
+## 定下敌人下一回合要做什么，让玩家提前应对。技能在下回合能用就预告技能。
+## 挑目标只在打得到的人里挑：背后捅刀瞄准血量比例最低的；刺客专找治疗、道士；射手、道士爱点后排；近战先找同一路的。
 func _plan_intent(enemy: BattleUnit) -> void:
-	var foes := foes_of(enemy)
+	var foes := reachable_foes(enemy)
 	if foes.is_empty():
 		return
 	# 冷却在轮到自己时才减 1，所以现在 ≤ 1 就代表下回合可用
@@ -762,23 +1176,43 @@ func _plan_intent(enemy: BattleUnit) -> void:
 	if enemy.charging and enemy.intent_target != null and enemy.intent_target.is_alive():
 		return
 	if enemy.intent_skill and enemy.data.skill.effect == SkillData.Effect.BACKSTAB:
-		enemy.intent_target = _weakest(foes)
-	else:
-		enemy.intent_target = foes[rng.randi_range(0, foes.size() - 1)]
+		enemy.intent_target = _weakest(foes_of(enemy))
+		return
+	var pool := foes
+	match enemy.data.role:
+		UnitData.Role.ASSASSIN:
+			var soft := foes.filter(func(u: BattleUnit) -> bool: return u.data.role in [UnitData.Role.HEALER, UnitData.Role.TAOIST])
+			if not soft.is_empty():
+				pool = soft
+		UnitData.Role.ARCHER, UnitData.Role.TAOIST:
+			var back := foes.filter(func(u: BattleUnit) -> bool: return u.row == 1)
+			if not back.is_empty() and rng.randf() < 0.6:
+				pool = back
+		_:
+			var same := foes.filter(func(u: BattleUnit) -> bool: return u.lane == enemy.lane)
+			if not same.is_empty() and rng.randf() < 0.6:
+				pool = same
+	var typed: Array[BattleUnit] = []
+	typed.assign(pool)
+	enemy.intent_target = typed[rng.randi_range(0, typed.size() - 1)]
 
 
-## 有嘲讽的敌人时必须打它；否则打指定目标，没指定就打第一个活着的。头目蓄满的绝招直取预告的目标，不吃嘲讽。
+## 打谁：只在打得到的人里挑（近战被卡位挡着的打不到）。有嘲讽的必须打它；否则打指定目标；
+## 没指定（或打不到）就打同一路的、再不然第一个。头目蓄满的绝招直取预告的目标，不吃嘲讽和卡位。
 func _pick_foe(actor: BattleUnit, wanted: BattleUnit) -> BattleUnit:
-	var foes := foes_of(actor)
+	var foes := reachable_foes(actor)
 	if foes.is_empty():
 		return null
-	if _charge_mult > 1.0 and wanted != null and wanted in foes:
+	if _charge_mult > 1.0 and wanted != null and wanted.is_alive() and wanted.side != actor.side:
 		return wanted
 	for f in foes:
 		if f.is_taunting():
 			return f
 	if wanted != null and wanted in foes:
 		return wanted
+	for f in foes:
+		if f.lane == actor.lane:
+			return f
 	return foes[0]
 
 

@@ -23,6 +23,14 @@ static func grant(tokens: int, silver: int, experience: int, equipment: EquipDat
 	return "　".join(parts)
 
 
+## 得到几张残页（合成技能书用），返回给玩家看的一句话。
+static func grant_pages(n: int) -> String:
+	if n <= 0:
+		return ""
+	GameState.pages += n
+	return "得到残页 %d 张" % n
+
+
 ## 得到一本秘籍，返回给玩家看的一句话。
 static func grant_scroll(mj: MijiData) -> String:
 	if mj == null:

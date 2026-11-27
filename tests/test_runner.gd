@@ -15,6 +15,12 @@ func _initialize() -> void:
 		"test_font_covers_text",
 		"test_damage_formula",
 		"test_role_counters",
+		"test_grid_and_blocking",
+		"test_skill_areas",
+		"test_move_and_summon",
+		"test_boss_phases_and_morale",
+		"test_class_stats_and_martial_levels",
+		"test_books",
 		"test_disarm_and_silence",
 		"test_pursuit",
 		"test_miji",
@@ -182,34 +188,303 @@ func test_damage_formula() -> bool:
 	return true
 
 
+func role_unit(id: StringName, role: UnitData.Role, stats: Array, skill_data: SkillData = null) -> UnitData:
+	var u := unit_data(id, stats, skill_data)
+	u.role = role
+	return u
+
+
 func test_role_counters() -> bool:
-	check(Roles.beats(UnitData.Role.WARRIOR, UnitData.Role.ARCHER), "武克射")
-	check(Roles.beats(UnitData.Role.ARCHER, UnitData.Role.STRATEGIST), "射克谋")
-	check(Roles.beats(UnitData.Role.STRATEGIST, UnitData.Role.TANK), "谋克猛")
-	check(Roles.beats(UnitData.Role.TANK, UnitData.Role.MYSTIC), "猛克奇")
-	check(Roles.beats(UnitData.Role.MYSTIC, UnitData.Role.WARRIOR), "奇克武")
-	check(not Roles.beats(UnitData.Role.WARRIOR, UnitData.Role.TANK), "武和猛不相干")
-	check_eq(Roles.beaten_by(UnitData.Role.WARRIOR), UnitData.Role.MYSTIC, "武被奇克")
-	# 克制 +20%、被克 -15%：攻击 100、防御 100 的基准伤害 50
-	var archer := unit_data(&"e", [100000, 1, 100, 1])
-	archer.role = UnitData.Role.ARCHER
-	var mystic := unit_data(&"m", [100000, 1, 100, 1])
-	mystic.role = UnitData.Role.MYSTIC
-	var warrior := unit_data(&"a", [500, 100, 0, 100])
-	warrior.role = UnitData.Role.WARRIOR
-	var m := battle([warrior], [archer, mystic])
-	var a := by_id(m, &"a")
+	var W := UnitData.Role.WARRIOR
+	var A := UnitData.Role.ASSASSIN
+	var R := UnitData.Role.ARCHER
+	var T := UnitData.Role.TAOIST
+	var H := UnitData.Role.HEALER
+	check(Roles.is_melee(W) and Roles.is_melee(A) and not Roles.is_melee(R), "战士、刺客近战，射手远程")
+	check(Roles.is_magic(T) and not Roles.is_magic(R), "道士打法术")
+	check(Roles.exploits(W, A) and Roles.exploits(W, H) and not Roles.exploits(W, W), "近身战士压制别的职业")
+	check(Roles.exploits(T, W) and Roles.exploits(T, H) and not Roles.exploits(T, T), "法术打法抗低的战士、治疗")
+	check(Roles.exploits(R, T) and Roles.exploits(A, T) and not Roles.exploits(R, W), "物理打防御低的道士")
+	check(is_equal_approx(Roles.melee_multiplier(W, R), 1.2) and is_equal_approx(Roles.melee_multiplier(A, W), 0.85) and is_equal_approx(Roles.melee_multiplier(R, W), 1.0), "近身压制只看近战")
+	# 闪避按敏捷算：30 以下不躲，最多 40%
+	check_eq(Roles.dodge_chance(25), 0.0, "敏捷低不躲")
+	check(absf(Roles.dodge_chance(130) - 100.0 / 380.0) < 0.001, "敏捷 130 闪避 26%")
+	check_eq(Roles.dodge_chance(10000), Roles.DODGE_MAX, "闪避有上限")
+	# 法抗：没填按职业从防御折算
+	var w := role_unit(&"w", W, [100, 10, 100, 100])
+	check_eq(w.res(), 35, "战士法抗 = 防御 ×0.35")
+	var t := role_unit(&"t", T, [100, 10, 10, 100])
+	check_eq(t.res(), 30, "道士法抗 = 防御 ×3")
+	w.base_res = 77
+	check_eq(w.res(), 77, "填了法抗就用填的")
+	# 法术看法抗：道士打战士（法抗 35）比打道士（法抗 300）疼得多；物理看防御
+	var m := battle([role_unit(&"mage", T, [500, 100, 0, 100]), role_unit(&"bow", R, [500, 100, 0, 100])], [role_unit(&"e", W, [100000, 1, 100, 1]), role_unit(&"e2", T, [100000, 1, 100, 1])])
+	by_id(m, &"mage").row = 1
+	by_id(m, &"bow").row = 1
+	for i in 10:
+		var on_w := m._deal(by_id(m, &"mage"), by_id(m, &"e"), 1.0, true)
+		check(on_w >= 105 and on_w <= 117, "道士打战士 crit %d（法抗 35：100×100/135×1.5≈111）" % on_w)
+		var on_t := m._deal(by_id(m, &"mage"), by_id(m, &"e2"), 1.0, true)
+		check(on_t >= 36 and on_t <= 40, "道士打道士 crit %d（法抗 300）" % on_t)
+		var bow_w := m._deal(by_id(m, &"bow"), by_id(m, &"e"), 1.0, true)
+		check(bow_w >= 71 and bow_w <= 79, "射手打战士 crit %d（防御 100）" % bow_w)
+	check(m._events.any(func(e: Dictionary) -> bool: return String(e["popup"]).begins_with("克")), "打在弱点上跳「克」")
+	# 近身压制：战士打刺客 ×1.2，刺客打战士 ×0.85
+	var mm := battle([role_unit(&"w", W, [500, 100, 0, 100]), role_unit(&"a", A, [500, 100, 0, 100])], [role_unit(&"ea", A, [100000, 1, 100, 1]), role_unit(&"ew", W, [100000, 1, 100, 1])])
+	by_id(mm, &"ea")._agi = 0
+	for i in 10:
+		var up := mm._deal(by_id(mm, &"w"), by_id(mm, &"ea"), 1.0, true)
+		check(up >= 85 and up <= 95, "战士打刺客 crit %d" % up)
+	# 刺客暴击 ×2.2、普攻 ×0.75，打战士再 ×0.85
+	for i in 10:
+		var a_hit := mm._deal(by_id(mm, &"a"), by_id(mm, &"ew"), 1.0, true, true)
+		check(a_hit >= 67 and a_hit <= 74, "刺客普攻暴击打战士 %d（50×2.2×0.75×0.85≈70）" % a_hit)
+	# 闪避：法术、必中闪不开；物理会被闪开（敏捷拉满 40%）
+	var md := battle([role_unit(&"mage", T, [500, 100, 0, 100]), role_unit(&"w", W, [500, 100, 0, 100])], [role_unit(&"e", A, [100000, 1, 0, 1])])
+	by_id(md, &"e")._agi = 100000
+	by_id(md, &"mage").row = 1
+	var magic_miss := 0
+	var phys_miss := 0
+	for i in 200:
+		if md._deal(by_id(md, &"mage"), by_id(md, &"e"), 1.0) == 0:
+			magic_miss += 1
+		if md._deal(by_id(md, &"w"), by_id(md, &"e"), 1.0) == 0:
+			phys_miss += 1
+	check_eq(magic_miss, 0, "法术不能闪避")
+	check(phys_miss > 50 and phys_miss < 110, "物理被闪开约 40%%（%d/200）" % phys_miss)
+	check(md._events.any(func(e: Dictionary) -> bool: return e["kind"] == "dodge"), "闪开有 dodge 事件")
+	# 站错排：近战站后排伤害 −20%
+	var mp := battle([role_unit(&"w", W, [500, 100, 0, 100])], [role_unit(&"e", W, [100000, 1, 100, 1])])
+	by_id(mp, &"w").row = 1
+	for i in 10:
+		var hit := mp._deal(by_id(mp, &"w"), by_id(mp, &"e"), 1.0, true)
+		check(hit >= 57 and hit <= 63, "近战站后排 crit %d（75×0.8）" % hit)
+	return true
+
+
+func test_grid_and_blocking() -> bool:
+	var W := UnitData.Role.WARRIOR
+	# 自动摆位：近战站前排、远程站后排，从中路往两边
+	var m := battle([role_unit(&"w", W, [500, 100, 0, 100]), role_unit(&"bow", UnitData.Role.ARCHER, [500, 100, 0, 100]), role_unit(&"cut", UnitData.Role.ASSASSIN, [500, 100, 0, 100])],
+		[role_unit(&"f0", W, [1000, 1, 0, 1]), role_unit(&"b0", UnitData.Role.HEALER, [1000, 1, 0, 1]), role_unit(&"f1", W, [1000, 1, 0, 1])])
+	check_eq(by_id(m, &"w").cell(), Vector2i(0, 1), "战士站中路前排")
+	check_eq(by_id(m, &"bow").cell(), Vector2i(1, 1), "射手站中路后排")
+	check_eq(by_id(m, &"cut").cell(), Vector2i(0, 0), "刺客站上路前排")
+	check_eq(by_id(m, &"b0").cell(), Vector2i(1, 1), "敌方治疗站中路后排")
+	# 卡位：近战只打得到每一路最前面的人；中路后排的治疗被前排挡住
+	var reach := m.reachable_foes(by_id(m, &"w"))
+	check(by_id(m, &"f0") in reach and by_id(m, &"f1") in reach, "前排打得到")
+	check(not by_id(m, &"b0") in reach, "后排被挡住，近战打不到")
+	check(by_id(m, &"b0") in m.reachable_foes(by_id(m, &"bow")), "远程打得到后排")
+	check(by_id(m, &"b0") in m.reachable_foes(by_id(m, &"cut")), "刺客越过前排")
+	# 点了打不到的人：改打同一路最前面的
+	check(m._pick_foe(by_id(m, &"w"), by_id(m, &"b0")) == by_id(m, &"f0"), "打不到的目标换成同路前排")
+	# 前排倒下，这一路破口，后排暴露
+	by_id(m, &"f0").hp = 0
+	check(by_id(m, &"b0") in m.reachable_foes(by_id(m, &"w")), "破口：后排暴露给近战")
+	# 指定站位：用给的格子
+	var mp := BattleModel.new(StageData.new(), [unit_data(&"a", [100, 1, 0, 100])] as Array[UnitData], 1, [], 1, &"", [Vector2i(1, 2)])
+	check_eq(by_id(mp, &"a").cell(), Vector2i(1, 2), "按给的格子站")
+	# 敌人照关卡给的格子站
+	var st := StageData.new()
+	st.enemies = [unit_data(&"e", [100, 1, 0, 1])]
+	st.enemy_cells = [Vector2i(1, 0)]
+	var me := BattleModel.new(st, [unit_data(&"a", [100, 1, 0, 100])] as Array[UnitData], 1, [], 1)
+	check_eq(by_id(me, &"e").cell(), Vector2i(1, 0), "敌人按关卡的格子站")
+	# 大体型：占一路前后两格，把这一路堵住
+	var big := unit_data(&"boss", [1000, 1, 0, 1])
+	big.big = true
+	var mb := battle([unit_data(&"a", [100, 1, 0, 100])], [unit_data(&"e1", [100, 1, 0, 1]), big])
+	check(by_id(mb, &"boss").occupies(Vector2i(0, 1)) and by_id(mb, &"boss").occupies(Vector2i(1, 1)), "大体型占中路两格")
+	check(mb.occupant(BattleUnit.Side.ENEMY, Vector2i(1, 1)) == by_id(mb, &"boss"), "后排那格也算它")
+	# 敌人近战预告只挑打得到的
 	for i in 20:
-		var up := m._deal(a, by_id(m, &"e"), 1.0, true)
-		check(up >= 85 and up <= 95, "武打射 crit %d in [85, 95]" % up)
-		var down := m._deal(a, by_id(m, &"m"), 1.0, true)
-		check(down >= 60 and down <= 67, "武打奇 crit %d in [60, 67]" % down)
-	check(m._events.any(func(e: Dictionary) -> bool: return String(e["popup"]).begins_with("克")), "countered hits pop 克")
-	# 克制方的眩晕多 1 回合
-	m._stun(a, by_id(m, &"e"), 1)
-	check_eq(by_id(m, &"e").stun_turns, 2, "advantaged stun lasts one more turn")
-	m._stun(a, by_id(m, &"m"), 1)
-	check_eq(by_id(m, &"m").stun_turns, 1, "plain stun keeps its turns")
+		var mi := battle([role_unit(&"front", W, [1000, 1, 0, 100]), role_unit(&"back", UnitData.Role.HEALER, [1000, 1, 0, 100])], [role_unit(&"e", W, [1000, 1, 0, 1])], [])
+		mi.rng.seed = i
+		mi._plan_intent(by_id(mi, &"e"))
+		check(by_id(mi, &"e").intent_target == by_id(mi, &"front"), "敌方近战盯不上被挡住的后排")
+	return true
+
+
+func test_skill_areas() -> bool:
+	var W := UnitData.Role.WARRIOR
+	var foes: Array[UnitData] = []
+	for id in [&"f0", &"f1", &"f2", &"b1", &"b2"]:
+		foes.append(role_unit(id, W, [100000, 1, 0, 1]))
+	var st := StageData.new()
+	st.enemies = foes
+	st.enemy_cells = [Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2), Vector2i(1, 1), Vector2i(1, 2)]
+	var m := BattleModel.new(st, [role_unit(&"a", UnitData.Role.ARCHER, [500, 100, 0, 100])] as Array[UnitData], 1, [], 1)
+	var a := by_id(m, &"a")
+	var ids := func(list: Array) -> Array: return list.map(func(p: Array) -> StringName: return p[0].data.id)
+	check_eq(ids.call(m.area_targets(a, by_id(m, &"f1"), SkillData.Area.SINGLE)), [&"f1"], "单人一格")
+	var row := m.area_targets(a, by_id(m, &"f1"), SkillData.Area.ROW)
+	check_eq(ids.call(row), [&"f0", &"f1", &"f2"], "多人：整排")
+	check(row.all(func(p: Array) -> bool: return is_equal_approx(p[1], BattleModel.ROW_MULT)), "多人每人 ×0.7")
+	var lane := m.area_targets(a, by_id(m, &"f1"), SkillData.Area.LANE)
+	check_eq(ids.call(lane), [&"f1", &"b1"], "穿透：一路前后")
+	check(is_equal_approx(lane[1][1], BattleModel.LANE_BACK_MULT), "穿透后格 ×0.8")
+	var chain := m.area_targets(a, by_id(m, &"f0"), SkillData.Area.CHAIN)
+	check_eq(chain.size(), 1 + BattleModel.CHAIN_HOPS, "连锁跳 3 次")
+	check_eq(chain[1][0].data.id, &"f1", "连锁先跳最近的")
+	check(chain[3][1] < chain[1][1], "连锁越跳越轻")
+	check_eq(m.area_targets(a, by_id(m, &"f0"), SkillData.Area.ALL).size(), 5, "全范围打全部")
+	# 普攻带范围：林冲式的穿透普攻打到身后的人
+	var spear := role_unit(&"s", W, [500, 100, 0, 200])
+	spear.basic_area = SkillData.Area.LANE
+	var m2 := BattleModel.new(st, [spear] as Array[UnitData], 1, [], 1)
+	advance_to(m2, &"s")
+	var hit := m2.act(BattleModel.Action.ATTACK, by_id(m2, &"f1")).filter(func(e: Dictionary) -> bool: return e["kind"] == "damage").map(func(e: Dictionary) -> StringName: return e["unit"].data.id)
+	check_eq(hit, [&"f1", &"b1"], "穿透普攻打穿一路")
+	# 绝招按范围展开
+	var sweep := role_unit(&"s", W, [500, 100, 0, 200], skill(SkillData.Effect.DAMAGE, {"power": 1.0, "area": SkillData.Area.ROW}))
+	var m3 := BattleModel.new(st, [sweep] as Array[UnitData], 1, [], 1)
+	advance_to(m3, &"s")
+	var swept := m3.act(BattleModel.Action.SKILL, by_id(m3, &"f1")).filter(func(e: Dictionary) -> bool: return e["kind"] == "damage")
+	check_eq(swept.size(), 3, "多人绝招扫一排")
+	return true
+
+
+func test_move_and_summon() -> bool:
+	# 补位：走到空格子，这回合防御；不能走到有人的格子
+	var m := battle([unit_data(&"a", [500, 10, 0, 200]), unit_data(&"b", [500, 10, 0, 100])], [unit_data(&"e", [500, 10, 0, 1])])
+	var a := by_id(m, &"a")
+	advance_to(m, &"a")
+	check(not m.can_move_to(a, by_id(m, &"b").cell()), "有人的格子去不了")
+	var ev := m.act(BattleModel.Action.MOVE, null, Vector2i(1, 2))
+	check_eq(a.cell(), Vector2i(1, 2), "挪过去了")
+	check(a.guarding, "补位时防御")
+	check(ev.any(func(e: Dictionary) -> bool: return e["kind"] == "move"), "有 move 事件")
+	# 召唤：放进空格子，有自己的出手顺序；召唤者倒下就消散；最多两个
+	var minion := unit_data(&"minion", [1, 1, 10, 100])
+	minion.display_name = "天将"
+	var call := skill(SkillData.Effect.SUMMON, {"summon": minion, "hits": 3, "power": 0.5, "amount": 0.4, "turns": 0, "cooldown": 1})
+	var caster := role_unit(&"c", UnitData.Role.TAOIST, [1000, 100, 0, 200], call)
+	var ms := battle([caster], [unit_data(&"e", [100000, 1, 0, 1])])
+	advance_to(ms, &"c")
+	ms.act(BattleModel.Action.SKILL)
+	var summons := ms.units.filter(func(u: BattleUnit) -> bool: return u.is_summon())
+	check_eq(summons.size(), BattleModel.MAX_SUMMONS, "最多召两个")
+	check_eq(summons[0].max_hp, 400, "生命按召唤者 ×0.4")
+	check_eq(summons[0].cell().x, 0, "先放前排")
+	check(summons[0] in ms.turn_order_preview(), "召唤物有出手顺序")
+	# 召唤物堵路：前排有召唤物，敌方近战打不到身后的道士
+	check(not by_id(ms, &"c") in ms.reachable_foes(by_id(ms, &"e")), "召唤物挡在前面，召唤者打不到")
+	ms._deal(by_id(ms, &"e"), by_id(ms, &"c"), 100000.0)
+	check(summons.all(func(u: BattleUnit) -> bool: return not u.is_alive()), "召唤者倒下，召唤物消散")
+	check_eq(ms.player_deaths, 1, "召唤物不算阵亡")
+	# 持续几回合的召唤物到时间就消散
+	var timed := skill(SkillData.Effect.SUMMON, {"summon": minion, "hits": 1, "power": 0.5, "amount": 0.4, "turns": 1})
+	var mt := battle([role_unit(&"c", UnitData.Role.TAOIST, [1000, 100, 0, 100], timed)], [unit_data(&"e", [100000, 1, 0, 1])])
+	advance_to(mt, &"c")
+	mt.act(BattleModel.Action.SKILL)
+	var sm: BattleUnit = mt.units.back()
+	for i in 6:
+		mt.start_next_turn()
+		if mt.current != null:
+			mt.act(BattleModel.Action.GUARD)
+	check(not sm.is_alive(), "一回合的召唤物到时就消散")
+	return true
+
+
+func test_boss_phases_and_morale() -> bool:
+	var boss := unit_data(&"b", [1000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 1.0}))
+	boss.is_boss = true
+	boss.boss_bars = 5
+	boss.enrage_name = "狂怒"
+	boss.enrage_atk_bonus = 0.5
+	var p2 := skill(SkillData.Effect.DAMAGE, {"power": 1.5, "area": SkillData.Area.ROW})
+	p2.display_name = "一掀"
+	var p3 := skill(SkillData.Effect.ALL_FOES, {"power": 1.0})
+	p3.display_name = "一剪"
+	boss.phase_skills = [p2, p3]
+	var m := battle([unit_data(&"a", [500, 100, 0, 100])], [boss])
+	var b := by_id(m, &"b")
+	var a := by_id(m, &"a")
+	b.hp = 620
+	m._deal(a, b, 0.5)
+	check_eq(b.phase, 2, "血量过 60% 进第二阶段")
+	check(b.enraged, "第二阶段狂暴")
+	check_eq(b.data.skill.display_name, "一掀", "第二阶段换招")
+	check_eq(boss.skill.display_name, "技能", "换招不改原数据")
+	check(m._events.any(func(e: Dictionary) -> bool: return e["kind"] == "phase"), "换阶段有事件")
+	check(m._events.any(func(e: Dictionary) -> bool: return e["kind"] == "bar"), "打碎一管血有事件")
+	b.hp = 310
+	m._deal(a, b, 0.5)
+	check_eq(b.phase, 3, "过 30% 进第三阶段")
+	check_eq(b.data.skill.display_name, "一剪", "第三阶段换招")
+	# 统领倒下：全队士气受挫
+	var lead := unit_data(BattleModel.COMMANDER_ID, [100, 10, 0, 100])
+	var mm := battle([lead, unit_data(&"h", [1000, 100, 0, 100])], [unit_data(&"e", [100000, 100, 0, 1])])
+	var before := by_id(mm, &"h").atk()
+	mm._deal(by_id(mm, &"e"), by_id(mm, BattleModel.COMMANDER_ID), 100.0)
+	check(by_id(mm, &"h").atk() < before, "统领倒下，全队攻击下降")
+	check(mm._events.any(func(e: Dictionary) -> bool: return e["popup"] == "士气受挫"), "有士气受挫横幅")
+	return true
+
+
+func test_class_stats_and_martial_levels() -> bool:
+	# 品级范围：甲 = 丁 ×1.3；速度、敏捷甲 +12
+	check_eq(Roles.stat_range(UnitData.Role.WARRIOR, UnitData.Tier.DING, 0), Vector2i(430, 480), "丁品战士气血")
+	check_eq(Roles.stat_range(UnitData.Role.WARRIOR, UnitData.Tier.JIA, 0), Vector2i(559, 624), "甲品战士气血 ×1.3")
+	check_eq(Roles.stat_range(UnitData.Role.ASSASSIN, UnitData.Tier.JIA, 5), Vector2i(122, 152), "甲品刺客敏捷 +12")
+	var ps := Roles.protagonist_stats(UnitData.Role.TAOIST)
+	check(ps[3] > ps[2] * 2, "统领当道士：法抗远高于防御")
+	# 等级成长按品级：好汉按品级，敌人 1.03
+	var hero := unit_data(&"h", [100, 10, 10, 100])
+	hero.rarity = UnitData.Rarity.TIANGANG
+	hero.tier = UnitData.Tier.JIA
+	check(is_equal_approx(Roles.level_growth(hero), 1.031), "甲品每级 ×1.031")
+	check(is_equal_approx(Roles.level_growth(unit_data(&"e", [1, 1, 1, 1])), BattleUnit.LEVEL_GROWTH), "敌人照旧")
+	# 武学十重：每重 +6%，第 5 重附带破绽，第 7 重冷却 -1，第 10 重范围升级
+	var m := MartialData.new()
+	m.skill = skill(SkillData.Effect.DAMAGE, {"power": 2.0, "cooldown": 3})
+	check(is_equal_approx(m.skill_at(1).power, 2.0), "第一重原样")
+	check(is_equal_approx(m.skill_at(4).power, 2.0 * 1.18), "第四重 +18%")
+	check(not m.skill_at(4).exposes and m.skill_at(5).exposes, "第五重打中露出破绽")
+	check_eq(m.skill_at(7).cooldown, 2, "第七重冷却 -1")
+	check_eq(m.skill_at(9).area, SkillData.Area.SINGLE, "第九重还是单人")
+	check_eq(m.skill_at(10).area, SkillData.Area.LANE, "大成：单人升穿透")
+	check(is_equal_approx(m.skill.power, 2.0), "修炼不改原数据")
+	check_eq(MartialData.level_cost(3), 1350, "修炼价钱 150 × 重²")
+	# 第五重的破绽在战斗里生效
+	var exp_skill := m.skill_at(5)
+	var mm := battle([unit_data(&"a", [500, 100, 0, 200], exp_skill)], [unit_data(&"e", [100000, 1, 0, 1])])
+	advance_to(mm, &"a")
+	mm.act(BattleModel.Action.SKILL, by_id(mm, &"e"))
+	check(by_id(mm, &"e").expose_turns > 0, "第五重绝招打出破绽")
+	return true
+
+
+func test_books() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var heroes := {}
+	for h: UnitData in GameDB.load_dir("res://data/heroes/"):
+		heroes[h.id] = h
+	var books: Array = GameDB.load_dir("res://data/miji/").filter(func(m: MijiData) -> bool: return m.is_book())
+	check_eq(books.size(), 8, "8 本技能书")
+	var roles := {}
+	for mj: MijiData in books:
+		for id in mj.recipe:
+			check(heroes.has(id), "《%s》要的 %s 是现有好汉" % [mj.display_name, id])
+		var n := mj.recipe.size()
+		var want := MijiData.Quality.LIANG if n <= 3 else (MijiData.Quality.JING if n <= 6 else MijiData.Quality.JUE)
+		check_eq(mj.quality, want, "《%s》品质按人数" % mj.display_name)
+		check(mj.martial != null and mj.martial.skill != null, "《%s》能研读出武学" % mj.display_name)
+		check(mj.story != "", "《%s》写了故事" % mj.display_name)
+		roles[mj.martial.role] = true
+	check_eq(roles.size(), 5, "五个职业都有技能书可研读")
+	# 合成：缺的将魂用残页顶
+	var mj: MijiData = books.filter(func(m: MijiData) -> bool: return m.recipe.size() == 2)[0]
+	var need := Books.souls_per_hero(mj)
+	var souls := {mj.recipe[0]: need, mj.recipe[1]: need - 2}
+	check_eq(Books.missing(mj, souls), 2, "缺 2 个")
+	check(not Books.can_craft(mj, souls, 1), "残页不够")
+	check(Books.can_craft(mj, souls, 2), "残页够顶")
+	# 召唤书：武学的绝招是召唤、召出来的能堵路
+	var summon_book: Array = books.filter(func(m: MijiData) -> bool: return m.martial.skill.effect == SkillData.Effect.SUMMON)
+	check_eq(summon_book.size(), 1, "有一本召唤书")
+	check(summon_book[0].martial.skill.summon != null, "召唤书带召唤物")
 	return true
 
 
@@ -312,7 +587,7 @@ func test_miji() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var all: Array = GameDB.load_dir("res://data/miji/")
 	var heroes: Array = GameDB.load_dir("res://data/heroes/")
-	var jue: Array = all.filter(func(m: MijiData) -> bool: return m.quality == MijiData.Quality.JUE)
+	var jue: Array = all.filter(func(m: MijiData) -> bool: return m.quality == MijiData.Quality.JUE and not m.is_book())
 	check_eq(jue.size(), heroes.size(), "one 绝品秘籍 per hero")
 	for h: UnitData in heroes:
 		check(jue.any(func(m: MijiData) -> bool: return m.owner == h.id), "%s teaches a 秘籍" % h.display_name)
@@ -365,9 +640,10 @@ func test_miji() -> bool:
 	mh.start_next_turn()
 	check_eq(h.hp, 550, "cleanse_regen heals 5%")
 	check(mh.current == h, "cleanse_regen clears the stun before it bites")
-	# 破计：被克时少挨打
+	# 破计：被打在弱点上（克）时少挨打。战士近身打射手 ×1.2，破计再 ×0.8
 	var anti := unit_data(&"e", [100000, 1, 100, 1])
 	anti.role = UnitData.Role.ARCHER
+	anti.base_agi = 0
 	anti.miji_effect = _miji_effect(&"anti_counter", 0.2)
 	var warrior := unit_data(&"a", [500, 100, 0, 100])
 	warrior.role = UnitData.Role.WARRIOR
@@ -390,11 +666,23 @@ func test_formations_and_factions() -> bool:
 	stage.enemies = [foe]
 	var team: Array[UnitData] = [unit_data(&"wu_song", [1000, 100, 50, 100]), h1, h2]
 	lead = team[0]
-	# 鱼鳞阵：好汉防御 +20%，主角不变
+	# 鱼鳞阵：按阵位顺序站，两鳞防御 +15%，鱼头（阵眼）受到伤害 -20%，宜战士站对了 ×1.5
 	var m := BattleModel.new(stage, team, 1, [], 1, &"yu_lin")
-	check_eq(roundi(by_id(m, &"lu_zhishen").def()), 60, "鱼鳞阵 raises a hero's defense")
-	check_eq(roundi(by_id(m, &"wu_song").def()), 50, "the 主将 is unchanged")
+	check_eq(by_id(m, &"wu_song").cell(), Vector2i(0, 0), "按阵位顺序站：第一位站上路前排")
+	check_eq(roundi(by_id(m, &"wu_song").def()), 57, "鳞：防御 +15%")
+	check(by_id(m, &"lu_zhishen").formation_eye, "鱼头是阵眼")
+	check(is_equal_approx(by_id(m, &"lu_zhishen").formation_mods["taken"], -0.3), "鱼头宜战士：减伤 20% ×1.5")
 	check(m.opening_events.any(func(e: Dictionary) -> bool: return String(e["log"]).begins_with("阵法")), "the formation shows in the 准备回合")
+	# 阵眼没人就摆不成阵
+	var m_no := BattleModel.new(stage, team, 1, [], 1, &"yu_lin", [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 2)])
+	check(not m_no.opening_events.any(func(e: Dictionary) -> bool: return String(e["log"]).begins_with("阵法")), "阵眼空着摆不成阵")
+	check(by_id(m_no, &"wu_song").formation_mods.is_empty(), "摆不成阵没有加成")
+	# 阵眼倒下就破阵：加成全部消失
+	var eye := by_id(m, &"lu_zhishen")
+	m._deal(by_id(m, &"e"), eye, 1000.0)
+	check(not eye.is_alive(), "阵眼倒下")
+	check(by_id(m, &"wu_song").formation_mods.is_empty(), "破阵：别人的加成也没了")
+	check(m._events.any(func(e: Dictionary) -> bool: return e["popup"] == "破阵"), "破阵有横幅")
 	# 鲁智深 + 杨志 同出二龙山：全队生命 +8%
 	check_eq(Factions.shared([&"lu_zhishen", &"yang_zhi", &"wu_song"] as Array[StringName]), &"er_long_shan", "all three from 二龙山")
 	check_eq(Factions.shared([&"lu_zhishen", &"yang_zhi"] as Array[StringName]), &"", "two are not enough")
@@ -402,10 +690,21 @@ func test_formations_and_factions() -> bool:
 	# 八卦阵：敌方减攻 3 回合
 	var mb := BattleModel.new(stage, team, 1, [], 1, &"ba_gua")
 	check(by_id(mb, &"e").atk() < 100.0, "八卦阵 weakens the enemy")
-	# 长蛇阵：主角多挨打
-	var mc := BattleModel.new(stage, team, 1, [], 1, &"chang_she")
-	check(is_equal_approx(by_id(mc, &"wu_song").taken_mult, 1.15), "长蛇阵 lead takes more")
-	check(is_equal_approx(by_id(mc, &"yang_zhi").taken_mult, 0.9), "长蛇阵 heroes take less")
+	# 长蛇阵：蛇头多挨打，蛇身少挨打；蛇头挨打时蛇尾追击
+	var snake: Array[UnitData] = [unit_data(&"head", [100000, 100, 50, 100]), unit_data(&"b1", [1000, 100, 50, 100]), unit_data(&"b2", [1000, 100, 50, 100]), unit_data(&"tail", [1000, 100, 50, 100])]
+	var mc := BattleModel.new(stage, snake, 1, [], 1, &"chang_she")
+	check(is_equal_approx(by_id(mc, &"head").formation_mods["taken"], 0.15), "长蛇阵 蛇头多挨打")
+	check(is_equal_approx(by_id(mc, &"b1").formation_mods["taken"], -0.1), "长蛇阵 蛇身少挨打")
+	var foe_hp := by_id(mc, &"e").hp
+	mc._deal(by_id(mc, &"e"), by_id(mc, &"head"), 1.0)
+	check(by_id(mc, &"e").hp < foe_hp, "击首尾应：蛇尾追击打的人")
+	# 偃月阵：敌人近战打中路，月角夹击
+	var moon: Array[UnitData] = [unit_data(&"h1", [1000, 100, 50, 100]), unit_data(&"h2", [1000, 100, 50, 100]), unit_data(&"heart", [100000, 100, 50, 100]), unit_data(&"back", [1000, 100, 50, 100])]
+	var my := BattleModel.new(stage, moon, 1, [], 1, &"yan_yue")
+	check_eq(by_id(my, &"heart").cell(), Vector2i(1, 1), "月心在中路后排")
+	var before := by_id(my, &"e").hp
+	my._deal(by_id(my, &"e"), by_id(my, &"heart"), 1.0)
+	check(by_id(my, &"e").hp < before, "月角夹击中路来犯的近战")
 	# 不摆阵、不同山头：什么也不加
 	var plain := BattleModel.new(stage, [lead, h1, unit_data(&"x", [1000, 100, 50, 100])] as Array[UnitData], 1, [], 1)
 	check(plain.opening_events.is_empty(), "no formation, no 山头, nothing to show")
@@ -468,29 +767,39 @@ func test_expose_and_boss_resist() -> bool:
 	check_eq(e.expose_turns, 0, "expose is used up by one hit")
 	var normal := m._deal(a, e, 1.0, true)
 	check(normal >= 71 and normal <= 79, "next hit is normal again (%d)" % normal)
-	# 头目：眩晕结束后的那一回合里，再眩晕无效
+	# 头目不吃控制，控制改成削韧性；韧性打空就破绽：跪地一回合、受到伤害 +30%，跪完韧性回满
 	var boss := unit_data(&"b", [100000, 1, 0, 100])
 	boss.is_boss = true
 	var m2 := battle([unit_data(&"a", [500, 1, 0, 100])], [boss])
 	var b := by_id(m2, &"b")
-	advance_to(m2, &"a")
-	check(m2._stun(by_id(m2, &"a"), b, 1), "first stun lands")
-	m2.act(BattleModel.Action.GUARD)
-	advance_to(m2, &"a")  # 头目这回合被跳过，定力开始
-	check(b.resists(&"stun"), "boss resists stun right after one")
-	check(not m2._stun(by_id(m2, &"a"), b, 1), "second stun is resisted")
-	m2.act(BattleModel.Action.GUARD)
-	advance_to(m2, &"a")  # 头目又动了一次，定力还剩一回合
-	check(b.resists(&"stun"), "resist lasts two boss turns")
-	m2.act(BattleModel.Action.GUARD)
-	advance_to(m2, &"a")  # 再动一次，定力过去
-	check(not b.resists(&"stun"), "resist wears off after the boss acts twice")
-	check(m2._stun(by_id(m2, &"a"), b, 1), "stun works again")
-	# 普通敌人没有定力
+	var a2 := by_id(m2, &"a")
+	check(not m2._stun(a2, b, 1), "头目不吃眩晕")
+	check_eq(b.stun_turns, 0, "没晕")
+	check_eq(b.toughness, BattleUnit.TOUGHNESS_MAX - BattleModel.TOUGHNESS_CONTROL, "控制削一截韧性")
+	for i in 3:
+		m2._stun(a2, b, 1)
+	check_eq(b.toughness, 0, "韧性打空")
+	check_eq(b.broken_turns, 1, "破绽")
+	check(m2._events.any(func(e: Dictionary) -> bool: return e["popup"] == "破绽"), "破绽有横幅")
+	var hp := b.hp
+	m2._deal(a2, b, 100.0, true)
+	var broken_hit := hp - b.hp
+	for i in 4:
+		m2.start_next_turn()
+		if m2.current != null:
+			m2.act(BattleModel.Action.GUARD)
+	check_eq(b.broken_turns, 0, "跪完一回合")
+	check_eq(b.toughness, BattleUnit.TOUGHNESS_MAX, "韧性回满")
+	hp = b.hp
+	m2._deal(a2, b, 100.0, true)
+	check(broken_hit > (hp - b.hp) * 1.2, "破绽时受到伤害更多（%d vs %d）" % [broken_hit, hp - b.hp])
+	# 普攻削韧性：5 点
+	var t := b.toughness
+	m2._deal(a2, b, 1.0, false, true)
+	check_eq(b.toughness, t - BattleModel.TOUGHNESS_BASIC, "普攻削 5 点韧性")
+	# 普通敌人照常被控
 	var m3 := battle([unit_data(&"a", [500, 1, 0, 100])], [unit_data(&"e", [100000, 1, 0, 100])])
-	m3._stun(by_id(m3, &"a"), by_id(m3, &"e"), 1)
-	advance_to(m3, &"a")
-	check(m3._stun(by_id(m3, &"a"), by_id(m3, &"e"), 1), "regular enemies can be stunned again")
+	check(m3._stun(by_id(m3, &"a"), by_id(m3, &"e"), 1), "regular enemies can be stunned")
 	return true
 
 
@@ -516,37 +825,44 @@ func test_boss_charge() -> bool:
 	# 攻击 100 × 2.0 × 1.4 = 280（±5%），不蓄力是 200
 	check(dealt >= 266 and dealt <= 294, "charged skill hits ×1.4 (%d)" % dealt)
 	check(not b.charging, "the charge is spent")
-	# 蓄力中被眩晕：打断，重新冷却，露出破绽
+	# 蓄力中韧性被打空：大招作废、重新冷却
 	var boss2 := unit_data(&"b", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0, "cooldown": 3}))
 	boss2.is_boss = true
 	var m2 := battle([unit_data(&"a", [100000, 1, 0, 90])], [boss2])
 	advance_to(m2, &"b")
 	m2.act_ai()
 	var b2 := by_id(m2, &"b")
-	check(m2._stun(by_id(m2, &"a"), b2, 1), "stun lands on a charging boss")
-	check(not b2.charging, "stun interrupts the charge")
+	check(not b2.charge_cells.is_empty(), "蓄力时标出要砸的格子")
+	m2._wear_toughness(b2, 1000)
+	check(not b2.charging, "韧性打空打断蓄力")
+	check(b2.charge_cells.is_empty(), "红格撤掉")
 	check_eq(b2.skill_cooldown, 3, "the skill goes back on cooldown")
-	check(b2.expose_turns > 0, "an interrupted boss is exposed")
-	# 头目身上的控制最多 1 回合
-	var boss3 := unit_data(&"b", [100000, 100, 0, 100])
-	boss3.is_boss = true
-	var m4 := battle([unit_data(&"a", [100000, 1, 0, 90])], [boss3])
-	m4._stun(by_id(m4, &"a"), by_id(m4, &"b"), 3)
-	check_eq(by_id(m4, &"b").stun_turns, 1, "a boss is stunned for at most 1 turn")
-	# 蓄满的绝招不吃嘲讽：打预告里的人
+	# 红格：大招打格子里的人；挪出红格就躲开了
 	var boss4 := unit_data(&"b", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0, "cooldown": 3}))
 	boss4.is_boss = true
 	var m5 := battle([unit_data(&"tank", [100000, 1, 0, 80]), unit_data(&"soft", [100000, 1, 0, 70])], [boss4])
 	advance_to(m5, &"b")
 	m5.act_ai()
 	var b5 := by_id(m5, &"b")
-	b5.intent_target = by_id(m5, &"soft")
-	by_id(m5, &"tank").taunt_turns = 5
-	check(m5.intent_target_of(b5) == by_id(m5, &"soft"), "a charged boss ignores taunt in its intent")
-	var soft_hp := by_id(m5, &"soft").hp
-	advance_to(m5, &"b")
+	var marked: BattleUnit = null
+	for u in [by_id(m5, &"tank"), by_id(m5, &"soft")]:
+		if u.cell() in b5.charge_cells:
+			marked = u
+	check(marked != null, "预告的目标站在红格里")
+	check(m5.is_threatened(marked), "红格里的人受威胁")
+	check(m5.in_danger(marked), "红格里的人有危险")
+	var safe := m5.safe_cell(marked)
+	check(safe != Grid.NONE and not safe in b5.charge_cells, "有能躲的空格子")
+	# 轮到它就躲开
+	advance_to(m5, marked.data.id)
 	m5.act_ai()
-	check(by_id(m5, &"soft").hp < soft_hp, "the charged blow lands on the announced target")
+	check(not marked.cell() in b5.charge_cells, "自动战斗会挪出红格")
+	var hp_marked := marked.hp
+	advance_to(m5, &"b")
+	var ev5 := m5.act_ai()
+	check_eq(marked.hp, hp_marked, "挪开了就没挨打")
+	check(ev5.any(func(e: Dictionary) -> bool: return e["popup"] == "扑空"), "大招扑空")
+	# 普通敌人不蓄力
 	# 普通敌人不蓄力
 	var m3 := battle([unit_data(&"a", [100000, 1, 0, 90])], [unit_data(&"e", [100000, 100, 0, 100], skill(SkillData.Effect.DAMAGE, {"power": 2.0}))])
 	advance_to(m3, &"e")
@@ -1547,11 +1863,12 @@ func test_story_data() -> bool:
 func test_martial_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var all: Array = GameDB.load_dir("res://data/martial/")
-	check_eq(all.size(), 8, "8 martial arts")
+	check_eq(all.size(), 16, "8 门武学 + 8 本技能书的武学")
 	for res in all:
 		var m: MartialData = res
 		check(m.skill != null and m.skill.description != "", "%s has a described skill" % m.display_name)
-		check(m.side_summary() != "", "%s has a side bonus" % m.display_name)
+		if not String(m.id).begins_with("book_"):
+			check(m.side_summary() != "", "%s has a side bonus" % m.display_name)
 		check(m.source != "", "%s says where it is learned" % m.display_name)
 	for res in GameDB.load_dir("res://data/origins/"):
 		var o: OriginData = res
@@ -1656,8 +1973,23 @@ func test_simulated_win_rate() -> bool:
 		combos.append(res as ComboData)
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	for team_ids: Array in [[&"lu_zhishen", &"lin_chong", &"wu_song"], [&"sun_erniang", &"wu_song", &"an_daoquan"], [&"shi_qian", &"wu_yong", &"hua_rong"]]:
-		var team: Array[UnitData] = []
-		var label := ""
+		# 统领（镖师出身、主修押镖横刀的战士）和三位好汉一起上场
+		var lead := UnitData.new()
+		lead.id = BattleModel.COMMANDER_ID
+		lead.display_name = "统领"
+		lead.rarity = UnitData.Rarity.PROTAGONIST
+		var lead_martial: MartialData = load("res://data/martial/ya_biao_heng_dao.tres")
+		lead.role = lead_martial.role
+		lead.skill = lead_martial.skill
+		var st := Roles.protagonist_stats(lead.role)
+		lead.base_hp = st[0]
+		lead.base_atk = st[1]
+		lead.base_def = st[2]
+		lead.base_res = st[3]
+		lead.base_spd = st[4]
+		lead.base_agi = st[5]
+		var team: Array[UnitData] = [lead]
+		var label := "统领+"
 		for id: StringName in team_ids:
 			team.append(heroes[id])
 			label += heroes[id].display_name

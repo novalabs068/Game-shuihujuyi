@@ -6,9 +6,11 @@ extends Resource
 enum Rarity { NONE, DISHA, TIANGANG, PROTAGONIST }
 ## 品级：强弱，决定抽卡概率和星数上限。和身份无关，见设计文档「好汉卡牌与招募」
 enum Tier { JIA, YI, BING, DING }
-enum Role { TANK, WARRIOR, ARCHER, STRATEGIST, MYSTIC }
+## 职业：战士、刺客（近战），射手、道士、治疗（远程）。相克、出手范围等规则见 Roles
+enum Role { WARRIOR, ASSASSIN, ARCHER, TAOIST, HEALER }
 ## 职业的单字，战斗日志和相克说明里用（和 UiKit.ROLE_TAGS 一致）
-const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
+const ROLE_TAGS: Array[String] = ["战", "刺", "射", "道", "医"]
+const ROLE_NAMES: Array[String] = ["战士", "刺客", "射手", "道士", "治疗"]
 
 @export var id: StringName
 @export var display_name: String
@@ -23,6 +25,10 @@ const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
 @export var base_atk := 10
 @export var base_def := 10
 @export var base_spd := 100
+## 法抗：挡法术伤害（道士打的）。-1 = 按职业从防御折算（Roles.RES_RATIO），敌人多数用这个
+@export var base_res := -1
+## 敏捷：决定闪避率（见 Roles.dodge_chance），不随等级涨。-1 = 用职业的默认值
+@export var base_agi := -1
 
 @export_group("立绘")
 ## 由 tools/art_pipeline.py 生成：整身立绘、卡片半身像、出手顺序头像。原图都是脸朝右。
@@ -37,6 +43,8 @@ const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
 @export_group("技能")
 ## 普攻的样子（战斗里按这个放动作和特效）：slash 刀剑、thrust 枪矛、heavy 斧棒禅杖、fist 拳脚、claw 爪牙（野兽）、arrow 弓箭、throw 暗器飞石火炮
 @export var attack_style: StringName = &"slash"
+## 普攻打几格（SkillData.Area）：大多数是单人，林冲的枪是穿透
+@export var basic_area: SkillData.Area = SkillData.Area.SINGLE
 @export var skill: SkillData
 ## 好汉的天赋（被动），点亮第 1 颗勾玉时解锁
 @export var talent: TalentData
@@ -59,3 +67,19 @@ const ROLE_TAGS: Array[String] = ["猛", "武", "射", "谋", "奇"]
 @export var enrage_name := ""
 @export var enrage_atk_bonus := 0.0
 @export var enrage_turns := 3
+## 血条叠成几管（只是显示：一管一个颜色，打掉一管血条碎开）
+@export var boss_bars := 3
+## 大体型：占一路的前后两格，把这一路整个堵住
+@export var big := false
+## 第二、第三阶段（血量降到 60%、30%）换成的绝招；没有就不换
+@export var phase_skills: Array[SkillData] = []
+
+
+## 实际的法抗（1 级）：填了就用填的，没填按职业从防御折算。
+func res() -> int:
+	return base_res if base_res >= 0 else roundi(base_def * Roles.RES_RATIO[role])
+
+
+## 实际的敏捷：填了就用填的，没填用职业默认值。
+func agi() -> int:
+	return base_agi if base_agi >= 0 else Roles.DEFAULT_AGI[role]

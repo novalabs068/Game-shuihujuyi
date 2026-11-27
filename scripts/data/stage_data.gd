@@ -5,6 +5,8 @@ extends Resource
 @export var id: String
 @export var title: String
 @export var enemies: Array[UnitData] = []
+## 敌人各站哪一格（和 enemies 一一对应，Vector2i(排, 路)）；空着或不够的按职业自动摆（见 Grid.auto_place）
+@export var enemy_cells: Array[Vector2i] = []
 @export var enemy_level := 1
 @export var recommended_level := 1
 ## 在这么多回合内获胜可拿第三颗星

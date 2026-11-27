@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "七星计"
+description = "敌方全体各受 80% 法术伤害，速度 -30%，持续 2 回合。"
+effect = 17
+power = 0.8
+amount = 0.3
+turns = 2
+cooldown = 3
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_qi_xing_ji"
+display_name = "七星计"
+flavor = "黄泥冈上七人扮作贩枣客商，一桶药酒麻翻了押送生辰纲的官军。"
+source = "研读技能书《七星计》"
+role = 3
+skill = SubResource("Resource_sk")

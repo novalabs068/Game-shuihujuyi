@@ -5,10 +5,8 @@ extends Node
 const SAVE_PATH := "user://save.json"
 ## 版本不同的旧存档不兼容，当作没有存档
 const SAVE_VERSION := 2
-## 队伍是主角 + 最多这么多位好汉
+## 队伍是统领（主角）+ 最多这么多位好汉，四人一起上场
 const MAX_HEROES := 3
-## 统领光环：主修武学的加成放大这么多倍给全队（统领不上阵，全靠这一条撑着）
-const COMMANDER_AURA_MULT := 3.0
 ## 新开局送的聚义令，够两次五连
 const STARTING_TOKENS := 10
 const DEFAULT_MAP := "ch1"
@@ -38,6 +36,8 @@ var pulls_since_jia := 0
 ## 每位好汉的星数（没记的就是 1 星）、通用货币义气（将魂化来，可换指定好汉的将魂）
 var stars: Dictionary[StringName, int] = {}
 var yiqi := 0
+## 残页：合成技能书时顶缺的将魂（见 Books）
+var pages := 0
 ## 主角和每位好汉的羁绊点数（见 Bonds）
 var bonds: Dictionary[StringName, int] = {}
 ## 气血：没回满的人剩多少（0～1，见 Vitality）；没记的就是满血
@@ -50,9 +50,12 @@ var camp: Dictionary = {}
 var last_camp_done := 0
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
-## 主角学会的武学和主修（主修那门就是统领光环）
+## 主角学会的武学和主修（主修那门就是统领在战斗里放的绝招，也决定统领的职业）、每门修到第几重
 var martials: Array[StringName] = []
 var martial_main: StringName = &""
+var martial_levels: Dictionary[StringName, int] = {}
+## 布阵：统领和每位好汉站哪一格（Vector2i(排, 路)，见 Grid）；没记的人开战时按阵法、按职业自动摆
+var positions: Dictionary[StringName, Vector2i] = {}
 ## 老存档里的副修武学。主角改当统领后不再用，读档时清空
 var martial_side: StringName = &""
 ## 秘籍：每本一条 {uid, id, holder}，holder 为空就是没人装。和装备共用编号
@@ -152,7 +155,7 @@ static func scroll_data(sc: Dictionary) -> MijiData:
 	return GameDB.mijis.get(sc["id"])
 
 
-## 某人秘籍栏里的那本（没有返回空字典）。主角是统领，没有秘籍栏。
+## 某人秘籍栏里的那本（没有返回空字典）。
 func scroll_of(holder: StringName) -> Dictionary:
 	for sc in scrolls:
 		if sc["holder"] == holder:
@@ -163,7 +166,7 @@ func scroll_of(holder: StringName) -> Dictionary:
 ## 给 holder 装上这本：他原来那本卸下；这本原来在别人身上就拿过来。
 func equip_scroll(holder: StringName, uid: int) -> void:
 	var sc := scroll(uid)
-	if sc.is_empty() or holder == PROTAGONIST_ID:
+	if sc.is_empty():
 		return
 	var old := scroll_of(holder)
 	if not old.is_empty():
@@ -210,6 +213,38 @@ func set_formation(id: StringName) -> void:
 ## 现在出战用的阵法（选的那个没解锁就用默认的）。
 func current_formation() -> StringName:
 	return formation if formation_unlocked(formation) else Formations.DEFAULT
+
+
+# --- 技能书 ---
+
+## 合成技能书：每位故事里的好汉扣将魂，不够的用残页顶。成功返回 true，书进行囊。
+func craft_book(mj: MijiData) -> bool:
+	if not Books.can_craft(mj, souls, pages):
+		return false
+	var need := Books.souls_per_hero(mj)
+	var short := 0
+	for id in mj.recipe:
+		var use := mini(souls_of(id), need)
+		souls[id] = souls_of(id) - use
+		short += need - use
+	pages -= short
+	add_scroll(mj.id)
+	save_game()
+	return true
+
+
+## 统领研读一本技能书：学会书里的武学，书用掉。已经会了返回 false。
+func study_book(uid: int) -> bool:
+	var sc := scroll(uid)
+	if sc.is_empty():
+		return false
+	var mj := scroll_data(sc)
+	if mj == null or mj.martial == null or mj.martial.id in martials:
+		return false
+	scrolls.erase(sc)
+	learn_martial(mj.martial)
+	save_game()
+	return true
 
 
 func buy_scroll(mj: MijiData) -> bool:
@@ -271,8 +306,16 @@ func protagonist() -> UnitData:
 		_protagonist.rarity = UnitData.Rarity.PROTAGONIST
 		var main := martial(martial_main)
 		if main != null:
-			_protagonist.skill = main.skill
+			_protagonist.skill = main.skill_at(martial_level(main.id))
 			_protagonist.role = main.role
+		# 统领的属性跟着职业走：这个职业甲品范围的中间值（换主修换职业，属性也跟着换）
+		var st := Roles.protagonist_stats(_protagonist.role)
+		_protagonist.base_hp = st[0]
+		_protagonist.base_atk = st[1]
+		_protagonist.base_def = st[2]
+		_protagonist.base_res = st[3]
+		_protagonist.base_spd = st[4]
+		_protagonist.base_agi = st[5]
 	return _protagonist
 
 
@@ -379,63 +422,134 @@ func recruit_with_souls(hero: UnitData) -> bool:
 	return true
 
 
-## 这位好汉现在等级下的生命上限（带上勾玉、羁绊、装备、秘籍；在队里的再带上统领光环），药按它折算比例。
+## 这个人现在等级下的生命上限（带上勾玉、羁绊、装备、秘籍），药按它折算比例。统领也算。
 func max_hp_of(id: StringName) -> int:
-	var hero := GameDB.hero(id)
-	if hero == null:
+	var unit := battle_data(id)
+	if unit == null:
 		return 1
-	var unit := Bonds.apply(Stars.apply(hero, star_of(id)), bond_of(id))
-	var gear := effective_gear(id)
-	if id in team_ids and commander_aura() != null:
-		gear.append(commander_aura())
-	unit = Equipment.apply(unit, gear)
+	return maxi(1, roundi(unit.base_hp * pow(Roles.level_growth(unit), level - 1)))
+
+
+## 一个人上战场的数据：好汉带上星级、羁绊，统领用主修武学；都再带上装备和秘籍。
+func battle_data(id: StringName) -> UnitData:
+	var unit: UnitData
+	if id == PROTAGONIST_ID:
+		unit = protagonist()
+	else:
+		var hero := GameDB.hero(id)
+		if hero == null:
+			return null
+		unit = Bonds.apply(Stars.apply(hero, star_of(id)), bond_of(id))
+	if unit == null:
+		return null
+	unit = Equipment.apply(unit, effective_gear(id))
 	var sc := scroll_of(id)
-	unit = Miji.apply(unit, scroll_data(sc) if not sc.is_empty() else null)
-	return maxi(1, roundi(unit.base_hp * pow(BattleUnit.LEVEL_GROWTH, level - 1)))
+	return Miji.apply(unit, scroll_data(sc) if not sc.is_empty() else null)
 
 
-## 战斗用的队伍：三位好汉带上星级、羁绊、装备、秘籍，再加上统领（主角）的光环。
-## with_aura 为 false 时不算光环（头目按养成变强时用：光环是补主角下场的，不算养成）。
-func battle_team(with_aura := true) -> Array[UnitData]:
+## 战斗用的队伍：统领在前，然后是出战的好汉（都带上星级、羁绊、装备、秘籍）。
+func battle_team(_unused := true) -> Array[UnitData]:
 	var out: Array[UnitData] = []
-	var aura := commander_aura() if with_aura else null
 	for u in team():
-		var unit := Bonds.apply(Stars.apply(u, star_of(u.id)), bond_of(u.id))
-		var gear := effective_gear(u.id)
-		if aura != null:
-			gear.append(aura)
-		unit = Equipment.apply(unit, gear)
-		var sc := scroll_of(u.id)
-		out.append(Miji.apply(unit, scroll_data(sc) if not sc.is_empty() else null))
+		var unit := battle_data(u.id)
+		if unit != null:
+			out.append(unit)
+	return out
+
+
+## 开战时每人站的格子（和 battle_team 一一对应）；没布过阵的是 Grid.NONE，按阵法、职业自动摆。
+func placement() -> Array:
+	var auto := _arranged(current_formation())
+	var out := []
+	for u in team():
+		out.append(positions.get(u.id, auto.get(u.id, Grid.NONE)))
+	return out
+
+
+## 按阵法的阵位一键布阵：阵位宜站什么职业就先挑那个职业的人，剩下的按顺序；阵位不够的按职业自动摆。
+func arrange_by_formation(id: StringName) -> void:
+	positions.clear()
+	var put := _arranged(id)
+	for uid: StringName in put:
+		positions[uid] = put[uid]
+	save_game()
+
+
+## 按阵位算出的站位（不存）：id → 格子。阵眼先挑人；宜站的职业优先，其次宜站这一排的，剩下的按职业找空格。
+func _arranged(id: StringName) -> Dictionary:
+	var members := team()
+	var cells := Formations.cells(id)
+	if not cells.is_empty():
+		cells.erase(Formations.eye_cell(id))
+		cells.push_front(Formations.eye_cell(id))
+	var left: Array[UnitData] = members.duplicate()
+	var put := {}
+	# 三轮：宜站的职业 → 宜站这一排的 → 阵眼不能空，谁都行
+	for pass_i in 3:
+		for c in cells:
+			if put.values().has(c):
+				continue
+			var want := Formations.suited_role(id, c)
+			for u in left:
+				var ok := (want != Formations.ANY and u.role == want) if pass_i == 0 else (Roles.home_row(u.role) == c.x if pass_i == 1 else c == Formations.eye_cell(id))
+				if ok:
+					put[u.id] = c
+					left.erase(u)
+					break
+	# 剩下的人（阵位不够时）按职业找空格
+	var taken := {}
+	for c: Vector2i in put.values():
+		taken[c] = true
+	for u in left:
+		var home := Roles.home_row(u.role)
+		for r in [home, 1 - home]:
+			if put.has(u.id):
+				break
+			for l in Grid.LANE_ORDER:
+				var c := Vector2i(r, l)
+				if not taken.has(c):
+					put[u.id] = c
+					taken[c] = true
+					break
+	return put
+
+
+## 把 id 挪到格子 c；那格原来有人就和他换位。
+func move_to_cell(id: StringName, c: Vector2i) -> void:
+	var team_ids_all: Array[StringName] = []
+	for u in team():
+		team_ids_all.append(u.id)
+	# 先把没记过格子的人按当前的样子补上，免得换位时丢人
+	var current := current_cells()
+	for uid in team_ids_all:
+		positions[uid] = current[uid]
+	for uid in team_ids_all:
+		if uid != id and positions[uid] == c:
+			positions[uid] = positions[id]
+	positions[id] = c
+	save_game()
+
+
+## 队伍现在每人站哪一格（没布过阵的按开战时的规则算出来）：id → Vector2i。
+func current_cells() -> Dictionary:
+	var stage := StageData.new()
+	var m := BattleModel.new(stage, team(), 1, [], 1, current_formation(), placement())
+	var out := {}
+	for u in m.units:
+		out[u.data.id] = u.cell()
 	return out
 
 
 ## 开打前的关卡：头目按队伍的养成程度加强（复制一份，不改原关卡）。
 func prepare_stage(stage: StageData) -> StageData:
 	var st: StageData = stage.duplicate()
-	st.boss_power = Encounters.boss_power(team(), battle_team(false))
+	st.boss_power = Encounters.boss_power(team(), battle_team())
 	return st
 
 
 ## 算属性时用的「装备」：身上的装备。
 func effective_gear(holder: StringName) -> Array[EquipData]:
 	return gear_of(holder)
-
-
-## 统领光环：主角不上场，主修武学的加成给出战的每一位好汉（折成一件「装备」）。没有主修返回 null。
-func commander_aura() -> EquipData:
-	return aura_of(martial(martial_main))
-
-
-## 某门武学作主修时的统领光环。
-static func aura_of(m: MartialData) -> EquipData:
-	if m == null:
-		return null
-	var g := m.side_as_gear()
-	g.display_name = "统领·%s" % m.display_name
-	for stat: String in ["hp_pct", "atk_pct", "def_pct", "spd_pct"]:
-		g.set(stat, g.get(stat) * COMMANDER_AURA_MULT)
-	return g
 
 
 # --- 武学 ---
@@ -456,7 +570,28 @@ func learn_martial(m: MartialData) -> bool:
 	return true
 
 
-## 换主修（统领光环跟着换）。
+## 第几重（学会就是第 1 重）。
+func martial_level(id: StringName) -> int:
+	return clampi(martial_levels.get(id, 1), 1, MartialData.MAX_LEVEL)
+
+
+func can_train(id: StringName) -> bool:
+	var lv := martial_level(id)
+	return id in martials and lv < MartialData.MAX_LEVEL and silver >= MartialData.level_cost(lv)
+
+
+## 花银两把这门武学修上一重。
+func train_martial(id: StringName) -> bool:
+	if not can_train(id):
+		return false
+	silver -= MartialData.level_cost(martial_level(id))
+	martial_levels[id] = martial_level(id) + 1
+	_protagonist = null
+	save_game()
+	return true
+
+
+## 换主修（统领的绝招和职业跟着换）。
 func set_martial_main(id: StringName) -> void:
 	if not id in martials or id == martial_main:
 		return
@@ -627,9 +762,14 @@ func buy_item(data: EquipData) -> bool:
 	return true
 
 
-## 出战队伍：三位好汉，第一位是主将。主角是统领，不上场。
+## 出战队伍：统领（主角）在前，加上最多三位好汉，四人一起上场。还没开新档（没有出身）时只有好汉。
 func team() -> Array[UnitData]:
-	return heroes()
+	var out: Array[UnitData] = []
+	var me := protagonist()
+	if me != null:
+		out.append(me)
+	out.append_array(heroes())
+	return out
 
 
 func set_heroes(list: Array[UnitData]) -> void:
@@ -845,6 +985,7 @@ func reset() -> void:
 	pulls_since_jia = 0
 	stars.clear()
 	yiqi = 0
+	pages = 0
 	bonds.clear()
 	vitality.clear()
 	medicines.clear()
@@ -858,6 +999,8 @@ func reset() -> void:
 	martials.clear()
 	martial_main = &""
 	martial_side = &""
+	martial_levels.clear()
+	positions.clear()
 	record = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0}
 	jobs = {}
 	flags.clear()
@@ -933,11 +1076,14 @@ func save_game() -> void:
 		"level_scale": LEVEL_SCALE,
 		"last_camp_done": last_camp_done,
 		"yiqi": yiqi,
+		"pages": pages,
 		"record": record,
 		"jobs": jobs,
 		"martials": martials.map(func(id: StringName) -> String: return String(id)),
 		"martial_main": String(martial_main),
 		"martial_side": String(martial_side),
+		"martial_levels": _ids_to_json(martial_levels),
+		"positions": _cells_to_json(positions),
 		"items": items.map(func(it: Dictionary) -> Dictionary: return {"uid": it["uid"], "id": String(it["id"]), "holder": String(it["holder"])}),
 		"formation": String(formation),
 		"scrolls": scrolls.map(func(sc: Dictionary) -> Dictionary: return {"uid": sc["uid"], "id": String(sc["id"]), "holder": String(sc["holder"])}),
@@ -1006,6 +1152,7 @@ func load_game() -> void:
 	for id: String in saved_bonds:
 		bonds[StringName(id)] = int(saved_bonds[id])
 	yiqi = data.get("yiqi", 0)
+	pages = int(data.get("pages", 0))
 	var saved_record: Dictionary = data.get("record", {})
 	for key in record:
 		record[key] = saved_record.get(key, record[key])
@@ -1037,20 +1184,31 @@ func load_game() -> void:
 			var uid := int(sc["uid"])
 			scrolls.append({"uid": uid, "id": StringName(sc["id"]), "holder": StringName(sc.get("holder", ""))})
 			_next_uid = maxi(_next_uid, uid + 1)
-	# 主角改当统领：只留坐骑，别的装备、秘籍放回行囊，副修作废
+	# 副修作废（统领只看主修）
 	martial_side = &""
-	for it in items:
-		if it["holder"] == PROTAGONIST_ID and item_data(it).slot != EquipData.Slot.MOUNT:
-			it["holder"] = &""
-	for sc in scrolls:
-		if sc["holder"] == PROTAGONIST_ID:
-			sc["holder"] = &""
+	var saved_levels: Dictionary = data.get("martial_levels", {})
+	for id: String in saved_levels:
+		if StringName(id) in martials:
+			martial_levels[StringName(id)] = clampi(int(saved_levels[id]), 1, MartialData.MAX_LEVEL)
+	var saved_positions: Dictionary = data.get("positions", {})
+	for id: String in saved_positions:
+		var c: Array = saved_positions[id]
+		var cell := Vector2i(int(c[0]), int(c[1])) if c.size() == 2 else Grid.NONE
+		if Grid.valid(cell):
+			positions[StringName(id)] = cell
 	# 有名器之前的旧存档：已经打完的列传、揭下的悬赏、开过的宝箱，补发对应的名器
 	claim_mingqi()
 	# 有秘籍之前就结义了的兄弟：补传秘籍
 	for id in owned:
 		if sworn(id):
 			_teach_miji(id)
+
+
+func _cells_to_json(values: Dictionary[StringName, Vector2i]) -> Dictionary:
+	var out := {}
+	for id in values:
+		out[String(id)] = [values[id].x, values[id].y]
+	return out
 
 
 func _floats_to_json(values: Dictionary[StringName, float]) -> Dictionary:

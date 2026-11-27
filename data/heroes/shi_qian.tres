@@ -12,7 +12,7 @@
 [sub_resource type="Resource" id="Resource_ekhxr"]
 script = ExtResource("2_r4hhm")
 display_name = "妙手空空"
-description = "偷取敌人 1 个增益，并立刻再行动 1 次。"
+description = "偷取：偷走敌人 1 个增益；没有增益就偷走他两成攻击和速度（3 回合），然后立刻再行动 1 次。"
 effect = 7
 
 [sub_resource type="Resource" id="Resource_p8fww"]
@@ -30,13 +30,15 @@ id = &"shi_qian"
 display_name = "时迁"
 nickname = "鼓上蚤"
 rarity = 1
-role = 4
+role = 1
 tier = 1
 sort_order = 7
 base_hp = 380
 base_atk = 64
 base_def = 26
 base_spd = 125
+base_res = 31
+base_agi = 122
 portrait = ExtResource("3_l6byi")
 bust = ExtResource("1_2v714")
 face = ExtResource("2_mhilm")

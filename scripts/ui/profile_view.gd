@@ -86,12 +86,11 @@ func _ready() -> void:
 	right.add_child(bar)
 	right.add_child(UiKit.label("银两 %d　聚义令 %d　义气 %d" % [GameState.silver, GameState.tokens, GameState.yiqi], 20, UiKit.TEXT_DIM))
 
-	# 统领：不上阵，主修武学给出战好汉全队加成
+	# 统领：和好汉一起上阵，主修武学决定绝招和职业
 	_section(right, "统领")
 	var main := GameState.martial(GameState.martial_main)
-	var aura := GameState.commander_aura()
-	right.add_child(_line("主修", "%s：出战的每位好汉 %s" % [main.display_name, aura.summary()] if main != null else "（无）"))
-	right.add_child(UiKit.label("已学会 %d 门武学，在「好汉」页换主修" % GameState.martials.size(), 16, UiKit.TEXT_DIM))
+	right.add_child(_line("主修", "%s 第 %d 重 · %s" % [main.display_name, GameState.martial_level(main.id), UiKit.ROLE_NAMES[main.role]] if main != null else "（无）"))
+	right.add_child(UiKit.label("已学会 %d 门武学，在「好汉」页换主修、修炼" % GameState.martials.size(), 16, UiKit.TEXT_DIM))
 	var mount := GameState.mount()
 	right.add_child(_line("坐骑", "%s · %s　%s" % [mount.display_name, mount.quality_name(), mount.summary()] if mount != null else "（无，集市有马卖）"))
 

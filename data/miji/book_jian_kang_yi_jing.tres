@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+[ext_resource type="Resource" path="res://data/martial/book_jian_kang_yi_jing.tres" id="3_w"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "建康医经"
+kind = &"cleanse_regen"
+amount = 0.04
+text = "每次轮到自己回复 {x} 生命，并解除一种控制"
+
+[resource]
+script = ExtResource("2_m")
+id = &"book_jian_kang_yi_jing"
+display_name = "建康医经"
+quality = 1
+flavor = "张顺星夜去建康请安道全，活闪婆王定六一路帮衬，救了宋江背上的疮。"
+effect = SubResource("Resource_e")
+story = "张顺请神医"
+recipe = Array[StringName]([&"an_daoquan", &"wang_dingliu"])
+martial = ExtResource("3_w")

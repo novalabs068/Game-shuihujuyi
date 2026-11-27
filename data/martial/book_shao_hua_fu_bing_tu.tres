@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_u"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/lin_zhong_qiang_ren.png" id="4_b"]
+
+[sub_resource type="Resource" id="Resource_fb"]
+script = ExtResource("3_u")
+id = &"fu_bing"
+display_name = "伏兵"
+base_hp = 100
+base_atk = 10
+base_def = 20
+base_spd = 95
+battle_sprite = ExtResource("4_b")
+attack_style = &"thrust"
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "少华伏兵图"
+description = "召唤两名伏兵站进空格子（攻击按自己的五成、生命三成五），能挡路，持续 3 回合。"
+effect = 23
+power = 0.5
+hits = 2
+amount = 0.35
+turns = 3
+cooldown = 4
+summon = SubResource("Resource_fb")
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_shao_hua_fu_bing_tu"
+display_name = "少华伏兵图"
+flavor = "史进在史家庄后山埋下伏兵，少华山的人马一到，四下里一齐杀出。"
+source = "研读技能书《少华伏兵图》"
+role = 3
+skill = SubResource("Resource_sk")

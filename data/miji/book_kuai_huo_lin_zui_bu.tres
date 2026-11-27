@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+[ext_resource type="Resource" path="res://data/martial/book_kuai_huo_lin_zui_bu.tres" id="3_w"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "快活林醉步"
+kind = &"low_hp_crit"
+amount = 0.2
+text = "生命低于一半时暴击率 +{x}"
+
+[resource]
+script = ExtResource("2_m")
+id = &"book_kuai_huo_lin_zui_bu"
+display_name = "快活林醉步"
+quality = 1
+flavor = "武松一路吃了三十五碗酒，醉里使出玉环步、鸳鸯脚，打得蒋门神跪地求饶。"
+effect = SubResource("Resource_e")
+story = "醉打蒋门神"
+recipe = Array[StringName]([&"wu_song", &"shi_en"])
+martial = ExtResource("3_w")

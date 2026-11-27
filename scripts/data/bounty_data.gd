@@ -30,9 +30,9 @@ func miji_quality() -> int:
 	return [-1, MijiData.Quality.LIANG, MijiData.Quality.JING][grade]
 
 
-## 「、良品秘籍一本」或空，悬赏告示上用。
+## 「、残页 3 张」或空，悬赏告示上用（秘籍改成用好汉将魂合成，悬赏给残页顶缺的将魂）。
 func miji_text() -> String:
-	return "、%s秘籍一本" % MijiData.QUALITY_NAMES[miji_quality()] if miji_quality() >= 0 else ""
+	return "、残页 %d 张" % Books.BOUNTY_PAGES[grade] if Books.BOUNTY_PAGES[grade] > 0 else ""
 
 
 ## 悬赏还送一份药：甲等续命膏，乙丙等金疮药。
@@ -43,8 +43,8 @@ func medicine() -> StringName:
 ## 接下悬赏开打时交给 main 的额外奖励。
 func battle_bonus() -> Dictionary:
 	var bonus := {"tokens": tokens(), "equip_quality": equip_quality(), "medicine": medicine(), "flag": "bounty_" + String(id), "text": "揭下了「%s」的悬赏。" % target}
-	if miji_quality() >= 0:
-		bonus["miji_quality"] = miji_quality()
+	if Books.BOUNTY_PAGES[grade] > 0:
+		bonus["pages"] = Books.BOUNTY_PAGES[grade]
 	return bonus
 
 

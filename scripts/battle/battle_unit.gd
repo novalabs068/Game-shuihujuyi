@@ -16,10 +16,8 @@ const BERSERK_BONUS := 1.0
 const MIN_STAT_RATIO := 0.3
 ## 持续这么多回合以上的增益算「整场有效」（天赋、越打越快），各算各的，不和同类合并
 const PERMANENT_TURNS := 900
-## 头目的「定力」：一种控制结束后，同一种控制在这么多回合内对它无效
-const BOSS_RESIST_TURNS := 2
-## 控制落在头目身上最多持续这么多回合（免得被一招晕到底）
-const BOSS_MAX_CONTROL := 1
+## 头目的韧性条：满值；打空就「破绽」跪地一回合
+const TOUGHNESS_MAX := 100
 
 
 class Buff:
@@ -38,6 +36,9 @@ class Buff:
 var data: UnitData
 var side: BattleUnit.Side
 var slot: int
+## 站在哪一格：row 0 前排、1 后排；lane 0 上路、1 中路、2 下路。大体型的头目占这一路的前后两格（row 记 0）
+var row := -1
+var lane := 0
 var level: int
 var max_hp: int
 var hp: int
@@ -52,8 +53,21 @@ var stun_turns := 0
 var disarm_turns := 0
 var silence_turns := 0
 var expose_turns := 0
-## 头目的定力：控制种类（&"stun"、&"disarm"、&"silence"）→ 还要几回合才会再被这种控制
-var control_resist := {}
+## 头目的韧性：控制和打中弱点削得多，打空就破绽（跪地一回合、受到伤害 +30%、蓄的大招作废）
+var toughness := TOUGHNESS_MAX
+## 破绽还剩几回合（>0 时受到的伤害加成）
+var broken_turns := 0
+## 头目第几阶段（1～3），血量 60%、30% 时换阶段
+var phase := 1
+## 头目蓄的大招要砸的格子（Vector2i(row, lane)，对方那一边的格子）；放的时候打这些格子里的人
+var charge_cells: Array[Vector2i] = []
+## 阵法给的加成（Formations 写入，破阵时清空）：atk、def、spd、taken、heal、control、tail、horn
+var formation_mods: Dictionary = {}
+## 站在阵眼上：倒下就破阵
+var formation_eye := false
+## 召唤物：谁召出来的、还剩几回合（0 = 打死为止）。召唤者倒下就一起消散
+var summoner: BattleUnit
+var summon_turns := 0
 ## 头目蓄力中：下一次行动放出蓄满的绝招（伤害 ×BattleModel.CHARGE_BONUS）；这期间被控制就打断
 var charging := false
 ## 阵法、山头给的：受到的伤害倍数、额外暴击率
@@ -80,7 +94,9 @@ var intent_target: BattleUnit
 
 var _atk: int
 var _def: int
+var _res: int
 var _spd: int
+var _agi: int
 
 
 func _init(p_data: UnitData, p_side: BattleUnit.Side, p_slot: int, p_level: int) -> void:
@@ -92,8 +108,17 @@ func _init(p_data: UnitData, p_side: BattleUnit.Side, p_slot: int, p_level: int)
 	hp = max_hp
 	_atk = _scaled(data.base_atk)
 	_def = _scaled(data.base_def)
+	_res = _scaled(data.res())
 	_spd = data.base_spd  # 速度不随等级成长，出手顺序只由好汉本身决定
+	_agi = data.agi()  # 敏捷也不随等级涨：闪避手感前期后期一样
 	first_crit_ready = has_talent(&"first_crit")
+
+
+## 召唤物的属性：按召唤者折算（开战后召出来，血是满的）。
+func set_summon_stats(p_hp: int, p_atk: float) -> void:
+	max_hp = maxi(1, p_hp)
+	hp = max_hp
+	_atk = maxi(1, roundi(p_atk))
 
 
 ## 敌人加强：生命、攻击按 k 放大，防御按 k_def 放大（开战前调用，血是满的）。
@@ -102,11 +127,20 @@ func strengthen(k: float, k_def := 1.0) -> void:
 	hp = max_hp
 	_atk = roundi(_atk * k)
 	_def = roundi(_def * k_def)
+	_res = roundi(_res * k_def)
+
+
+## 敌人按我方人数加强：生命、攻击各乘一个数（开战前调用，血是满的）。
+func scale_squad(k_hp: float, k_atk: float) -> void:
+	max_hp = roundi(max_hp * k_hp)
+	hp = max_hp
+	_atk = roundi(_atk * k_atk)
 
 
 ## 开战时按倍数加防御、加生命（阵法、山头用）。
 func scale_def(k: float) -> void:
 	_def = roundi(_def * k)
+	_res = roundi(_res * k)
 
 
 func scale_hp(k: float) -> void:
@@ -115,7 +149,7 @@ func scale_hp(k: float) -> void:
 
 
 func _scaled(base: int) -> int:
-	return roundi(base * pow(LEVEL_GROWTH, level - 1))
+	return roundi(base * pow(Roles.level_growth(data), level - 1))
 
 
 func display_name() -> String:
@@ -138,18 +172,62 @@ func atk() -> float:
 		bonus += BERSERK_BONUS
 	if hp_ratio() < 0.5:
 		bonus += talent(&"bloodlust")
+	bonus += float(formation_mods.get("atk", 0.0))
 	return _atk * maxf(1.0 + bonus, MIN_STAT_RATIO)
 
 
 func def() -> float:
-	return float(_def)
+	return _def * (1.0 + float(formation_mods.get("def", 0.0)))
+
+
+## 法抗：挡法术伤害。
+func res() -> float:
+	return _res * (1.0 + float(formation_mods.get("def", 0.0)))
+
+
+func agi() -> float:
+	return float(_agi)
 
 
 func spd() -> float:
 	var bonus := 0.0
 	for b in buffs:
 		bonus += b.spd_bonus
+	bonus += float(formation_mods.get("spd", 0.0))
 	return _spd * maxf(1.0 + bonus, MIN_STAT_RATIO)
+
+
+func role() -> UnitData.Role:
+	return data.role
+
+
+func is_melee() -> bool:
+	return Roles.is_melee(data.role)
+
+
+func is_summon() -> bool:
+	return summoner != null
+
+
+## 站的格子（大体型的头目返回它的前排格）。
+func cell() -> Vector2i:
+	return Vector2i(row, lane)
+
+
+## 占着的格子：一般一格，大体型占一路前后两格。
+func cells() -> Array[Vector2i]:
+	if data.big:
+		return [Vector2i(0, lane), Vector2i(1, lane)]
+	return [Vector2i(row, lane)]
+
+
+func occupies(c: Vector2i) -> bool:
+	return c in cells()
+
+
+## 站错排（近战在后排、远程在前排）。大体型和召唤物不算。
+func misplaced() -> bool:
+	return not data.big and not is_summon() and row != Roles.home_row(data.role)
 
 
 func has_gear(effect: StringName) -> bool:
@@ -207,8 +285,9 @@ func can_attack() -> bool:
 	return disarm_turns == 0
 
 
-func resists(kind: StringName) -> bool:
-	return int(control_resist.get(kind, 0)) > 0
+## 头目不吃控制：控制改成削韧性（见 BattleModel._control）。
+func resists(_kind: StringName) -> bool:
+	return data.is_boss
 
 
 ## 加一个增益或减益。同一类（加攻、减攻、加速、减速）不叠加：数值取大的，回合取长的。
@@ -237,25 +316,18 @@ static func _buff_kind(b: Buff) -> String:
 func tick_turn_end() -> void:
 	if disarm_turns > 0:
 		disarm_turns -= 1
-		if disarm_turns == 0:
-			_start_resist(&"disarm")
 	if silence_turns > 0:
 		silence_turns -= 1
-		if silence_turns == 0:
-			_start_resist(&"silence")
 	expose_turns = maxi(expose_turns - 1, 0)
 
 
-## 眩晕的这一回合被跳过时调用。
+## 眩晕的这一回合被跳过时调用。破绽（跪地）也是这样跳过的，跪完韧性回满。
 func consume_stun() -> void:
 	stun_turns -= 1
-	if stun_turns == 0:
-		_start_resist(&"stun")
-
-
-func _start_resist(kind: StringName) -> void:
-	if data.is_boss:
-		control_resist[kind] = BOSS_RESIST_TURNS
+	if broken_turns > 0:
+		broken_turns -= 1
+		if broken_turns == 0:
+			toughness = TOUGHNESS_MAX
 
 
 ## 轮到自己时调用：清掉上回合的防御，冷却和各状态减 1。
@@ -268,10 +340,6 @@ func tick_turn_start() -> void:
 		reduction_turns -= 1
 		if reduction_turns < 0:
 			reduction = 0.0
-	for kind in control_resist.keys():
-		control_resist[kind] = int(control_resist[kind]) - 1
-		if control_resist[kind] <= 0:
-			control_resist.erase(kind)
 	for b in buffs:
 		b.turns_left -= 1
 	buffs.assign(buffs.filter(func(b: Buff) -> bool: return b.turns_left >= 0))
@@ -295,10 +363,14 @@ func status_tags() -> PackedStringArray:
 		tags.append("缴械")
 	if silence_turns > 0:
 		tags.append("计穷")
-	if expose_turns > 0:
+	if expose_turns > 0 and broken_turns == 0:
 		tags.append("破绽")
-	if not control_resist.is_empty():
-		tags.append("定力")
+	if formation_eye and not formation_mods.is_empty():
+		tags.append("阵眼")
+	if is_summon() and summon_turns > 0:
+		tags.append("余%d回合" % summon_turns)
+	if broken_turns > 0:
+		tags.append("破绽")
 	if charging:
 		tags.append("蓄力")
 	if burn_turns > 0:

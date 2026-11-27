@@ -28,6 +28,7 @@ const INTENT_SIZE := 34
 const PIXEL_SCALE := 4
 ## 待机时上下起伏的像素数和一个来回的秒数
 const IDLE_BOB := 4.0
+const DISSOLVE := preload("res://scripts/ui/shaders/ink_dissolve.gdshader")
 const IDLE_PERIOD := 1.6
 ## 脚底在这个人自己坐标里的位置（立绘底边中点）
 const FEET := Vector2(CARD_SIZE.x / 2, FIGURE_HEIGHT)
@@ -354,12 +355,24 @@ func cheer() -> void:
 	t.tween_callback(_start_idle)
 
 
-## 倒地：往后侧倒下。
+## 倒地：往后侧倒下，然后人像像墨晕开一样化掉（召唤物直接化成青烟）。
 func _fall() -> void:
 	_fallen = true
 	_pause_idle()
+	var mat := ShaderMaterial.new()
+	mat.shader = DISSOLVE
+	_figure.material = mat
 	var t := create_tween()
-	t.tween_property(_figure, "rotation", -1.45 * _facing, 0.35).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	if not unit.is_summon():
+		t.tween_property(_figure, "rotation", -1.45 * _facing, 0.35).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	t.tween_method(func(v: float) -> void: mat.set_shader_parameter("progress", v), 0.0, 1.0, 0.9).set_delay(0.15)
+	t.tween_callback(func() -> void: _figure.visible = false)
+
+
+## 近战打不到（被前排挡住）的敌人：人像压暗一些。
+func set_reachable(on: bool) -> void:
+	if _figure != null:
+		_figure.self_modulate = Color.WHITE if on else Color(0.45, 0.45, 0.5)
 
 
 ## 待机：身体轻轻上下起伏，每个人起伏的时机错开一点。
@@ -384,7 +397,11 @@ func _pause_idle() -> void:
 
 
 ## 在头顶飘一行字，例如伤害数字。暴击的字更大、先放大再落下。
+## 字以「克 」开头时（打在弱点上），数字旁边先盖一方朱红的「克」字小印。
 func popup(text: String, color: Color, big := false) -> void:
+	if text.begins_with("克 "):
+		text = text.substr(2)
+		_seal_popup("克")
 	var l := UiKit.label(text, 52 if big else 36, color)
 	l.add_theme_constant_override("outline_size", 10)
 	l.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -400,6 +417,54 @@ func popup(text: String, color: Color, big := false) -> void:
 	t.tween_property(l, "position:y", l.position.y - 60, 0.8)
 	t.parallel().tween_property(l, "modulate:a", 0.0, 0.8).set_delay(0.35)
 	t.tween_callback(l.queue_free)
+
+
+## 头顶盖一方小印（克），先大后小砸下来，停一下再淡掉。
+func _seal_popup(ch: String) -> void:
+	var seal := PanelContainer.new()
+	seal.add_theme_stylebox_override("panel", UiKit.box(PLATE_RED, PLATE_PAPER, 2, 4))
+	seal.z_index = 21
+	seal.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := UiKit.label(ch, 26, PLATE_PAPER)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	seal.add_child(l)
+	get_parent().add_child(seal)
+	seal.reset_size()
+	seal.pivot_offset = seal.size / 2
+	seal.position = position + Vector2(CARD_SIZE.x / 2 + 30.0, FIGURE_HEIGHT - _figure.size.y * _depth - 50.0)
+	seal.rotation = -0.12
+	seal.scale = Vector2(2.2, 2.2)
+	var t := seal.create_tween()
+	t.tween_property(seal, "scale", Vector2.ONE, 0.14).set_ease(Tween.EASE_IN)
+	t.tween_interval(0.5)
+	t.tween_property(seal, "modulate:a", 0.0, 0.3)
+	t.tween_callback(seal.queue_free)
+
+
+## 闪开：留一道半透明残影在原地，人往后一闪再回来。
+func dodge() -> void:
+	_pause_idle()
+	var ghost := TextureRect.new()
+	ghost.texture = _figure.texture
+	ghost.texture_filter = _figure.texture_filter
+	ghost.expand_mode = _figure.expand_mode
+	ghost.stretch_mode = _figure.stretch_mode
+	ghost.flip_h = _figure.flip_h
+	ghost.size = _figure.size
+	ghost.pivot_offset = _figure.pivot_offset
+	ghost.position = _figure.position
+	ghost.scale = _figure.scale
+	ghost.modulate = Color(0.7, 0.85, 1.0, 0.55)
+	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(ghost)
+	move_child(ghost, _figure.get_index())
+	var g := ghost.create_tween()
+	g.tween_property(ghost, "modulate:a", 0.0, 0.4)
+	g.tween_callback(ghost.queue_free)
+	var t := create_tween()
+	t.tween_property(_figure, "position:x", _figure.position.x - 46.0 * _facing, 0.08).set_ease(Tween.EASE_OUT)
+	t.tween_property(_figure, "position:x", _figure.position.x, 0.2).set_delay(0.12).set_ease(Tween.EASE_IN_OUT)
+	t.tween_callback(_start_idle)
 
 
 func shake() -> void:

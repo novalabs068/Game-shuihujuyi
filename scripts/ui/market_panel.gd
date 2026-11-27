@@ -94,11 +94,6 @@ func _refresh() -> void:
 			_list.add_child(_medicine_row(id, "买 %d 两" % price, GameState.silver >= price, func() -> void:
 				GameState.buy_medicine(id)
 				_refresh()))
-		for mj: MijiData in GameDB.mijis.values():
-			if mj.quality == MijiData.Quality.FAN:
-				_list.add_child(_scroll_row(mj, "买 %d 两" % MijiData.FAN_PRICE, GameState.silver >= MijiData.FAN_PRICE, func() -> void:
-					GameState.buy_scroll(mj)
-					_refresh()))
 		for data: EquipData in wares:
 			_list.add_child(_row(data, "买 %d 两" % data.buy_price(), GameState.silver >= data.buy_price(), func() -> void:
 				GameState.buy_item(data)

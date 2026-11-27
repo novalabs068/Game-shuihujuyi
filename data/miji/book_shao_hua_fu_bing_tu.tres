@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+[ext_resource type="Resource" path="res://data/martial/book_shao_hua_fu_bing_tu.tres" id="3_w"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "少华伏兵图"
+kind = &"team_rage_start"
+amount = 15.0
+text = "开战时全队怒气 +{x}"
+
+[resource]
+script = ExtResource("2_m")
+id = &"book_shao_hua_fu_bing_tu"
+display_name = "少华伏兵图"
+quality = 1
+flavor = "史进在史家庄后山埋下伏兵，少华山的人马一到，四下里一齐杀出。"
+effect = SubResource("Resource_e")
+story = "史家庄"
+recipe = Array[StringName]([&"shi_jin", &"li_zhong"])
+martial = ExtResource("3_w")

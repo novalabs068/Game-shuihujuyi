@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+[ext_resource type="Resource" path="res://data/martial/book_gou_lian_qiang_pu.tres" id="3_w"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "钩镰枪谱"
+kind = &"boss_slayer"
+amount = 0.2
+text = "打头目伤害 +{x}"
+
+[resource]
+script = ExtResource("2_m")
+id = &"book_gou_lian_qiang_pu"
+display_name = "钩镰枪谱"
+quality = 1
+flavor = "时迁盗来雁翎甲，赚得徐宁上山教钩镰枪，专破呼延灼的连环马。"
+effect = SubResource("Resource_e")
+story = "大破连环马"
+recipe = Array[StringName]([&"huyan_zhuo", &"ling_zhen", &"shi_qian"])
+martial = ExtResource("3_w")

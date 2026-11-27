@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_m"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+
+[sub_resource type="Resource" id="Resource_sk"]
+script = ExtResource("2_s")
+display_name = "钩镰枪谱"
+description = "穿透：一路前后两格，前一格 170%、后一格打八折。"
+effect = 0
+power = 1.7
+area = 2
+cooldown = 3
+
+[resource]
+script = ExtResource("1_m")
+id = &"book_gou_lian_qiang_pu"
+display_name = "钩镰枪谱"
+flavor = "时迁盗来雁翎甲，赚得徐宁上山教钩镰枪，专破呼延灼的连环马。"
+source = "研读技能书《钩镰枪谱》"
+role = 0
+skill = SubResource("Resource_sk")

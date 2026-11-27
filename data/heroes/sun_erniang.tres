@@ -12,9 +12,10 @@
 [sub_resource type="Resource" id="Resource_qtstr"]
 script = ExtResource("2_e72y8")
 display_name = "蒙汗药酒"
-description = "单体眩晕 1 回合。"
+description = "连锁：麻药刀弹中三个人（先打选中的，再跳到最近的），中者眩晕 1 回合。"
 effect = 6
 turns = 1
+area = 3
 
 [sub_resource type="Resource" id="Resource_vc42h"]
 script = ExtResource("7_digai")
@@ -29,13 +30,15 @@ id = &"sun_erniang"
 display_name = "孙二娘"
 nickname = "母夜叉"
 rarity = 1
-role = 4
+role = 1
 tier = 2
 sort_order = 6
-base_hp = 450
-base_atk = 66
-base_def = 32
-base_spd = 104
+base_hp = 385
+base_atk = 62
+base_def = 24
+base_spd = 119
+base_res = 29
+base_agi = 114
 portrait = ExtResource("3_digai")
 bust = ExtResource("1_qigqk")
 face = ExtResource("2_sgclb")
