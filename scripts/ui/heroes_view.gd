@@ -207,7 +207,7 @@ func _show_detail() -> void:
 		var pm := HBoxContainer.new()
 		pm.add_theme_constant_override("separation", 8)
 		pm.add_child(UiKit.role_tag(hero, 15))
-		pm.add_child(UiKit.label("统领 · %s · %s（%s）" % [GameState.origin().display_name, UiKit.ROLE_NAMES[hero.role], Roles.summary(hero.role)], 20, UiKit.ACCENT))
+		pm.add_child(UiKit.label("统领 · %s · %s · %s（%s）" % [Renown.realm_name(GameState.realm), GameState.origin().display_name, UiKit.ROLE_NAMES[hero.role], Roles.summary(hero.role)], 20, UiKit.ACCENT))
 		info.add_child(pm)
 	else:
 		var marks := HBoxContainer.new()
@@ -223,8 +223,8 @@ func _show_detail() -> void:
 		var m := GameState.martial(GameState.martial_main)
 		var lv0 := GameState.level
 		info.add_child(UiKit.label("%d 级　生命 %d　攻击 %d　防御 %d　法抗 %d　速度 %d　敏捷 %d" % [lv0, _at(effective.base_hp, lv0), _at(effective.base_atk, lv0), _at(effective.base_def, lv0), _at(effective.res(), lv0), effective.base_spd, effective.agi()], 20))
-		info.add_child(_wrapped("主修「%s」第 %d 重：统领上阵放它的绝招，职业也跟着它走（属性按职业的甲品算）" % [m.display_name, GameState.martial_level(m.id)] if m != null else "还没有主修武学", UiKit.GOLD))
-		info.add_child(_wrapped("统领和好汉一起上场；统领倒下全队攻击 -%d%%。换主修就换职业和绝招，在「武学」里花银两修炼。" % roundi(BattleModel.MORALE_LOSS * 100), UiKit.TEXT_DIM))
+		info.add_child(_wrapped("主修「%s」第 %d 重：统领上阵放它的绝招%s" % [m.display_name, GameState.martial_level(m.id), "（外门武学，威力七成）" if m.role != hero.role else ""] if m != null else "还没有主修武学", UiKit.GOLD))
+		info.add_child(_wrapped("统领和好汉一起上场；统领倒下全队攻击 -%d%%。职业开局定下不变；换主修只换绝招，在「武学」里花修为修炼。境界、名望、号令在主角页。" % roundi(BattleModel.MORALE_LOSS * 100), UiKit.TEXT_DIM))
 	elif owned:
 		var lv := GameState.level
 		info.add_child(UiKit.label("%d 级　生命 %d　攻击 %d　防御 %d　法抗 %d　速度 %d　敏捷 %d" % [lv, _at(effective.base_hp, lv, effective), _at(effective.base_atk, lv, effective), _at(effective.base_def, lv, effective), _at(effective.res(), lv, effective), effective.base_spd, effective.agi()], 20))
@@ -427,7 +427,7 @@ func _wrapped(text: String, color: Color) -> Label:
 	return l
 
 
-## 主修按钮：显示现在练的那门（就是统领光环），点开换。
+## 主修按钮：显示现在练的那门（就是统领上阵放的绝招），点开换。
 func _martial_button(main: bool) -> Button:
 	var m := GameState.martial(GameState.martial_main) if main else null
 	var text := "%s：%s" % ["主修" if main else "副修", m.display_name if m != null else "空"]
@@ -439,7 +439,7 @@ func _martial_button(main: bool) -> Button:
 	return button
 
 
-## 武学：列出学会的每一门和它作统领光环时给全队加什么，点按钮换主修。
+## 武学：列出学会的每一门，花修为修炼、点按钮换主修。别的职业的武学标「外门」（威力七成）。
 func _open_martials() -> void:
 	var overlay := Control.new()
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -463,7 +463,9 @@ func _open_martials() -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	pad.add_child(v)
-	v.add_child(UiKit.label("武学：主修的那门就是统领上阵放的绝招，统领的职业也跟着它。银两 %d" % GameState.silver, 22, UiKit.ACCENT))
+	var my_role := GameState.protagonist_role()
+	v.add_child(UiKit.label("武学：主修的那门就是统领上阵放的绝招。修为 %d　境界「%s」最多修到第 %d 重" % [GameState.xiuwei, Renown.realm_name(GameState.realm), GameState.martial_cap()], 22, UiKit.ACCENT))
+	v.add_child(UiKit.label("统领是%s：主修别的职业的武学（外门）也行，但威力只有七成。修为靠打仗、野外打坐攒。" % UiKit.ROLE_NAMES[my_role], 16, UiKit.TEXT_DIM))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -496,9 +498,12 @@ func _open_martials() -> void:
 		name_row.add_child(UiKit.label(m.source, 16, UiKit.TEXT_DIM))
 		var lv := GameState.martial_level(id)
 		var sk := m.skill_at(lv)
-		info.add_child(UiKit.label("%s · 第 %d 重　「%s」%s" % [UiKit.ROLE_NAMES[m.role], lv, sk.display_name if sk != null else "", _area_text(sk) if sk != null else ""], 17))
-		if lv < MartialData.MAX_LEVEL:
-			info.add_child(UiKit.label("修到第 %d 重：%s（%d 两）" % [lv + 1, MartialData.level_text(lv + 1), MartialData.level_cost(lv)], 16, UiKit.GOLD))
+		var outer := "（外门，威力七成）" if m.role != my_role else ""
+		info.add_child(UiKit.label("%s%s · 第 %d 重　「%s」%s" % [UiKit.ROLE_NAMES[m.role], outer, lv, sk.display_name if sk != null else "", _area_text(sk) if sk != null else ""], 17))
+		if lv < MartialData.MAX_LEVEL and lv >= GameState.martial_cap():
+			info.add_child(UiKit.label("境界不够：升到下一阶境界才能接着修（主角页「立名之战」）", 16, UiKit.TEXT_DIM))
+		elif lv < MartialData.MAX_LEVEL:
+			info.add_child(UiKit.label("修到第 %d 重：%s（修为 %d）" % [lv + 1, MartialData.level_text(lv + 1), MartialData.level_cost(lv)], 16, UiKit.GOLD))
 		var train := UiKit.button("修炼", Vector2(90, 46), 20)
 		train.disabled = not GameState.can_train(id)
 		train.pressed.connect(func() -> void:

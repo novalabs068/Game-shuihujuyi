@@ -254,7 +254,7 @@ layout = "########################################################
 #.TT........TT.......hhhhh___hhhhhT.........T..........#
 #....................hhhhhEEEhhhhh.....................#
 ########################################################"
-spawn_cell = Vector2i(27, 26)
+spawn_cell = Vector2i(27, 20)
 npcs = Array[ExtResource("4_duos0")]([SubResource("Resource_mv3fe"), SubResource("Resource_can2e"), SubResource("Resource_vm73e"), SubResource("Resource_cdsrj"), SubResource("Resource_fp05q"), SubResource("Resource_nlc7o"), SubResource("Resource_tafka")])
 region = &"dongjing"
 roam_spots = Array[Vector2i]([Vector2i(12, 20), Vector2i(19, 21), Vector2i(8, 28), Vector2i(19, 28), Vector2i(33, 24), Vector2i(46, 27), Vector2i(51, 10), Vector2i(36, 10)])

@@ -42,7 +42,7 @@ func _ready() -> void:
 func ask(event: EventData) -> EventChoice:
 	visible = true
 	_title.text = event.title
-	_body.text = event.text.replace("{name}", GameState.player_name)
+	_body.text = GameState.fill_text(event.text)
 	_clear_choices()
 	for i in event.choices.size():
 		var c := event.choices[i]
@@ -62,7 +62,7 @@ func ask(event: EventData) -> EventChoice:
 ## 显示选择的结果和获得的东西，点「继续」后关闭。
 func show_result(text: String, gained: String) -> void:
 	visible = true
-	_body.text = text.replace("{name}", GameState.player_name) + ("\n\n" + gained if gained != "" else "")
+	_body.text = GameState.fill_text(text) + ("\n\n" + gained if gained != "" else "")
 	_clear_choices()
 	var ok := UiKit.button("继续", Vector2(680, 56), 22)
 	ok.pressed.connect(func() -> void: _closed.emit())

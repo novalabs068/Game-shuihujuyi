@@ -115,7 +115,7 @@ id = &"lu_zhishen"
 display_name = "鲁智深"
 unit = ExtResource("9_xveqm")
 cell = Vector2i(25, 10)
-lines = PackedStringArray("鲁智深：哪里来的后生？看洒家把这棵柳树连根拔起！", "鲁智深：哈哈哈！洒家鲁智深。你叫什么？", "我：在下{name}。", "鲁智深：好！{name}兄弟，改日来菜园里喝酒！")
+lines = PackedStringArray("鲁智深：哪里来的{后生}？看洒家把这棵柳树连根拔起！", "鲁智深：哈哈哈！洒家鲁智深。你叫什么？", "我：在下{name}。", "鲁智深：好！{name}{兄弟}，改日来菜园里喝酒！")
 
 [sub_resource type="Resource" id="Resource_502s1"]
 script = ExtResource("12_1rfvs")

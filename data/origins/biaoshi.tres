@@ -10,6 +10,12 @@
 [ext_resource type="Texture2D" path="res://art/portraits/hero_biaoshi.png" id="5_gn8rf"]
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="6_pgnk1"]
 [ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="7_nsnri"]
+[ext_resource type="Texture2D" path="res://art/portraits/hero_biaoshi_f.png" id="f_portrait"]
+[ext_resource type="Texture2D" path="res://art/busts/hero_biaoshi_f.png" id="f_bust"]
+[ext_resource type="Texture2D" path="res://art/faces/hero_biaoshi_f.png" id="f_face"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_biaoshi_f.png" id="f_map_sprite"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/hero_biaoshi_f.png" id="f_battle_sprite"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_biaoshi_f_sit.png" id="f_sit_sprite"]
 
 [sub_resource type="Resource" id="Resource_fksru"]
 script = ExtResource("7_nsnri")
@@ -45,3 +51,9 @@ unit = SubResource("Resource_66qdh")
 start_location = &"dongjing"
 martial = ExtResource("1_qf3mf")
 sit_sprite = ExtResource("3_gn8rf")
+portrait_female = ExtResource("f_portrait")
+bust_female = ExtResource("f_bust")
+face_female = ExtResource("f_face")
+map_sprite_female = ExtResource("f_map_sprite")
+battle_sprite_female = ExtResource("f_battle_sprite")
+sit_sprite_female = ExtResource("f_sit_sprite")

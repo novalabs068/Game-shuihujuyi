@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_yzd01"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_yzd02"]
+
+[sub_resource type="Resource" id="Resource_yzd03"]
+script = ExtResource("2_yzd02")
+display_name = "银针渡穴"
+description = "几根银针走遍全队的穴道，全队回复 20% 生命，解除眩晕、缴械、计穷和灼烧。"
+effect = 8
+amount = 0.2
+
+[resource]
+script = ExtResource("1_yzd01")
+id = &"yin_zhen_du_xue"
+display_name = "银针渡穴"
+flavor = "走方郎中的看家本事：针下去，人就能站起来接着打。"
+source = "走方郎中出身"
+role = 4
+skill = SubResource("Resource_yzd03")

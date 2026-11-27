@@ -87,8 +87,8 @@ func _show_title() -> void:
 func _show_character_create() -> void:
 	var screen := CharacterCreate.new()
 	screen.back_requested.connect(_show_title)
-	screen.created.connect(func(player_name: String, origin: OriginData) -> void:
-		GameState.new_game(player_name, origin)
+	screen.created.connect(func(player_name: String, origin: OriginData, gender: StringName) -> void:
+		GameState.new_game(player_name, origin, gender)
 		_go_home())
 	_set_screen(screen)
 
@@ -138,6 +138,7 @@ func _show_profile() -> void:
 	var screen := ProfileView.new()
 	screen.back_requested.connect(_go_home.bind(""))
 	screen.heroes_requested.connect(_show_heroes)
+	screen.battle_requested.connect(func(stage: StageData, bonus: Dictionary) -> void: _start_battle(stage, &"", 0.0, bonus))
 	_set_screen(screen)
 
 
@@ -288,7 +289,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		_go_home(NO_TEAM_TEXT)
 		return
 	var screen := BattleView.new()
-	screen.stage = stage if bonus.has("arena_round") else GameState.prepare_stage(stage)
+	screen.stage = stage if bonus.has("arena_round") or bonus.has("trial") else GameState.prepare_stage(stage)
 	screen.team = GameState.battle_team()
 	screen.placement = GameState.placement()
 	screen.hero_level = GameState.level
@@ -298,8 +299,8 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		where = sd.battle_bg if sd.battle_bg != &"" else sd.region
 	screen.background = _battle_background(where)
 	screen.place = String(where)
-	# 擂台比武开打前回满、打完不记伤；别的仗血量都接着上一仗
-	var arena := bonus.has("arena_round")
+	# 擂台比武、立名之战开打前回满、打完不记伤；别的仗血量都接着上一仗
+	var arena := bonus.has("arena_round") or bonus.has("trial")
 	if not arena:
 		screen.start_hp = GameState.vitality.duplicate()
 	screen.retry_requested.connect(_start_battle.bind(stage, destination, progress, bonus, return_scene))
@@ -317,11 +318,16 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		var bond_text := GameState.record_win() if won else ""
 		var notice := ""
 		if won:
+			var renown_before := GameState.renown()
 			var r: Dictionary = Encounters.rewards(screen.model)
 			var ups := GameState.add_rewards(r["exp"], r["silver"])
+			# 修为：打赢一场和银两一样多
+			GameState.xiuwei += r["silver"]
 			var parts := PackedStringArray()
+			if r["silver"] > 0:
+				parts.append("修为 +%d" % r["silver"])
 			if bonus.has("text"):
-				parts.append(String(bonus["text"]).replace("{name}", GameState.player_name))
+				parts.append(GameState.fill_text(String(bonus["text"])))
 			# 悬赏给指定品质的装备；普通遇敌有机会掉一件凡品
 			var drop: EquipData = null
 			if bonus.has("equip_quality"):
@@ -343,6 +349,14 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			GameState.set_flag(bonus.get("flag", ""))
 			if bonus.has("arena_round"):
 				GameState.record["arena"] = maxi(Arena.best(), bonus["arena_round"])
+			if bonus.has("trial"):
+				var up := GameState.pass_trial(bonus["trial"])
+				if up != "":
+					parts.append(up)
+			# 头目第一次被打败，记下来（算名望）
+			for e in stage.enemies:
+				if e.is_boss:
+					GameState.set_flag("boss_" + String(e.id))
 			var mingqi := GameState.claim_mingqi()
 			if mingqi != "":
 				parts.append(mingqi)
@@ -353,6 +367,8 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 				parts.append("升到 %d 级！" % GameState.level)
 			if bond_text != "":
 				parts.append(bond_text)
+			if GameState.can_try_trial() and not Renown.can_try(GameState.realm, renown_before):
+				parts.append("江湖名望到了 %d，可以去主角页打「立名之战」升境界了" % GameState.renown())
 			var hurt := _wounded_text()
 			if hurt != "" and not arena:
 				parts.append(hurt)

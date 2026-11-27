@@ -1,7 +1,8 @@
 class_name MartialData
 extends Resource
-## 主角的一门武学。主角同时带两门：主修的那门就是他在战斗里放的技能，副修的那门只给被动加成。
-## 从出身、奇遇、列传（好汉传授）中学到，可以随时换。
+## 统领的一门武学。主修的那门就是统领在战斗里放的绝招；统领的职业由出身定死，
+## 主修别的职业的武学也行，但威力打 FOREIGN_POWER 折（不是本门功夫）。
+## 从出身、奇遇、列传（好汉传授）、技能书中学到，可以随时换。（「副修加成」那组字段是旧设计，已不再使用）
 
 @export var id: StringName
 @export var display_name: String
@@ -35,6 +36,21 @@ const MASTER_LEVEL := 10
 const MASTER_ALL_BONUS := 0.15
 ## 修炼一重要多少银两：从 level 重修到下一重 = LEVEL_COST × level × level
 const LEVEL_COST := 150
+
+
+## 主修别的职业的武学：伤害（或治疗量、加成数值）打七折
+const FOREIGN_POWER := 0.7
+
+
+## 别的职业的武学：返回打过折的复制（description 末尾注明）。
+static func foreign(s: SkillData) -> SkillData:
+	if s == null:
+		return null
+	var out: SkillData = s.duplicate()
+	out.power *= FOREIGN_POWER
+	out.amount *= FOREIGN_POWER
+	out.description += "（外门武学，威力七成）"
+	return out
 
 
 ## 修到第 level 重时的绝招（复制一份，不改原数据）。

@@ -178,7 +178,7 @@ func _say(speaker: String, text: String) -> void:
 	var me := GameState.protagonist()
 	var shown_name := me.display_name if speaker == "我" else speaker
 	_name_label.text = shown_name
-	_text_label.text = text.replace("{name}", me.display_name)
+	_text_label.text = GameState.fill_text(text)
 	# 说话的人亮起来，另一个变暗；旁白时两边都半亮
 	for side in _sides:
 		var unit: UnitData = _units.get(side)
@@ -192,7 +192,7 @@ func _say(speaker: String, text: String) -> void:
 	if _auto:
 		_typing.finished.connect(func() -> void:
 			get_tree().create_timer(AUTO_DELAY).timeout.connect(func() -> void:
-				if _auto and _text_label.text == text.replace("{name}", me.display_name):
+				if _auto and _text_label.text == GameState.fill_text(text):
 					_next.emit()))
 	await _next
 
@@ -202,7 +202,7 @@ func _choose(options: Array) -> String:
 	_text_label.text = ""
 	var picked := [""]
 	for option: Dictionary in options:
-		var button := UiKit.button(String(option["text"]).replace("{name}", GameState.player_name), Vector2(640, 64), 22)
+		var button := UiKit.button(GameState.fill_text(String(option["text"])), Vector2(640, 64), 22)
 		button.pressed.connect(func() -> void:
 			picked[0] = option["label"]
 			_next.emit())

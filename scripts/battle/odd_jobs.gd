@@ -71,6 +71,7 @@ static func on_battle_won(stage: StageData) -> String:
 			job["have"] += 1
 			if job["have"] >= job["need"]:
 				var gained := Rewards.grant(job["tokens"], job["silver"], job["exp"])
+				GameState.record["odd_jobs"] = int(GameState.record.get("odd_jobs", 0)) + 1
 				done.append("小悬赏「打败%s %d 拨」完成：%s" % [job["name"], job["need"], gained])
 				jobs[i] = {}
 		GameState.jobs[region] = jobs.filter(func(j: Dictionary) -> bool: return not j.is_empty())

@@ -8,7 +8,7 @@ class_name StoryScript
 ##   ? 选项文字 > 标签      连着几行就是一组选项（最多 3 个），选了跳到对应的标签
 ##   * 标签                跳转的落点
 ##   @goto 标签            跳到标签
-##   林冲：台词            「说话人：台词」；没有冒号的是旁白；「我」是主角；台词里的 {name} 换成主角的名字
+##   林冲：台词            「说话人：台词」；没有冒号的是旁白；「我」是主角；台词里的 {name} 换成主角的名字，{兄弟} 按性别换成「兄弟」或「妹子」
 
 ## 解析成一串指令：{"op": "say"/"bg"/"show"/"battle"/"choice"/"label"/"goto", ...}
 static func parse(text: String) -> Array[Dictionary]:

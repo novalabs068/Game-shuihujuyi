@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="OriginData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/origin_data.gd" id="1_o"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="2_u"]
+[ext_resource type="Resource" path="res://data/martial/yin_zhen_du_xue.tres" id="3_m"]
+[ext_resource type="Texture2D" path="res://art/portraits/hero_langzhong.png" id="t0"]
+[ext_resource type="Texture2D" path="res://art/busts/hero_langzhong.png" id="t1"]
+[ext_resource type="Texture2D" path="res://art/faces/hero_langzhong.png" id="t2"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_langzhong.png" id="t3"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/hero_langzhong.png" id="t4"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_langzhong_sit.png" id="t5"]
+[ext_resource type="Texture2D" path="res://art/portraits/hero_langzhong_f.png" id="t6"]
+[ext_resource type="Texture2D" path="res://art/busts/hero_langzhong_f.png" id="t7"]
+[ext_resource type="Texture2D" path="res://art/faces/hero_langzhong_f.png" id="t8"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_langzhong_f.png" id="t9"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/hero_langzhong_f.png" id="t10"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/hero_langzhong_f_sit.png" id="t11"]
+
+[sub_resource type="Resource" id="Resource_unit"]
+script = ExtResource("2_u")
+id = &"hero_langzhong"
+display_name = "走方郎中"
+rarity = 3
+role = 4
+portrait = ExtResource("t0")
+bust = ExtResource("t1")
+face = ExtResource("t2")
+map_sprite = ExtResource("t3")
+battle_sprite = ExtResource("t4")
+
+[resource]
+script = ExtResource("1_o")
+id = &"langzhong"
+display_name = "走方郎中"
+description = "背着药篓走村串镇，会针灸，也会几下防身的棍棒。听说东京人多病多，便来这里落脚。"
+sort_order = 5
+unit = SubResource("Resource_unit")
+start_location = &"dongjing"
+martial = ExtResource("3_m")
+sit_sprite = ExtResource("t5")
+portrait_female = ExtResource("t6")
+bust_female = ExtResource("t7")
+face_female = ExtResource("t8")
+map_sprite_female = ExtResource("t9")
+battle_sprite_female = ExtResource("t10")
+sit_sprite_female = ExtResource("t11")

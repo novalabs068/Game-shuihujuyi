@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_cty01"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_cty02"]
+
+[sub_resource type="Resource" id="Resource_cty03"]
+script = ExtResource("2_cty02")
+display_name = "穿堂燕"
+description = "身子一矮从前排缝里钻过去，专找敌方血量比例最低的人，200% 伤害。"
+effect = 9
+power = 2.0
+
+[resource]
+script = ExtResource("1_cty01")
+id = &"chuan_tang_yan"
+display_name = "穿堂燕"
+flavor = "像燕子穿过厅堂，贴着人缝一闪就到了跟前。"
+source = "游侠出身"
+role = 1
+skill = SubResource("Resource_cty03")
