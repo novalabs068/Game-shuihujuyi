@@ -1,7 +1,8 @@
 class_name HeroCard
 extends Control
 ## 竖长的好汉卡（参考三国志战略版的卡面）：品级颜色的光晕做底（五玉金、四玉紫、三玉蓝、二玉灰），
-## 版画立绘铺满整张卡，底部压暗一截写勾玉、名字和绰号；左上角身份印，右上角小标签（「新」「将魂 +10」）。
+## 版画立绘铺满整张卡，底部压暗一截写勾玉、名字和绰号；左上角职业徽章（铜边珐琅圆章，画剑、短刀、弓、太极、葫芦，
+## 图见 tools/recruit_marks.py），右上角小标签（「新」「将魂 +10」）。
 ## 外框是深铜色，里面一道细线用品级颜色，五玉的细线加粗。
 
 ## 光晕底：中心亮、四周压暗
@@ -85,8 +86,6 @@ static func make(hero: UnitData, card_size: Vector2, lit := 0, tag := "", tag_co
 	marks.alignment = BoxContainer.ALIGNMENT_CENTER
 	marks.add_theme_constant_override("separation", 4)
 	marks.add_child(MagatamaRow.make(UiKit.tier_magatama(hero.tier), lit, maxf(12, w * 0.085)))
-	if not hidden and w >= 170:
-		marks.add_child(UiKit.role_tag(hero, 13))
 	foot.add_child(marks)
 	var name_color := Color("fff0c8") if hero.tier == UnitData.Tier.JIA else Color("f0e4cc")
 	var name := UiKit.outlined("？？？" if hidden else hero.display_name, name_px, name_color)
@@ -99,11 +98,12 @@ static func make(hero: UnitData, card_size: Vector2, lit := 0, tag := "", tag_co
 		nick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		foot.add_child(nick)
 
-	# 左上身份印，右上小标签
+	# 左上职业徽章（没招到的只剩黑影，不露职业），右上小标签
 	var inset := maxf(5, w * 0.035)
-	var seal := IdentitySeal.make(hero.rarity, clampf(w * 0.15, 20, 34))
-	seal.position = Vector2(inset, inset)
-	card.add_child(seal)
+	if not hidden:
+		var badge := role_badge(hero.role, clampf(w * 0.17, 22, 40))
+		badge.position = Vector2(inset, inset)
+		card.add_child(badge)
 	if tag != "":
 		var t := UiKit.outlined(tag, int(clampf(w * 0.085, 13, 19)), tag_color)
 		t.add_theme_constant_override("outline_size", 5)
@@ -131,6 +131,19 @@ static func make(hero: UnitData, card_size: Vector2, lit := 0, tag := "", tag_co
 	line.offset_right = -4
 	line.offset_bottom = -4
 	return card
+
+
+## 职业徽章：side 像素见方，鼠标停上去显示职业名。
+static func role_badge(role: int, side: float) -> TextureRect:
+	var badge := TextureRect.new()
+	badge.texture = load("res://art/ui/role_%d.png" % role)
+	badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	badge.size = Vector2(side, side)
+	badge.custom_minimum_size = Vector2(side, side)
+	badge.tooltip_text = UiKit.ROLE_NAMES[role]
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return badge
 
 
 func _fill(node: Control) -> void:
