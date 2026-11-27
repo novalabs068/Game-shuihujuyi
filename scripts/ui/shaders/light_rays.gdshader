@@ -19,6 +19,8 @@ uniform float ray_strength = 0.55;
 uniform float reach = 0.9;
 // 光芒流转的快慢
 uniform float speed = 0.06;
+// 光芒整体慢慢转（弧度/秒，0 不转）：金卡翻开时用
+uniform float spin = 0.0;
 
 // 整数哈希：0～1，任何精度下都稳定
 float hash(ivec2 p) {
@@ -44,6 +46,8 @@ void fragment() {
 	highp float d = length(p);
 	vec2 dir = d > 0.0001 ? p / d : vec2(1.0, 0.0);
 	highp float t = mod(TIME, 1000.0);
+	float sa = t * spin;
+	dir = mat2(vec2(cos(sa), sin(sa)), vec2(-sin(sa), cos(sa))) * dir;
 	// 光芒：在方向上取噪声（方向是单位圆上的点，首尾自然接上），粗光束、中等光束、细光丝三层，反向流转
 	float wide = noise(dir * 3.0 + vec2(t * speed * 4.0, 0.0));
 	float mid = noise(dir * 9.0 + vec2(0.0, -t * speed * 7.0) + 17.0);
