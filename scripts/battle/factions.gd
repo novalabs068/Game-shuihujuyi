@@ -5,7 +5,7 @@ class_name Factions
 const ALL := {
 	&"er_long_shan": ["二龙山", [&"lu_zhishen", &"yang_zhi", &"wu_song", &"cao_zheng", &"zhang_qing", &"sun_erniang", &"shi_en"], "全队生命 +8%"],
 	&"liang_shan_yuan_lao": ["梁山元老", [&"lin_chong", &"du_qian", &"song_wan", &"zhu_gui"], "全队防御 +8%"],
-	&"qi_xing": ["七星聚义", [&"wu_yong", &"bai_sheng"], "全队开战怒气 +20"],
+	&"qi_xing": ["七星聚义", [&"wu_yong", &"bai_sheng", &"gongsun_sheng"], "全队开战怒气 +20"],
 	&"qing_feng_shan": ["清风山", [&"hua_rong", &"qin_ming"], "全队暴击率 +8%"],
 	&"xiang_jiang": ["朝廷降将", [&"huyan_zhuo", &"ling_zhen"], "全队攻击 +8%"],
 	&"jian_kang": ["建康府", [&"an_daoquan", &"wang_dingliu"], "全队每次轮到自己回复 2% 生命"],

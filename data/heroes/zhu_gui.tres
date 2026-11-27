@@ -12,9 +12,9 @@
 [sub_resource type="Resource" id="Resource_cmygp"]
 script = ExtResource("5_w3ode")
 display_name = "旱地伏击"
-description = "敌方全体各受 80% 伤害。"
-effect = 12
-power = 0.8
+description = "连锁：响箭在敌阵里连跳 3 次，第一下 130%，每跳打七五折。"
+power = 1.3
+area = 3
 
 [sub_resource type="Resource" id="Resource_yknvn"]
 script = ExtResource("6_0pa5l")

@@ -7,7 +7,7 @@ enum Effect {
 	EXECUTE,     ## 单体伤害：power 倍，目标血量低于 30% 时翻倍
 	MULTI_HIT,   ## 对同一目标连击 hits 次，每次 power 倍
 	SURE_CRIT,   ## 必中必暴击的单体伤害
-	TAUNT,       ## 嘲讽全体敌人 turns 回合，自身减伤 amount
+	TAUNT,       ## 嘲讽全体敌人 turns 回合，自身减伤 amount；power > 0 时先按范围打一下
 	TEAM_HASTE,  ## 全队速度 +amount、怒气 +rage_gain，持续 turns 回合
 	STUN,        ## 单体眩晕 turns 回合
 	STEAL,       ## 偷取目标 1 个增益，并立刻再行动一次
@@ -52,6 +52,8 @@ const AREA_NAMES: Array[String] = ["单人", "多人", "穿透", "连锁", "全�
 
 ## 出手前是否需要玩家选一个敌人。
 func needs_enemy_target() -> bool:
+	if effect == Effect.TAUNT:
+		return power > 0.0
 	return effect in [Effect.DAMAGE, Effect.EXECUTE, Effect.MULTI_HIT, Effect.SURE_CRIT, Effect.STUN, Effect.STEAL, Effect.GUARD_STRIKE, Effect.PIERCE, Effect.CRIPPLE, Effect.DISARM, Effect.SILENCE]
 
 

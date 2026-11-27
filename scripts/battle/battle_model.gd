@@ -45,10 +45,16 @@ const LANE_BACK_MULT := 0.8
 const CHAIN_DECAY := 0.75
 const CHAIN_HOPS := 3
 const ALL_MULT := 0.55
-## 统领上场后我方是四个人：我方满四人时，敌人的生命、攻击都乘上这两个数（关卡数据还是按三人编的）
+## 统领上场后我方是四个人（关卡数据还是按三人编的）。我方满四人时敌人扩编：
+## 关卡里的小兵（不是头目的）按顺序再来 REINFORCE 个，最多 MAX_ENEMIES 个人，大家再略加强一点；
+## 没有小兵的头目单挑（景阳冈大虫这种）不扩编，头目自己按 SOLO_* 加强。增援不给经验银两
 const SQUAD_SIZE := 4
-const SQUAD_HP_SCALE := 1.6
-const SQUAD_ATK_SCALE := 1.65
+const MAX_ENEMIES := 6
+const REINFORCE := 2
+const SQUAD_HP_SCALE := 1.0
+const SQUAD_ATK_SCALE := 1.05
+const SOLO_HP_SCALE := 1.6
+const SOLO_ATK_SCALE := 1.65
 ## 四人仗打得久一些：三星的回合限制多给这么多回合
 const SQUAD_EXTRA_ROUNDS := 3
 ## 每方最多几个召唤物
@@ -125,10 +131,10 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 		var boss_k := stage.boss_power if e.data.is_boss else 1.0
 		if not is_equal_approx(stage.enemy_power * boss_k, 1.0):
 			e.strengthen(stage.enemy_power * boss_k, boss_k)
-		squad = players.size() >= SQUAD_SIZE
-		if squad:
-			e.scale_squad(SQUAD_HP_SCALE, SQUAD_ATK_SCALE)
 		foes.append(e)
+	squad = players.size() >= SQUAD_SIZE
+	if squad:
+		_reinforce(foes)
 	_place(foes, stage.enemy_cells)
 	for u in players + foes:
 		if u.row >= 0:
@@ -138,6 +144,11 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 	if not players.is_empty():
 		var formation_text := Formations.apply(formation, players, alive(BattleUnit.Side.ENEMY))
 		if formation_text != "":
+			for u in players:
+				if u.has_talent(&"formation_boost"):
+					Formations.boost(players, u.talent(&"formation_boost"))
+					formation_text += "　%s「%s」：阵法加成 +%d%%" % [u.display_name(), u.passive(&"formation_boost").display_name, roundi(u.talent(&"formation_boost") * 100)]
+					break
 			var eye := players.filter(func(u: BattleUnit) -> bool: return u.formation_eye)
 			_emit("prep", eye[0] if not eye.is_empty() else players[0], Formations.display_name(formation), "阵法%s" % formation_text)
 		var hero_ids: Array[StringName] = []
@@ -157,6 +168,28 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 		u.next_time = TIME_PER_ACTION / u.spd()
 	for e in alive(BattleUnit.Side.ENEMY):
 		_plan_intent(e)
+
+
+## 我方满四人时敌人扩编：关卡里的小兵按顺序补到 +REINFORCE 个（最多 MAX_ENEMIES 个），全体略加强；
+## 没有小兵（头目单挑）时头目自己加强。
+func _reinforce(foes: Array[BattleUnit]) -> void:
+	var mooks := foes.filter(func(u: BattleUnit) -> bool: return not u.data.is_boss)
+	if mooks.is_empty():
+		for e in foes:
+			e.scale_squad(SOLO_HP_SCALE, SOLO_ATK_SCALE)
+		return
+	var target := mini(MAX_ENEMIES, foes.size() + REINFORCE)
+	var i := 0
+	while foes.size() < target:
+		var src: BattleUnit = mooks[i % mooks.size()]
+		var e := BattleUnit.new(src.data, BattleUnit.Side.ENEMY, foes.size(), src.level)
+		if not is_equal_approx(stage.enemy_power, 1.0):
+			e.strengthen(stage.enemy_power)
+		e.reinforcement = true
+		foes.append(e)
+		i += 1
+	for e in foes:
+		e.scale_squad(SQUAD_HP_SCALE, SQUAD_ATK_SCALE)
 
 
 ## 摆位：先按 wanted 里的格子（和 list 一一对应；不合法、被占的跳过），没格子的人先去 fallback 里还空着的格子
@@ -667,6 +700,8 @@ func _do_skill(actor: BattleUnit, wanted: BattleUnit, skill: SkillData = null) -
 			for h in hits:
 				_deal(actor, h[0], s.power * h[1], true)
 		SkillData.Effect.TAUNT:
+			for h in hits:
+				_deal(actor, h[0], s.power * h[1])
 			actor.taunt_turns = s.turns
 			actor.reduction = s.amount
 			actor.reduction_turns = s.turns

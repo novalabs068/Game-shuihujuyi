@@ -183,6 +183,16 @@ static func apply(id: StringName, player_units: Array[BattleUnit], enemies: Arra
 	return "「%s」%s" % [display_name(id), "　".join(on)]
 
 
+## 阵法加成整体放大（朱武「神机军师」）：数值类加成 ×(1 + k)；控制回合、多挨打的不放大。
+static func boost(player_units: Array[BattleUnit], k: float) -> void:
+	for u in player_units:
+		for key: String in u.formation_mods:
+			var v: Variant = u.formation_mods[key]
+			if key == "control" or (key == "taken" and v > 0):
+				continue
+			u.formation_mods[key] = v * (1.0 + k)
+
+
 ## 破阵：阵眼倒下，全队的阵法加成清空。
 static func break_formation(player_units: Array[BattleUnit]) -> void:
 	for u in player_units:

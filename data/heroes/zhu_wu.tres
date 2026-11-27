@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/zhu_wu.png" id="1_b"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/zhu_wu.png" id="1_bs"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_u"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+[ext_resource type="Texture2D" path="res://art/faces/zhu_wu.png" id="2_f"]
+[ext_resource type="Texture2D" path="res://art/portraits/zhu_wu.png" id="3_p"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhu_wu.png" id="3_m"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_t"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/lin_zhong_qiang_ren.png" id="8_sb"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/lin_zhong_qiang_ren.png" id="8_sm"]
+
+[sub_resource type="Resource" id="Resource_summon"]
+script = ExtResource("1_u")
+id = &"fu_bing"
+display_name = "伏兵"
+role = 0
+base_hp = 100
+base_atk = 10
+base_def = 20
+base_spd = 95
+map_sprite = ExtResource("8_sm")
+battle_sprite = ExtResource("8_sb")
+attack_style = &"thrust"
+
+[sub_resource type="Resource" id="Resource_skill"]
+script = ExtResource("2_s")
+display_name = "神机伏兵"
+description = "召唤：两名伏兵从空格里杀出（前排先放），攻击按朱武五成、生命三成五，持续 3 回合，能挡路。"
+effect = 23
+power = 0.5
+hits = 2
+turns = 3
+amount = 0.35
+cooldown = 4
+summon = SubResource("Resource_summon")
+
+[sub_resource type="Resource" id="Resource_talent"]
+script = ExtResource("7_t")
+display_name = "神机军师"
+kind = &"formation_boost"
+amount = 0.5
+text = "朱武在场时，全队的阵法加成再 +{x}"
+
+[resource]
+script = ExtResource("1_u")
+id = &"zhu_wu"
+display_name = "朱武"
+nickname = "神机军师"
+rarity = 1
+role = 3
+tier = 1
+sort_order = 26
+base_hp = 360
+base_atk = 62
+base_def = 15
+base_spd = 114
+base_res = 46
+base_agi = 46
+portrait = ExtResource("3_p")
+bust = ExtResource("1_b")
+face = ExtResource("2_f")
+map_sprite = ExtResource("3_m")
+battle_sprite = ExtResource("1_bs")
+attack_style = &"throw"
+skill = SubResource("Resource_skill")
+talent = SubResource("Resource_talent")

@@ -12,9 +12,9 @@
 [sub_resource type="Resource" id="Resource_tccbb"]
 script = ExtResource("5_bsw56")
 display_name = "九纹龙腾"
-description = "敌方全体各受 90% 伤害。"
-effect = 12
-power = 0.9
+description = "多人：一条棍扫开敌方一排，每人 130% 的七成伤害。"
+power = 1.3
+area = 1
 
 [sub_resource type="Resource" id="Resource_7fky8"]
 script = ExtResource("6_ntqga")

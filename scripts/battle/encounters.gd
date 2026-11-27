@@ -85,7 +85,7 @@ static func rewards(model: BattleModel) -> Dictionary:
 	if model.result != BattleModel.Result.WIN:
 		return {"exp": 0, "silver": 0}
 	for u in model.units:
-		if u.side != BattleUnit.Side.ENEMY:
+		if u.side != BattleUnit.Side.ENEMY or u.reinforcement or u.is_summon():
 			continue
 		var mult := 2 if u.data.elite_trait != &"" else 1
 		gained_exp += u.level * EXP_PER_LEVEL * mult

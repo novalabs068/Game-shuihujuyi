@@ -146,7 +146,7 @@ func advance_to(model: BattleModel, id: StringName) -> void:
 
 func test_data_loads() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
-	check_eq(GameDB.load_dir("res://data/heroes/").size(), 24, "24 heroes")
+	check_eq(GameDB.load_dir("res://data/heroes/").size(), 27, "27 位好汉（新加公孙胜、朱武、樊瑞）")
 	check_eq(GameDB.load_dir("res://data/combos/").size(), 15, "15 combos")
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
@@ -420,6 +420,25 @@ func test_boss_phases_and_morale() -> bool:
 	mm._deal(by_id(mm, &"e"), by_id(mm, BattleModel.COMMANDER_ID), 100.0)
 	check(by_id(mm, &"h").atk() < before, "统领倒下，全队攻击下降")
 	check(mm._events.any(func(e: Dictionary) -> bool: return e["popup"] == "士气受挫"), "有士气受挫横幅")
+	# 我方满四人：关卡里的小兵补两个（最多 6 个），增援不给经验；头目单挑时头目自己加强
+	var four: Array[UnitData] = [unit_data(&"p1", [100, 1, 0, 100]), unit_data(&"p2", [100, 1, 0, 100]), unit_data(&"p3", [100, 1, 0, 100]), unit_data(&"p4", [100, 1, 0, 100])]
+	var st4 := StageData.new()
+	var bossy := unit_data(&"boss", [1000, 10, 0, 1])
+	bossy.is_boss = true
+	st4.enemies = [unit_data(&"m1", [100, 10, 0, 1]), unit_data(&"m2", [100, 10, 0, 1]), bossy]
+	var m4 := BattleModel.new(st4, four, 1, [], 1)
+	var foes4 := m4.alive(BattleUnit.Side.ENEMY)
+	check_eq(foes4.size(), 5, "三个敌人扩到五个")
+	check_eq(foes4.filter(func(u: BattleUnit) -> bool: return u.reinforcement).size(), 2, "两个增援")
+	check(foes4.filter(func(u: BattleUnit) -> bool: return u.data.is_boss).size() == 1, "头目不会多出来")
+	st4.enemies = [unit_data(&"a1", [100, 10, 0, 1]), unit_data(&"a2", [100, 10, 0, 1]), unit_data(&"a3", [100, 10, 0, 1]), unit_data(&"a4", [100, 10, 0, 1]), unit_data(&"a5", [100, 10, 0, 1])]
+	check_eq(BattleModel.new(st4, four, 1, [], 1).alive(BattleUnit.Side.ENEMY).size(), BattleModel.MAX_ENEMIES, "最多六个")
+	var three: Array[UnitData] = [unit_data(&"p1", [100, 1, 0, 100])]
+	check_eq(BattleModel.new(st4, three, 1, [], 1).alive(BattleUnit.Side.ENEMY).size(), 5, "我方不满四人不扩编")
+	st4.enemies = [bossy]
+	var solo := BattleModel.new(st4, four, 1, [], 1)
+	check_eq(solo.alive(BattleUnit.Side.ENEMY).size(), 1, "头目单挑不加人")
+	check_eq(solo.alive(BattleUnit.Side.ENEMY)[0].max_hp, roundi(1000 * BattleModel.SOLO_HP_SCALE), "头目单挑时自己加强")
 	return true
 
 
@@ -462,7 +481,7 @@ func test_books() -> bool:
 	for h: UnitData in GameDB.load_dir("res://data/heroes/"):
 		heroes[h.id] = h
 	var books: Array = GameDB.load_dir("res://data/miji/").filter(func(m: MijiData) -> bool: return m.is_book())
-	check_eq(books.size(), 8, "8 本技能书")
+	check_eq(books.size(), 9, "9 本技能书")
 	var roles := {}
 	for mj: MijiData in books:
 		for id in mj.recipe:
@@ -1489,7 +1508,19 @@ func test_hero_pool_tiers() -> bool:
 		counts[h.tier] += 1
 		check(h.skill != null and h.skill.description != "", "%s has a described skill" % h.display_name)
 		check(h.portrait != null and h.bust != null and h.face != null, "%s has art" % h.display_name)
-	check_eq(counts, [7, 5, 7, 5], "tier spread 甲7 乙5 丙7 丁5")
+	check_eq(counts, [8, 6, 8, 5], "tier spread 甲8 乙6 丙8 丁5")
+	# 三位召唤型道士：绝招是召唤、带召唤物、召唤物有战斗小人
+	for id in [&"gongsun_sheng", &"zhu_wu", &"fan_rui"]:
+		var h: UnitData = load("res://data/heroes/%s.tres" % id)
+		check_eq(h.role, UnitData.Role.TAOIST, "%s 是道士" % h.display_name)
+		check(h.skill.effect == SkillData.Effect.SUMMON and h.skill.summon != null and h.skill.summon.battle_sprite != null, "%s 召唤物齐全" % h.display_name)
+	# 朱武在场：阵法加成放大
+	var zw: UnitData = load("res://data/heroes/zhu_wu.tres")
+	var zhu := Stars.apply(zw, 2)
+	var st := StageData.new()
+	st.enemies = [unit_data(&"e", [1000, 10, 10, 1])]
+	var with_zhu := BattleModel.new(st, [unit_data(&"a", [1000, 10, 50, 100]), unit_data(&"b", [1000, 10, 50, 100]), unit_data(&"c", [1000, 10, 50, 100]), zhu] as Array[UnitData], 1, [], 1, &"yu_lin")
+	check(is_equal_approx(by_id(with_zhu, &"a").formation_mods["def"], 0.15 * 1.5), "朱武「神机军师」让阵法加成 +50%")
 	return true
 
 
@@ -1757,7 +1788,7 @@ func test_equipment() -> bool:
 			check_eq(e.effects.size(), e.quality, "%s has %d effects" % [e.display_name, e.quality])
 		for fx in e.effects:
 			check(EquipData.EFFECTS.has(fx), "%s effect %s is known" % [e.display_name, fx])
-	check_eq(per_quality, [9, 7, 4, 26], "9 凡品（含 3 匹马）7 良品 4 精品 26 名器")
+	check_eq(per_quality, [9, 7, 4, 29], "9 凡品（含 3 匹马）7 良品 4 精品 29 名器")
 	check_eq(mounts, 5, "3 horses + 2 famous horses")
 	var h := unit_data(&"h", [1000, 100, 50, 100])
 	var sword := EquipData.new()
@@ -1863,7 +1894,7 @@ func test_story_data() -> bool:
 func test_martial_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var all: Array = GameDB.load_dir("res://data/martial/")
-	check_eq(all.size(), 16, "8 门武学 + 8 本技能书的武学")
+	check_eq(all.size(), 17, "8 门武学 + 9 本技能书的武学")
 	for res in all:
 		var m: MartialData = res
 		check(m.skill != null and m.skill.description != "", "%s has a described skill" % m.display_name)

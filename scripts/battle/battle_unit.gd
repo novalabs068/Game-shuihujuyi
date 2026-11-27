@@ -68,6 +68,8 @@ var formation_eye := false
 ## 召唤物：谁召出来的、还剩几回合（0 = 打死为止）。召唤者倒下就一起消散
 var summoner: BattleUnit
 var summon_turns := 0
+## 我方满四人时敌人扩编来的增援（不给经验银两）
+var reinforcement := false
 ## 头目蓄力中：下一次行动放出蓄满的绝招（伤害 ×BattleModel.CHARGE_BONUS）；这期间被控制就打断
 var charging := false
 ## 阵法、山头给的：受到的伤害倍数、额外暴击率

@@ -24,7 +24,7 @@ OUT = ROOT / "art/pixel/battle"
 # 人物小人的原图
 SHEETS = [
     "pixel_characters", "pixel_protagonists", "pixel_heroes2", "pixel_heroes3", "pixel_heroes4", "pixel_heroes5",
-    "pixel_enemies", "pixel_wild_enemies", "pixel_ma_zei", "pixel_jianghu_people", "pixel_boss_a", "pixel_boss_b",
+    "pixel_enemies", "pixel_wild_enemies", "pixel_ma_zei", "pixel_jianghu_people", "pixel_boss_a", "pixel_boss_b", "pixel_heroes6",
 ]
 SCALE = 2
 MAX_COLORS = 48

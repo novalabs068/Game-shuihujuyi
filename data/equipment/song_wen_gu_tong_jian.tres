@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EquipData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/equip_data.gd" id="1_e"]
+
+[resource]
+script = ExtResource("1_e")
+id = &"song_wen_gu_tong_jian"
+display_name = "松纹古铜剑"
+quality = 3
+flavor = "公孙胜背上那口松纹古铜剑，作法时剑指处风雷俱起。"
+atk_pct = 0.1
+hp_pct = 0.06
+effects = Array[StringName]([&"nimble"])
+owner = &"gongsun_sheng"
+source = "arena:9"
+source_text = "擂台第 9 关首次打赢"
