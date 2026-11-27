@@ -578,7 +578,7 @@ func _enter_rest() -> void:
 	_rest_lit.modulate.a = 0.0
 	# 盘腿坐下：身子一沉，换成打坐的样子
 	_rest_standing = _player.sprite
-	var sit := GameState.origin().sit_sprite if GameState.origin() != null else null
+	var sit := GameState.sit_sprite()
 	await _sink(sit)
 	var dusk := create_tween().set_parallel()
 	dusk.tween_property(_rest_sky, "color:a", 0.62, 0.9)

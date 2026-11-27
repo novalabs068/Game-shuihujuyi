@@ -40,6 +40,8 @@ const SKILL_SPOT := Vector3(252, 72, 86)
 const GUARD_SPOT := Vector3(236, 206, 72)
 const COMBO_SPOT := Vector3(112, 258, 64)
 const MOVE_SPOT := Vector3(358, 62, 62)
+## 统领的「号令」圆钮（只有带了号令时才出现）
+const COMMAND_SPOT := Vector3(470, 62, 62)
 ## 法术伤害的数字颜色（青）
 const MAGIC_CYAN := Color("8fe3f0")
 ## 出手顺序头像的直径：当前出手的、后面排着的
@@ -130,6 +132,8 @@ var placement: Array = []
 var _scene: TextureRect
 var _combo_sub: Label
 var _move_button: Button
+var _command_button: Button
+var _command_sub: Label
 ## 补位：点了「补位」后在等玩家点一个空格子
 var _move_mode := false
 var _move_cell := Grid.NONE
@@ -143,6 +147,8 @@ var _area_hits: Array[BattleUnit] = []
 func _ready() -> void:
 	_formation = GameState.current_formation()
 	model = BattleModel.new(stage, team, hero_level, GameState.combos(), -1, _formation, placement)
+	if team.any(func(u: UnitData) -> bool: return u.id == BattleModel.COMMANDER_ID):
+		model.command = GameState.battle_command()
 	Vitality.apply_start(model, start_hp)
 	var bg := ColorRect.new()
 	bg.color = UiKit.BG
@@ -913,6 +919,17 @@ func _shake_screen(strength: float) -> void:
 
 # --- 输入 ---
 
+## 统领发号令：不占出手，播完效果接着等玩家选行动。
+func _on_command() -> void:
+	if not _awaiting_input or not model.can_command():
+		return
+	_awaiting_input = false
+	_move_mode = false
+	_refresh()
+	await _play(model.use_command())
+	_awaiting_input = true
+	_refresh()
+
 func _choose(action: int) -> void:
 	if _awaiting_input:
 		_move_mode = false
@@ -1026,6 +1043,11 @@ func _refresh() -> void:
 	_combo_button.disabled = not input or combo == null
 	_combo_sub.text = combo.display_name if combo != null else "组合技"
 	_set_lit(_combo_button, combo != null and input)
+	if _command_button != null:
+		var ready := input and player and model.can_command()
+		_command_button.disabled = not ready
+		_set_lit(_command_button, ready)
+		_command_sub.text = "号令·%s" % Commands.display_name(model.command) if not model.command_used else "号令已用"
 
 
 ## 地面格子上色：头目要砸的红格；轮到玩家时，普攻会打到的格子金色、绝招的范围朱红描边；补位时能去的空格青色。
@@ -1430,6 +1452,13 @@ func _build_bottom_bar() -> void:
 	_skill_button.pressed.connect(_choose.bind(BattleModel.Action.SKILL))
 	_guard_button.pressed.connect(_choose.bind(BattleModel.Action.GUARD))
 	_combo_button.pressed.connect(_choose.bind(BattleModel.Action.COMBO))
+	if model.command != &"":
+		var cname := Commands.display_name(model.command)
+		_command_button = _corner_button(cname.left(1), COMMAND_SPOT, Color("8f2a1c"), PAPER, 28)
+		_command_sub = _corner_caption(COMMAND_SPOT)
+		_command_sub.text = "号令·%s" % cname
+		_command_button.tooltip_text = Commands.describe(model.command)
+		_command_button.pressed.connect(_on_command)
 
 
 ## 右下角的圆钮：spot 是（中心离右边、离下边、直径）。

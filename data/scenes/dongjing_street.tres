@@ -335,7 +335,7 @@ TT.TT.........................TT...............T..TTTT..,,,,,,,,,.........TTTTTT
 TT............................TTTTTTT..........T.TTTTT.T.,,,,,,,,........TTTTTTTTTTTTTTTTTTTTTTTTTTT.........TTT
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT,,,TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTDDDTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
-spawn_cell = Vector2i(55, 50)
+spawn_cell = Vector2i(55, 44)
 npcs = Array[ExtResource("4_qsl24")]([SubResource("Resource_mv3fe"), SubResource("Resource_can2e"), SubResource("Resource_vm73e"), SubResource("Resource_cdsrj"), SubResource("Resource_fp05q"), SubResource("Resource_nlc7o"), SubResource("Resource_tafka")])
 chests = Array[ExtResource("3_0saps")]([SubResource("Resource_8p0n8"), SubResource("Resource_eq4x8"), SubResource("Resource_sunms"), SubResource("Resource_nds8q")])
 region = &"dongjing"

@@ -46,6 +46,7 @@ func _initialize() -> void:
 		"test_ai_guards_when_threatened",
 		"test_map_routes",
 		"test_scene_layout",
+		"test_arrivals_not_hidden",
 		"test_world_links",
 		"test_guard_strike_shields_team",
 		"test_origins_load",
@@ -72,6 +73,10 @@ func _initialize() -> void:
 		"test_vitality",
 		"test_steal_skips_debuffs",
 		"test_hero_pool_tiers",
+		"test_renown_and_realms",
+		"test_commands",
+		"test_foreign_martial_and_role_talents",
+		"test_story_placeholders",
 		"test_simulated_win_rate",
 	]:
 		if call(t) != true:
@@ -1567,6 +1572,39 @@ func test_map_routes() -> bool:
 	return true
 
 
+## 进场景时站的格子（出生格、从别的场景走过来的到达格）不能藏在建筑、门楼的图后面，
+## 不然一进来就找不到自己（东京街市的出生格曾经就在南城门楼背后）。
+func test_arrivals_not_hidden() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var scenes := {}
+	for sd: SceneData in GameDB.load_dir("res://data/scenes/"):
+		scenes[sd.id] = sd
+	var arrivals := {}
+	for id: String in scenes:
+		var sd: SceneData = scenes[id]
+		arrivals[id] = arrivals.get(id, []) + [sd.spawn_cell]
+		for door: Vector2i in sd.doors:
+			var target: String = sd.doors[door]
+			if scenes.has(target):
+				arrivals[target] = arrivals.get(target, []) + [sd.door_arrivals.get(door, (scenes[target] as SceneData).spawn_cell)]
+	for id: String in arrivals:
+		var sd: SceneData = scenes[id]
+		var tp := float(sd.tile_pixels)
+		for cell: Vector2i in arrivals[id]:
+			# 脚底的位置（以格为单位），见 LocationView._feet；场景里的图放大 3 倍（LocationView.PIXEL_SCALE，测试里引用它会拉进 GameState 编译不过）
+			var feet := Vector2(cell) + Vector2(0.5, 0.8)
+			for prop in sd.props:
+				if prop.texture == null or cell.y >= prop.cell.y:
+					continue
+				var bottom := prop.cell.y + 0.95 + prop.offset.y / (tp * 3)
+				var cx := prop.cell.x + 0.5 + prop.offset.x / (tp * 3)
+				var half := prop.texture.get_width() / tp / 2.0
+				var top := bottom - prop.texture.get_height() / tp
+				var hidden := absf(feet.x - cx) < half and feet.y > top and feet.y < bottom
+				check(not hidden, "%s 的到达格 %s 藏在 %s 后面" % [id, cell, prop.texture.resource_path.get_file()])
+	return true
+
+
 func test_scene_layout() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	for res in GameDB.load_dir("res://data/scenes/"):
@@ -1664,12 +1702,129 @@ func test_guard_strike_shields_team() -> bool:
 func test_origins_load() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var origins: Array[Resource] = GameDB.load_dir("res://data/origins/")
-	check_eq(origins.size(), 2, "two origins")
+	check_eq(origins.size(), 5, "五个职业各一个出身")
+	var roles := {}
 	for res in origins:
 		var o := res as OriginData
-		check(o.unit != null and o.unit.skill != null, "%s has a unit and a skill" % o.id)
+		check(o.unit != null, "%s has a unit" % o.id)
 		check(o.unit.rarity == UnitData.Rarity.PROTAGONIST, "%s is marked as protagonist" % o.id)
-		check(o.unit.map_sprite != null, "%s has a pixel sprite" % o.id)
+		check(o.unit.map_sprite != null and o.unit.portrait != null, "%s has art" % o.id)
+		check(o.martial != null and o.martial.role == o.unit.role, "%s 的开局武学是本职业的" % o.id)
+		check_eq(o.start_location, &"dongjing", "%s 从东京开局（别处的怪太强）" % o.id)
+		roles[o.unit.role] = true
+	check_eq(roles.size(), 5, "五个出身职业各不相同")
+	return true
+
+
+## 名望按做过的事现算；境界决定属性倍数、武学上限、天赋档次；立名之战的关卡能生成。
+func test_renown_and_realms() -> bool:
+	check_eq(Renown.compute({}), 0, "什么都没做名望 0")
+	var r := Renown.compute({"heroes": 3, "stories": 1, "bounties": [1, 1, 1], "odd_jobs": 2, "bosses": 1, "arena": 2, "events": 1})
+	check_eq(r, 3 * 20 + 30 + 15 + 25 + 40 + 2 * 3 + 25 + 2 * 20 + 10, "名望各项加起来")
+	check(not Renown.can_try(0, 99) and Renown.can_try(0, 100), "100 名望能打一阶的立名之战")
+	check(not Renown.can_try(Renown.MAX_REALM, 99999), "满阶不能再打")
+	check(is_equal_approx(Renown.stat_mult(0), 1.0) and is_equal_approx(Renown.stat_mult(5), 1.5), "五阶属性 +50%")
+	check_eq(Renown.martial_cap(0), 4, "开局武学最多四重")
+	check_eq(Renown.martial_cap(3), 10, "三阶能修到大成")
+	check_eq([Renown.talent_rank(0), Renown.talent_rank(1), Renown.talent_rank(4)], [0, 1, 2], "天赋一阶解锁、四阶强化")
+	check_eq(Renown.next_threshold(Renown.MAX_REALM), -1, "满阶没有下一阶")
+	for n in range(1, Renown.MAX_REALM + 1):
+		var st := Renown.trial_stage(n)
+		check_eq(st.enemies.size(), 3, "立名之战 %d 有三个对手" % n)
+		check(st.enemy_level > (Renown.TRIALS[n - 2][1] if n > 1 else 0), "立名之战 %d 一阶比一阶强" % n)
+		check(Renown.trial_bonus(n).get("trial") == n, "立名之战 %d 的奖励带阶数" % n)
+	return true
+
+
+## 号令：随境界解锁；只有统领能用、每场一次、不占出手；自动战斗统领第一次轮到就用。
+func test_commands() -> bool:
+	check(Commands.unlocked(1).is_empty(), "一阶还没有号令")
+	check_eq(Commands.unlocked(2), [Commands.LEIGU] as Array[StringName], "二阶擂鼓")
+	check_eq(Commands.unlocked(5).size(), 3, "五阶三个号令都有")
+	for id: StringName in Commands.ALL:
+		check(Commands.describe(id) != "", "%s 有说明" % id)
+	var boss := unit_data(BattleModel.COMMANDER_ID, [500, 100, 0, 200])
+	var mate := unit_data(&"b", [500, 100, 0, 50])
+	var m := battle([boss, mate], [unit_data(&"e", [100000, 1, 0, 1])])
+	m.command = Commands.LEIGU
+	advance_to(m, BattleModel.COMMANDER_ID)
+	var leader := m.current
+	var b := by_id(m, &"b")
+	var rage_before := b.rage
+	var atk_before := b.atk()
+	check(m.can_command(), "统领轮到了能发号令")
+	m.use_command()
+	check(m.current == leader, "号令不占出手：还是统领的回合")
+	check_eq(b.rage, rage_before + Commands.LEIGU_RAGE, "擂鼓加怒气")
+	check(b.atk() > atk_before, "擂鼓加攻击")
+	check(not m.can_command(), "每场只能用一次")
+	m.act(BattleModel.Action.GUARD)
+	# 列阵给护盾，鸣金回血；好汉轮到时不能发号令
+	var m2 := battle([unit_data(BattleModel.COMMANDER_ID, [500, 100, 0, 200]), unit_data(&"b", [500, 100, 0, 300])], [unit_data(&"e", [100000, 1, 0, 1])])
+	m2.command = Commands.LIEZHEN
+	advance_to(m2, &"b")
+	check(not m2.can_command(), "好汉不能发号令")
+	m2.act(BattleModel.Action.GUARD)
+	advance_to(m2, BattleModel.COMMANDER_ID)
+	m2.use_command()
+	check_eq(by_id(m2, &"b").shield, roundi(by_id(m2, &"b").max_hp * Commands.LIEZHEN_SHIELD), "列阵给护盾")
+	var m3 := battle([unit_data(BattleModel.COMMANDER_ID, [500, 100, 0, 200])], [unit_data(&"e", [100000, 1, 0, 1])])
+	m3.command = Commands.MINGJIN
+	advance_to(m3, BattleModel.COMMANDER_ID)
+	var me := m3.current
+	me.hp = 100
+	me.stun_turns = 2
+	m3.use_command()
+	check_eq(me.hp, 100 + roundi(me.max_hp * Commands.MINGJIN_HEAL), "鸣金回血")
+	check_eq(me.stun_turns, 0, "鸣金解控")
+	# 自动战斗：统领第一次轮到就发号令，接着照常出手
+	var m4 := battle([unit_data(BattleModel.COMMANDER_ID, [500, 100, 0, 200])], [unit_data(&"e", [100000, 1, 0, 1])])
+	m4.command = Commands.LEIGU
+	advance_to(m4, BattleModel.COMMANDER_ID)
+	var events := m4.act_ai()
+	check(m4.command_used, "自动战斗会用号令")
+	check(m4.current == null, "用完号令接着出手，回合结束")
+	check(events.any(func(e: Dictionary) -> bool: return e["kind"] == "skill" and e["popup"] == "擂鼓"), "事件里有号令")
+	return true
+
+
+## 外门武学打七折；每个职业的统领天赋都是现成的天赋种类。
+func test_foreign_martial_and_role_talents() -> bool:
+	var s := skill(SkillData.Effect.DAMAGE, {"power": 2.0})
+	var f := MartialData.foreign(s)
+	check(is_equal_approx(f.power, 2.0 * MartialData.FOREIGN_POWER), "外门威力七成")
+	check(is_equal_approx(s.power, 2.0), "不改原招")
+	for role in 5:
+		var t := Renown.role_talent(role)
+		check(TalentData.KINDS.has(t.kind), "%s 的统领天赋种类存在" % UiKit.ROLE_NAMES[role])
+		check(t.describe(1) != "" and not "{x}" in t.describe(2), "%s 的统领天赋有说明" % UiKit.ROLE_NAMES[role])
+	# 统领天赋带进战斗：道士聚气开战全队加怒气
+	var taoist := unit_data(&"t", [500, 100, 0, 100])
+	taoist.talent = Renown.role_talent(UnitData.Role.TAOIST)
+	taoist.talent_rank = 1
+	var m := battle([taoist, unit_data(&"b", [500, 100, 0, 100])], [unit_data(&"e", [100000, 1, 0, 1])])
+	check_eq(by_id(m, &"b").rage, 20, "聚气：开战全队怒气 +20")
+	return true
+
+
+## 剧本、场景台词里的占位词只用认得的几个（{name}、{兄弟}、{后生}），不然会原样显示出来。
+func test_story_placeholders() -> bool:
+	var known := ["{name}", "{兄弟}", "{后生}"]
+	var re := RegEx.create_from_string("\\{[A-Za-z_\\p{Han}]{1,8}\\}")
+	var files: Array[String] = []
+	for dir in DirAccess.get_directories_at("res://data/stories"):
+		for f in DirAccess.get_files_at("res://data/stories/" + dir):
+			if f.ends_with(".txt"):
+				files.append("res://data/stories/%s/%s" % [dir, f])
+	for f in DirAccess.get_files_at("res://data/scenes"):
+		files.append("res://data/scenes/" + f)
+	var count := 0
+	for path in files:
+		for m in re.search_all(FileAccess.get_file_as_string(path)):
+			check(m.get_string() in known, "%s 里的占位词 %s 认得" % [path.get_file(), m.get_string()])
+			if m.get_string() == "{兄弟}":
+				count += 1
+	check(count >= 20, "列传里好汉称呼统领都换成了 {兄弟}（%d 处）" % count)
 	return true
 
 
@@ -1894,12 +2049,10 @@ func test_story_data() -> bool:
 func test_martial_data() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
 	var all: Array = GameDB.load_dir("res://data/martial/")
-	check_eq(all.size(), 17, "8 门武学 + 9 本技能书的武学")
+	check_eq(all.size(), 20, "11 门武学（5 个出身各一门）+ 9 本技能书的武学")
 	for res in all:
 		var m: MartialData = res
 		check(m.skill != null and m.skill.description != "", "%s has a described skill" % m.display_name)
-		if not String(m.id).begins_with("book_"):
-			check(m.side_summary() != "", "%s has a side bonus" % m.display_name)
 		check(m.source != "", "%s says where it is learned" % m.display_name)
 	for res in GameDB.load_dir("res://data/origins/"):
 		var o: OriginData = res

@@ -106,6 +106,9 @@ var _reacting := false
 var formation_id: StringName = &""
 ## 我方满四人（统领 + 三位好汉）：敌人按四人加强，三星回合多给几回合
 var squad := false
+## 统领带上场的号令（Commands 的 id，空 = 没有），每场只能用一次
+var command: StringName = &""
+var command_used := false
 
 
 ## formation 是玩家选的阵法（Formations 的 id，空 = 不摆阵）。placement 是我方每人站的格子（和 team 对应，
@@ -458,6 +461,47 @@ func act(action: Action, target: BattleUnit = null, cell := Grid.NONE) -> Array[
 	return _events
 
 
+## 现在轮到统领、带了号令、这一场还没用过。
+func can_command() -> bool:
+	return result == Result.ONGOING and current != null and current.data.id == COMMANDER_ID \
+		and current.side == BattleUnit.Side.PLAYER and command != &"" and not command_used
+
+
+## 统领发号令：全队得到效果，不占出手（current 不变，统领接着选行动）。
+func use_command() -> Array[Dictionary]:
+	_events = []
+	if not can_command():
+		return _events
+	command_used = true
+	var actor := current
+	var name := Commands.display_name(command)
+	_emit("skill", actor, name, "%s 号令「%s」：%s" % [actor.display_name(), name, Commands.describe(command)])
+	_events.back()["area"] = SkillData.Area.ALL
+	_events.back()["charged"] = false
+	_events.back()["cells"] = []
+	for ally in allies_of(actor):
+		match command:
+			Commands.LEIGU:
+				ally.add_buff(BattleUnit.Buff.new(name, Commands.LEIGU_ATK, 0.0, Commands.LEIGU_TURNS))
+				ally.add_rage(Commands.LEIGU_RAGE)
+				_emit("info", ally, "擂鼓", "")
+			Commands.LIEZHEN:
+				var shield := roundi(ally.max_hp * Commands.LIEZHEN_SHIELD)
+				ally.shield += shield
+				stats.add(actor, "shielded", shield)
+				_emit("info", ally, "护盾 +%d" % shield, "")
+			Commands.MINGJIN:
+				var amount := mini(roundi(ally.max_hp * Commands.MINGJIN_HEAL), ally.max_hp - ally.hp)
+				ally.hp += amount
+				stats.add(actor, "healed", amount, round_number())
+				ally.stun_turns = 0
+				ally.disarm_turns = 0
+				ally.silence_turns = 0
+				ally.burn_turns = 0
+				_emit("heal", ally, "+%d" % amount, "")
+	return _events
+
+
 ## 敌人照预告的意图出手。自动战斗：能放组合技就放；站在头目大招的红格里就躲开（躲不开就防御）；
 ## 被敌人的技能瞄准就防御；技能值得用就用；否则普攻打得到的人里最弱的。召唤物也走这里。
 func act_ai() -> Array[Dictionary]:
@@ -469,6 +513,11 @@ func act_ai() -> Array[Dictionary]:
 		if use_skill and actor.data.is_boss and not actor.charging:
 			return _charge(actor)
 		return act(Action.SKILL if use_skill else Action.ATTACK, intent_target_of(actor))
+	# 自动战斗：统领第一次轮到就发号令（不占出手），再照常行动
+	if can_command():
+		var pre := use_command()
+		pre.append_array(act_ai())
+		return pre
 	var foes := reachable_foes(actor)
 	var weakest := _weakest(foes)
 	if available_combo(actor) != null:

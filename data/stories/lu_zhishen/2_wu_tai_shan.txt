@@ -16,7 +16,7 @@
 你拉不住，鲁智深一挣，已经冲了上去。
 @goto fight
 * let
-鲁智深：好兄弟，懂洒家！
+鲁智深：好{兄弟}，懂洒家！
 * fight
 @battle wu_tai_shan
 @show right none

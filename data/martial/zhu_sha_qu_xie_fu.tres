@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="MartialData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/martial_data.gd" id="1_zsq01"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_zsq02"]
+
+[sub_resource type="Resource" id="Resource_zsq03"]
+script = ExtResource("2_zsq02")
+display_name = "朱砂驱邪符"
+description = "朱砂符化作一片火，敌方全体各受 70% 法术伤害，并灼烧 2 回合（每次轮到时掉施放者攻击 20% 的血）。"
+effect = 19
+power = 0.7
+turns = 2
+amount = 0.2
+
+[resource]
+script = ExtResource("1_zsq01")
+id = &"zhu_sha_qu_xie_fu"
+display_name = "朱砂驱邪符"
+flavor = "山中道观里画了三年的符，头一回拿来对付活人。"
+source = "云游道人出身"
+role = 3
+skill = SubResource("Resource_zsq03")

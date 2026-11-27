@@ -11,6 +11,16 @@ const MAX_HEROES := 3
 const STARTING_TOKENS := 10
 const DEFAULT_MAP := "ch1"
 const PROTAGONIST_ID := &"protagonist"
+const GENDER_MALE := &"male"
+const GENDER_FEMALE := &"female"
+## 别人称呼统领：台词里的占位词按性别换（例：「{name}{兄弟}」→ 女统领「韩青妹子」）
+const ADDRESS_WORDS := {
+	"{兄弟}": {GENDER_MALE: "兄弟", GENDER_FEMALE: "妹子"},
+	"{后生}": {GENDER_MALE: "后生", GENDER_FEMALE: "姑娘"},
+}
+const GENDERS: Array[StringName] = [GENDER_MALE, GENDER_FEMALE]
+## 修为：野外歇脚打坐歇完得多少（按队伍等级）
+const CAMP_XIUWEI_PER_LEVEL := 12
 ## 队伍等级上限（M3 做养成时再细分到每个人）
 const MAX_LEVEL := 99
 ## 存档里的等级是哪一套：旧存档（1～30 级）读档时换算成 1～99 级
@@ -18,6 +28,14 @@ const LEVEL_SCALE := 99
 
 var player_name := ""
 var origin_id: StringName = &""
+## 统领的性别：只换立绘、小人和别人怎么称呼（属性不分男女）。旧存档没有这一项，算男
+var gender: StringName = GENDER_MALE
+## 统领的境界（见 Renown）：名望够了打赢立名之战才升一阶
+var realm := 0
+## 修为：修炼武学用（打仗、野外打坐得来）
+var xiuwei := 0
+## 开战带哪一个号令（见 Commands）；空 = 自动带最后解锁的那个
+var command: StringName = &""
 var team_ids: Array[StringName] = []
 var flags: Dictionary[String, bool] = {}
 var location_id: StringName = &""
@@ -50,7 +68,7 @@ var camp: Dictionary = {}
 var last_camp_done := 0
 ## 背包里的装备：每件 {"uid": 编号, "id": 模板 id, "holder": 装备在谁身上（空 = 没装备）}
 var items: Array[Dictionary] = []
-## 主角学会的武学和主修（主修那门就是统领在战斗里放的绝招，也决定统领的职业）、每门修到第几重
+## 主角学会的武学和主修（主修那门就是统领在战斗里放的绝招；职业由出身定）、每门修到第几重
 var martials: Array[StringName] = []
 var martial_main: StringName = &""
 var martial_levels: Dictionary[StringName, int] = {}
@@ -63,7 +81,7 @@ var scrolls: Array[Dictionary] = []
 ## 选用的阵法（Formations 的 id）
 var formation: StringName = Formations.DEFAULT
 ## 江湖履历：打赢几场、其中游荡小怪几只、闯荡了多少秒（主角页显示）
-var record: Dictionary = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0}
+var record: Dictionary = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0, "odd_jobs": 0}
 ## 小悬赏：{地区 id: [{enemy, name, need, have, silver, exp, tokens}, ...]}，见 OddJobs
 var jobs: Dictionary = {}
 var _next_uid := 1
@@ -278,10 +296,11 @@ func add_bond(id: StringName, points: int) -> String:
 
 
 ## 开新档：起名、选出身，从出身的开局地点出发。
-func new_game(p_name: String, origin: OriginData) -> void:
+func new_game(p_name: String, origin: OriginData, p_gender: StringName = GENDER_MALE) -> void:
 	reset()
 	player_name = p_name
 	origin_id = origin.id
+	gender = p_gender if p_gender in GENDERS else GENDER_MALE
 	location_id = origin.start_location
 	tokens = STARTING_TOKENS
 	_learn_origin_martial()
@@ -295,6 +314,8 @@ func origin() -> OriginData:
 
 
 ## 主角的战斗数据：出身模板的一份复制，名字换成玩家起的名字。
+## 职业由出身定死（开局选的）；主修别的职业的武学也行，但绝招威力打折（MartialData.FOREIGN_POWER）。
+## 属性：这个职业甲品范围的中间值 × 境界倍数；境界到了再带上统领天赋。女统领换女版的立绘和小人。
 func protagonist() -> UnitData:
 	if _protagonist == null:
 		var o := origin()
@@ -304,19 +325,118 @@ func protagonist() -> UnitData:
 		_protagonist.id = PROTAGONIST_ID
 		_protagonist.display_name = player_name
 		_protagonist.rarity = UnitData.Rarity.PROTAGONIST
+		if gender == GENDER_FEMALE:
+			o.apply_female_art(_protagonist)
 		var main := martial(martial_main)
 		if main != null:
-			_protagonist.skill = main.skill_at(martial_level(main.id))
-			_protagonist.role = main.role
-		# 统领的属性跟着职业走：这个职业甲品范围的中间值（换主修换职业，属性也跟着换）
+			_protagonist.skill = main.skill_at(mini(martial_level(main.id), MartialData.MAX_LEVEL))
+			if main.role != _protagonist.role:
+				_protagonist.skill = MartialData.foreign(_protagonist.skill)
 		var st := Roles.protagonist_stats(_protagonist.role)
-		_protagonist.base_hp = st[0]
-		_protagonist.base_atk = st[1]
-		_protagonist.base_def = st[2]
-		_protagonist.base_res = st[3]
+		var k := Renown.stat_mult(realm)
+		_protagonist.base_hp = roundi(st[0] * k)
+		_protagonist.base_atk = roundi(st[1] * k)
+		_protagonist.base_def = roundi(st[2] * k)
+		_protagonist.base_res = roundi(st[3] * k)
 		_protagonist.base_spd = st[4]
 		_protagonist.base_agi = st[5]
+		var rank := Renown.talent_rank(realm)
+		if rank > 0:
+			_protagonist.talent = Renown.role_talent(_protagonist.role)
+			_protagonist.talent_rank = rank
+			Stars.apply_passive(_protagonist, _protagonist.talent, rank)
+		else:
+			_protagonist.talent = null
+			_protagonist.talent_rank = 0
 	return _protagonist
+
+
+## 统领的职业（出身定的）。
+func protagonist_role() -> UnitData.Role:
+	var o := origin()
+	return o.unit.role if o != null else UnitData.Role.WARRIOR
+
+
+## 统领打坐时的像素小人（女统领用女版）。
+func sit_sprite() -> Texture2D:
+	var o := origin()
+	if o == null:
+		return null
+	if gender == GENDER_FEMALE and o.sit_sprite_female != null:
+		return o.sit_sprite_female
+	return o.sit_sprite
+
+
+## 台词、旁白里的占位词：{name} 换成统领的名字，{兄弟}、{后生} 按性别换（见 ADDRESS_WORDS）。
+func fill_text(text: String) -> String:
+	var out := text.replace("{name}", player_name)
+	for key: String in ADDRESS_WORDS:
+		out = out.replace(key, ADDRESS_WORDS[key][gender if gender in GENDERS else GENDER_MALE])
+	return out
+
+
+# --- 名望和境界 ---
+
+## 江湖名望：按已经做过的事现算（见 Renown.compute）。
+func renown() -> int:
+	var bounties := [0, 0, 0]
+	for b: BountyData in GameDB.bounties:
+		if has_flag("bounty_" + String(b.id)):
+			bounties[int(b.grade)] += 1
+	var stories := GameDB.stories.filter(func(s: StoryData) -> bool: return story_done(s)).size()
+	var bosses := 0
+	var events := 0
+	for f: String in flags:
+		if f.begins_with("boss_"):
+			bosses += 1
+		elif f.begins_with("event_"):
+			events += 1
+	return Renown.compute({
+		"heroes": owned.size(),
+		"stories": stories,
+		"bounties": bounties,
+		"odd_jobs": int(record.get("odd_jobs", 0)),
+		"bosses": bosses,
+		"arena": Arena.best(),
+		"events": events,
+	})
+
+
+## 名望够了，可以去打下一阶的立名之战。
+func can_try_trial() -> bool:
+	return Renown.can_try(realm, renown())
+
+
+## 打赢第 n 阶的立名之战：升到这一阶。返回提示。
+func pass_trial(n: int) -> String:
+	if n != realm + 1 or n > Renown.MAX_REALM:
+		return ""
+	realm = n
+	_protagonist = null
+	var parts := PackedStringArray(["境界升到「%s」：统领属性 +%d%%，武学最多修到第 %d 重" % [Renown.realm_name(n), roundi(Renown.STAT_PER_REALM * n * 100), Renown.martial_cap(n)]])
+	if n == Renown.TALENT_REALM:
+		parts.append("领悟统领天赋「%s」" % Renown.role_talent(protagonist_role()).display_name)
+	elif n == Renown.TALENT_ENHANCE_REALM:
+		parts.append("统领天赋「%s」强化" % Renown.role_talent(protagonist_role()).display_name)
+	for id in Commands.unlocked(n):
+		if Commands.unlock_realm(id) == n:
+			parts.append("学会号令「%s」" % Commands.display_name(id))
+	save_game()
+	return "　".join(parts)
+
+
+## 这一仗带哪个号令：选过且已解锁的就用它，否则带最后解锁的那个；还没解锁返回空。
+func battle_command() -> StringName:
+	var list := Commands.unlocked(realm)
+	if list.is_empty():
+		return &""
+	return command if command in list else list.back()
+
+
+func set_command(id: StringName) -> void:
+	if id in Commands.unlocked(realm):
+		command = id
+		save_game()
 
 
 func heroes() -> Array[UnitData]:
@@ -575,23 +695,28 @@ func martial_level(id: StringName) -> int:
 	return clampi(martial_levels.get(id, 1), 1, MartialData.MAX_LEVEL)
 
 
+## 武学现在最多能修到第几重（受境界限制）。
+func martial_cap() -> int:
+	return Renown.martial_cap(realm)
+
+
 func can_train(id: StringName) -> bool:
 	var lv := martial_level(id)
-	return id in martials and lv < MartialData.MAX_LEVEL and silver >= MartialData.level_cost(lv)
+	return id in martials and lv < martial_cap() and xiuwei >= MartialData.level_cost(lv)
 
 
-## 花银两把这门武学修上一重。
+## 花修为把这门武学修上一重。
 func train_martial(id: StringName) -> bool:
 	if not can_train(id):
 		return false
-	silver -= MartialData.level_cost(martial_level(id))
+	xiuwei -= MartialData.level_cost(martial_level(id))
 	martial_levels[id] = martial_level(id) + 1
 	_protagonist = null
 	save_game()
 	return true
 
 
-## 换主修（统领的绝招和职业跟着换）。
+## 换主修（统领的绝招跟着换；职业不变，别的职业的武学威力打折）。
 func set_martial_main(id: StringName) -> void:
 	if not id in martials or id == martial_main:
 		return
@@ -889,7 +1014,13 @@ func cancel_camp() -> void:
 func finish_camp() -> void:
 	camp = {}
 	last_camp_done = now()
+	xiuwei += camp_xiuwei()
 	camp_rest()
+
+
+## 歇完一次打坐得多少修为。
+func camp_xiuwei() -> int:
+	return CAMP_XIUWEI_PER_LEVEL * level
 
 
 ## 每人回 Vitality.CAMP_REGEN。
@@ -979,6 +1110,10 @@ func set_flag(flag: String) -> void:
 func reset() -> void:
 	player_name = ""
 	origin_id = &""
+	gender = GENDER_MALE
+	realm = 0
+	xiuwei = 0
+	command = &""
 	team_ids.clear()
 	owned.clear()
 	souls.clear()
@@ -1001,7 +1136,7 @@ func reset() -> void:
 	martial_side = &""
 	martial_levels.clear()
 	positions.clear()
-	record = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0}
+	record = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0, "odd_jobs": 0}
 	jobs = {}
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
@@ -1057,6 +1192,10 @@ func save_game() -> void:
 		"version": SAVE_VERSION,
 		"name": player_name,
 		"origin": String(origin_id),
+		"gender": String(gender),
+		"realm": realm,
+		"xiuwei": xiuwei,
+		"command": String(command),
 		"team": team_names,
 		"flags": flags.keys(),
 		"location": String(location_id),
@@ -1109,6 +1248,12 @@ func load_game() -> void:
 		return
 	player_name = data.get("name", "")
 	origin_id = StringName(data.get("origin", ""))
+	gender = StringName(data.get("gender", String(GENDER_MALE)))
+	if not gender in GENDERS:
+		gender = GENDER_MALE
+	realm = clampi(int(data.get("realm", 0)), 0, Renown.MAX_REALM)
+	xiuwei = maxi(0, int(data.get("xiuwei", 0)))
+	command = StringName(data.get("command", ""))
 	var saved_team: Array = data.get("team", [])
 	team_ids.clear()
 	for id: String in saved_team:

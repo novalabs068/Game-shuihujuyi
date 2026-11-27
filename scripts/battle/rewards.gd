@@ -50,7 +50,7 @@ static func affordable(choice: EventChoice) -> bool:
 static func learn(m: MartialData) -> String:
 	if m == null or not GameState.learn_martial(m):
 		return ""
-	return "学会武学「%s」（在「好汉」页主角那里换主修，统领光环就跟着换）" % m.display_name
+	return "学会武学「%s」（在「好汉」页主角那里换主修）" % m.display_name
 
 
 ## 奇遇里选了要打仗的选项：打赢后给的奖励（交给 main 的 _start_battle）。
