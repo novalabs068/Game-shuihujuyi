@@ -30,8 +30,8 @@ func _ready() -> void:
 	volume = Prefs.get_value("audio", "sfx_volume", 0.8)
 
 
-## 放一个音效；pitch_jitter 让连续的同一个声音（刀光、翻牌）每次略有不同。
-func play(name: StringName, volume_db := 0.0, pitch_jitter := 0.0) -> void:
+## 放一个音效；pitch_jitter 让连续的同一个声音（刀光、翻牌）每次略有不同；pitch 整体升降调（招募时一声比一声高，像上升的音阶）。
+func play(name: StringName, volume_db := 0.0, pitch_jitter := 0.0, pitch := 1.0) -> void:
 	if not enabled or volume <= 0.0:
 		return
 	var stream := _stream(name)
@@ -41,7 +41,7 @@ func play(name: StringName, volume_db := 0.0, pitch_jitter := 0.0) -> void:
 	_next = (_next + 1) % POOL
 	p.stream = stream
 	p.volume_db = BASE_DB + volume_db + linear_to_db(volume)
-	p.pitch_scale = 1.0 + randf_range(-pitch_jitter, pitch_jitter)
+	p.pitch_scale = pitch * (1.0 + randf_range(-pitch_jitter, pitch_jitter))
 	p.play()
 
 

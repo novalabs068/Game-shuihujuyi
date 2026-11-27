@@ -1,6 +1,6 @@
 class_name SettingsPanel
 extends Control
-## 设置：音乐开关和音量、战斗默认 2 倍速、重新开始（要点两次确认）。盖在大地图或开始界面上。
+## 设置：音乐开关和音量、战斗默认 2 倍速、震动开关、重新开始（要点两次确认）。盖在大地图或开始界面上。
 
 signal closed
 ## 玩家确认清空存档、从头开始
@@ -34,7 +34,7 @@ func _ready() -> void:
 		margin.add_theme_constant_override("margin_" + side, 24)
 	panel.add_child(margin)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 10)
+	v.add_theme_constant_override("separation", 6)
 	margin.add_child(v)
 	v.add_child(UiKit.label("设置", 32, UiKit.GOLD))
 
@@ -88,6 +88,15 @@ func _ready() -> void:
 	fast.button_pressed = Prefs.get_value("battle", "fast", false)
 	fast.toggled.connect(func(on: bool) -> void: Prefs.set_value("battle", "fast", on))
 	v.add_child(fast)
+
+	var vibrate := CheckButton.new()
+	vibrate.text = "震动（招募等时候手机震一下）"
+	vibrate.add_theme_font_size_override("font_size", 24)
+	vibrate.button_pressed = Haptics.enabled()
+	vibrate.toggled.connect(func(on: bool) -> void:
+		Haptics.set_enabled(on)
+		Haptics.pulse(Haptics.Level.MEDIUM))
+	v.add_child(vibrate)
 
 	if allow_restart:
 		_restart = UiKit.button("重新开始", Vector2(220, 52), 22)

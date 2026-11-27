@@ -1,9 +1,11 @@
 class_name RecruitView
 extends Control
 ## 聚义厅招募：用聚义令单抽或五连（参考三国志战略版：五张竖卡排一排，不再两排挤着）。
-## 演出：画面压暗，做旧的聚义令旋转砸下（光的颜色预示这一抽最好的品级，出五玉时只亮紫光，留个悬念）→
-## 锦缎卡背一张张落下 → 逐张翻开。四玉翻开前颤动、卡边冒紫光；五玉翻开前卡飞到屏幕正中，全屏的光一涨一退，
-## 先白光、再紫光，呼之欲出又迟迟不出，最后炸成金光，翻开后全屏登场（只有五玉有全屏）。翻牌时点屏幕跳过（五玉的变色和登场照放）。
+## 演出：按下按钮先沉一下 → 画面压暗，做旧的聚义令旋转落下、悬在半空，光从蓝色一次次变色（这一抽越好悬得越久、变色越多，
+## 出五玉时只变到更亮的紫，留个悬念），再「咚」地砸下（越好砸得越重）→ 锦缎卡背一张张落下 → 逐张翻开。
+## 四玉翻开前颤动、卡边冒紫光、光点往卡上聚，再立体翻开、高光扫过；五玉翻开前卡飞到屏幕正中，全屏的光一涨一退，
+## 先白光、再紫光，呼之欲出又迟迟不出，最后炸成金光，立体翻开后全屏登场：金边剪影→上色→勾玉逐颗点亮→名字（只有五玉有全屏）。
+## 一路配手机震动（三玉轻、四玉中、五玉强，设置里能关）。翻牌时点屏幕跳过（五玉的变色和登场照放）。
 
 signal back_requested
 
@@ -31,6 +33,32 @@ const LIGHT_RAYS := preload("res://scripts/ui/shaders/light_rays.gdshader")
 const CARD_AURA := preload("res://scripts/ui/shaders/card_aura.gdshader")
 ## 聚义令落地后的大小（图高 520，落地后约 430）
 const TOKEN_SCALE := 0.82
+## 聚义令落下后悬在半空多久再砸下（按这一抽最好的品级：五玉、四玉、三玉、二玉），悬着的时候光一次次变色。
+## 加上落下、砸地、收走，三玉约 1.3 秒、四玉约 2 秒、五玉约 3 秒
+const TOKEN_HOVER: Array[float] = [1.5, 0.75, 0.0, 0.0]
+## 出五玉时，聚义令的光蓝→紫之后再变一次「更亮的紫」，不露出金色
+const TOKEN_HINT_BRIGHT := Color("d0a8ff")
+## 四玉翻开前光点往卡上聚、停多久
+const RARE_GATHER := 0.3
+## 立体翻牌（四玉、五玉）：转一圈用几秒、眼睛离卡多远（越近透视越夸张）、卡有多厚（像素）
+const FLIP_TIME_YI := 0.45
+const FLIP_TIME_JIA := 0.85
+const FLIP_DEPTH_YI := 1800.0
+const FLIP_DEPTH_JIA := 650.0
+const FLIP_THICKNESS := 10.0
+## 翻牌画面比卡大出的边（透视下近的一边会变大）；正面按几倍分辨率画，手机上不糊
+const FLIP_MARGIN := Vector2(70, 80)
+const FLIP_RES := 2
+const CARD_FLIP := preload("res://scripts/ui/shaders/card_flip.gdshader")
+const SILHOUETTE := preload("res://scripts/ui/shaders/silhouette.gdshader")
+## 五玉登场：立绘先是金边剪影，停多久再上色、上色用多久
+const SILHOUETTE_HOLD := 0.45
+const SILHOUETTE_FADE := 0.6
+## 勾玉一颗颗点亮的间隔
+const MAGATAMA_STEP := 0.12
+## 抽卡按钮按下去下沉多久、缩到多小
+const PRESS_TIME := 0.15
+const PRESS_SCALE := 0.93
 
 var _rng := RandomNumberGenerator.new()
 var _tokens_label: Label
@@ -120,6 +148,8 @@ func _ready() -> void:
 	_multi = UiKit.button("五连（%d 枚）" % Gacha.MULTI, Vector2(240, 60), 26)
 	_multi.pressed.connect(_recruit.bind(Gacha.MULTI))
 	buttons.add_child(_multi)
+	_press_feel(_single)
+	_press_feel(_multi)
 
 	_fx = Control.new()
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -127,6 +157,19 @@ func _ready() -> void:
 	add_child(_fx)
 	_fx.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_refresh()
+
+
+## 抽卡按钮的按压手感：按下时 0.15 秒沉下去、缩一点、变暗（像按进去），松开时弹回来。
+func _press_feel(b: Button) -> void:
+	b.resized.connect(func() -> void: b.pivot_offset = b.size / 2)
+	b.button_down.connect(func() -> void:
+		var t := b.create_tween().set_parallel()
+		t.tween_property(b, "scale", Vector2.ONE * PRESS_SCALE, PRESS_TIME).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		t.tween_property(b, "modulate", Color(0.8, 0.74, 0.68), PRESS_TIME))
+	b.button_up.connect(func() -> void:
+		var t := b.create_tween().set_parallel()
+		t.tween_property(b, "scale", Vector2.ONE, 0.25).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		t.tween_property(b, "modulate", Color.WHITE, 0.2))
 
 
 ## 翻牌时点屏幕：剩下的直接翻开。
@@ -218,10 +261,17 @@ func _make_slot(hero: UnitData, is_new: bool) -> Control:
 	return slot
 
 
-## 聚义令：画面压暗，一块乌木铜边的竖令牌晃着从上方落下，「咚」地砸在地上，冲出一圈光；光的颜色预示这一抽最好的品级。
-## 出五玉时只亮四玉的紫光，金光留到翻那张卡的时候。
+## 聚义令：画面压暗，一块乌木铜边的竖令牌晃着从上方落下，悬在半空，「咚」地砸在地上，冲出一圈光。
+## 光先是蓝色，这一抽越好、悬得越久，中途一次次变色、每变一次闪一下、叮一声（一声比一声高）：
+## 三玉直接砸下；四玉 蓝→紫；五玉 蓝→紫→更亮的紫（金光留到翻那张卡的时候），砸得也更重（全屏一闪、震得更久、手机强震）。
 func _token_strike(best: int) -> void:
-	var color: Color = UiKit.TIER_COLORS[maxi(best, UnitData.Tier.YI)]
+	var shown := maxi(best, UnitData.Tier.YI)
+	var hints: Array[Color] = []
+	if best <= UnitData.Tier.YI:
+		hints.append(UiKit.TIER_COLORS[UnitData.Tier.YI])
+	if best == UnitData.Tier.JIA:
+		hints.append(TOKEN_HINT_BRIGHT)
+	var color: Color = UiKit.TIER_COLORS[maxi(shown, UnitData.Tier.BING)] if hints.is_empty() else UiKit.TIER_COLORS[UnitData.Tier.BING]
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0)
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -234,6 +284,7 @@ func _token_strike(best: int) -> void:
 	glow.modulate.a = 0.0
 	token.add_child(glow)
 	token.move_child(glow, 0)
+	var glow_mat := glow.material as ShaderMaterial
 	_fx.add_child(token)
 	var land := Vector2((size.x - token.size.x) / 2, (size.y - token.size.y) / 2 - 10)
 	token.position = land - Vector2(0, size.y * 0.9)
@@ -249,6 +300,20 @@ func _token_strike(best: int) -> void:
 	t.tween_property(token, "scale", Vector2(0.9, 0.9), 0.5 * fast).set_ease(Tween.EASE_OUT)
 	t.tween_property(glow, "modulate:a", 1.0, 0.5 * fast)
 	await t.finished
+	# 悬着：轻轻上下浮、摆正，光一次次变色
+	var hover := TOKEN_HOVER[best] * fast
+	if hover > 0.0:
+		var bob := token.create_tween().set_loops()
+		bob.tween_property(token, "position:y", land.y - 72, 0.35).set_trans(Tween.TRANS_SINE)
+		bob.tween_property(token, "position:y", land.y - 60, 0.35).set_trans(Tween.TRANS_SINE)
+		create_tween().tween_property(token, "rotation", 0.0, 0.3).set_trans(Tween.TRANS_SINE)
+		var step := hover / (hints.size() + 1)
+		for i in hints.size():
+			await get_tree().create_timer(step).timeout
+			_token_hint(token, glow_mat, hints[i], i)
+		await get_tree().create_timer(step).timeout
+		bob.kill()
+		color = hints[-1]
 	# 悬一下，再砸下
 	var hang := create_tween()
 	hang.tween_property(token, "rotation", 0.0, 0.14 * fast).set_trans(Tween.TRANS_SINE)
@@ -261,10 +326,24 @@ func _token_strike(best: int) -> void:
 	squash.tween_property(token, "scale", Vector2(TOKEN_SCALE * 1.05, TOKEN_SCALE * 0.95), 0.05)
 	squash.tween_property(token, "scale", Vector2(TOKEN_SCALE, TOKEN_SCALE), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	var foot := token.position + token.pivot_offset + (Vector2(token.size.x / 2, token.size.y * 0.86) - token.pivot_offset) * TOKEN_SCALE
-	_shockwave(foot, color)
-	_flash(color)
-	_shake(14.0)
-	Sfx.play(&"token_slam")
+	# 砸地的轻重：三玉只散一圈小光浪；四玉光浪 + 轻震 0.25 秒；五玉两圈光浪 + 全屏一闪 + 震 0.5 秒
+	match best:
+		UnitData.Tier.JIA:
+			_shockwave(foot, color, 9.0)
+			get_tree().create_timer(0.12).timeout.connect(_shockwave.bind(foot, color, 6.0))
+			_flash(color)
+			_shake(16.0, 0.5)
+			Haptics.pulse(Haptics.Level.STRONG)
+			Sfx.play(&"token_slam", 2.0)
+		UnitData.Tier.YI:
+			_shockwave(foot, color, 7.0)
+			_shake(8.0, 0.25)
+			Haptics.pulse(Haptics.Level.MEDIUM)
+			Sfx.play(&"token_slam")
+		_:
+			_shockwave(foot, color, 4.0)
+			Haptics.pulse(Haptics.Level.LIGHT)
+			Sfx.play(&"token_slam", -5.0)
 	await get_tree().create_timer(0.45 * fast).timeout
 	var out := create_tween().set_parallel()
 	out.tween_property(token, "modulate:a", 0.0, 0.3)
@@ -274,6 +353,18 @@ func _token_strike(best: int) -> void:
 	out.finished.connect(func() -> void:
 		token.queue_free()
 		dim.queue_free())
+
+
+## 聚义令的光变一次色：光芒一下子胀亮再落回、令牌一闪，叮一声；第 n 次变色音调升高一级（像上升的音阶）。
+func _token_hint(token: Control, glow_mat: ShaderMaterial, color: Color, n: int) -> void:
+	glow_mat.set_shader_parameter("color", color)
+	var pop := create_tween()
+	pop.tween_method(_set_param.bind(glow_mat, "intensity"), 2.2 + n * 0.6, 1.0 + n * 0.3, 0.45).set_ease(Tween.EASE_OUT)
+	token.modulate = Color(1.8, 1.6, 2.0)
+	create_tween().tween_property(token, "modulate", Color.WHITE, 0.3)
+	Sfx.play(&"rare_shimmer", -4.0 + n * 2.0, 0.0, 1.0 + n * 0.26)
+	Sfx.play(&"skill_drum", -8.0 + n * 2.0)
+	Haptics.pulse(Haptics.Level.LIGHT)
 
 
 ## 聚义令：做旧的乌木铜边令牌，繁体「聚义」刻在牌面上、描金剥落（字已经画在图上，见 tools/recruit_marks.py）。
@@ -308,7 +399,7 @@ func _rays(rect_size: Vector2, color: Color, core: float, ray_strength: float) -
 
 
 ## 一圈光从 at 往外扩开：边缘柔和、中间空、叠加混合，像地上震起的一圈光浪（不是硬边的色环）。
-func _shockwave(at: Vector2, color: Color) -> void:
+func _shockwave(at: Vector2, color: Color, reach := 7.0) -> void:
 	var band := Gradient.new()
 	band.offsets = PackedFloat32Array([0.0, 0.55, 0.8, 0.9, 1.0])
 	band.colors = PackedColorArray([Color(color, 0.0), Color(color, 0.08), Color(color.lightened(0.4), 0.9), Color(color, 0.35), Color(color, 0.0)])
@@ -333,7 +424,7 @@ func _shockwave(at: Vector2, color: Color) -> void:
 	ring.scale = Vector2(0.3, 0.3)
 	_fx.add_child(ring)
 	var t := create_tween().set_parallel()
-	t.tween_property(ring, "scale", Vector2(7, 7), 0.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(ring, "scale", Vector2.ONE * reach, 0.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	t.tween_property(ring, "modulate:a", 0.0, 0.6).set_ease(Tween.EASE_IN)
 	t.finished.connect(ring.queue_free)
 
@@ -350,10 +441,12 @@ func _flash(color: Color) -> void:
 	t.finished.connect(f.queue_free)
 
 
-func _shake(strength: float) -> void:
+## 震屏：strength 像素，duration 秒内越震越轻。
+func _shake(strength: float, duration := 0.2) -> void:
 	var t := create_tween()
-	for i in 6:
-		var k := strength * (1.0 - i / 6.0)
+	var steps := maxi(3, int(duration / 0.03))
+	for i in steps:
+		var k := strength * (1.0 - float(i) / steps)
 		t.tween_property(self, "position", Vector2(randf_range(-k, k), randf_range(-k, k)), 0.03)
 	t.tween_property(self, "position", Vector2.ZERO, 0.03)
 
@@ -441,12 +534,31 @@ func _jitter(slot: Control, count: int, angle: float) -> void:
 	await shake.finished
 
 
-## 四玉翻开前：卡片颤动，卡边冒出紫光、顶上一道光柱。
+## 四玉翻开前：卡片颤动，卡边冒出紫光、顶上一道光柱；再停 0.3 秒，四周的光点往卡上聚。
 func _build_up(slot: Control, tier: int) -> void:
-	var aura := _add_aura(slot, UiKit.TIER_COLORS[tier])
-	_aura_to(aura, UiKit.TIER_COLORS[tier], 1.0, 0.25)
+	var color: Color = UiKit.TIER_COLORS[tier]
+	var aura := _add_aura(slot, color)
+	_aura_to(aura, color, 1.0, 0.25)
 	Sfx.play(&"rare_shimmer", -6.0)
+	Sfx.play(&"skill_drum", -8.0)
 	await _jitter(slot, 6, 0.05)
+	var gather := _soft_particles(color.lightened(0.4), 26)
+	gather.position = Vector2(AURA_PAD.x, AURA_PAD.w) + CARD_SIZE / 2
+	gather.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
+	gather.emission_ring_radius = 260.0
+	gather.emission_ring_inner_radius = 190.0
+	gather.gravity = Vector2.ZERO
+	gather.initial_velocity_min = 0.0
+	gather.initial_velocity_max = 0.0
+	gather.radial_accel_min = -700.0
+	gather.radial_accel_max = -620.0
+	gather.lifetime = 0.6
+	gather.one_shot = true
+	gather.explosiveness = 0.6
+	aura.add_child(gather)
+	gather.finished.connect(gather.queue_free)
+	_aura_to(aura, color, 1.3, RARE_GATHER)
+	await get_tree().create_timer(RARE_GATHER).timeout
 
 
 ## 五玉翻开前（全屏）：整屏压暗，这张卡背飞到正中放大；全屏的光芒和卡边的光跟着心跳一涨一退，
@@ -530,7 +642,8 @@ func _build_up_gold(slot: Control) -> void:
 	(aura.material as ShaderMaterial).set_shader_parameter("color", gold)
 	(aura.material as ShaderMaterial).set_shader_parameter("intensity", 2.0)
 	_flash(Color(1, 0.97, 0.85))
-	_shake(16.0)
+	_shake(16.0, 0.4)
+	_rumble()
 	Sfx.play(&"token_slam")
 	Sfx.play(&"rare_shimmer", -1.0)
 	var burst := create_tween()
@@ -560,6 +673,7 @@ func _set_param(value: Variant, mat: ShaderMaterial, param: String) -> void:
 func _swell(rays_mat: ShaderMaterial, aura: ColorRect, lift: Control, peak: float, rest: float) -> void:
 	var aura_mat := aura.material as ShaderMaterial
 	Sfx.play(&"skill_drum", -4.0 + peak * 2.0)
+	get_tree().create_timer(SWELL_UP * 0.85).timeout.connect(Haptics.pulse.bind(Haptics.Level.LIGHT if peak < 1.2 else Haptics.Level.MEDIUM))
 	var up := create_tween().set_parallel()
 	up.tween_method(_set_param.bind(rays_mat, "intensity"), rays_mat.get_shader_parameter("intensity") as float, peak, SWELL_UP).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
 	up.tween_method(_set_param.bind(aura_mat, "intensity"), aura_mat.get_shader_parameter("intensity") as float, peak * 0.9, SWELL_UP).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
@@ -575,8 +689,26 @@ func _swell(rays_mat: ShaderMaterial, aura: ColorRect, lift: Control, peak: floa
 	await get_tree().create_timer(SWELL_REST).timeout
 
 
-## 翻牌：横着收窄到 0，换成正面，再展开；稀有的翻开时亮一下。
+## 强震之后再跟两下，像余震（五玉炸开、翻开时用）。
+func _rumble() -> void:
+	Haptics.pulse(Haptics.Level.STRONG)
+	for k in 2:
+		get_tree().create_timer(0.22 * (k + 1)).timeout.connect(Haptics.pulse.bind(Haptics.Level.MEDIUM))
+
+
+## 翻牌。四玉、五玉（没跳过时）立体翻：见 _flip_3d；其余横着收窄到 0、换成正面、再展开。
 func _flip(slot: Control, tier: int, rare: bool) -> void:
+	if tier == UnitData.Tier.JIA or (rare and not _skip):
+		await _flip_3d(slot, tier)
+	else:
+		await _flip_flat(slot, tier, rare)
+	# 翻开后卡后的光收一收，留一圈淡淡的
+	var aura := slot.get_node_or_null("Aura") as ColorRect
+	if aura != null:
+		_aura_to(aura, (aura.material as ShaderMaterial).get_shader_parameter("color"), 0.55, 0.6)
+
+
+func _flip_flat(slot: Control, tier: int, rare: bool) -> void:
 	var half := 0.06 if _skip else 0.1
 	Sfx.play(&"card_flip", -2.0, 0.12)
 	var t := create_tween()
@@ -588,19 +720,100 @@ func _flip(slot: Control, tier: int, rare: bool) -> void:
 	if rare:
 		front.modulate = Color(2.2, 2.0, 1.4)
 		create_tween().tween_property(front, "modulate", Color.WHITE, 0.35)
-		if tier == UnitData.Tier.JIA:
-			_shake(10.0)
-			Sfx.play(&"jia_gong")
+		Haptics.pulse(Haptics.Level.MEDIUM)
 	var t2 := create_tween()
 	t2.tween_property(slot, "scale:x", 1.0, half).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	await t2.finished
-	# 翻开后卡后的光收一收，留一圈淡淡的
-	var aura := slot.get_node_or_null("Aura") as ColorRect
-	if aura != null:
-		_aura_to(aura, (aura.material as ShaderMaterial).get_shader_parameter("color"), 0.55, 0.6)
 
 
-## 五玉金卡：整屏转成金色，背后金光放射，全身立绘从中间完整升起，名字竖写在左边，金色光点往上飘。
+## 立体翻牌（card_flip.gdshader）：卡像一块有厚度的板绕竖轴转过来，转到侧面露出金色的卡边，翻开后一道高光从卡面扫过。
+## 四玉转得快、透视轻；五玉转得慢、透视重，转到正面那一下金光炸开、震屏、手机强震。
+## 正面（好汉卡）临时挪进一个 SubViewport 画成图给 shader 用，翻完放回原处。
+func _flip_3d(slot: Control, tier: int) -> void:
+	var gold := tier == UnitData.Tier.JIA
+	var front := slot.get_node("Front") as Control
+	var back := slot.get_node("Back") as TextureRect
+	var vp := SubViewport.new()
+	vp.transparent_bg = true
+	vp.disable_3d = true
+	vp.size = Vector2i(CARD_SIZE) * FLIP_RES
+	vp.size_2d_override = Vector2i(CARD_SIZE)
+	vp.size_2d_override_stretch = true
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	# SubViewport 里不继承外面的主题（字体），手动套上
+	var holder := Control.new()
+	holder.theme = _outer_theme()
+	holder.size = CARD_SIZE
+	vp.add_child(holder)
+	slot.add_child(vp)
+	var front_index := front.get_index()
+	slot.remove_child(front)
+	holder.add_child(front)
+	front.visible = true
+	front.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var view := ColorRect.new()
+	view.color = Color.WHITE
+	view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	view.position = -FLIP_MARGIN
+	view.size = CARD_SIZE + FLIP_MARGIN * 2
+	var mat := ShaderMaterial.new()
+	mat.shader = CARD_FLIP
+	mat.set_shader_parameter("front_tex", vp.get_texture())
+	mat.set_shader_parameter("back_tex", back.texture)
+	mat.set_shader_parameter("rect_size", view.size)
+	mat.set_shader_parameter("card_size", CARD_SIZE)
+	mat.set_shader_parameter("depth", FLIP_DEPTH_JIA if gold else FLIP_DEPTH_YI)
+	mat.set_shader_parameter("thickness", FLIP_THICKNESS)
+	mat.set_shader_parameter("edge_color", Color("c89838") if gold else Color("8a6cc0"))
+	view.material = mat
+	slot.add_child(view)
+	back.visible = false
+
+	var turn := FLIP_TIME_JIA if gold else FLIP_TIME_YI
+	Sfx.play(&"card_flip", -2.0, 0.05, 0.85 if gold else 1.0)
+	var t := create_tween()
+	t.tween_method(_set_param.bind(mat, "angle"), 0.0, PI * 0.5, turn * 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+	await t.finished
+	# 转到侧面：正面亮起来
+	view.modulate = Color(2.2, 2.0, 1.4)
+	create_tween().tween_property(view, "modulate", Color.WHITE, 0.4)
+	if gold:
+		_flash(UiKit.TIER_COLORS[UnitData.Tier.JIA])
+		_shake(12.0, 0.35)
+		_rumble()
+		Sfx.play(&"jia_gong")
+	else:
+		Haptics.pulse(Haptics.Level.MEDIUM)
+		Sfx.play(&"rare_shimmer", -6.0, 0.0, 1.3)
+	var t2 := create_tween()
+	t2.tween_method(_set_param.bind(mat, "angle"), PI * 0.5, PI, turn * 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	await t2.finished
+	var sweep := create_tween()
+	sweep.tween_method(_set_param.bind(mat, "sweep"), -0.3, 1.3, 0.45).set_ease(Tween.EASE_IN_OUT)
+	await sweep.finished
+	# 放回原处
+	holder.remove_child(front)
+	slot.add_child(front)
+	slot.move_child(front, front_index)
+	front.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	view.queue_free()
+	vp.queue_free()
+
+
+## 往上找套着主题的那一层（main.gd 在最外层套了 UiKit.make_theme()）。
+func _outer_theme() -> Theme:
+	var n: Node = self
+	while n != null:
+		var c := n as Control
+		if c != null and c.theme != null:
+			return c.theme
+		n = n.get_parent()
+	return null
+
+
+## 五玉金卡：整屏转成金色，背后金光放射、慢慢转，全身立绘从中间升起——先是一道金边的剪影，0.45 秒后再慢慢上色；
+## 接着勾玉一颗颗点亮（每颗 0.12 秒、一声比一声高），名字最后出现。之后是余韵：光点慢慢飘，立绘轻轻「呼吸」，背景慢慢推近。
 func _showcase_gold(hero: UnitData, is_new: bool) -> void:
 	_in_showcase = true
 	var gold: Color = UiKit.TIER_COLORS[UnitData.Tier.JIA]
@@ -615,10 +828,25 @@ func _showcase_gold(hero: UnitData, is_new: bool) -> void:
 	layer.add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var center := Vector2(size.x / 2, size.y * 0.46)
+	# 背景：聚义厅大堂染成暗金色，慢慢推近
+	var hall_path := StoryScript.background_path("juyiting")
+	var hall: TextureRect = null
+	if hall_path != "":
+		hall = TextureRect.new()
+		hall.texture = load(hall_path)
+		hall.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		hall.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		hall.modulate = Color(0.42, 0.3, 0.14)
+		hall.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hall.size = size
+		hall.pivot_offset = size / 2
+		layer.add_child(hall)
 
 	# 背后的金光：白热的光核、柔和光晕、粗细不一慢慢流转的光芒（叠加混合）
 	var rays := _rays(size * FULL_RAYS, gold, 0.14 / FULL_RAYS * 1.6, 0.7)
 	rays.position = center - rays.size / 2
+	rays.pivot_offset = rays.size / 2
+	(rays.material as ShaderMaterial).set_shader_parameter("spin", 0.06)
 	layer.add_child(rays)
 
 	# 金色光点往上飘
@@ -650,7 +878,15 @@ func _showcase_gold(hero: UnitData, is_new: bool) -> void:
 	fig.size = Vector2(fig_h * aspect, fig_h)
 	var fig_to := Vector2((size.x - fig.size.x) / 2, size.y - fig_h)
 	fig.position = fig_to + Vector2(0, 120)
-	fig.modulate = Color(1.6, 1.4, 0.9, 0.0)
+	fig.pivot_offset = Vector2(fig.size.x / 2, fig.size.y)
+	fig.modulate.a = 0.0
+	var sil := ShaderMaterial.new()
+	sil.shader = SILHOUETTE
+	sil.set_shader_parameter("rim_color", gold.lightened(0.25))
+	if fig.texture != null:
+		# 金边在屏幕上大约 7 像素宽
+		sil.set_shader_parameter("rim_width", 7.0 * fig.texture.get_height() / fig_h)
+	fig.material = sil
 	layer.add_child(fig)
 
 	# 左边竖写名字，旁边小字绰号
@@ -686,7 +922,8 @@ func _showcase_gold(hero: UnitData, is_new: bool) -> void:
 	top.add_theme_constant_override("separation", 12)
 	info.add_child(top)
 	top.add_child(IdentitySeal.make(hero.rarity, 48))
-	top.add_child(MagatamaRow.for_tier(hero.tier, 34))
+	var stones := MagatamaRow.for_tier(hero.tier, 34)
+	top.add_child(stones)
 	info.add_child(UiKit.outlined("新入伙！" if is_new else "已在麾下，化作将魂 +%d" % Gacha.DUPLICATE_SOULS, 40 if is_new else 26, gold if is_new else Color("e8d8b8")))
 	if hero.skill != null:
 		var skill_line := UiKit.outlined("「%s」%s" % [hero.skill.display_name, hero.skill.description], 20, Color("fff0d8"))
@@ -700,15 +937,39 @@ func _showcase_gold(hero: UnitData, is_new: bool) -> void:
 
 	_flash(gold)
 	Sfx.play(&"rare_shimmer", -1.0)
+	# 立绘升起（剪影）→ 停 0.45 秒 → 上色
+	var rise := 0.6
+	var color_at := 0.15 + rise + SILHOUETTE_HOLD
 	var t := create_tween().set_parallel()
 	t.tween_property(layer, "modulate:a", 1.0, 0.25)
-	t.tween_property(fig, "position", fig_to, 0.6).set_delay(0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	t.tween_property(fig, "modulate", Color.WHITE, 0.7).set_delay(0.15)
-	t.tween_property(name_col, "modulate:a", 1.0, 0.4).set_delay(0.6)
-	t.tween_property(nick_col, "modulate:a", 1.0, 0.4).set_delay(0.8)
-	t.tween_property(info, "modulate:a", 1.0, 0.4).set_delay(0.9)
-	t.tween_property(hint, "modulate:a", 1.0, 0.3).set_delay(1.3)
+	t.tween_property(fig, "position", fig_to, rise).set_delay(0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(fig, "modulate:a", 1.0, 0.35).set_delay(0.15)
+	t.tween_method(_set_param.bind(sil, "reveal"), 0.0, 1.0, SILHOUETTE_FADE).set_delay(color_at)
+	t.tween_property(info, "modulate:a", 1.0, 0.4).set_delay(color_at + 0.2)
+	t.tween_callback(Sfx.play.bind(&"rare_shimmer", -4.0, 0.0, 1.2)).set_delay(color_at)
+	# 余韵：背景、光芒慢慢推近
+	var push := layer.create_tween().set_parallel()
+	push.tween_property(rays, "scale", Vector2.ONE * 1.12, 12.0).set_trans(Tween.TRANS_SINE)
+	if hall != null:
+		push.tween_property(hall, "scale", Vector2.ONE * 1.1, 12.0).set_trans(Tween.TRANS_SINE)
 	await t.finished
+	# 勾玉一颗颗点亮，叮叮叮一声比一声高
+	for k in stones.count:
+		stones.filled = k + 1
+		stones.queue_redraw()
+		Sfx.play(&"ui_click", -2.0, 0.0, 1.0 + k * 0.15)
+		await get_tree().create_timer(MAGATAMA_STEP).timeout
+	# 名字最后出现
+	var t2 := create_tween().set_parallel()
+	t2.tween_property(name_col, "modulate:a", 1.0, 0.4)
+	t2.tween_property(nick_col, "modulate:a", 1.0, 0.4).set_delay(0.2)
+	t2.tween_property(hint, "modulate:a", 1.0, 0.3).set_delay(0.5)
+	Sfx.play(&"jia_gong", -8.0)
+	# 立绘轻轻「呼吸」
+	var breathe := fig.create_tween().set_loops()
+	breathe.tween_property(fig, "scale", Vector2(1.012, 1.018), 1.6).set_trans(Tween.TRANS_SINE)
+	breathe.tween_property(fig, "scale", Vector2.ONE, 1.6).set_trans(Tween.TRANS_SINE)
+	await t2.finished
 	var tap := Button.new()
 	tap.flat = true
 	tap.focus_mode = Control.FOCUS_NONE
