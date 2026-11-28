@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"v5_tian_hu_wang_qing"
+order = 5
+title = "卷五　征田虎王庆"
+era = "河北、淮西两路平乱"
+summary = "河北田虎、淮西王庆各自称王，梁山人马分兵两路去讨。阵上遇到了飞石的女将琼英。"
+rumor = "河北有个叫田虎的占了五州五十六县，自立为王。"
+side_story = false
+status = 1
+realm_gate = 5
+level_min = 85
+level_max = 92
+affairs = PackedStringArray("河北征田虎", "琼英飞石", "淮西征王庆")
+new_play = PackedStringArray("两路分兵：好汉分成两队各打一路")

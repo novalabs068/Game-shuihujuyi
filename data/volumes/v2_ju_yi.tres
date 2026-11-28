@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"v2_ju_yi"
+order = 2
+title = "卷二　聚义"
+era = "梁山泊一天天壮大"
+summary = "宋江在江州题了反诗被判斩首，梁山好汉劫了法场；此后三打祝家庄、破连环马、打青州、救卢俊义，梁山泊越聚越多。"
+rumor = "江州传来消息：有个黑矮汉子在酒楼上题了反诗，秋后就要问斩。又听说独龙冈祝家庄扬言要踏平梁山……"
+side_story = false
+status = 1
+realm_gate = 3
+level_min = 60
+level_max = 80
+affairs = PackedStringArray("江州劫法场", "白龙庙小聚义", "三打祝家庄", "高唐州破妖法", "破连环马", "三山聚义打青州", "曾头市", "大名府救卢俊义", "东平府、东昌府")
+new_play = PackedStringArray("限时救人：几个回合内冲到刑场", "连番大战：几仗连着打，中间不回血", "盘陀路：记住白杨树才能走出来", "对症下药：钩镰枪才破得了连环马")

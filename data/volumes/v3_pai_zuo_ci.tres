@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"v3_pai_zuo_ci"
+order = 3
+title = "卷三　排座次"
+era = "一百单八将齐聚忠义堂"
+summary = "朝廷大军一次次来剿，梁山两赢童贯、三败高俅。一百单八将在忠义堂排定座次，接着是招安之议。受不受招安由你定，无论怎么选，故事都接着往下走。"
+rumor = "听说朝廷点了十节度使、征了几千条战船，要来围剿梁山泊。"
+side_story = false
+status = 1
+realm_gate = 4
+level_min = 75
+level_max = 85
+affairs = PackedStringArray("两赢童贯", "三败高俅", "英雄排座次", "招安之议")
+new_play = PackedStringArray("守山寨：敌人一波一波上来", "忠义堂一百零八个座位，招到谁就点亮谁", "招安还是不招安：两条路都能走")

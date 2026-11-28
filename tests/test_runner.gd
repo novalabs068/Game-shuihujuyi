@@ -13,6 +13,10 @@ func _initialize() -> void:
 	for t: String in [
 		"test_data_loads",
 		"test_font_covers_text",
+		"test_volumes",
+		"test_guide_track",
+		"test_city_jobs",
+		"test_jiama",
 		"test_damage_formula",
 		"test_role_counters",
 		"test_grid_and_blocking",
@@ -152,7 +156,7 @@ func advance_to(model: BattleModel, id: StringName) -> void:
 
 func test_data_loads() -> bool:
 	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
-	check_eq(GameDB.load_dir("res://data/heroes/").size(), 27, "27 位好汉（新加公孙胜、朱武、樊瑞）")
+	check_eq(GameDB.load_dir("res://data/heroes/").size(), 28, "28 位好汉（新加戴宗）")
 	check_eq(GameDB.load_dir("res://data/combos/").size(), 15, "15 combos")
 	var stage: StageData = load("res://data/stages/stage_1_7.tres")
 	check_eq(stage.enemies.size(), 3, "stage 1-7 has 3 enemies")
@@ -161,6 +165,101 @@ func test_data_loads() -> bool:
 
 
 ## 打包的字体只收了 art/fonts/chars.txt 里的字：脚本和数据里出现的字都得在里面，不然手机上会显示成方框。
+## 江湖年表：8 卷按先后排好、编号不重复；眼下只有卷一能玩，开局就是「正在发生」；
+## 没开发的卷是传闻，外传是远方传闻；开了的卷境界门槛不比前一卷低。
+func test_volumes() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var list := Volumes.sorted(GameDB.load_dir("res://data/volumes/"))
+	check_eq(list.size(), 8, "年表 8 卷（卷一到卷六、两部外传）")
+	var ids := {}
+	var orders := {}
+	var gate := 0
+	for v in list:
+		ids[v.id] = true
+		orders[v.order] = true
+		check(v.realm_gate >= gate, "%s 的境界门槛不比前一卷低" % v.title)
+		gate = v.realm_gate
+		check(not v.affairs.is_empty(), "%s 列了经典场面" % v.title)
+		check(v.status == VolumeData.Status.OPEN or v.rumor != "", "%s 没开发的卷要有传闻" % v.title)
+		check(v.side_story == (v.status == VolumeData.Status.FAR), "%s 外传才是远期" % v.title)
+	check_eq(ids.size(), 8, "卷编号不重复")
+	check_eq(orders.size(), 8, "卷先后不重复")
+	check_eq(list[0].id, &"v1_luo_cao", "第一卷是落草")
+	check_eq(Volumes.state_of(list[0], 0), Volumes.State.ACTIVE, "开局卷一就是正在发生")
+	check_eq(Volumes.state_of(list[1], 5), Volumes.State.RUMOR, "卷二还没开发：满境界也只是传闻")
+	check_eq(Volumes.state_of(list[7], 5), Volumes.State.FAR, "抗金是远方传闻")
+	check_eq(Volumes.current(list, 0), list[0], "年表停在卷一")
+	# 以后卷二开发好了：境界不够时是「等你扬名」，够了是「正在发生」
+	var v2: VolumeData = list[1].duplicate()
+	v2.status = VolumeData.Status.OPEN
+	check_eq(Volumes.state_of(v2, v2.realm_gate - 1), Volumes.State.LOCKED, "开发好的卷境界不够时等你扬名")
+	check_eq(Volumes.state_of(v2, v2.realm_gate), Volumes.State.ACTIVE, "境界够了就开启")
+	return true
+
+
+## 指引：推荐先列传后悬赏、太难的不推荐、养成不推荐；「上梁山」按境界和名望给进度和下一步。
+func test_guide_track() -> bool:
+	var items: Array[Dictionary] = [
+		{"kind": "宝箱", "text": "宝箱", "detail": "", "location": &"dongjing", "level": 0},
+		{"kind": "悬赏", "text": "悬赏远", "detail": "", "location": &"weizhou", "level": 30},
+		{"kind": "悬赏", "text": "悬赏近", "detail": "", "location": &"dongjing", "level": 8},
+		{"kind": "列传", "text": "列传太难", "detail": "", "location": &"dongjing", "level": 18},
+		{"kind": "列传", "text": "列传", "detail": "", "location": &"dongjing", "level": 6},
+		{"kind": "养成", "text": "升星", "detail": "", "location": &"", "level": 0},
+		{"kind": "列传", "text": "招到杨志后", "detail": "", "location": &"", "level": 0},
+	]
+	var picks := Guide.recommended(items, 2, 5)
+	check_eq(picks.map(func(it: Dictionary) -> String: return it["text"]), ["列传", "悬赏近"], "先列传、再悬赏，太难的、养成、列传预告不推荐")
+	check_eq(Guide.recommended(items, 9, 5).size(), 3, "5 级能推荐三件（列传、近悬赏、宝箱）")
+	var info := Guide.default_info(0, 80, items, 5)
+	check_eq(info["seal"], "上梁山", "默认指引叫上梁山")
+	check_eq(info["progress_text"], "80/100", "名望进度")
+	check(String(info["next"]).contains("再攒 20 名望") and String(info["next"]).contains("列传"), "名望不够：说还差多少、推荐一件事")
+	check_eq(info["location"], &"dongjing", "推荐的事在哪")
+	var only_chest: Array[Dictionary] = [items[0]]
+	check(not String(Guide.default_info(0, 80, only_chest, 5)["next"]).contains("宝箱"), "上梁山不推荐不涨名望的宝箱")
+	check(String(Guide.default_info(0, 120, items, 5)["next"]).contains("投名状"), "名望够了：去纳投名状")
+	check(String(Guide.default_info(Renown.MAX_REALM, 9999, items, 5)["next"]).contains("江湖年表"), "满境界：去看江湖年表")
+	return true
+
+
+## 城中悬赏：第一次来给一张；每天多一张；几天不来攒着、最多 7 张（含正在贴的）；贴出来必给 2～3 枚聚义令。
+func test_city_jobs() -> bool:
+	var e := CityJobs.accrue({}, 100)
+	check_eq(e["stock"], 1, "第一次来攒着一张")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var pool: Array[UnitData] = [load("res://data/enemies/po_pi.tres")]
+	e = CityJobs.post_next(e, pool, rng)
+	check(not (e["job"] as Dictionary).is_empty() and e["stock"] == 0, "贴出一张，攒的扣掉")
+	var job: Dictionary = e["job"]
+	check(job["tokens"] >= CityJobs.TOKENS_MIN and job["tokens"] <= CityJobs.TOKENS_MAX, "必给 2～3 枚聚义令")
+	check(job["need"] >= CityJobs.NEED_MIN and job["need"] <= CityJobs.NEED_MAX, "要打 3～5 拨")
+	check_eq(CityJobs.accrue(e, 100)["stock"], 0, "同一天不多给")
+	check_eq(CityJobs.accrue(e, 102)["stock"], 2, "过两天多两张")
+	check_eq(CityJobs.accrue(e, 130)["stock"], CityJobs.MAX_STOCK - 1, "攒太久：连正在贴的最多 7 张")
+	var empty := {"day": 100, "stock": 0, "job": {}}
+	check_eq(CityJobs.accrue(empty, 200)["stock"], CityJobs.MAX_STOCK, "没在贴的时候能攒满 7 张")
+	check_eq(CityJobs.accrue(e, 90)["day"], 100, "手机时间往回调不倒扣")
+	check_eq(CityJobs.post_next(e, pool, rng)["job"], job, "正在贴的没做完，不换")
+	check_eq(Renown.compute({"city_jobs": 2}), 2 * Renown.PER_CITY_JOB, "城中悬赏涨名望")
+	return true
+
+
+## 甲马：戴宗第一次当天就写 5 张；按天攒；身上最多 15 张；集市每天限买 5 张、也不超过身上上限。
+func test_jiama() -> bool:
+	check_eq(Jiama.dai_write(0, 0, 100), [5, 100, 5], "第一次当天写 5 张")
+	check_eq(Jiama.dai_write(5, 100, 100), [5, 100, 0], "同一天不再写")
+	check_eq(Jiama.dai_write(5, 100, 101), [10, 101, 5], "过一天多 5 张")
+	check_eq(Jiama.dai_write(5, 100, 110), [15, 110, 10], "几天不来：攒到上限 15 张为止")
+	check_eq(Jiama.dai_write(20, 100, 101), [20, 101, 0], "已经超过上限的不扣")
+	check_eq(Jiama.shop_left({}, 100, 0), 5, "今天还没买：能买 5 张")
+	check_eq(Jiama.shop_left({"day": 100, "bought": 3}, 100, 0), 2, "今天买了 3 张：还能买 2 张")
+	check_eq(Jiama.shop_left({"day": 99, "bought": 5}, 100, 0), 5, "换天了重新算")
+	check_eq(Jiama.shop_left({}, 100, 13), 2, "身上 13 张：最多再买 2 张")
+	return true
+
+
 func test_font_covers_text() -> bool:
 	var have := {}
 	for ch in FileAccess.get_file_as_string("res://art/fonts/chars.txt"):
@@ -1550,7 +1649,7 @@ func test_hero_pool_tiers() -> bool:
 		counts[h.tier] += 1
 		check(h.skill != null and h.skill.description != "", "%s has a described skill" % h.display_name)
 		check(h.portrait != null and h.bust != null and h.face != null, "%s has art" % h.display_name)
-	check_eq(counts, [8, 6, 8, 5], "tier spread 甲8 乙6 丙8 丁5")
+	check_eq(counts, [8, 7, 8, 5], "tier spread 甲8 乙7 丙8 丁5（新加戴宗乙）")
 	# 三位召唤型道士：绝招是召唤、带召唤物、召唤物有战斗小人
 	for id in [&"gongsun_sheng", &"zhu_wu", &"fan_rui"]:
 		var h: UnitData = load("res://data/heroes/%s.tres" % id)
@@ -1753,12 +1852,12 @@ func test_origins_load() -> bool:
 	return true
 
 
-## 名望按做过的事现算；境界决定属性倍数、武学上限、天赋档次；立名之战的关卡能生成。
+## 名望按做过的事现算；境界决定属性倍数、武学上限、天赋档次；投名状的关卡能生成。
 func test_renown_and_realms() -> bool:
 	check_eq(Renown.compute({}), 0, "什么都没做名望 0")
 	var r := Renown.compute({"heroes": 3, "stories": 1, "bounties": [1, 1, 1], "odd_jobs": 2, "bosses": 1, "arena": 2, "events": 1})
 	check_eq(r, 3 * 20 + 30 + 15 + 25 + 40 + 2 * 3 + 25 + 2 * 20 + 10, "名望各项加起来")
-	check(not Renown.can_try(0, 99) and Renown.can_try(0, 100), "100 名望能打一阶的立名之战")
+	check(not Renown.can_try(0, 99) and Renown.can_try(0, 100), "100 名望能打一阶的投名状")
 	check(not Renown.can_try(Renown.MAX_REALM, 99999), "满阶不能再打")
 	check(is_equal_approx(Renown.stat_mult(0), 1.0) and is_equal_approx(Renown.stat_mult(5), 1.5), "五阶属性 +50%")
 	check_eq(Renown.martial_cap(0), 4, "开局武学最多四重")
@@ -1767,9 +1866,9 @@ func test_renown_and_realms() -> bool:
 	check_eq(Renown.next_threshold(Renown.MAX_REALM), -1, "满阶没有下一阶")
 	for n in range(1, Renown.MAX_REALM + 1):
 		var st := Renown.trial_stage(n)
-		check_eq(st.enemies.size(), 3, "立名之战 %d 有三个对手" % n)
-		check(st.enemy_level > (Renown.TRIALS[n - 2][1] if n > 1 else 0), "立名之战 %d 一阶比一阶强" % n)
-		check(Renown.trial_bonus(n).get("trial") == n, "立名之战 %d 的奖励带阶数" % n)
+		check_eq(st.enemies.size(), 3, "投名状 %d 有三个对手" % n)
+		check(st.enemy_level > (Renown.TRIALS[n - 2][1] if n > 1 else 0), "投名状 %d 一阶比一阶强" % n)
+		check(Renown.trial_bonus(n).get("trial") == n, "投名状 %d 的奖励带阶数" % n)
 	return true
 
 
@@ -1981,7 +2080,7 @@ func test_equipment() -> bool:
 			check_eq(e.effects.size(), e.quality, "%s has %d effects" % [e.display_name, e.quality])
 		for fx in e.effects:
 			check(EquipData.EFFECTS.has(fx), "%s effect %s is known" % [e.display_name, fx])
-	check_eq(per_quality, [9, 7, 4, 29], "9 凡品（含 3 匹马）7 良品 4 精品 29 名器")
+	check_eq(per_quality, [9, 7, 4, 30], "9 凡品（含 3 匹马）7 良品 4 精品 30 名器（新加戴宗的神行甲马）")
 	check_eq(mounts, 5, "3 horses + 2 famous horses")
 	var h := unit_data(&"h", [1000, 100, 50, 100])
 	var sword := EquipData.new()

@@ -595,7 +595,7 @@ func _open_martials() -> void:
 		var outer := "（外门，威力七成）" if m.role != my_role else ""
 		info.add_child(_label("%s%s · 第 %d 重　「%s」%s" % [UiKit.ROLE_NAMES[m.role], outer, lv, sk.display_name if sk != null else "", _area_text(sk) if sk != null else ""], 17))
 		if lv < MartialData.MAX_LEVEL and lv >= GameState.martial_cap():
-			info.add_child(_label("境界不够：升到下一阶境界才能接着修（主角页「立名之战」）", 16, DIM))
+			info.add_child(_label("境界不够：升到下一阶境界才能接着修（主角页「投名状」）", 16, DIM))
 		elif lv < MartialData.MAX_LEVEL:
 			info.add_child(_label("修到第 %d 重：%s（修为 %d）" % [lv + 1, MartialData.level_text(lv + 1), MartialData.level_cost(lv)], 16, GOLD_INK))
 		var train := UiKit.button("修炼", Vector2(90, 46), 20)

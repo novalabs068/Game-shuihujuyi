@@ -1,7 +1,7 @@
 class_name WorldMapView
 extends Control
-## 江湖大地图：只能看。点地名看那里的情况，在所在的地点可以开列传、住店、逛集市、揭悬赏；
-## 去别的地点要回到场景里，从路口走上野外路过去（不能点了就走）。
+## 江湖大地图：点地名看那里的情况，在所在的地点可以开列传、住店、逛集市、揭悬赏；
+## 去别的地点要回到场景里，从路口走上野外路过去；去过的地方也可以用一张甲马直接到（见 Jiama）。
 
 ## 揭了悬赏要打仗；bonus：打赢后额外的奖励和标记，见 main.gd 的 _start_battle()
 signal battle_requested(stage: StageData, bonus: Dictionary)
@@ -13,6 +13,8 @@ signal heroes_requested
 signal story_requested(story: StoryData)
 signal jianghu_requested
 signal profile_requested
+## 用甲马去一个去过的地方（main 扣一张、切到那里的场景）
+signal jiama_requested(location_id: StringName)
 ## 在设置里确认了重新开始
 signal restart_requested
 
@@ -414,6 +416,12 @@ func _show_panel(loc: LocationData) -> void:
 		for story in GameDB.stories:
 			if story.location == loc.id and GameState.story_available(story):
 				_panel_buttons.add_child(UiKit.label("%s列传·%s（到了那里才能开始）" % [GameDB.hero(story.hero).display_name, story.title], 17, UiKit.CINNABAR))
+		if GameState.has_flag("visited_" + String(loc.id)):
+			var go := UiKit.button("使用甲马（%d）" % GameState.jiama, Vector2(200, 52), 22)
+			go.disabled = GameState.jiama <= 0
+			go.tooltip_text = "用一张甲马，直接到%s" % loc.display_name if GameState.jiama > 0 else "没有甲马：集市能买，招到戴宗后他每天写"
+			go.pressed.connect(func() -> void: jiama_requested.emit(loc.id))
+			_panel_buttons.add_child(go)
 		var back := UiKit.button("返回场景", Vector2(150, 52), 22)
 		back.pressed.connect(func() -> void: back_requested.emit())
 		_panel_buttons.add_child(back)

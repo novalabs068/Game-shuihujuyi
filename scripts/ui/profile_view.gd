@@ -1,11 +1,11 @@
 class_name ProfileView
 extends Control
-## 主角页：立绘和出身、等级和家当、境界和名望（立名之战、统领天赋、号令）、主修武学、坐骑、江湖履历。
+## 主角页：立绘和出身、等级和家当、境界和名望（投名状、统领天赋、号令）、主修武学、坐骑、江湖履历。
 ## 换武学和装备在「好汉」页主角那里做，这里有按钮直接过去。
 
 signal back_requested
 signal heroes_requested
-## 去打立名之战（main 接着开打）
+## 去纳投名状（main 接着开打）
 signal battle_requested(stage: StageData, bonus: Dictionary)
 
 const SECTION_GAP := 14
@@ -249,7 +249,7 @@ func _add_record(right: VBoxContainer) -> void:
 		right.add_child(_line(l[0], l[1]))
 
 
-## 境界：现在第几阶、名望进度、立名之战按钮、统领天赋、号令（点了换带哪一个）。
+## 境界：现在第几阶、名望进度、投名状按钮、统领天赋、号令（点了换带哪一个）。
 func _add_realm(right: VBoxContainer) -> void:
 	var realm := GameState.realm
 	var renown := GameState.renown()
@@ -271,7 +271,7 @@ func _add_realm(right: VBoxContainer) -> void:
 		var text := UiKit.label("江湖名望 %d / %d　下一阶「%s」" % [renown, need, Renown.realm_name(realm + 1)], 17, INK)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(text)
-		var trial := UiKit.plaque_button("立名之战", Vector2(186, 58), GameState.can_try_trial(), 28)
+		var trial := UiKit.plaque_button("投名状", Vector2(186, 58), GameState.can_try_trial(), 28)
 		trial.disabled = not GameState.can_try_trial()
 		trial.tooltip_text = "对手 %d 级，都是精英；打赢升到「%s」" % [Renown.TRIALS[realm][1], Renown.realm_name(realm + 1)]
 		trial.pressed.connect(func() -> void:
@@ -284,7 +284,7 @@ func _add_realm(right: VBoxContainer) -> void:
 		bar.custom_minimum_size = Vector2(0, 12)
 		UiKit.style_bar(bar, UiKit.CINNABAR)
 		right.add_child(bar)
-		var hint := "名望够了，去打立名之战（对手 %d 级精英，开打前回满血）" % Renown.TRIALS[realm][1] if GameState.can_try_trial() else "招好汉、打列传、揭悬赏、做小悬赏、打头目、上擂台、遇奇遇都会涨名望"
+		var hint := "名望够了，去纳投名状（对手 %d 级精英，开打前回满血）" % Renown.TRIALS[realm][1] if GameState.can_try_trial() else "招好汉、打列传、揭悬赏、做小悬赏、打头目、上擂台、遇奇遇都会涨名望"
 		var hint_label := UiKit.label(hint, 15, DIM)
 		hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		right.add_child(hint_label)

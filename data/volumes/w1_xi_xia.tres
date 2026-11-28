@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"w1_xi_xia"
+order = 7
+title = "外传　西夏"
+era = "西北边关的风沙"
+summary = "鲁智深原是渭州种家军的提辖，种家军世代守西北、抗西夏。这一卷是虚构的故事：好汉们回到西北，和党项的铁骑交锋。"
+rumor = "渭州的老军汉说，横山那边又起了烽火，党项骑兵来去如风。"
+side_story = true
+status = 2
+realm_gate = 5
+level_min = 95
+level_max = 99
+affairs = PackedStringArray("横山烽火", "种家军", "西北边关")
+new_play = PackedStringArray("荒漠行军", "骑兵来去如风")

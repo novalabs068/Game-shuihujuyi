@@ -8,6 +8,8 @@ extends Control
 ## 一路配手机震动（三玉轻、四玉中、五玉强，设置里能关）。翻牌时点屏幕跳过（五玉的变色和登场照放）。
 
 signal back_requested
+## 「聚义令从哪来」里点了「在哪」：去大地图看那里
+signal travel_requested(location_id: StringName)
 
 ## 五连一排竖卡，和按钮一起放进 720 高的屏幕
 const CARD_SIZE := Vector2(220, 330)
@@ -70,6 +72,8 @@ const IDLE_TOKEN_RECT := Rect2(590, 176, 100, 310)
 
 var _rng := RandomNumberGenerator.new()
 var _tokens_label: Label
+var _sources_button: Button
+var _sources_pulse: Tween
 var _pity_label: Label
 var _single: Button
 var _multi: Button
@@ -161,6 +165,11 @@ func _ready() -> void:
 	purse.add_child(purse_row)
 	_tokens_label = purse_row.get_child(1) as Label
 	corner.add_child(purse)
+	# 聚义令从哪来：不知道去哪拿聚义令时点这里（不够五连时一闪一闪）
+	_sources_button = UiKit.button("从哪来 ›", Vector2(110, 40), 18)
+	_sources_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_sources_button.pressed.connect(_show_sources)
+	corner.add_child(_sources_button)
 	_back = UiKit.back_button()
 	_back.pressed.connect(func() -> void:
 		if not _revealing:
@@ -300,6 +309,27 @@ func _refresh() -> void:
 	_single.disabled = _revealing or GameState.tokens < 1
 	_multi.disabled = _revealing or GameState.tokens < Gacha.MULTI
 	_back.disabled = _revealing
+	_sources_button.disabled = _revealing
+	var short := GameState.tokens < Gacha.MULTI and not _revealing
+	if short and _sources_pulse == null:
+		_sources_pulse = _sources_button.create_tween().set_loops()
+		_sources_pulse.tween_property(_sources_button, "modulate", Color(1.8, 1.5, 0.6), 0.6)
+		_sources_pulse.tween_property(_sources_button, "modulate", Color.WHITE, 0.6)
+	elif not short and _sources_pulse != null:
+		_sources_pulse.kill()
+		_sources_pulse = null
+		_sources_button.modulate = Color.WHITE
+
+
+## 打开「聚义令从哪来」单子。
+func _show_sources() -> void:
+	if _revealing:
+		return
+	var panel := TokenSources.new()
+	add_child(panel)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.closed.connect(panel.queue_free)
+	panel.travel_requested.connect(func(id: StringName) -> void: travel_requested.emit(id))
 
 
 func _recruit(count: int) -> void:

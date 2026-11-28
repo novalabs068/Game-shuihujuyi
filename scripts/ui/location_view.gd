@@ -15,6 +15,8 @@ signal team_requested
 signal heroes_requested
 signal recruit_requested
 signal jianghu_requested
+## 左下「行囊」：看身上带的东西
+signal bag_requested
 
 ## 像素瓦片放大倍数：16 像素的瓦片在画面上是 48 像素一格
 const PIXEL_SCALE := 3
@@ -242,6 +244,18 @@ func _build_ui() -> void:
 	foot.offset_top = -92
 	foot.offset_bottom = -16
 	foot.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	# 行囊：铜钱牌，挂在「歇脚」上面
+	var bag := UiKit.copper_button("行囊", 76, 22)
+	add_child(bag)
+	bag.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	bag.offset_left = 16
+	bag.offset_top = -184
+	bag.offset_bottom = -108
+	bag.offset_right = 92
+	bag.pressed.connect(func() -> void:
+		if not _busy:
+			_remember()
+			bag_requested.emit())
 	var camp := UiKit.copper_button("歇脚", 76, 22)
 	camp.tooltip_text = "就地打坐 %d 分钟，全队回复 %d%% 气血；一小时只能歇一次" % [Vitality.CAMP_SECONDS / 60, roundi(Vitality.CAMP_REGEN * 100)]
 	camp.pressed.connect(_camp)
@@ -259,6 +273,7 @@ func _build_ui() -> void:
 			row.add_child(_team_face(u))
 		foot.add_child(strip)
 	_build_guide(guide_targets)
+	_build_track()
 
 	_toast = UiKit.brush_label("", 30, Color("f4e2b4"))
 	_toast.add_theme_constant_override("outline_size", 8)
@@ -326,6 +341,93 @@ func _build_guide(targets: Dictionary) -> void:
 		var pulse := target.create_tween().set_loops()
 		pulse.tween_property(target, "modulate", Color(1.8, 1.5, 0.6), 0.5)
 		pulse.tween_property(target, "modulate", Color.WHITE, 0.5)
+
+
+## 指引（地图左上）：平时只挂一方红印（「上梁山」或正在追踪的那件事），印下写名望进度；
+## 点一下展开成一张签条（写着下一步做什么），再点收起。展开还是收起记在设置里，下次进来照旧。
+## 新手引导还没走完时不挂（引导字条占着同一个位置）。
+const TRACK_PREF := "guide_open"
+## 签条宽
+const TRACK_WIDTH := 360.0
+var _track_box: Control
+
+
+func _build_track() -> void:
+	if GameState.tutorial_step() != 0:
+		return
+	if _track_box != null:
+		_track_box.queue_free()
+	var info := GuideTrack.current()
+	var open: bool = Prefs.get_value("ui", TRACK_PREF, false)
+	var box := HBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	box.position = Vector2(16, 86)
+	add_child(box)
+	_track_box = box
+	# 红印 + 进度：点了展开或收起
+	var stamp := VBoxContainer.new()
+	stamp.add_theme_constant_override("separation", 2)
+	stamp.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	stamp.mouse_filter = Control.MOUSE_FILTER_STOP
+	stamp.tooltip_text = "指引：点一下展开或收起"
+	var seal := UiKit.seal_label(String(info["seal"]), 20, true)
+	seal.rotation = deg_to_rad(-2)
+	seal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	stamp.add_child(seal)
+	if info["progress_text"] != "":
+		var prog := UiKit.label(info["progress_text"], 13, Color("f4e2b4"))
+		prog.add_theme_constant_override("outline_size", 4)
+		prog.add_theme_color_override("font_outline_color", Color("1a0f08"))
+		prog.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		stamp.add_child(prog)
+	UiKit.ignore_mouse(seal)
+	for child in stamp.get_children():
+		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stamp.gui_input.connect(func(event: InputEvent) -> void:
+		var click := event as InputEventMouseButton
+		if click != null and click.button_index == MOUSE_BUTTON_LEFT and not click.pressed and not _busy:
+			Prefs.set_value("ui", TRACK_PREF, not open)
+			_build_track())
+	box.add_child(stamp)
+	if not open:
+		return
+	# 展开的签条：从哪阶到哪阶、名望进度条、下一步；点「江湖榜」看全部
+	var note := PanelContainer.new()
+	note.add_theme_stylebox_override("panel", UiKit.note_box())
+	note.custom_minimum_size.x = TRACK_WIDTH
+	note.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	box.add_child(note)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	note.add_child(v)
+	var title := UiKit.brush_label(String(info["title"]), 22, UiKit.INK)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(title)
+	if float(info["progress"]) >= 0.0 and info["progress_text"] != "":
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(TRACK_WIDTH - 40, 8)
+		bar.value = float(info["progress"]) * 100.0
+		var bg := StyleBoxFlat.new()
+		bg.bg_color = Color("d9c7a4")
+		bg.set_corner_radius_all(4)
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = UiKit.CINNABAR
+		fill.set_corner_radius_all(4)
+		bar.add_theme_stylebox_override("background", bg)
+		bar.add_theme_stylebox_override("fill", fill)
+		v.add_child(bar)
+	var next := UiKit.label(String(info["next"]), 15, UiKit.INK)
+	next.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	next.custom_minimum_size.x = TRACK_WIDTH - 40
+	v.add_child(next)
+	var more := UiKit.button("江湖榜", Vector2(96, 34), 16)
+	more.size_flags_horizontal = Control.SIZE_SHRINK_END
+	more.pressed.connect(func() -> void:
+		if not _busy:
+			_remember()
+			jianghu_requested.emit())
+	v.add_child(more)
 
 
 ## 小地图：一格画成 MINI_CELL 见方的色块，以主角为中心；朱点是自己，墨点是小怪，石青点是人物。

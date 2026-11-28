@@ -116,6 +116,10 @@ func _show_map(notice := "", focus_location: StringName = &"") -> void:
 	screen.story_requested.connect(_start_story)
 	screen.jianghu_requested.connect(_show_jianghu)
 	screen.profile_requested.connect(_show_profile)
+	screen.jiama_requested.connect(func(id: StringName) -> void:
+		if GameState.use_jiama(id):
+			var loc: LocationData = GameDB.maps[GameState.DEFAULT_MAP].location(id)
+			_show_scene(loc.scene_id, "使用甲马，到了%s" % loc.display_name))
 	screen.restart_requested.connect(func() -> void:
 		GameState.delete_save()
 		_show_title())
@@ -139,6 +143,14 @@ func _show_profile() -> void:
 	screen.back_requested.connect(_go_home.bind(""))
 	screen.heroes_requested.connect(_show_heroes)
 	screen.battle_requested.connect(func(stage: StageData, bonus: Dictionary) -> void: _start_battle(stage, &"", 0.0, bonus))
+	_set_screen(screen)
+
+
+func _show_bag() -> void:
+	var screen := BagView.new()
+	screen.back_requested.connect(_go_home.bind(""))
+	screen.heroes_requested.connect(_show_heroes)
+	screen.travel_requested.connect(func(id: StringName) -> void: _show_map("", id))
 	_set_screen(screen)
 
 
@@ -246,6 +258,7 @@ func _show_heroes() -> void:
 func _show_recruit() -> void:
 	var screen := RecruitView.new()
 	screen.back_requested.connect(_go_home.bind(""))
+	screen.travel_requested.connect(func(id: StringName) -> void: _show_map("", id))
 	_set_screen(screen)
 
 
@@ -264,6 +277,7 @@ func _show_scene(scene_id: String, notice := "") -> void:
 	screen.heroes_requested.connect(_show_heroes)
 	screen.recruit_requested.connect(_show_recruit)
 	screen.jianghu_requested.connect(_show_jianghu)
+	screen.bag_requested.connect(_show_bag)
 	_set_screen(screen)
 
 
@@ -299,7 +313,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 		where = sd.battle_bg if sd.battle_bg != &"" else sd.region
 	screen.background = _battle_background(where)
 	screen.place = String(where)
-	# 擂台比武、立名之战开打前回满、打完不记伤；别的仗血量都接着上一仗
+	# 擂台比武、投名状开打前回满、打完不记伤；别的仗血量都接着上一仗
 	var arena := bonus.has("arena_round") or bonus.has("trial")
 	if not arena:
 		screen.start_hp = GameState.vitality.duplicate()
@@ -363,11 +377,14 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			var job_text := OddJobs.on_battle_won(stage)
 			if job_text != "":
 				parts.append(job_text)
+			var city_text := GameState.city_on_battle_won(stage)
+			if city_text != "":
+				parts.append(city_text)
 			parts.append_array(ups)
 			if bond_text != "":
 				parts.append(bond_text)
 			if GameState.can_try_trial() and not Renown.can_try(GameState.realm, renown_before):
-				parts.append("江湖名望到了 %d，可以去主角页打「立名之战」升境界了" % GameState.renown())
+				parts.append("江湖名望到了 %d，可以去主角页纳「投名状」升境界了" % GameState.renown())
 			var hurt := _wounded_text()
 			if hurt != "" and not arena:
 				parts.append(hurt)

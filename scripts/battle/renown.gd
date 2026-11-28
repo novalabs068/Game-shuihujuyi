@@ -2,7 +2,7 @@ class_name Renown
 ## 统领的成长线：江湖名望 → 五阶境界（见方案页「统领之路」）。纯规则，不碰画面。
 ##
 ## 名望不单独记数，按存档里已经做过的事现算（招到几位好汉、打完几章列传、揭了几张悬赏……），
-## 所以旧存档读进来自动就有名望。名望够了不会自动升阶，要打赢一场「立名之战」才升（境界存在 GameState.realm）。
+## 所以旧存档读进来自动就有名望。名望够了不会自动升阶，要纳下一份「投名状」（打赢一仗）才升（境界存在 GameState.realm）。
 ## 每升一阶：统领属性 +10%、武学能多修两重，并解锁统领天赋、号令等。数值是初稿。
 
 ## 名望来源（每件事给多少）
@@ -11,6 +11,8 @@ const PER_STORY := 30
 ## 大悬赏按等级：丙、乙、甲
 const PER_BOUNTY: Array[int] = [15, 25, 40]
 const PER_ODD_JOB := 3
+## 每张城中悬赏（每天每个地方一张）
+const PER_CITY_JOB := 5
 ## 每个头目第一次被打败（标记 boss_<敌人 id>）
 const PER_BOSS := 25
 ## 擂台每打过一关
@@ -18,7 +20,7 @@ const PER_ARENA := 20
 ## 每个打完的奇遇（只发生一次的那种，标记 event_<id>）
 const PER_EVENT := 10
 
-## 境界：名字和要多少名望才能去打立名之战（第 0 阶是开局）
+## 境界：名字和要多少名望才能去纳投名状（第 0 阶是开局）
 const NAMES: Array[String] = ["无名", "初露锋芒", "小有名气", "名动一方", "威震江湖", "名震天下"]
 const THRESHOLDS: Array[int] = [0, 100, 300, 600, 1000, 1500]
 const MAX_REALM := 5
@@ -30,7 +32,7 @@ const MARTIAL_CAP: Array[int] = [4, 6, 8, 10, 10, 10]
 const TALENT_REALM := 1
 const TALENT_ENHANCE_REALM := 4
 
-## 立名之战：要升到第 n 阶打的那一仗（n 从 1 数）：[敌人 id, 敌人等级]。上台的都是精英
+## 投名状：要升到第 n 阶打的那一仗（n 从 1 数）：[敌人 id, 敌人等级]。上台的都是精英
 const TRIALS := [
 	[["po_pi_tou", "po_pi", "po_pi"], 12],
 	[["xun_jie_ya_yi", "gao_fu_jia_ding", "xun_jie_ya_yi"], 24],
@@ -38,11 +40,11 @@ const TRIALS := [
 	[["qin_bing", "lei_tai_jiao_tou", "guan_bing_gong_shou"], 50],
 	[["shui_kou", "jiang_men_shen", "shan_zei_tou_mu"], 64],
 ]
-## 立名之战第一次打赢给的银两（按阶）
+## 投名状第一次打赢给的银两（按阶）
 const TRIAL_SILVER := 200
 
 
-## 按已经做过的事算名望。counts 的键：heroes、stories、bounties（[丙, 乙, 甲] 各几张）、odd_jobs、bosses、arena、events。
+## 按已经做过的事算名望。counts 的键：heroes、stories、bounties（[丙, 乙, 甲] 各几张）、odd_jobs、city_jobs、bosses、arena、events。
 static func compute(counts: Dictionary) -> int:
 	var total := 0
 	total += int(counts.get("heroes", 0)) * PER_HERO
@@ -51,6 +53,7 @@ static func compute(counts: Dictionary) -> int:
 	for g in mini(bounties.size(), PER_BOUNTY.size()):
 		total += int(bounties[g]) * PER_BOUNTY[g]
 	total += int(counts.get("odd_jobs", 0)) * PER_ODD_JOB
+	total += int(counts.get("city_jobs", 0)) * PER_CITY_JOB
 	total += int(counts.get("bosses", 0)) * PER_BOSS
 	total += int(counts.get("arena", 0)) * PER_ARENA
 	total += int(counts.get("events", 0)) * PER_EVENT
@@ -84,17 +87,17 @@ static func next_threshold(realm: int) -> int:
 	return THRESHOLDS[realm + 1] if realm < MAX_REALM else -1
 
 
-## 名望够不够去打下一阶的立名之战。
+## 名望够不够去纳下一阶的投名状。
 static func can_try(realm: int, renown: int) -> bool:
 	return realm < MAX_REALM and renown >= THRESHOLDS[realm + 1]
 
 
-## 升到第 n 阶（从 1 数）的立名之战。
+## 升到第 n 阶（从 1 数）的投名状。
 static func trial_stage(n: int) -> StageData:
 	var spec: Array = TRIALS[n - 1]
 	var st := StageData.new()
 	st.id = "trial_%d" % n
-	st.title = "立名之战 · %s" % NAMES[n]
+	st.title = "投名状 · %s" % NAMES[n]
 	var ids: Array = spec[0]
 	for i in ids.size():
 		var e: UnitData = load("res://data/enemies/%s.tres" % ids[i])
@@ -108,7 +111,7 @@ static func trial_stage(n: int) -> StageData:
 
 ## 交给 main 的额外奖励：打赢了升阶（main 看 "trial" 这个键）。
 static func trial_bonus(n: int) -> Dictionary:
-	return {"trial": n, "silver": TRIAL_SILVER * n, "text": "立名之战胜！江湖上从此都知道{name}这号人物了。"}
+	return {"trial": n, "silver": TRIAL_SILVER * n, "text": "投名状纳下了！江湖上从此都知道{name}这号人物了。"}
 
 
 ## 统领天赋：每个职业一条（一阶解锁、四阶强化）。用好汉天赋现成的种类（见 TalentData.KINDS）。

@@ -1,6 +1,6 @@
 class_name JiangHuView
 extends Control
-## 江湖榜：没有主线时，玩家从这里看「接下来能做什么」。三页：可以做的事、悬赏榜、好汉图鉴。
+## 江湖榜：没有主线时，玩家从这里看「接下来能做什么」。四页：可以做的事、悬赏榜、好汉图鉴、江湖年表。
 
 signal back_requested
 ## 点「在哪」：打开大地图看这个地点（怎么走过去）
@@ -8,15 +8,23 @@ signal travel_requested(location_id: StringName)
 ## 点图鉴里的好汉或「去升星」：打开好汉页
 signal heroes_requested
 
-enum Tab { TODO, BOUNTIES, ALBUM }
+enum Tab { TODO, BOUNTIES, ALBUM, ANNALS }
 
 ## 图鉴竖卡的大小：一行 8 张
 const ALBUM_CARD := Vector2(140, 210)
-const TAB_NAMES: Array[String] = ["可以做的事", "悬赏榜", "好汉图鉴"]
+const TAB_NAMES: Array[String] = ["可以做的事", "悬赏榜", "好汉图鉴", "江湖年表"]
+## 年表上各状态那方小印的颜色
+const STATE_COLORS := {
+	Volumes.State.ACTIVE: Color("a8291d"),
+	Volumes.State.LOCKED: Color("8a5a12"),
+	Volumes.State.RUMOR: Color("5a5048"),
+	Volumes.State.FAR: Color("2f5f8a"),
+}
 ## 每种事前面那方小印的颜色（压在宣纸字条上，用深色）
 const KIND_COLORS := {
 	"列传": Color("8a5a12"),
 	"悬赏": Color("a8291d"),
+	"城中悬赏": Color("b0401a"),
 	"初到": Color("2f5f8a"),
 	"宝箱": Color("7a5a2a"),
 	"支线": Color("5a3480"),
@@ -75,9 +83,10 @@ func _ready() -> void:
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_theme_constant_override("separation", 8)
 	_scroll.add_child(_body)
-	# 左边挂三支木签切页（加在内容区后面，压在上面才点得到）
+	# 左边挂四支木签切页（加在内容区后面，压在上面才点得到）
 	var tabs := VBoxContainer.new()
-	tabs.add_theme_constant_override("separation", 18)
+	# 四支木签竖排，间距收紧才放得进 720 高的屏幕
+	tabs.add_theme_constant_override("separation", 10)
 	tabs.position = Vector2(24, 104)
 	add_child(tabs)
 	for i in TAB_NAMES.size():
@@ -103,16 +112,121 @@ func _switch(tab: int) -> void:
 			_show_bounties()
 		Tab.ALBUM:
 			_show_album()
+		Tab.ANNALS:
+			_show_annals()
 
 
 # --- 可以做的事 ---
 
+## 「可以做的事」里点开了哪几类（其余按种类折起来，只露一行「悬赏 12 件」）
+var _open_kinds: Array[String] = []
+
+
+## 第一页：最上面置顶「上梁山」，接着是眼下最合适的两件事，其余按种类折起来，点开才列出。
 func _show_todo() -> void:
 	var items := todo_items()
+	_body.add_child(_pinned_row(items))
 	if items.is_empty():
 		_body.add_child(UiKit.label("眼下没什么急事。四处走走，说不定会碰上奇遇。", 22, Color("e9d3a0")))
+		return
+	var picks := Guide.recommended(items, 2, GameState.level)
+	if not picks.is_empty():
+		_body.add_child(UiKit.label("眼下最合适的事", 16, Color("e9d3a0")))
+		for item in picks:
+			_body.add_child(_todo_row(item))
+	var groups := {}
 	for item in items:
-		_body.add_child(_todo_row(item))
+		if item in picks:
+			continue
+		var kind: String = item["kind"]
+		if not groups.has(kind):
+			groups[kind] = []
+		groups[kind].append(item)
+	if groups.is_empty():
+		return
+	_body.add_child(UiKit.label("其余的事（点开看）", 16, Color("e9d3a0")))
+	for kind: String in KIND_COLORS:
+		if not groups.has(kind):
+			continue
+		var open := kind in _open_kinds
+		var head := UiKit.button("%s　%d 件　%s" % [kind, groups[kind].size(), "▴" if open else "▾"], Vector2(220, 40), 18)
+		head.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		head.pressed.connect(func() -> void:
+			if open:
+				_open_kinds.erase(kind)
+			else:
+				_open_kinds.append(kind)
+			var keep := _scroll.scroll_vertical
+			_switch(Tab.TODO)
+			_scroll.set_deferred("scroll_vertical", keep))
+		_body.add_child(head)
+		if open:
+			for item: Dictionary in groups[kind]:
+				_body.add_child(_todo_row(item))
+
+
+## 置顶的「上梁山」：境界从哪阶到哪阶、名望进度、下一步、名望从哪来；没在追踪别的事时标「追踪中」。
+func _pinned_row(items: Array[Dictionary]) -> PanelContainer:
+	var info := Guide.default_info(GameState.realm, GameState.renown(), items, GameState.level)
+	var row := PanelContainer.new()
+	var style := UiKit.note_box()
+	style.content_margin_top = 12
+	style.content_margin_bottom = 12
+	row.add_theme_stylebox_override("panel", style)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 16)
+	row.add_child(h)
+	var mark := VBoxContainer.new()
+	mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	mark.add_child(UiKit.seal_label(Guide.DEFAULT_SEAL, 22, false))
+	if GameState.tracked.is_empty():
+		var on := UiKit.label("追踪中", 14, UiKit.CINNABAR)
+		on.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		mark.add_child(on)
+	h.add_child(mark)
+	var v := VBoxContainer.new()
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_theme_constant_override("separation", 4)
+	h.add_child(v)
+	var title := HBoxContainer.new()
+	title.add_theme_constant_override("separation", 14)
+	title.add_child(UiKit.brush_label(String(info["title"]), 26, UiKit.INK))
+	if info["progress_text"] != "":
+		var prog := UiKit.label("名望 " + String(info["progress_text"]).replace("/", " / "), 16, UiKit.INK_DIM)
+		prog.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		title.add_child(prog)
+	v.add_child(title)
+	var next := UiKit.label(String(info["next"]), 17, UiKit.INK)
+	next.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(next)
+	var hint := UiKit.label("名望从哪来：招到好汉 +%d、揭悬赏 +%d 起、打完一段列传 +%d、第一次打败头目 +%d、擂台每过一关 +%d" % [Renown.PER_HERO, Renown.PER_BOUNTY[0], Renown.PER_STORY, Renown.PER_BOSS, Renown.PER_ARENA], 14, UiKit.INK_DIM)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(hint)
+	if not GameState.tracked.is_empty():
+		var back := UiKit.button("追踪", Vector2(96, 42), 18)
+		back.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		back.pressed.connect(func() -> void:
+			GameState.tracked = {}
+			GameState.save_game()
+			_switch(Tab.TODO))
+		h.add_child(back)
+	var loc: StringName = info["location"]
+	if loc != &"":
+		h.add_child(_go_button(loc, Vector2(110, 42), 20))
+	return row
+
+
+## 去办某件事的按钮：就在眼下这个地方 →「动身」，回到场景里去办；在别处 →「在哪」，打开大地图看那里。
+func _go_button(location: StringName, min_size: Vector2, font_size: int) -> Button:
+	var here := location == GameState.location_id
+	var go := UiKit.button("动身" if here else "在哪", min_size, font_size)
+	go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	go.pressed.connect(func() -> void:
+		if here:
+			back_requested.emit()
+		else:
+			travel_requested.emit(location))
+	return go
 
 
 ## 现在能做的事，按种类排好：{kind, text, detail, location, level}。location 为空表示不用赶路。
@@ -142,7 +256,15 @@ static func todo_items() -> Array[Dictionary]:
 	# 小悬赏：已经在告示栏上看过的地区
 	for region in GameState.jobs:
 		for job: Dictionary in GameState.jobs[region]:
-			out.append({"kind": "差事", "text": "小悬赏：" + OddJobs.describe(job), "detail": "在%s一带，赏%s" % [name_of.call(StringName(region)), OddJobs.reward_text(job)], "location": StringName(region), "level": 0})
+			out.append({"kind": "差事", "text": "小悬赏：" + OddJobs.describe(job), "detail": "在%s一带，赏%s" % [name_of.call(StringName(region)), OddJobs.reward_text(job)], "location": StringName(region), "level": map.location(StringName(region)).level_min})
+	# 城中悬赏：去过的地方各一张（每天贴一张，攒着不过期）
+	for region in GameState.visited_regions():
+		var city := GameState.city_entry(region)
+		var cjob: Dictionary = city.get("job", {})
+		if cjob.is_empty():
+			continue
+		var more := int(city.get("stock", 0))
+		out.append({"kind": "城中悬赏", "text": "%s：%s" % [name_of.call(region), OddJobs.describe(cjob)], "detail": "赏%s%s" % [CityJobs.reward_text(cjob), "，另有 ×%d" % more if more > 0 else ""], "location": region, "level": map.location(region).level_min})
 	# 擂台
 	if Arena.best() < Arena.round_count():
 		var next := Arena.best() + 1
@@ -156,12 +278,12 @@ static func todo_items() -> Array[Dictionary]:
 		var scene: SceneData = GameDB.scenes.get(loc.scene_id)
 		if scene == null:
 			continue
-		for chest in scene.chests:
-			if not GameState.has_flag("chest_%s_%s" % [scene.id, chest.id]):
-				out.append({"kind": "宝箱", "text": "%s还有一个宝箱没打开" % scene.title, "detail": "在%s，进去找找" % loc.display_name, "location": loc.id, "level": 0})
+		var closed := scene.chests.filter(func(chest: ChestData) -> bool: return not GameState.has_flag("chest_%s_%s" % [scene.id, chest.id])).size()
+		if closed > 0:
+			out.append({"kind": "宝箱", "text": "%s还有 %d 个宝箱没打开" % [scene.title, closed], "detail": "在%s，进去找找" % loc.display_name, "location": loc.id, "level": loc.level_min})
 		for npc in scene.npcs:
 			if npc.event != null and not GameState.has_flag("event_" + String(npc.event.id)) and (npc.hide_flag == "" or not GameState.has_flag(npc.hide_flag)):
-				out.append({"kind": "支线", "text": "%s：%s那边好像有事" % [scene.title, npc.display_name], "detail": "在%s，进去和他说说话" % loc.display_name, "location": loc.id, "level": 0})
+				out.append({"kind": "支线", "text": "%s：%s那边好像有事" % [scene.title, npc.display_name], "detail": "在%s，进去和他说说话" % loc.display_name, "location": loc.id, "level": loc.level_min})
 	# 养成
 	var can_up := GameDB.heroes.filter(func(h: UnitData) -> bool: return GameState.can_star_up(h))
 	for h: UnitData in can_up:
@@ -190,12 +312,20 @@ func _todo_row(item: Dictionary) -> PanelContainer:
 	var level: int = item["level"]
 	if level > 0:
 		h.add_child(_level_label(level))
+	# 追踪：地图左上的指引改成跟这一件事
+	var tracking := GuideTrack.is_tracked(item)
+	var track := UiKit.button("追踪中" if tracking else "追踪", Vector2(90, 42), 18)
+	track.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	track.disabled = tracking
+	track.pressed.connect(func() -> void:
+		GuideTrack.track(item)
+		var keep := _scroll.scroll_vertical
+		_switch(Tab.TODO)
+		_scroll.set_deferred("scroll_vertical", keep))
+	h.add_child(track)
 	var location: StringName = item["location"]
 	if location != &"":
-		var go := UiKit.button("就在这里" if location == GameState.location_id else "在哪", Vector2(110, 42), 20)
-		go.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		go.pressed.connect(func() -> void: travel_requested.emit(location))
-		h.add_child(go)
+		h.add_child(_go_button(location, Vector2(110, 42), 20))
 	elif kind == "养成" or kind == "列传":
 		var open := UiKit.button("去看看", Vector2(110, 42), 20)
 		open.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -291,9 +421,8 @@ func _notice(b: BountyData, map: WorldMapData, index: int) -> Control:
 		stamp.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 		paper.modulate = Color(0.88, 0.85, 0.8)
 	else:
-		var go := UiKit.button("就在这里" if b.location == GameState.location_id else "在哪", Vector2(110, 40), 19)
+		var go := _go_button(b.location, Vector2(110, 40), 19)
 		go.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		go.pressed.connect(func() -> void: travel_requested.emit(b.location))
 		v.add_child(go)
 	return paper
 
@@ -376,3 +505,65 @@ func _album_cell(hero: UnitData) -> Control:
 		elif owned and click.global_position.distance_to(pressed_at[0]) < TeamSelect.TAP_SLOP:
 			heroes_requested.emit())
 	return cell
+
+
+# --- 江湖年表 ---
+
+func _show_annals() -> void:
+	var realm := GameState.realm
+	_body.add_child(UiKit.label("你如今是「%s」，名望 %d。江湖上的大事一卷一卷发生，名头越响，卷入的风波越大。" % [Renown.realm_name(realm), GameState.renown()], 16, Color("e9d3a0")))
+	for vol in GameDB.volumes:
+		_body.add_child(_volume_row(vol, realm))
+
+
+## 年表上的一卷：卷名、年代、状态小印；开了的写这一卷讲什么和进度，没开的只露传闻和经典场面的目录。
+func _volume_row(vol: VolumeData, realm: int) -> PanelContainer:
+	var state := Volumes.state_of(vol, realm)
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", UiKit.note_box())
+	if state == Volumes.State.RUMOR or state == Volumes.State.FAR:
+		row.modulate = Color(0.86, 0.83, 0.78)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	row.add_child(v)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	v.add_child(head)
+	var title := UiKit.brush_label(vol.title, 28, UiKit.INK)
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_child(title)
+	var era := UiKit.label(vol.era, 16, UiKit.INK_DIM)
+	era.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	era.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(era)
+	var tag := UiKit.seal_label(Volumes.STATE_NAMES[state], 18, false, STATE_COLORS[state])
+	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_child(tag)
+	var text := ""
+	match state:
+		Volumes.State.ACTIVE:
+			text = vol.summary
+		Volumes.State.LOCKED:
+			text = "%s\n境界到「%s」后，这一卷的大事就会找上门来。" % [vol.rumor, Renown.realm_name(vol.realm_gate)]
+		_:
+			text = "传闻：" + vol.rumor
+	var body := UiKit.label(text, 17, UiKit.INK)
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(body)
+	var affairs := UiKit.label("经典场面：" + "、".join(vol.affairs), 15, UiKit.INK_DIM)
+	affairs.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(affairs)
+	if state == Volumes.State.ACTIVE:
+		v.add_child(UiKit.label(_volume_progress(vol), 15, Color("3f6a3a")))
+	elif state != Volumes.State.LOCKED:
+		var levels := "满级以后" if vol.level_min >= Leveling.MAX_LEVEL else "约 %d～%d 级" % [vol.level_min, vol.level_max]
+		v.add_child(UiKit.label("（%s，%s）" % ["外传，远期" if vol.side_story else "还在编写", levels], 14, UiKit.INK_DIM))
+	return row
+
+
+## 正在发生的那一卷做到哪了：列传和悬赏完成了几成。眼下只有卷一能玩，所以按全部列传、悬赏算；
+## 以后每卷有了自己的地点，再按卷分开算。
+func _volume_progress(_vol: VolumeData) -> String:
+	var stories := GameDB.stories.filter(func(s: StoryData) -> bool: return GameState.story_done(s)).size()
+	var bounties := GameDB.bounties.filter(func(b: BountyData) -> bool: return GameState.has_flag("bounty_" + String(b.id))).size()
+	return "进度：列传 %d / %d 段　悬赏 %d / %d 张" % [stories, GameDB.stories.size(), bounties, GameDB.bounties.size()]
