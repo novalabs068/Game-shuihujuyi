@@ -3,9 +3,10 @@
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_r3r0a"]
 [ext_resource type="Resource" path="res://data/enemies/du_fang_da_shou.tres" id="2_7kn7t"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_4xcd6"]
+[ext_resource type="Resource" path="res://data/enemies/bang_xian.tres" id="9_mix"]
 
 [resource]
 script = ExtResource("3_4xcd6")
 id = "du_fang_nao_shi"
 title = "赌坊闹事"
-enemies = Array[ExtResource("1_r3r0a")]([ExtResource("2_7kn7t"), ExtResource("2_7kn7t")])
+enemies = Array[ExtResource("1_r3r0a")]([ExtResource("2_7kn7t"), ExtResource("9_mix")])

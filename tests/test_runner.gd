@@ -16,6 +16,8 @@ func _initialize() -> void:
 		"test_volumes",
 		"test_guide_track",
 		"test_city_jobs",
+		"test_bounty_pool_no_roads",
+		"test_encounter_mix",
 		"test_jiama",
 		"test_damage_formula",
 		"test_role_counters",
@@ -243,6 +245,48 @@ func test_city_jobs() -> bool:
 	check_eq(CityJobs.accrue(e, 90)["day"], 100, "手机时间往回调不倒扣")
 	check_eq(CityJobs.post_next(e, pool, rng)["job"], job, "正在贴的没做完，不换")
 	check_eq(Renown.compute({"city_jobs": 2}), 2 * Renown.PER_CITY_JOB, "城中悬赏涨名望")
+	# 旧存档里贴着的悬赏要打的敌人已经不在这一带：换一种，拨数、进度、赏格不变
+	var odd := {"day": 100, "stock": 0, "job": {"enemy": "guan_bing_gong_shou", "name": "官兵弓手", "need": 4, "have": 1, "silver": 96, "exp": 240, "tokens": 2}}
+	var fixed := CityJobs.fix_enemy(odd, pool, rng)
+	check_eq(fixed["job"]["enemy"], "po_pi", "不在这一带的敌人换成这一带的")
+	check(fixed["job"]["need"] == 4 and fixed["job"]["have"] == 1 and fixed["job"]["tokens"] == 2, "换敌人不动拨数、进度、赏格")
+	check_eq(odd["job"]["enemy"], "guan_bing_gong_shou", "fix_enemy 不改原来的")
+	check_eq(CityJobs.fix_enemy(e, pool, rng), e, "敌人还在这一带的不换")
+	return true
+
+
+## 悬赏要打的敌人只从这个地方自己的场景里挑，不算通往别处的野外路
+## （曾经东京的悬赏要打官兵弓手，可官兵弓手只在东京往黄泥冈的路上）。
+## 这里照 OddJobs.enemy_pool 的规则用数据算一遍（OddJobs 引用了 autoload，测试里编译不过）。
+func test_bounty_pool_no_roads() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var map: WorldMapData = load("res://data/maps/ch1.tres")
+	var scenes: Array = GameDB.load_dir("res://data/scenes/")
+	for loc: LocationData in map.locations:
+		var ids: Array[String] = []
+		var groups: Array[StageData] = loc.encounter_groups.duplicate()
+		for sd: SceneData in scenes:
+			if sd.region == loc.id and not sd.id.begins_with("road_"):
+				groups.append_array(sd.roam_groups)
+		for g in groups:
+			for u in g.enemies:
+				ids.append(String(u.id))
+		check(not ids.is_empty(), "%s 一带有敌人可贴悬赏" % loc.id)
+		if loc.id == &"dongjing":
+			check(not "guan_bing_gong_shou" in ids, "东京一带的悬赏不会要打官兵弓手")
+			check("po_pi" in ids, "东京一带的悬赏有泼皮")
+	return true
+
+
+## 人的遭遇组合不能清一色战士：至少搭一个射手、道士、刺客或治疗（纯野兽的组合不管）。
+func test_encounter_mix() -> bool:
+	var GameDB: GDScript = load("res://scripts/autoload/game_db.gd")
+	var beasts: Array[String] = ["ye_lang", "ye_zhu", "ye_zhu_wang", "lang_wang", "da_chong"]
+	for g: StageData in GameDB.load_dir("res://data/encounters/"):
+		var people := g.enemies.filter(func(u: UnitData) -> bool: return not String(u.id) in beasts)
+		if people.is_empty():
+			continue
+		check(people.any(func(u: UnitData) -> bool: return u.role != UnitData.Role.WARRIOR), "%s 不是清一色战士" % g.title)
 	return true
 
 
@@ -1719,6 +1763,8 @@ func test_arrivals_not_hidden() -> bool:
 	for id: String in scenes:
 		var sd: SceneData = scenes[id]
 		arrivals[id] = arrivals.get(id, []) + [sd.spawn_cell]
+		if sd.exit_scene != "":
+			arrivals[sd.exit_scene] = arrivals.get(sd.exit_scene, []) + [sd.exit_cell]
 		for door: Vector2i in sd.doors:
 			var target: String = sd.doors[door]
 			if scenes.has(target):

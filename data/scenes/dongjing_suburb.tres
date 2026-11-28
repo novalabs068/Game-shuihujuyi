@@ -209,8 +209,8 @@ id = "dongjing_suburb"
 title = "东京·城外郊野"
 tileset_texture = ExtResource("25_8gat3")
 tile_block = 4
-layout = "T######################################################################T
-T#################################DDD##################################T
+layout = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTDDDTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT,,,TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 T.................................,,,........................~~~~......T
 T.................................,,,.........................~~~~.....T
 T...T....T.T..T...TT....TT...T....,,,.........................~~~~.....T
@@ -261,14 +261,19 @@ roam_spots = Array[Vector2i]([Vector2i(30, 10), Vector2i(40, 6), Vector2i(8, 7),
 roam_groups = Array[ExtResource("18_lqdix")]([ExtResource("19_x4add"), ExtResource("20_qw8p1"), ExtResource("21_eoujg"), ExtResource("22_1o6cg"), ExtResource("23_rlnxa")])
 roam_bonus = Array[int]([0, 0, 3, 3, 7, 7, 3, 3, 3, 10, 10, 14, 14, 10])
 doors = Dictionary[Vector2i, String]({
-Vector2i(34, 1): "dongjing_street",
-Vector2i(35, 1): "dongjing_street",
-Vector2i(36, 1): "dongjing_street"
+Vector2i(34, 0): "dongjing_street",
+Vector2i(35, 0): "dongjing_street",
+Vector2i(36, 0): "dongjing_street"
+})
+door_arrivals = Dictionary[Vector2i, Vector2i]({
+Vector2i(34, 0): Vector2i(41, 77),
+Vector2i(35, 0): Vector2i(41, 77),
+Vector2i(36, 0): Vector2i(41, 77)
 })
 exit_scene = "dongjing_street"
 music = &"jiaoye"
 battle_bg = &"yezhulin"
-exit_cell = Vector2i(56, 53)
+exit_cell = Vector2i(41, 77)
 overlays = Dictionary[String, Texture2D]({
 "=": ExtResource("8_5abb1"),
 "T": ExtResource("9_jpxqb"),

@@ -3,10 +3,11 @@
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_p3ywy"]
 [ext_resource type="Resource" path="res://data/enemies/shui_kou.tres" id="2_wxfa2"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_uw6j8"]
+[ext_resource type="Resource" path="res://data/enemies/shui_kou_jian_shou.tres" id="9_mix"]
 
 [resource]
 script = ExtResource("3_uw6j8")
 id = "shui_kou_jie_jiang"
 title = "水寇截江"
-enemies = Array[ExtResource("1_p3ywy")]([ExtResource("2_wxfa2"), ExtResource("2_wxfa2"), ExtResource("2_wxfa2")])
+enemies = Array[ExtResource("1_p3ywy")]([ExtResource("2_wxfa2"), ExtResource("9_mix"), ExtResource("2_wxfa2")])
 star_round_limit = 6

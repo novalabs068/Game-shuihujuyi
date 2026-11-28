@@ -198,7 +198,8 @@ cell = Vector2i(45, 14)
 [sub_resource type="Resource" id="Resource_yu27j"]
 script = ExtResource("14_lxfh3")
 texture = ExtResource("26_s8i66")
-cell = Vector2i(27, 30)
+cell = Vector2i(27, 31)
+offset = Vector2(0, 24)
 
 [sub_resource type="Resource" id="Resource_5787v"]
 script = ExtResource("14_lxfh3")
@@ -249,11 +250,11 @@ layout = "########################################################
 #..HHHH..HHHH..HHHH......_____.........................#
 #,,,,,,,,,,,,,,,,,,,,,,,,_____..................T......#
 #,,,,,,,,,,,,,,,,,,,,,,,,_____..........TT.............#
-#.......................h_____h........................#
-#......W.............hhhhh___hhhhh..................TT.#
+#....................,,,,_____.........................#
+#......W................h_____h.....................TT.#
 #.TT........TT.......hhhhh___hhhhhT.........T..........#
-#....................hhhhhEEEhhhhh.....................#
-########################################################"
+#....................hhhhh___hhhhh.....................#
+##########################,,,###########################"
 spawn_cell = Vector2i(27, 20)
 npcs = Array[ExtResource("4_duos0")]([SubResource("Resource_mv3fe"), SubResource("Resource_can2e"), SubResource("Resource_vm73e"), SubResource("Resource_cdsrj"), SubResource("Resource_fp05q"), SubResource("Resource_nlc7o"), SubResource("Resource_tafka")])
 region = &"dongjing"
@@ -262,8 +263,6 @@ roam_groups = Array[ExtResource("30_0saps")]([ExtResource("31_qsl24"), ExtResour
 doors = Dictionary[Vector2i, String]({
 Vector2i(45, 14): "xiangguosi"
 })
-exit_scene = "dongjing_suburb"
-exit_cell = Vector2i(35, 3)
 overlays = Dictionary[String, Texture2D]({
 "=": ExtResource("11_qsl24"),
 "T": ExtResource("12_4qsy1"),

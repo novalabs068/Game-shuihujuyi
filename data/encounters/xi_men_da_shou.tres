@@ -3,9 +3,10 @@
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_hpbgf"]
 [ext_resource type="Resource" path="res://data/enemies/xi_men_jia_ding.tres" id="2_tqj2q"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_briph"]
+[ext_resource type="Resource" path="res://data/enemies/bang_xian.tres" id="9_mix"]
 
 [resource]
 script = ExtResource("3_briph")
 id = "xi_men_da_shou"
 title = "西门府打手"
-enemies = Array[ExtResource("1_hpbgf")]([ExtResource("2_tqj2q"), ExtResource("2_tqj2q")])
+enemies = Array[ExtResource("1_hpbgf")]([ExtResource("2_tqj2q"), ExtResource("9_mix")])

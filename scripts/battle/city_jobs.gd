@@ -56,5 +56,18 @@ static func post_next(entry: Dictionary, pool: Array[UnitData], rng: RandomNumbe
 	return out
 
 
+## 正在贴的那张要打的敌人已经不在这一带（比如旧版本把通往别处的野外路上的敌人也算进来了），
+## 就换成 pool 里的一种，拨数、进度和赏格不变。纯函数。
+static func fix_enemy(entry: Dictionary, pool: Array[UnitData], rng: RandomNumberGenerator) -> Dictionary:
+	var job: Dictionary = entry.get("job", {})
+	if job.is_empty() or pool.is_empty() or pool.any(func(u: UnitData) -> bool: return String(u.id) == job["enemy"]):
+		return entry
+	var out := entry.duplicate(true)
+	var enemy: UnitData = pool[rng.randi_range(0, pool.size() - 1)]
+	out["job"]["enemy"] = String(enemy.id)
+	out["job"]["name"] = enemy.display_name
+	return out
+
+
 static func reward_text(job: Dictionary) -> String:
 	return "聚义令 %d、银两 %d、经验 %d" % [job["tokens"], job["silver"], job["exp"]]

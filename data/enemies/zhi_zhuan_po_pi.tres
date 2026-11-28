@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/zhang_san.png" id="1_map"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/zhang_san.png" id="2_bat"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_unit"]
+
+[resource]
+script = ExtResource("3_unit")
+id = &"zhi_zhuan_po_pi"
+display_name = "掷砖泼皮"
+role = 2
+base_hp = 230
+base_atk = 70
+base_def = 12
+base_spd = 100
+map_sprite = ExtResource("1_map")
+battle_sprite = ExtResource("2_bat")
+attack_style = &"throw"

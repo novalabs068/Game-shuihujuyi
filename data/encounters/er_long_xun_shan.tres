@@ -4,9 +4,10 @@
 [ext_resource type="Resource" path="res://data/enemies/er_long_lou_luo.tres" id="2_fwtsv"]
 [ext_resource type="Resource" path="res://data/enemies/shan_zei_tou_mu.tres" id="3_nc4ds"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_6dk2m"]
+[ext_resource type="Resource" path="res://data/enemies/lin_zhong_gong_shou.tres" id="9_mix"]
 
 [resource]
 script = ExtResource("4_6dk2m")
 id = "er_long_xun_shan"
 title = "二龙山巡山"
-enemies = Array[ExtResource("1_v7f1r")]([ExtResource("2_fwtsv"), ExtResource("3_nc4ds"), ExtResource("2_fwtsv")])
+enemies = Array[ExtResource("1_v7f1r")]([ExtResource("2_fwtsv"), ExtResource("3_nc4ds"), ExtResource("9_mix")])
