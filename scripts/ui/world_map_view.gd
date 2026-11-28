@@ -42,6 +42,9 @@ var _panel_desc: Label
 var _panel_buttons: HBoxContainer
 var _toast: Label
 var _status: Label
+var _exp_bar: ProgressBar
+var _silver_row: HBoxContainer
+var _token_row: HBoxContainer
 ## 镜头对准的地点位置（铺满屏幕、尺寸确定后在 _layout 里对准）
 var _focus := Vector2.ZERO
 ## 地图拖到哪了：底图左上角在屏幕上的位置
@@ -103,25 +106,34 @@ func _ready() -> void:
 # --- 搭界面 ---
 
 func _build_location(loc: LocationData) -> void:
-	# 地名竖签：墨底金边，一字一行
+	# 地名小竖幅：宣纸、石青包头、下面一根木轴，墨色毛笔字一字一行；危险几颗朱点
 	var tag := PanelContainer.new()
-	tag.add_theme_stylebox_override("panel", UiKit.box(Color(INK, 0.88), UiKit.GOLD, 2, 4))
-	var chars := PackedStringArray()
-	for i in loc.display_name.length():
-		chars.append(loc.display_name[i])
+	var flag := StyleBoxFlat.new()
+	flag.bg_color = Color("efe3c6")
+	flag.border_color = UiKit.INDIGO
+	flag.border_width_top = 7
+	flag.border_width_bottom = 5
+	flag.border_color = UiKit.INDIGO
+	flag.set_content_margin_all(4)
+	flag.content_margin_top = 9
+	flag.content_margin_bottom = 8
+	flag.shadow_color = Color(0, 0, 0, 0.4)
+	flag.shadow_size = 4
+	flag.shadow_offset = Vector2(0, 3)
+	tag.add_theme_stylebox_override("panel", flag)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 2)
+	column.add_theme_constant_override("separation", 4)
 	tag.add_child(column)
-	var name_label := UiKit.label("\n".join(chars), 24, PAPER)
+	var name_label := UiKit.brush_label(UiKit.vertical_text(loc.display_name), 24, UiKit.INK)
+	name_label.add_theme_constant_override("line_spacing", -6)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(name_label)
-	# 危险星级竖排在地名下面
-	var star_lines := PackedStringArray()
-	for i in loc.danger:
-		star_lines.append("★")
-	var stars := UiKit.label("\n".join(star_lines), 14, UiKit.GOLD)
-	stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(stars)
+	var dots := Control.new()
+	dots.custom_minimum_size = Vector2(26, loc.danger * 10)
+	dots.draw.connect(func() -> void:
+		for i in loc.danger:
+			dots.draw_circle(Vector2(dots.size.x / 2, 5 + i * 10), 3.2, UiKit.CINNABAR))
+	column.add_child(dots)
 	_layer.add_child(tag)
 	tag.position = loc.label_position - Vector2(20, 0)
 	UiKit.ignore_mouse(tag)
@@ -130,8 +142,11 @@ func _build_location(loc: LocationData) -> void:
 
 	# 道路上的落脚点
 	var dot := Panel.new()
-	dot.add_theme_stylebox_override("panel", UiKit.box(CINNABAR, INK, 3, 14))
-	dot.size = Vector2(26, 26)
+	var pin := UiKit.box(CINNABAR, INK, 3, 13)
+	pin.shadow_color = Color(PAPER, 0.85)
+	pin.shadow_size = 3
+	dot.add_theme_stylebox_override("panel", pin)
+	dot.size = Vector2(24, 24)
 	dot.position = loc.map_position - dot.size / 2
 	dot.gui_input.connect(_on_location_input.bind(loc))
 	_layer.add_child(dot)
@@ -165,7 +180,10 @@ func _build_avatar() -> Control:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var frame := Panel.new()
 	frame.size = Vector2(72, 72)
-	frame.add_theme_stylebox_override("panel", UiKit.box(PAPER, CINNABAR, 4, 36))
+	var ring := UiKit.box(PAPER, CINNABAR, 4, 36)
+	ring.shadow_color = Color(1.0, 0.8, 0.45, 0.8)
+	ring.shadow_size = 10
+	frame.add_theme_stylebox_override("panel", ring)
 	frame.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
 	root.add_child(frame)
 	var me := GameState.protagonist()
@@ -180,62 +198,118 @@ func _build_avatar() -> Control:
 	return root
 
 
+## 左上：主角头像 + 黑漆名牌（点了进主角页）；中间题签；右上：家当、设置、「归」；右边一列挂木签（主菜单）。
 func _build_top_bar() -> void:
-	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", UiKit.box(Color(INK, 0.85), Color(0, 0, 0, 0), 0, 0))
-	add_child(bar)
-	bar.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	bar.offset_bottom = 56
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	bar.add_child(row)
-	# 左上角是主角：头像 + 名字，点了进主角页
 	var me := GameState.protagonist()
-	var profile := UiKit.button(me.display_name if me != null else map.title, Vector2(150, 44), 22)
-	if me != null and me.face != null:
-		profile.icon = me.face
-		profile.expand_icon = true
-		profile.add_theme_constant_override("icon_max_width", 36)
-	profile.add_theme_color_override("font_color", PAPER)
+	var profile := Button.new()
+	profile.flat = true
+	profile.focus_mode = Control.FOCUS_NONE
+	profile.custom_minimum_size = Vector2(280, 88)
+	profile.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	profile.pressed.connect(func() -> void: profile_requested.emit())
-	row.add_child(profile)
-	_status = UiKit.label("", 20, UiKit.GOLD)
-	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	row.add_child(_status)
-	_refresh_status()
-	var jianghu_button := UiKit.button("江湖榜", Vector2(100, 40), 20)
-	jianghu_button.add_theme_color_override("font_color", UiKit.GOLD)
-	jianghu_button.pressed.connect(func() -> void: jianghu_requested.emit())
-	row.add_child(jianghu_button)
-	var recruit_button := UiKit.button("招募", Vector2(100, 40), 20)
-	recruit_button.pressed.connect(func() -> void: recruit_requested.emit())
-	row.add_child(recruit_button)
-	var heroes_button := UiKit.button("好汉", Vector2(100, 40), 20)
-	heroes_button.pressed.connect(func() -> void: heroes_requested.emit())
-	row.add_child(heroes_button)
-	var team_button := UiKit.button("编队", Vector2(100, 40), 20)
-	team_button.pressed.connect(func() -> void: team_requested.emit())
-	row.add_child(team_button)
-	var settings_button := UiKit.button("设置", Vector2(90, 40), 18)
+	UiKit.click_sound(profile)
+	add_child(profile)
+	profile.position = Vector2(16, 12)
+	var plate := PanelContainer.new()
+	plate.add_theme_stylebox_override("panel", UiKit.lacquer_box())
+	plate.position = Vector2(66, 16)
+	plate.custom_minimum_size = Vector2(196, 58)
+	profile.add_child(plate)
+	var info := VBoxContainer.new()
+	info.add_theme_constant_override("separation", 2)
+	plate.add_child(info)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 10)
+	info.add_child(name_row)
+	var spacer := Control.new()
+	spacer.custom_minimum_size.x = 14
+	name_row.add_child(spacer)
+	name_row.add_child(UiKit.brush_label(me.display_name if me != null else "", 28, Color("f1d99c")))
+	_status = UiKit.label("", 14, Color("cdb68a"))
+	_status.size_flags_vertical = Control.SIZE_SHRINK_END
+	name_row.add_child(_status)
+	_exp_bar = ProgressBar.new()
+	_exp_bar.custom_minimum_size = Vector2(150, 6)
+	UiKit.style_bar(_exp_bar, Color("e9c979"), false)
+	var bar_row := HBoxContainer.new()
+	var spacer2 := Control.new()
+	spacer2.custom_minimum_size.x = 14
+	bar_row.add_child(spacer2)
+	bar_row.add_child(_exp_bar)
+	info.add_child(bar_row)
+	var face_ring := Panel.new()
+	var ring := UiKit.box(PAPER, UiKit.GILT, 3, 42)
+	ring.shadow_color = Color(0, 0, 0, 0.5)
+	ring.shadow_size = 6
+	face_ring.add_theme_stylebox_override("panel", ring)
+	face_ring.size = Vector2(84, 84)
+	face_ring.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
+	profile.add_child(face_ring)
+	var face := UiKit.picture(me.face if me != null else null, 78)
+	face.position = Vector2(3, 3)
+	face.size = Vector2(78, 78)
+	face_ring.add_child(face)
+	UiKit.ignore_mouse(profile)
+
+	var title := UiKit.title_plaque("大宋江湖舆图", 26)
+	add_child(title)
+	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	title.offset_top = 16
+	title.grow_horizontal = Control.GROW_DIRECTION_BOTH
+
+	var right := HBoxContainer.new()
+	right.add_theme_constant_override("separation", 12)
+	right.alignment = BoxContainer.ALIGNMENT_END
+	add_child(right)
+	right.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	right.offset_left = -480
+	right.offset_right = -16
+	right.offset_top = 14
+	var purse := PanelContainer.new()
+	purse.add_theme_stylebox_override("panel", UiKit.lacquer_box())
+	purse.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var purse_row := HBoxContainer.new()
+	purse_row.add_theme_constant_override("separation", 18)
+	purse.add_child(purse_row)
+	_silver_row = UiKit.amount_row(UiKit.coin_icon(), "")
+	purse_row.add_child(_silver_row)
+	_token_row = UiKit.amount_row(UiKit.token_icon(), "")
+	purse_row.add_child(_token_row)
+	right.add_child(purse)
+	var settings_button := UiKit.copper_button("设置", 46, 22, true)
+	settings_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	settings_button.pressed.connect(_open_settings)
-	row.add_child(settings_button)
-	var back := UiKit.button("返回", Vector2(90, 40), 20)
-	back.add_theme_color_override("font_color", UiKit.GOLD)
+	right.add_child(settings_button)
+	var back := UiKit.back_button()
+	back.tooltip_text = "回到场景"
 	back.pressed.connect(func() -> void: back_requested.emit())
-	row.add_child(back)
+	right.add_child(back)
+	_refresh_status()
+
+	var menu := VBoxContainer.new()
+	menu.add_theme_constant_override("separation", 20)
+	add_child(menu)
+	menu.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	menu.offset_left = -78
+	menu.offset_right = -24
+	menu.offset_top = 112
+	for item in [["招募", recruit_requested], ["好汉", heroes_requested], ["编队", team_requested], ["江湖榜", jianghu_requested]]:
+		var slip := UiKit.slip_button(item[0])
+		var sig: Signal = item[1]
+		slip.pressed.connect(func() -> void: sig.emit())
+		menu.add_child(slip)
 
 
 func _build_panel() -> void:
 	_panel = PanelContainer.new()
-	_panel.add_theme_stylebox_override("panel", UiKit.box(Color(INK, 0.9), UiKit.GOLD, 2, 10))
+	_panel.add_theme_stylebox_override("panel", UiKit.panel_box())
 	add_child(_panel)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 6)
 	_panel.add_child(v)
-	_panel_title = UiKit.label("", 26, UiKit.GOLD)
+	_panel_title = UiKit.brush_label("", 30, INK)
 	v.add_child(_panel_title)
-	_panel_desc = UiKit.label("", 18, PAPER)
+	_panel_desc = UiKit.label("", 17, INK)
 	_panel_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_panel_desc.custom_minimum_size.x = 640
 	v.add_child(_panel_desc)
@@ -327,7 +401,7 @@ func _on_location_input(event: InputEvent, loc: LocationData) -> void:
 func _show_panel(loc: LocationData) -> void:
 	_panel.visible = true
 	var here := loc.id == GameState.location_id
-	_panel_title.text = "%s　%s%s" % [loc.display_name, "★".repeat(loc.danger), "　（你在这里）" if here else ""]
+	_panel_title.text = "%s%s" % [loc.display_name, "　· 你在这里" if here else ""]
 	var desc := "%s\n这一带的敌人：%d～%d 级（你现在 %d 级）" % [loc.description, loc.level_min, loc.level_max, GameState.level]
 	if not here:
 		var route := _route_names(GameState.location_id, loc.id)
@@ -339,7 +413,7 @@ func _show_panel(loc: LocationData) -> void:
 	if not here:
 		for story in GameDB.stories:
 			if story.location == loc.id and GameState.story_available(story):
-				_panel_buttons.add_child(UiKit.label("%s列传·%s（到了那里才能开始）" % [GameDB.hero(story.hero).display_name, story.title], 17, UiKit.GOLD))
+				_panel_buttons.add_child(UiKit.label("%s列传·%s（到了那里才能开始）" % [GameDB.hero(story.hero).display_name, story.title], 17, UiKit.CINNABAR))
 		var back := UiKit.button("返回场景", Vector2(150, 52), 22)
 		back.pressed.connect(func() -> void: back_requested.emit())
 		_panel_buttons.add_child(back)
@@ -400,7 +474,12 @@ func _open_board(loc: LocationData) -> void:
 
 
 func _refresh_status() -> void:
-	_status.text = "Lv%d　经验 %d/%d　银两 %d　聚义令 %d" % [GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver, GameState.tokens]
+	_status.text = "%s级" % UiKit.cn_number(GameState.level)
+	_exp_bar.max_value = GameState.exp_to_next(GameState.level)
+	_exp_bar.value = GameState.experience
+	_exp_bar.tooltip_text = "经验 %d / %d" % [GameState.experience, GameState.exp_to_next(GameState.level)]
+	(_silver_row.get_child(1) as Label).text = str(GameState.silver)
+	(_token_row.get_child(1) as Label).text = str(GameState.tokens)
 
 
 func _refresh_locks() -> void:

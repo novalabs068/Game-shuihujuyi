@@ -26,93 +26,139 @@ var _role_desc: Label
 
 
 func _ready() -> void:
-	var bg := ColorRect.new()
-	bg.color = UiKit.BG
-	add_child(bg)
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	UiKit.backdrop(self)
 
-	var margin := MarginContainer.new()
-	for side: String in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 28)
-	add_child(margin)
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var body := HBoxContainer.new()
-	body.add_theme_constant_override("separation", 28)
-	margin.add_child(body)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	head.position = Vector2(28, 16)
+	add_child(head)
+	head.add_child(UiKit.page_title("投身江湖", "", 46))
+	var hint := UiKit.label("选一条出身，职业定下就不再改", 15, Color("cdb68a"))
+	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_child(hint)
+	var back := UiKit.back_button()
+	add_child(back)
+	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	back.offset_left = -74
+	back.offset_right = -20
+	back.offset_top = 14
+	back.pressed.connect(func() -> void: back_requested.emit())
 
-	# 左边：职业、性别、名字、出身说明、按钮
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 12)
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.add_child(v)
-	v.add_child(UiKit.label("创建角色", 32))
-
-	v.add_child(UiKit.label("职业", 20, UiKit.TEXT_DIM))
+	# 左边：五支职业木签，选中的变朱漆、往上抬一截
 	var roles := HBoxContainer.new()
-	roles.add_theme_constant_override("separation", 10)
-	v.add_child(roles)
+	roles.add_theme_constant_override("separation", 14)
+	roles.alignment = BoxContainer.ALIGNMENT_END
+	roles.position = Vector2(30, 120)
+	roles.custom_minimum_size = Vector2(0, 280)
+	add_child(roles)
 	for o in GameDB.origin_list():
-		var b := UiKit.button("%s\n%s" % [UiKit.ROLE_NAMES[o.unit.role], o.display_name], ROLE_BUTTON_SIZE, 20)
+		var b := UiKit.slip_button(o.display_name, 84, 30)
+		b.custom_minimum_size.y = maxf(b.custom_minimum_size.y + 48, 230)
+		b.set_meta("base_height", b.custom_minimum_size.y)
+		b.size_flags_vertical = Control.SIZE_SHRINK_END
+		var l: Label = b.get_meta("label")
+		l.offset_top = 76
+		var badge := UiKit.brush_label(UiKit.ROLE_TAGS[o.unit.role], 24, Color("e9c979"))
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		var ring := StyleBoxFlat.new()
+		ring.bg_color = UiKit.INK
+		ring.border_color = UiKit.GILT
+		ring.set_border_width_all(2)
+		ring.set_corner_radius_all(21)
+		badge.add_theme_stylebox_override("normal", ring)
+		badge.custom_minimum_size = Vector2(42, 42)
+		badge.position = Vector2(21, 26)
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(badge)
 		b.pressed.connect(_choose.bind(o))
 		roles.add_child(b)
 		_role_buttons[o] = b
 
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	v.add_child(row)
-	row.add_child(UiKit.label("性别", 20, UiKit.TEXT_DIM))
-	for g: StringName in GameState.GENDERS:
-		var b := UiKit.button("男" if g == GameState.GENDER_MALE else "女", GENDER_BUTTON_SIZE, 22)
-		b.pressed.connect(_choose_gender.bind(g))
-		row.add_child(b)
-		_gender_buttons[g] = b
-	var gap := Control.new()
-	gap.custom_minimum_size.x = 24
-	row.add_child(gap)
-	row.add_child(UiKit.label("姓名", 20, UiKit.TEXT_DIM))
-	_name_edit = LineEdit.new()
-	_name_edit.placeholder_text = DEFAULT_NAME
-	_name_edit.max_length = MAX_NAME_LENGTH
-	_name_edit.custom_minimum_size = Vector2(220, 52)
-	_name_edit.add_theme_font_size_override("font_size", 24)
-	row.add_child(_name_edit)
+	var info := VBoxContainer.new()
+	info.add_theme_constant_override("separation", 6)
+	info.position = Vector2(30, 430)
+	info.custom_minimum_size.x = 500
+	info.size.x = 500
+	add_child(info)
+	_origin_title = UiKit.brush_label("", 30, Color("e9c979"))
+	info.add_child(_origin_title)
+	_origin_desc = _wrap(UiKit.label("", 16, UiKit.TEXT))
+	info.add_child(_origin_desc)
+	_role_desc = _wrap(UiKit.label("", 14, UiKit.TEXT_DIM))
+	info.add_child(_role_desc)
 
-	var info := PanelContainer.new()
-	info.add_theme_stylebox_override("panel", UiKit.box(UiKit.PANEL, UiKit.PANEL_LIGHT, 1, 6))
-	info.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	v.add_child(info)
-	var iv := VBoxContainer.new()
-	iv.add_theme_constant_override("separation", 6)
-	info.add_child(iv)
-	_origin_title = UiKit.label("", 26, UiKit.GOLD)
-	iv.add_child(_origin_title)
-	_origin_desc = _wrap(UiKit.label("", 18))
-	iv.add_child(_origin_desc)
-	_role_desc = _wrap(UiKit.label("", 16, UiKit.TEXT_DIM))
-	iv.add_child(_role_desc)
-	_martial_title = UiKit.label("", 20, UiKit.GOLD)
-	iv.add_child(_martial_title)
-	_martial_desc = _wrap(UiKit.label("", 16, UiKit.TEXT_DIM))
-	iv.add_child(_martial_desc)
-
-	var bottom := HBoxContainer.new()
-	bottom.add_theme_constant_override("separation", 20)
-	bottom.alignment = BoxContainer.ALIGNMENT_END
-	v.add_child(bottom)
-	var back := UiKit.button("返回", Vector2(150, 60), 24)
-	back.pressed.connect(func() -> void: back_requested.emit())
-	bottom.add_child(back)
-	var start := UiKit.button("踏入江湖", Vector2(220, 60), 28)
-	start.pressed.connect(_on_start)
-	bottom.add_child(start)
-
-	# 右边：立绘
+	# 中间：立绘
 	_portrait = TextureRect.new()
 	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_portrait.custom_minimum_size = Vector2(PORTRAIT_SIZE * 0.78, PORTRAIT_SIZE)
-	_portrait.size_flags_vertical = Control.SIZE_SHRINK_END
-	body.add_child(_portrait)
+	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait.position = Vector2(530, 90)
+	_portrait.size = Vector2(PORTRAIT_SIZE * 0.78, PORTRAIT_SIZE + 70)
+	add_child(_portrait)
+
+	# 右边：宣纸页上起名、选男女、看开局武学，最后「踏入江湖」
+	var page := PanelContainer.new()
+	page.add_theme_stylebox_override("panel", UiKit.panel_box())
+	page.position = Vector2(916, 110)
+	page.size = Vector2(344, 530)
+	add_child(page)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 14)
+	page.add_child(v)
+	v.add_child(UiKit.brush_label("姓名", 24, UiKit.INDIGO))
+	_name_edit = LineEdit.new()
+	_name_edit.placeholder_text = DEFAULT_NAME
+	_name_edit.max_length = MAX_NAME_LENGTH
+	_name_edit.custom_minimum_size = Vector2(220, 58)
+	_name_edit.add_theme_font_override("font", UiKit.brush_font())
+	_name_edit.add_theme_font_size_override("font_size", 36)
+	_name_edit.add_theme_color_override("font_placeholder_color", Color(UiKit.INK, 0.45))
+	var line := StyleBoxFlat.new()
+	line.bg_color = Color(0, 0, 0, 0)
+	line.border_color = UiKit.INK
+	line.border_width_bottom = 2
+	line.set_content_margin_all(4)
+	_name_edit.add_theme_stylebox_override("normal", line)
+	_name_edit.add_theme_stylebox_override("focus", line)
+	v.add_child(_name_edit)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	v.add_child(row)
+	var gender_head := UiKit.brush_label("性别", 24, UiKit.INDIGO)
+	gender_head.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(gender_head)
+	for g: StringName in GameState.GENDERS:
+		var b := UiKit.seal_button("男" if g == GameState.GENDER_MALE else "女", 58, 30)
+		b.pressed.connect(_choose_gender.bind(g))
+		row.add_child(b)
+		_gender_buttons[g] = b
+	var martial := PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(UiKit.CINNABAR, 0.07)
+	box.border_color = Color(UiKit.CINNABAR, 0.35)
+	box.set_border_width_all(1)
+	box.set_content_margin_all(10)
+	martial.add_theme_stylebox_override("panel", box)
+	v.add_child(martial)
+	var mv := VBoxContainer.new()
+	mv.add_theme_constant_override("separation", 4)
+	martial.add_child(mv)
+	var mrow := HBoxContainer.new()
+	mrow.add_theme_constant_override("separation", 8)
+	mv.add_child(mrow)
+	mrow.add_child(UiKit.seal_label("开局武学", 15))
+	_martial_title = UiKit.label("", 17, UiKit.INK)
+	mrow.add_child(_martial_title)
+	_martial_desc = _wrap(UiKit.label("", 14, UiKit.INK))
+	mv.add_child(_martial_desc)
+	var gap := Control.new()
+	gap.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_child(gap)
+	var start := UiKit.plaque_button("踏入江湖", Vector2(220, 64), true, 32)
+	start.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	start.pressed.connect(_on_start)
+	v.add_child(start)
 
 	var origins := GameDB.origin_list()
 	if not origins.is_empty():
@@ -131,10 +177,12 @@ func _choose(o: OriginData) -> void:
 		_highlight(_role_buttons[other], other == o)
 	var loc: LocationData = GameDB.maps[GameState.DEFAULT_MAP].location(o.start_location)
 	_origin_title.text = "%s · %s　开局：%s" % [UiKit.ROLE_NAMES[o.unit.role], o.display_name, loc.display_name if loc != null else "?"]
+	for other in _role_buttons:
+		UiKit.set_slip_lit(_role_buttons[other], other == o)
 	_origin_desc.text = o.description
 	_role_desc.text = "%s：%s。职业开局定下就不再变；学到别的职业的武学也能主修，但威力只有七成。" % [UiKit.ROLE_NAMES[o.unit.role], Roles.summary(o.unit.role)]
 	var skill := o.martial.skill if o.martial != null else o.unit.skill
-	_martial_title.text = "开局武学「%s」" % (o.martial.display_name if o.martial != null else skill.display_name)
+	_martial_title.text = "「%s」" % (o.martial.display_name if o.martial != null else skill.display_name)
 	_martial_desc.text = skill.description
 	_refresh_portrait()
 
@@ -153,13 +201,12 @@ func _refresh_portrait() -> void:
 	_portrait.texture = _chosen.portrait_female if female else _chosen.unit.portrait
 
 
-## 选中的按钮描金边。
+## 选中的职业木签往上抬一截；选中的男女是朱印，另一个褪成淡墨。
 func _highlight(b: Button, on: bool) -> void:
-	b.modulate = Color.WHITE if on else Color(1, 1, 1, 0.55)
-	if on:
-		b.add_theme_stylebox_override("normal", UiKit.box(UiKit.PANEL_LIGHT, UiKit.GOLD, 3, 6))
+	if b.has_meta("base_height"):
+		b.custom_minimum_size.y = (b.get_meta("base_height") as float) + (16.0 if on else 0.0)
 	else:
-		b.remove_theme_stylebox_override("normal")
+		b.modulate = Color.WHITE if on else Color(0.55, 0.5, 0.45, 0.6)
 
 
 func _on_start() -> void:
