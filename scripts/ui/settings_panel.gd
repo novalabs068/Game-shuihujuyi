@@ -9,8 +9,8 @@ signal restart_requested
 ## 在开始界面打开时没有存档可清，不显示「重新开始」
 var allow_restart := true
 
-## 鸣谢：CC-BY 授权要求写明作者、曲名和授权（素材都从 OpenGameArt、Kenney 来）
-const CREDITS := "鸣谢　战斗配乐：Blackmoor Ninjas（Matthew Pablo，CC-BY 3.0）、Drums of Dawn（magnesus，CC-BY 3.0）、Samurai（tad，CC-BY 4.0），均来自 OpenGameArt.org。战斗音效录音：Kenney（CC0）。字体：思源宋体 Noto Serif SC、马善政毛笔楷书 Ma Shan Zheng（均为 SIL OFL 1.1）。"
+## 鸣谢：CC-BY 授权要求写明作者、曲名和授权（素材从 OpenGameArt、Kenney、Freesound 来；CC0 的不要求署名，也一并写上）
+const CREDITS := "鸣谢　战斗配乐：Blackmoor Ninjas（Matthew Pablo，CC-BY 3.0）、Drums of Dawn（magnesus，CC-BY 3.0）、Samurai（tad，CC-BY 4.0），均来自 OpenGameArt.org。音效录音：Kenney 及 Freesound.org 的多位作者（CC0）。字体：思源宋体 Noto Serif SC、马善政毛笔楷书 Ma Shan Zheng（均为 SIL OFL 1.1）。"
 
 var _restart: Button
 var _armed := false
