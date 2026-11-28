@@ -178,7 +178,7 @@ chests = Array[ExtResource("1_kwhtk")]([SubResource("Resource_3rb5v")])
 region = &"dongjing"
 roam_spots = Array[Vector2i]([Vector2i(2, 2), Vector2i(22, 2), Vector2i(11, 18), Vector2i(37, 18)])
 exit_scene = "dongjing_street"
-exit_cell = Vector2i(73, 37)
+exit_cell = Vector2i(75, 37)
 overlays = Dictionary[String, Texture2D]({
 "=": ExtResource("10_15oec"),
 "T": ExtResource("9_5krpj"),

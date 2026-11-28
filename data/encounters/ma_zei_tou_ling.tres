@@ -4,10 +4,11 @@
 [ext_resource type="Resource" path="res://data/enemies/ma_zei.tres" id="2_ud5mu"]
 [ext_resource type="Resource" path="res://data/enemies/shan_zei_tou_mu.tres" id="3_ckfll"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_t405f"]
+[ext_resource type="Resource" path="res://data/enemies/xiang_ma.tres" id="9_mix"]
 
 [resource]
 script = ExtResource("4_t405f")
 id = "ma_zei_tou_ling"
 title = "马贼头领"
-enemies = Array[ExtResource("1_sskv0")]([ExtResource("2_ud5mu"), ExtResource("3_ckfll"), ExtResource("2_ud5mu")])
+enemies = Array[ExtResource("1_sskv0")]([ExtResource("2_ud5mu"), ExtResource("3_ckfll"), ExtResource("9_mix")])
 star_round_limit = 6

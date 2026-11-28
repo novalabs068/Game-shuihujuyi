@@ -4,10 +4,11 @@
 [ext_resource type="Resource" path="res://data/enemies/shui_kou.tres" id="2_yr740"]
 [ext_resource type="Resource" path="res://data/enemies/shan_zei_tou_mu.tres" id="3_j7lnl"]
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="4_t8ors"]
+[ext_resource type="Resource" path="res://data/enemies/shui_kou_jian_shou.tres" id="9_mix"]
 
 [resource]
 script = ExtResource("4_t8ors")
 id = "shui_zhai_tou_ling"
 title = "水寨头领"
-enemies = Array[ExtResource("1_j8t02")]([ExtResource("2_yr740"), ExtResource("3_j7lnl"), ExtResource("2_yr740")])
+enemies = Array[ExtResource("1_j8t02")]([ExtResource("2_yr740"), ExtResource("3_j7lnl"), ExtResource("9_mix")])
 star_round_limit = 6

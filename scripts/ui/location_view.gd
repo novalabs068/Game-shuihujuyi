@@ -127,8 +127,105 @@ func _build_tiles() -> void:
 			var info: Dictionary = SceneData.TERRAIN.get(rows[y][x], SceneData.TERRAIN["#"])
 			var block := scene_data.tile_block
 			var tile: int = info["tile"]
-			layer.set_cell(Vector2i(x, y), 0, Vector2i(tile * block + x % block, y % block))
+			var cell := Vector2i(x, y)
+			match _thin_wall(cell):
+				&"v":
+					# 竖着的一道墙：取图块最上面那一条（瓦檐 + 红墙）沿对角线翻过来，整道墙一个样；
+					# 不翻的话是按横墙的图一格格往下堆，看着像一截截横墙叠在一起
+					layer.set_cell(cell, 0, Vector2i(tile * block + y % block, 0), TileSetAtlasSource.TRANSFORM_TRANSPOSE)
+				&"h":
+					# 横着的一道墙：也都取最上面那一条，不然隔几行的墙有的有瓦檐、有的只剩砖
+					layer.set_cell(cell, 0, Vector2i(tile * block + x % block, 0))
+				_:
+					layer.set_cell(cell, 0, Vector2i(tile * block + x % block, y % block))
 	_world.add_child(layer)
+
+
+## 每个路口（一串通往同一处的门格）旁边写上通往哪里，免得几个路口分不清（东京南边有通郊野和通黄泥冈两个）。
+func _add_door_signs() -> void:
+	var groups: Dictionary[String, Array] = {}
+	for door: Vector2i in scene_data.doors:
+		var target: String = scene_data.doors[door]
+		if not groups.has(target):
+			groups[target] = []
+		groups[target].append(door)
+	var middle := Vector2(scene_data.size()) * _tile / 2.0
+	for target: String in groups:
+		var cells: Array = groups[target]
+		# 同一处可能有好几个路口（隔得远的分开写）
+		var clusters: Array = []
+		for c: Vector2i in cells:
+			var placed := false
+			for cl: Array in clusters:
+				if (cl[0] as Vector2i).distance_to(c) < 6:
+					cl.append(c)
+					placed = true
+					break
+			if not placed:
+				clusters.append([c])
+		for cl: Array in clusters:
+			var center := Vector2.ZERO
+			for c: Vector2i in cl:
+				center += _feet(c)
+			center /= cl.size()
+			# 往地图里面挪一点，贴边的字不会被切掉
+			var at := center + (middle - center).normalized() * _tile * 1.6
+			var plate := UiKit.label(_door_sign_text(target), 22, Color("f3e6c4"))
+			plate.add_theme_constant_override("outline_size", 6)
+			plate.add_theme_color_override("font_outline_color", Color(0.12, 0.08, 0.05, 0.9))
+			plate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			plate.size = Vector2(_tile * 6, _tile)
+			plate.position = at - plate.size / 2.0
+			plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			plate.z_index = 5
+			_world.add_child(plate)
+
+
+## 路牌上的字：「往黄泥冈」「往城外郊野」。路名「东京—黄泥冈道上」取不是这里的那头；
+## 「东京·城外郊野」这种，同一地区写后半截，别的地区写前半截。
+func _door_sign_text(target: String) -> String:
+	var sd: SceneData = GameDB.scenes.get(target)
+	if sd == null:
+		return ""
+	var title := sd.title
+	if title.contains("—"):
+		for part in title.trim_suffix("道上").split("—"):
+			if not scene_data.title.contains(part):
+				return "往" + part
+	if title.contains("·"):
+		var parts := title.split("·")
+		return "往" + (parts[1] if sd.region == scene_data.region and not OddJobs.is_road(scene_data) else parts[0])
+	return "往" + title
+
+
+## 一格宽的墙：竖着走的返回 &"v"，横着走的（含拐角、孤零零一格）返回 &"h"，不是墙或者是厚墙块返回 &""。
+func _thin_wall(cell: Vector2i) -> StringName:
+	var bounds := Rect2i(Vector2i.ZERO, scene_data.size())
+	var t := func(c: Vector2i) -> bool: return bounds.has_point(c) and scene_data.terrain_at(c) == "#"
+	if not t.call(cell):
+		return &""
+	var side: bool = t.call(cell + Vector2i.LEFT) or t.call(cell + Vector2i.RIGHT)
+	var updown: bool = t.call(cell + Vector2i.UP) or t.call(cell + Vector2i.DOWN)
+	if updown and not side:
+		return &"v"
+	if not (t.call(cell + Vector2i.UP) and t.call(cell + Vector2i.DOWN)) and not (side and updown and _thick(cell)):
+		return &"h"
+	return &""
+
+
+## 这一格周围 2×2 有没有整块都是墙（厚墙块、建筑底座），有就按原来的花纹铺。
+func _thick(cell: Vector2i) -> bool:
+	var bounds := Rect2i(Vector2i.ZERO, scene_data.size())
+	for d: Vector2i in [Vector2i(-1, -1), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(0, 0)]:
+		var all := true
+		for k: Vector2i in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]:
+			var c: Vector2i = cell + d + k
+			if not (bounds.has_point(c) and scene_data.terrain_at(c) == "#"):
+				all = false
+				break
+		if all:
+			return true
+	return false
 
 
 func _build_pathfinding() -> void:
@@ -152,6 +249,7 @@ func _spawn_objects() -> void:
 				_actors.add_child(_pixel_sprite(overlay, _cell_bottom(Vector2i(x, y))))
 	for prop in scene_data.props:
 		_actors.add_child(_pixel_sprite(prop.texture, _cell_bottom(prop.cell) + prop.offset))
+	_add_door_signs()
 	for npc in scene_data.npcs:
 		# 已经随行的好汉不再站在场景里
 		if npc.unit != null and npc.unit.id in GameState.team_ids:
@@ -571,8 +669,52 @@ func _gui_input(event: InputEvent) -> void:
 		_approach(cell, _talk.bind(_npc_at[cell]))
 	elif _chest_at.has(cell):
 		_approach(cell, _open_chest.bind(_chest_at[cell]))
+	elif _gate_target(click.position - _world.position) != Grid.NONE:
+		# 点在城门楼、山门这类图上：走进它底下的门，或者穿过门洞走到另一边
+		_walk_to(_gate_target(click.position - _world.position), Callable())
 	elif scene_data.is_walkable(cell):
 		_walk_to(cell, Callable())
+
+
+## 点到的位置落在哪张建筑图上：图底下有门格，就返回离点的位置最近的门格；
+## 图底下是能走的门洞（比如东京南城门），就返回穿过门洞后另一边的那一格。都没有返回 Grid.NONE。
+## 城门楼的图比门格、门洞大很多，只认那几格的话玩家点门楼没反应。
+func _gate_target(pos: Vector2) -> Vector2i:
+	var best := Grid.NONE
+	var best_dist := INF
+	for prop in scene_data.props:
+		if prop.texture == null:
+			continue
+		var size := prop.texture.get_size() * PIXEL_SCALE
+		var bottom := _cell_bottom(prop.cell) + prop.offset
+		var rect := Rect2(bottom - Vector2(size.x / 2.0, size.y), size)
+		if not rect.has_point(pos):
+			continue
+		for door: Vector2i in scene_data.doors:
+			var at := _feet(door)
+			# 门格要在图的底部一带（门洞在图的下沿）
+			if at.x < rect.position.x or at.x > rect.end.x or absf(at.y - rect.end.y) > _tile * 1.5:
+				continue
+			var d := at.distance_to(pos)
+			if d < best_dist:
+				best_dist = d
+				best = door
+		if best != Grid.NONE:
+			return best
+		# 没有门：找图下沿那一行能走的门洞，穿过去
+		var here := _cell_at(_player.position)
+		for x in range(prop.cell.x - 3, prop.cell.x + 4):
+			var hole := Vector2i(x, prop.cell.y)
+			if not scene_data.is_walkable(hole) or _feet(hole).x < rect.position.x or _feet(hole).x > rect.end.x:
+				continue
+			var through := hole + (Vector2i.DOWN if here.y < hole.y else Vector2i.UP)
+			if not scene_data.is_walkable(through):
+				continue
+			var d := _feet(hole).distance_to(pos)
+			if d < best_dist:
+				best_dist = d
+				best = through
+	return best
 
 
 ## 走到 target 旁边一格再执行 action；已经挨着就直接执行。

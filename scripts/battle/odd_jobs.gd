@@ -13,13 +13,15 @@ const TOKEN_CHANCE := 0.35
 
 
 ## 某个地区能遇到的敌人（地区遇敌表 + 属于这个地区的场景里的小怪），去重。
+## 通往别处的野外路不算：路虽然挂在这个地区名下，可路上的敌人是两头地区混着的
+## （东京往黄泥冈那条路上有官兵弓手），揭了东京的悬赏却要跑到别的路上去打，玩家找不到。
 static func enemy_pool(region: StringName) -> Array[UnitData]:
 	var loc: LocationData = GameDB.maps[GameState.DEFAULT_MAP].location(region)
 	var groups: Array[StageData] = []
 	if loc != null:
 		groups.append_array(loc.encounter_groups)
 	for sd: SceneData in GameDB.scenes.values():
-		if sd.region == region:
+		if sd.region == region and not is_road(sd):
 			groups.append_array(sd.roam_groups)
 	var out: Array[UnitData] = []
 	var seen: Array[StringName] = []
@@ -31,10 +33,16 @@ static func enemy_pool(region: StringName) -> Array[UnitData]:
 	return out
 
 
-## 这个地区眼下的 3 张小悬赏；不够就补新的。
+## 野外路（两个地点之间的路，id 由世界生成器起成 road_甲_乙）。
+static func is_road(sd: SceneData) -> bool:
+	return sd.id.begins_with("road_")
+
+
+## 这个地区眼下的 3 张小悬赏；不够就补新的。要打的敌人已经不在这一带的旧悬赏撤掉重贴。
 static func jobs_for(region: StringName) -> Array:
-	var jobs: Array = GameState.jobs.get(String(region), [])
 	var pool := enemy_pool(region)
+	var ids := pool.map(func(u: UnitData) -> String: return String(u.id))
+	var jobs: Array = (GameState.jobs.get(String(region), []) as Array).filter(func(j: Dictionary) -> bool: return j["enemy"] in ids)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	while jobs.size() < PER_REGION and not pool.is_empty():

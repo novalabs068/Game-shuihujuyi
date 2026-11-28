@@ -798,7 +798,9 @@ func city_entry(region: StringName) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	var e := CityJobs.accrue(city_jobs.get(String(region), {}), CityJobs.today())
-	e = CityJobs.post_next(e, OddJobs.enemy_pool(region), rng)
+	var pool := OddJobs.enemy_pool(region)
+	e = CityJobs.fix_enemy(e, pool, rng)
+	e = CityJobs.post_next(e, pool, rng)
 	city_jobs[String(region)] = e
 	return e
 

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/ma_zei.png" id="1_map"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/ma_zei.png" id="2_bat"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_unit"]
+
+[resource]
+script = ExtResource("3_unit")
+id = &"xiang_ma"
+display_name = "响马"
+role = 2
+base_hp = 300
+base_atk = 90
+base_def = 16
+base_spd = 112
+map_sprite = ExtResource("1_map")
+battle_sprite = ExtResource("2_bat")
+attack_style = &"arrow"

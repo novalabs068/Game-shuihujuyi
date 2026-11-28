@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/pixel/characters/shui_kou.png" id="1_map"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/shui_kou.png" id="2_bat"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="3_unit"]
+
+[resource]
+script = ExtResource("3_unit")
+id = &"shui_kou_jian_shou"
+display_name = "水寇箭手"
+role = 2
+base_hp = 330
+base_atk = 90
+base_def = 18
+base_spd = 100
+map_sprite = ExtResource("1_map")
+battle_sprite = ExtResource("2_bat")
+attack_style = &"arrow"
