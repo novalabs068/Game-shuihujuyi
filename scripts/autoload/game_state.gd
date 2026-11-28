@@ -19,10 +19,10 @@ const ADDRESS_WORDS := {
 	"{后生}": {GENDER_MALE: "后生", GENDER_FEMALE: "姑娘"},
 }
 const GENDERS: Array[StringName] = [GENDER_MALE, GENDER_FEMALE]
-## 修为：野外歇脚打坐歇完得多少（按队伍等级）
+## 修为：野外歇脚打坐歇完得多少（按统领等级）
 const CAMP_XIUWEI_PER_LEVEL := 12
-## 队伍等级上限（M3 做养成时再细分到每个人）
-const MAX_LEVEL := 99
+## 等级上限（规则在 Leveling）
+const MAX_LEVEL := Leveling.MAX_LEVEL
 ## 存档里的等级是哪一套：旧存档（1～30 级）读档时换算成 1～99 级
 const LEVEL_SCALE := 99
 
@@ -41,9 +41,12 @@ var flags: Dictionary[String, bool] = {}
 var location_id: StringName = &""
 ## 现在在哪张场景里（地点的场景或者野外路图）；游戏以它为家，打完仗、看完菜单都回这里
 var scene_id := ""
-## 主角和随行好汉共用的队伍等级（M3 前的简化）
+## 统领的等级和经验；敌人强弱、歇脚价钱这些都按统领等级算
 var level := 1
 var experience := 0
+## 每位好汉自己的等级和经验：只有上场的好汉拿经验。没记的就是 1 级（新招的从 1 级练起）
+var hero_levels: Dictionary[StringName, int] = {}
+var hero_exp: Dictionary[StringName, int] = {}
 var silver := 0
 ## 聚义令：抽卡用，只能靠闯荡获得
 var tokens := 0
@@ -547,7 +550,36 @@ func max_hp_of(id: StringName) -> int:
 	var unit := battle_data(id)
 	if unit == null:
 		return 1
-	return maxi(1, roundi(unit.base_hp * pow(Roles.level_growth(unit), level - 1)))
+	return maxi(1, roundi(unit.base_hp * pow(Roles.level_growth(unit), level_of(id) - 1)))
+
+
+## 这个人的等级：统领看 level，好汉看自己的（没记的是 1 级）。
+func level_of(id: StringName) -> int:
+	if id == PROTAGONIST_ID:
+		return level
+	return hero_levels.get(id, 1)
+
+
+## 这个人当前这一级攒了多少经验。
+func exp_of(id: StringName) -> int:
+	if id == PROTAGONIST_ID:
+		return experience
+	return hero_exp.get(id, 0)
+
+
+## 这个人拿经验的倍数：好汉比统领低就多拿（见 Leveling.catch_up_mult），统领拿原样。
+func catch_up_mult(id: StringName) -> float:
+	if id == PROTAGONIST_ID:
+		return 1.0
+	return Leveling.catch_up_mult(level_of(id), level)
+
+
+## 出战队伍每人的等级（和 team() 一一对应），开战时交给 BattleModel。
+func team_levels() -> Array[int]:
+	var out: Array[int] = []
+	for u in team():
+		out.append(level_of(u.id))
+	return out
 
 
 ## 一个人上战场的数据：好汉带上星级、羁绊，统领用主修武学；都再带上装备和秘籍。
@@ -903,10 +935,9 @@ func set_heroes(list: Array[UnitData]) -> void:
 		team_ids.append(h.id)
 
 
-## 从 level 升到下一级需要的经验。
-## 一场仗（三个同级敌人）给 15 × 等级 的经验：早期一两场升一级，60 级左右要三场，越往后越慢。
+## 从 at_level 升到下一级需要的经验（见 Leveling）。
 static func exp_to_next(at_level: int) -> int:
-	return 20 + 15 * at_level + at_level * at_level / 2
+	return Leveling.exp_to_next(at_level)
 
 
 ## 旧存档（最高 30 级）的等级换算到 1～99 级。
@@ -914,21 +945,37 @@ static func rescale_old_level(old: int) -> int:
 	return clampi(roundi(1 + (old - 1) * 98.0 / 29.0), 1, MAX_LEVEL)
 
 
-## 加经验和银两，返回升了几级。
-func add_rewards(gained_exp: int, gained_silver: int) -> int:
+## 加银两，统领和出战的好汉每人各加一份经验（好汉按 catch_up_mult 多拿）。
+## 返回升级的提示，升到同一级的并成一句（「统领、林冲升到 12 级！」），没人升级返回空。升了级的人气血回满。
+func add_rewards(gained_exp: int, gained_silver: int) -> PackedStringArray:
 	silver += gained_silver
-	experience += gained_exp
-	var ups := 0
-	while level < MAX_LEVEL and experience >= exp_to_next(level):
-		experience -= exp_to_next(level)
-		level += 1
-		ups += 1
-	if level >= MAX_LEVEL:
-		experience = 0
-	# 升级时全队气血回满
-	if ups > 0:
-		vitality.clear()
-	return ups
+	var texts := PackedStringArray()
+	if gained_exp <= 0:
+		return texts
+	var risen := {}  # 升到几级 → [谁, ...]
+	var ids: Array[StringName] = [PROTAGONIST_ID]
+	for hero in heroes():
+		ids.append(hero.id)
+	for id in ids:
+		var gained := roundi(gained_exp * catch_up_mult(id))
+		var grown := Leveling.gain_exp(level_of(id), exp_of(id), gained)
+		var ups: int = grown[0] - level_of(id)
+		if id == PROTAGONIST_ID:
+			level = grown[0]
+			experience = grown[1]
+		else:
+			hero_levels[id] = grown[0]
+			hero_exp[id] = grown[1]
+		if ups > 0:
+			vitality.erase(id)
+			var who := "统领" if id == PROTAGONIST_ID else GameDB.hero(id).display_name
+			if not risen.has(grown[0]):
+				risen[grown[0]] = PackedStringArray()
+			risen[grown[0]].append(who)
+	for lv: int in risen:
+		texts.append("%s升到 %d 级！" % ["、".join(risen[lv]), lv])
+	return texts
+
 
 
 # --- 气血和药 ---
@@ -1142,6 +1189,8 @@ func reset() -> void:
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
 	level = 1
 	experience = 0
+	hero_levels.clear()
+	hero_exp.clear()
 	silver = 0
 	tokens = 0
 	_protagonist = null
@@ -1201,6 +1250,8 @@ func save_game() -> void:
 		"location": String(location_id),
 		"level": level,
 		"exp": experience,
+		"hero_levels": _ids_to_json(hero_levels),
+		"hero_exp": _ids_to_json(hero_exp),
 		"silver": silver,
 		"tokens": tokens,
 		"owned": owned.map(func(id: StringName) -> String: return String(id)),
@@ -1275,6 +1326,17 @@ func load_game() -> void:
 	var saved_owned: Array = data.get("owned", saved_team)
 	for id: String in saved_owned:
 		owned.append(StringName(id))
+	# 好汉各自的等级：以前全队共用一个等级的旧存档，已招到的好汉都从统领现在的等级起
+	if data.has("hero_levels"):
+		var saved_hero_levels: Dictionary = data["hero_levels"]
+		for id: String in saved_hero_levels:
+			hero_levels[StringName(id)] = clampi(int(saved_hero_levels[id]), 1, MAX_LEVEL)
+		var saved_hero_exp: Dictionary = data.get("hero_exp", {})
+		for id: String in saved_hero_exp:
+			hero_exp[StringName(id)] = maxi(0, int(saved_hero_exp[id]))
+	else:
+		for id in owned:
+			hero_levels[id] = level
 	var saved_souls: Dictionary = data.get("souls", {})
 	for id: String in saved_souls:
 		souls[StringName(id)] = int(saved_souls[id])

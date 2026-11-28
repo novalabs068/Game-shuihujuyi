@@ -45,8 +45,9 @@ const STAT_NAMES: Array[String] = ["气血", "攻击", "防御", "法抗", "速�
 ## 甲乙丙丁（UnitData.Tier 的顺序）
 const TIER_MULT: Array[float] = [1.3, 1.2, 1.1, 1.0]
 const TIER_ADD: Array[int] = [12, 8, 4, 0]
-## 好汉每升一级气血、攻击、防御、法抗乘这么多（按品级）；敌人和统领用 BattleUnit.LEVEL_GROWTH
-const TIER_GROWTH: Array[float] = [1.031, 1.030, 1.029, 1.028]
+## 好汉每升一级气血、攻击、防御、法抗乘这么多（按品级）；敌人和统领用 BattleUnit.LEVEL_GROWTH。
+## 甲比乙高出一截：99 级时甲约是乙的 1.44 倍、同级敌人的 1.73 倍
+const TIER_GROWTH: Array[float] = [1.033, 1.030, 1.029, 1.028]
 
 
 ## 某职业某品级某项属性的范围 [最低, 最高]。

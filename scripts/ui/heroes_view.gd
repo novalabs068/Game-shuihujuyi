@@ -179,7 +179,12 @@ func _make_row(hero: UnitData) -> PanelContainer:
 	var name := UiKit.brush_label(hero.display_name, 26, UiKit.INDIGO if _is_protagonist(hero) else TIER_INK[hero.tier])
 	col.add_child(name)
 	if not _is_protagonist(hero):
-		col.add_child(MagatamaRow.for_hero(hero, GameState.star_of(hero.id), 13))
+		var marks := HBoxContainer.new()
+		marks.add_theme_constant_override("separation", 6)
+		marks.add_child(MagatamaRow.for_hero(hero, GameState.star_of(hero.id), 13))
+		if GameState.owns(hero.id):
+			marks.add_child(_label("%d 级" % GameState.level_of(hero.id), 13, DIM))
+		col.add_child(marks)
 	var right := _label("", 14, UiKit.CINNABAR)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -282,8 +287,9 @@ func _show_detail() -> void:
 		info.add_child(_wrapped("主修「%s」第 %d 重：统领上阵放它的绝招%s" % [m.display_name, GameState.martial_level(m.id), "（外门武学，威力七成）" if m.role != hero.role else ""] if m != null else "还没有主修武学", GOLD_INK))
 		info.add_child(_wrapped("统领和好汉一起上场；统领倒下全队攻击 -%d%%。职业开局定下不变；换主修只换绝招，在「武学」里花修为修炼。境界、名望、号令在主角页。" % roundi(BattleModel.MORALE_LOSS * 100), DIM))
 	elif owned:
-		var lv := GameState.level
+		var lv := GameState.level_of(hero.id)
 		info.add_child(_label("%d 级　生命 %d　攻击 %d　防御 %d　法抗 %d　速度 %d　敏捷 %d" % [lv, _at(effective.base_hp, lv, effective), _at(effective.base_atk, lv, effective), _at(effective.base_def, lv, effective), _at(effective.res(), lv, effective), effective.base_spd, effective.agi()], 17))
+		info.add_child(_label(_exp_text(hero.id), 16, DIM))
 		var vit := GameState.vitality_of(hero.id)
 		if vit < 0.999:
 			var hurt := "气血 %d%%" % roundi(vit * 100)
@@ -292,7 +298,7 @@ func _show_detail() -> void:
 			info.add_child(_label(hurt + "　歇脚、吃药、赶路都能回", 18, UiKit.CINNABAR))
 		var bonus := PackedStringArray()
 		if star > 1 and not protagonist:
-			bonus.append("勾玉：生命、攻击、防御 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
+			bonus.append("勾玉：生命、攻击、防御、法抗 +%d%%" % roundi(Stars.STAT_BONUS * (star - 1) * 100))
 		if Bonds.level(GameState.bond_of(hero.id)) > 0 and not protagonist:
 			bonus.append("羁绊：+%d%%" % roundi(Bonds.STAT_BONUS * Bonds.level(GameState.bond_of(hero.id)) * 100))
 		if not effective.gear_effects.is_empty():
@@ -939,7 +945,19 @@ func _done(text: String) -> void:
 	_show_detail()
 
 
-## 当前队伍等级下的属性，和战斗里的算法一致。
+## 「经验 120 / 300（比统领低 5 级，经验 ×1.5）」：只有上场的好汉拿经验。
+static func _exp_text(id: StringName) -> String:
+	var lv := GameState.level_of(id)
+	var out := "满级" if lv >= GameState.MAX_LEVEL else "经验 %d / %d" % [GameState.exp_of(id), GameState.exp_to_next(lv)]
+	var k := GameState.catch_up_mult(id)
+	if k > 1.0:
+		out += "（比统领低 %d 级，经验 ×%.1f）" % [GameState.level - lv, k]
+	if not id in GameState.team_ids:
+		out += "　出战才长经验"
+	return out
+
+
+## 这个等级下的属性，和战斗里的算法一致。
 static func _at(base: int, level: int, unit: UnitData = null) -> int:
 	return roundi(base * pow(Roles.level_growth(unit) if unit != null else BattleUnit.LEVEL_GROWTH, level - 1))
 

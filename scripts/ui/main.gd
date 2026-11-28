@@ -170,7 +170,7 @@ func _start_story_battle(stage: StageData, resume_at: int, story: StoryData) -> 
 	screen.stage = stage
 	screen.team = GameState.battle_team()
 	screen.placement = GameState.placement()
-	screen.hero_level = GameState.level
+	screen.hero_levels = GameState.team_levels()
 	# 在剧本里打仗前最后换的那张背景下打（五台山、瓦罐寺这些不是大地图上的地点）
 	var where := StoryScript.background_before(StoryScript.load_file(story.script_path), resume_at)
 	if where == "":
@@ -292,7 +292,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 	screen.stage = stage if bonus.has("arena_round") or bonus.has("trial") else GameState.prepare_stage(stage)
 	screen.team = GameState.battle_team()
 	screen.placement = GameState.placement()
-	screen.hero_level = GameState.level
+	screen.hero_levels = GameState.team_levels()
 	var where := destination if destination != &"" else GameState.location_id
 	if return_scene != "":
 		var sd: SceneData = GameDB.scenes[return_scene]
@@ -363,8 +363,7 @@ func _start_battle(stage: StageData, destination: StringName, progress: float, b
 			var job_text := OddJobs.on_battle_won(stage)
 			if job_text != "":
 				parts.append(job_text)
-			if ups > 0:
-				parts.append("升到 %d 级！" % GameState.level)
+			parts.append_array(ups)
 			if bond_text != "":
 				parts.append(bond_text)
 			if GameState.can_try_trial() and not Renown.can_try(GameState.realm, renown_before):

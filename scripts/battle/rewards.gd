@@ -18,8 +18,7 @@ static func grant(tokens: int, silver: int, experience: int, equipment: EquipDat
 	if experience != 0:
 		var ups := GameState.add_rewards(experience, 0)
 		parts.append("经验 %+d" % experience)
-		if ups > 0:
-			parts.append("升到 %d 级！" % GameState.level)
+		parts.append_array(ups)
 	return "　".join(parts)
 
 

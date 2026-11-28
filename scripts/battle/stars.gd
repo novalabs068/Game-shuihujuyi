@@ -4,7 +4,7 @@ class_name Stars
 ## 界面上用勾玉表示：甲 5 颗、乙 4 颗、丙 3 颗、丁 2 颗，刚抽到时全是空心，每升一星点亮一颗。
 ## 内部星级从 1 起（1 = 一颗都没点亮），所以星级上限 = 勾玉数 + 1。
 const MAX_STARS: Array[int] = [6, 5, 4, 3]
-## 每点亮一颗勾玉，生命、攻击、防御 +10%；速度不加，免得打乱出手顺序
+## 每点亮一颗勾玉，生命、攻击、防御、法抗 +10%；速度不加，免得打乱出手顺序
 const STAT_BONUS := 0.10
 ## 到这个星级（点亮 2 颗勾玉）时主动技强化一次
 const SKILL_UP_STAR := 3
@@ -25,9 +25,13 @@ static func lit(star: int) -> int:
 	return star - 1
 
 
-## 从 star 星升到下一星（再点亮一颗勾玉）要多少将魂：20、40、60、80、100。
+## 每点亮一颗勾玉要的将魂按这个数递增：10、20、30、40、50（甲乙丙丁都一样）
+const COST_STEP := 10
+
+
+## 从 star 星升到下一星（再点亮一颗勾玉）要多少将魂：10、20、30、40、50。
 static func cost(star: int) -> int:
-	return 20 * star
+	return COST_STEP * star
 
 
 ## 天赋档次：一颗勾玉都没点亮时 0（未解锁），点亮了 1，全部点亮 2（强化）。
@@ -46,6 +50,9 @@ static func apply(hero: UnitData, star: int) -> UnitData:
 	out.base_hp = roundi(hero.base_hp * k)
 	out.base_atk = roundi(hero.base_atk * k)
 	out.base_def = roundi(hero.base_def * k)
+	# 法抗没填（-1）的按防御折算，已经跟着防御涨了；填了的另外放大
+	if hero.base_res >= 0:
+		out.base_res = roundi(hero.base_res * k)
 	if star >= SKILL_UP_STAR and hero.skill != null:
 		out.skill = upgraded_skill(hero.skill)
 	out.talent_rank = talent_rank(hero, star)
