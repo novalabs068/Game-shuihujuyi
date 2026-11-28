@@ -416,12 +416,12 @@ static func plaque_button(text: String, min_size := Vector2(190, 60), primary :=
 static func slip_button(text: String, width := 54.0, font_size := 26, lit := false) -> Button:
 	var b := Button.new()
 	b.focus_mode = Control.FOCUS_NONE
-	var height := 40.0 + text.length() * (font_size + 2)
-	b.custom_minimum_size = Vector2(width, height)
 	skin(b, kit_box(&"slip_red" if lit else &"slip"))
 	var l := brush_label(vertical_text(text), font_size, Color("fff1d0") if lit else Color("f4e2b4"))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.add_theme_constant_override("line_spacing", -int(font_size * 0.28))
+	# 签的高按竖排字实际占的高算（顶上系绳孔 24 + 字 + 底下留白），字多也不会溢出签外
+	b.custom_minimum_size = Vector2(width, 24.0 + l.get_minimum_size().y + 14.0)
 	l.add_theme_constant_override("outline_size", 3)
 	l.add_theme_color_override("font_outline_color", Color("1a0f08"))
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -645,3 +645,28 @@ static func amount_row(icon: Control, text: String, font_size := 18, color := Co
 	h.add_child(label(text, font_size, color))
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return h
+
+
+## 设计稿的画面大小。手机屏比 16:9 宽时（拉伸模式 expand），视口会比这个宽。
+const DESIGN_SIZE := Vector2(1280, 720)
+
+
+## 一块设计稿大小（1280×720）、在屏幕正中的画框：按绝对坐标摆的页面把内容放进来，
+## 屏幕更宽时整块居中，不会挤在左边、右边空一大片。背景和贴屏幕边的按钮（如「归」）不要放进来。
+static func design_frame(parent: Control) -> Control:
+	var f := Control.new()
+	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(f)
+	f.set_anchors_preset(Control.PRESET_CENTER)
+	f.offset_left = -DESIGN_SIZE.x / 2
+	f.offset_right = DESIGN_SIZE.x / 2
+	f.offset_top = -DESIGN_SIZE.y / 2
+	f.offset_bottom = DESIGN_SIZE.y / 2
+	return f
+
+
+## 铺满屏幕的背景图（KEEP_ASPECT_COVERED）上一点在屏幕上的位置和缩放：
+## 返回 [缩放, 左上偏移]，图上坐标 p 在屏幕上是 偏移 + p * 缩放。叠在背景画上的字和物件按这个摆。
+static func cover_transform(screen: Vector2, texture_size: Vector2) -> Array:
+	var s := maxf(screen.x / texture_size.x, screen.y / texture_size.y)
+	return [s, (screen - texture_size * s) / 2]

@@ -9,6 +9,7 @@ signal start_requested(heroes: Array[UnitData])
 
 const MAX_TEAM := GameState.MAX_HEROES
 const TILE_SIZE := Vector2(250, 186)
+const TILE_GAP := 12
 ## 布阵格子的大小
 const CELL_SIZE := Vector2(150, 62)
 ## 手指按下后移动超过这么多像素算拖动滚屏，不算点选
@@ -101,9 +102,13 @@ func _ready() -> void:
 	middle.add_child(scroll)
 	var grid := GridContainer.new()
 	grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	grid.add_theme_constant_override("h_separation", TILE_GAP)
+	grid.add_theme_constant_override("v_separation", TILE_GAP)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(grid)
+	# 屏幕宽了一行多放几张卡，卡片拉宽填满，不在右边空一大片
+	scroll.resized.connect(func() -> void:
+		grid.columns = maxi(1, int((scroll.size.x - 12 + TILE_GAP) / (TILE_SIZE.x + TILE_GAP))))
 	# 已招募的排前面，同一组里按品级、再按原来的顺序
 	var heroes := GameDB.heroes.duplicate()
 	heroes.sort_custom(func(a: UnitData, b: UnitData) -> bool:
@@ -215,6 +220,7 @@ func _build_board() -> Control:
 func _make_tile(hero: UnitData) -> PanelContainer:
 	var tile := PanelContainer.new()
 	tile.custom_minimum_size = TILE_SIZE
+	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 2)
 	tile.add_child(v)
@@ -320,7 +326,10 @@ func _refresh() -> void:
 		_badges[hero].text = UiKit.vertical_text("出战") if picked else ""
 		if not owned:
 			_badges[hero].text = UiKit.vertical_text("未招")
-		_badges[hero].get_parent().visible = _badges[hero].text != ""
+		# 没选中时印章只是看不见、位置照占：选来选去名字那一行宽度不变，字不会重新换行、卡片不会忽高忽低
+		(_badges[hero].get_parent() as Control).modulate.a = 1.0 if _badges[hero].text != "" else 0.0
+		if _badges[hero].text == "":
+			_badges[hero].text = UiKit.vertical_text("出战")
 
 	var names := PackedStringArray()
 	for hero in _selected:

@@ -15,6 +15,8 @@ const TABS: Array[String] = ["境界", "武学", "履历"]
 const SCROLL_RECT := Rect2(40, 16, 380, 690)
 
 static var _tab := 0
+## 设计稿大小的居中画框：挂轴、页签、宣纸页都放在里面（宽屏时整块居中）
+var _frame: Control
 
 ## 纸面上的字色
 const INK := UiKit.INK
@@ -23,12 +25,13 @@ const DIM := UiKit.INK_DIM
 
 func _ready() -> void:
 	UiKit.backdrop(self)
+	_frame = UiKit.design_frame(self)
 	_build_scroll()
 
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 4)
 	head.position = Vector2(464, 18)
-	add_child(head)
+	_frame.add_child(head)
 	var title := UiKit.brush_label("统领", 44, Color("e9c979"))
 	title.custom_minimum_size.x = 110
 	head.add_child(title)
@@ -53,7 +56,7 @@ func _ready() -> void:
 	page.add_theme_stylebox_override("panel", UiKit.panel_box())
 	page.position = Vector2(452, 70)
 	page.size = Vector2(800, 636)
-	add_child(page)
+	_frame.add_child(page)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	page.add_child(scroll)
@@ -91,7 +94,7 @@ func _build_scroll() -> void:
 	paper.size = Vector2(r.size.x, paper_h)
 	paper.clip_contents = true
 	paper.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(paper)
+	_frame.add_child(paper)
 	_band(brocade, Rect2(r.position.x, y + top_band + paper_h, r.size.x, bottom_band))
 	_rod(Rect2(r.position.x + 6, r.position.y, r.size.x - 12, 16))
 	_rod(Rect2(r.position.x - 2, y + top_band + paper_h + bottom_band, r.size.x + 4, 20))
@@ -138,16 +141,16 @@ func _band(tex: Texture2D, rect: Rect2) -> void:
 	t.position = rect.position
 	t.size = rect.size
 	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(t)
+	_frame.add_child(t)
 	var edge := ColorRect.new()
 	edge.color = UiKit.GILT
 	edge.position = rect.position
 	edge.size = Vector2(rect.size.x, 2)
 	edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(edge)
+	_frame.add_child(edge)
 	var edge2 := edge.duplicate() as ColorRect
 	edge2.position.y = rect.end.y - 2
-	add_child(edge2)
+	_frame.add_child(edge2)
 
 
 ## 一根木轴，两头包金。
@@ -164,7 +167,7 @@ func _rod(rect: Rect2) -> void:
 	rod.position = rect.position
 	rod.size = rect.size
 	rod.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(rod)
+	_frame.add_child(rod)
 	for x: float in [rect.position.x - 12, rect.end.x - 8]:
 		var cap := Panel.new()
 		var c := StyleBoxFlat.new()
@@ -176,7 +179,7 @@ func _rod(rect: Rect2) -> void:
 		cap.position = Vector2(x, rect.position.y - 3)
 		cap.size = Vector2(20, rect.size.y + 6)
 		cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(cap)
+		_frame.add_child(cap)
 
 
 ## 等级、经验、家当。

@@ -61,7 +61,8 @@ const PRESS_TIME := 0.15
 const PRESS_SCALE := 0.93
 ## 聚义厅背景（供案、红烛、前排柱上两条空白红对联，见 art/prompts/recruit_hall.txt）
 const HALL_TEXTURE := "res://art/ui/recruit_hall.jpg"
-## 对联：写在背景画里那两条红纸上（横坐标是红纸的中线，按 1280×720 的画面算）
+## 对联：写在背景画里那两条红纸上（横坐标是红纸的中线，按背景原图 1280×720 的像素算；
+## 屏幕更宽时背景放大裁切，对联和聚义令跟着背景换算位置，见 _place_on_hall）
 const COUPLETS := [["四海英雄同聚义", 143.0], ["八方豪杰共结盟", 1143.0]]
 const COUPLET_TOP := 98.0
 ## 没在抽卡时，聚义令立在供案正中
@@ -82,6 +83,10 @@ var _in_showcase := false
 var _fx: Control
 ## 供案上立着的那块聚义令（抽卡、翻牌时收起来）
 var _idle_token: Control
+var _hall: TextureRect
+var _couplets: Array[Label] = []
+var _idle_glow: TextureRect
+var _idle_pic: TextureRect
 
 
 func _ready() -> void:
@@ -92,6 +97,7 @@ func _ready() -> void:
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# 聚义厅大堂（水墨淡彩）：供案、红烛、香炉都画在图里
 	var hall := TextureRect.new()
+	_hall = hall
 	hall.texture = load(HALL_TEXTURE)
 	hall.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	hall.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -103,10 +109,9 @@ func _ready() -> void:
 		var couplet := UiKit.brush_label(UiKit.vertical_text(c[0]), 40, Color(0.1, 0.06, 0.04, 0.85))
 		couplet.add_theme_constant_override("line_spacing", -12)
 		couplet.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		couplet.position = Vector2(c[1] - 24, COUPLET_TOP)
-		couplet.size = Vector2(48, 420)
 		couplet.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(couplet)
+		_couplets.append(couplet)
 
 	_idle_token = Control.new()
 	_idle_token.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -122,18 +127,18 @@ func _ready() -> void:
 	glow_tex.fill_to = Vector2(0.5, 0.0)
 	glow.texture = glow_tex
 	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	glow.position = IDLE_TOKEN_RECT.get_center() - Vector2(180, 190)
-	glow.size = Vector2(360, 380)
 	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_idle_token.add_child(glow)
+	_idle_glow = glow
 	var idle := TextureRect.new()
 	idle.texture = load("res://art/ui/juyi_token_old.png")
 	idle.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	idle.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	idle.position = IDLE_TOKEN_RECT.position
-	idle.size = IDLE_TOKEN_RECT.size
 	idle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_idle_token.add_child(idle)
+	_idle_pic = idle
+	resized.connect(_place_on_hall)
+	_place_on_hall()
 
 	var title := UiKit.title_plaque("聚　义　厅", 40)
 	add_child(title)
@@ -247,6 +252,23 @@ func _ready() -> void:
 	add_child(_fx)
 	_fx.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_refresh()
+
+
+## 对联、供案上的聚义令按背景画换算到屏幕上（背景铺满屏幕时会按宽窄放大裁切）。
+func _place_on_hall() -> void:
+	var t := UiKit.cover_transform(size, _hall.texture.get_size())
+	var s: float = t[0]
+	var offset: Vector2 = t[1]
+	for i in _couplets.size():
+		var l := _couplets[i]
+		l.add_theme_font_size_override("font_size", int(40 * s))
+		l.add_theme_constant_override("line_spacing", -int(12 * s))
+		l.size = Vector2(48, 420) * s
+		l.position = offset + Vector2(COUPLETS[i][1] - 24, COUPLET_TOP) * s
+	_idle_pic.position = offset + IDLE_TOKEN_RECT.position * s
+	_idle_pic.size = IDLE_TOKEN_RECT.size * s
+	_idle_glow.size = Vector2(360, 380) * s
+	_idle_glow.position = offset + (IDLE_TOKEN_RECT.get_center() - Vector2(180, 190)) * s
 
 
 ## 抽卡按钮的按压手感：按下时 0.15 秒沉下去、缩一点、变暗（像按进去），松开时弹回来。
