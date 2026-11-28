@@ -1,6 +1,6 @@
 extends Node
 ## 音效（自动加载为 Sfx）：play(名字) 放 audio/sfx/<名字>.ogg，几个声音可以同时响。
-## 音效由 tools/music/make_sfx.py 合成；开关和音量存在设置里（Prefs），和背景音乐分开。
+## 音效由 tools/music/real_sfx.py 用真实录音（Kenney、Freesound，都是 CC0）叠出来；开关和音量存在设置里（Prefs），和背景音乐分开。
 
 const POOL := 8
 const BASE_DB := -4.0

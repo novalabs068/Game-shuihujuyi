@@ -161,6 +161,9 @@ func _ready() -> void:
 	_choices.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 
 	_ops = StoryScript.load_file(story.script_path)
+	# 列传从头开讲时像说书人一样拍一下醒木；打完仗接着演就不拍
+	if start_at == 0:
+		Sfx.play(&"xingmu", -3.0)
 	_run()
 
 
