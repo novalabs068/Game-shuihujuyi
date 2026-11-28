@@ -1,6 +1,6 @@
 class_name Bonds
 ## 羁绊：主角和每位好汉的交情。带他打赢一场、打完他的一段列传都会涨；
-## 每升一级，这位好汉生命、攻击、防御 +3%。到「知己」后可以结义，解锁主角和他的组合技「结义同心」。纯规则，数值是初稿。
+## 每升一级，这位好汉生命、攻击、防御、法抗 +3%。到「知己」后可以结义，解锁主角和他的组合技「结义同心」。纯规则，数值是初稿。
 
 const NAMES: Array[String] = ["相识", "相熟", "相知", "知己"]
 ## 到这一级需要的羁绊点数
@@ -44,6 +44,8 @@ static func apply(hero: UnitData, points: int) -> UnitData:
 	out.base_hp = roundi(hero.base_hp * k)
 	out.base_atk = roundi(hero.base_atk * k)
 	out.base_def = roundi(hero.base_def * k)
+	if hero.base_res >= 0:
+		out.base_res = roundi(hero.base_res * k)
 	return out
 
 

@@ -259,6 +259,8 @@ func _make_tile(hero: UnitData) -> PanelContainer:
 	marks.add_child(IdentitySeal.make(hero.rarity, 22))
 	marks.add_child(MagatamaRow.for_hero(hero, GameState.star_of(hero.id), 14))
 	marks.add_child(UiKit.role_tag(hero, 13))
+	# 好汉各自的等级：新招的从 1 级练起，选人时一眼看出谁跟得上
+	marks.add_child(UiKit.label("%d 级" % GameState.level_of(hero.id), 14, UiKit.INK))
 	head.add_child(marks)
 	var area := hero.skill.effective_area()
 	v.add_child(UiKit.label("「%s」%s" % [hero.skill.display_name, "" if area == SkillData.Area.SINGLE else "（%s）" % SkillData.AREA_NAMES[area]], 16, UiKit.INK))

@@ -20,6 +20,7 @@ func _initialize() -> void:
 		"test_move_and_summon",
 		"test_boss_phases_and_morale",
 		"test_class_stats_and_martial_levels",
+		"test_hero_levels",
 		"test_books",
 		"test_disarm_and_silence",
 		"test_pursuit",
@@ -447,6 +448,39 @@ func test_boss_phases_and_morale() -> bool:
 	return true
 
 
+## 好汉各自的等级：升级曲线、比统领低时多拿经验、开战时每人按自己的等级；升星、羁绊也放大填写的法抗。
+func test_hero_levels() -> bool:
+	check_eq(Leveling.gain_exp(1, 0, Leveling.exp_to_next(1) - 1), [1, Leveling.exp_to_next(1) - 1] as Array[int], "差 1 点经验不升级")
+	var two := Leveling.exp_to_next(1) + Leveling.exp_to_next(2)
+	check_eq(Leveling.gain_exp(1, 0, two + 5), [3, 5] as Array[int], "一次连升两级，余下的经验留着")
+	check_eq(Leveling.gain_exp(98, 0, 999999), [99, 0] as Array[int], "到 99 级封顶，经验清零")
+	check(is_equal_approx(Leveling.catch_up_mult(10, 10), 1.0), "和统领同级拿原样")
+	check(is_equal_approx(Leveling.catch_up_mult(20, 10), 1.0), "比统领高也拿原样")
+	check(is_equal_approx(Leveling.catch_up_mult(5, 10), 1.5), "低 5 级经验 ×1.5")
+	check(is_equal_approx(Leveling.catch_up_mult(1, 60), Leveling.CATCH_UP_MAX), "低很多最多 ×3")
+	# 开战时每人按自己的等级
+	var a := unit_data(&"a", [100, 10, 10, 100])
+	var b := unit_data(&"b", [100, 10, 10, 90])
+	var stage := StageData.new()
+	stage.enemies = [unit_data(&"e", [100, 10, 10, 80])] as Array[UnitData]
+	stage.enemy_level = 1
+	var m := BattleModel.new(stage, [a, b] as Array[UnitData], 1, [], 1, &"", [], [10, 1])
+	var lv := {}
+	for u in m.units:
+		lv[u.data.id] = u.level
+	check_eq(lv[&"a"], 10, "第一个人 10 级")
+	check_eq(lv[&"b"], 1, "第二个人 1 级")
+	check(m.units.filter(func(u: BattleUnit) -> bool: return u.data.id == &"a")[0].max_hp > 100, "10 级的人血更厚")
+	# 好汉数据里写了法抗：升星、羁绊一起放大
+	var h := unit_data(&"h", [1000, 100, 100, 100])
+	h.base_res = 50
+	check_eq(Stars.apply(h, 3).base_res, 60, "点亮 2 颗勾玉：法抗 +20%")
+	check_eq(Bonds.apply(h, Bonds.THRESHOLDS[3]).base_res, roundi(50 * 1.09), "知己：法抗 +9%")
+	h.base_res = -1
+	check_eq(Stars.apply(h, 3).base_res, -1, "没填法抗的仍按防御折算")
+	return true
+
+
 func test_class_stats_and_martial_levels() -> bool:
 	# 品级范围：甲 = 丁 ×1.3；速度、敏捷甲 +12
 	check_eq(Roles.stat_range(UnitData.Role.WARRIOR, UnitData.Tier.DING, 0), Vector2i(430, 480), "丁品战士气血")
@@ -458,7 +492,10 @@ func test_class_stats_and_martial_levels() -> bool:
 	var hero := unit_data(&"h", [100, 10, 10, 100])
 	hero.rarity = UnitData.Rarity.TIANGANG
 	hero.tier = UnitData.Tier.JIA
-	check(is_equal_approx(Roles.level_growth(hero), 1.031), "甲品每级 ×1.031")
+	check(is_equal_approx(Roles.level_growth(hero), 1.033), "甲品每级 ×1.033")
+	hero.tier = UnitData.Tier.YI
+	check(is_equal_approx(Roles.level_growth(hero), 1.030), "乙品每级 ×1.030")
+	hero.tier = UnitData.Tier.JIA
 	check(is_equal_approx(Roles.level_growth(unit_data(&"e", [1, 1, 1, 1])), BattleUnit.LEVEL_GROWTH), "敌人照旧")
 	# 武学十重：每重 +6%，第 5 重附带破绽，第 7 重冷却 -1，第 10 重范围升级
 	var m := MartialData.new()
@@ -1924,7 +1961,8 @@ func test_stars() -> bool:
 	check_eq(Stars.max_stars(h), 4, "丙 has 3 magatama (star cap 4)")
 	check_eq(UiKit.tier_magatama(UnitData.Tier.JIA), 5, "甲 has 5 magatama")
 	check_eq(UiKit.tier_magatama(UnitData.Tier.DING), 2, "丁 has 2 magatama")
-	check_eq(Stars.cost(1) + Stars.cost(2) + Stars.cost(3), 120, "lighting all 3 of 丙 costs 120 souls")
+	check_eq(Stars.cost(1) + Stars.cost(2) + Stars.cost(3), 60, "lighting all 3 of 丙 costs 60 souls")
+	check_eq(Stars.cost(1) + Stars.cost(2) + Stars.cost(3) + Stars.cost(4) + Stars.cost(5), 150, "甲 5 颗全亮要 150 将魂")
 	check_eq(Stars.soul_price(h), 2, "丙 souls cost 2 义气")
 	return true
 

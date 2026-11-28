@@ -83,7 +83,8 @@ const RESULT_GOLD := Color("cea656")
 
 var stage: StageData
 var team: Array[UnitData] = []
-var hero_level := 1
+## 我方每人的等级（和 team 一一对应）
+var hero_levels: Array[int] = []
 ## 战场背景（地区的水墨画）；为空就用深色底
 var background: Texture2D
 ## 战场在哪儿（背景名），决定飘什么天气，见 BattleWeather
@@ -145,7 +146,7 @@ var _area_hits: Array[BattleUnit] = []
 
 func _ready() -> void:
 	_formation = GameState.current_formation()
-	model = BattleModel.new(stage, team, hero_level, GameState.combos(), -1, _formation, placement)
+	model = BattleModel.new(stage, team, 1, GameState.combos(), -1, _formation, placement, hero_levels)
 	if team.any(func(u: UnitData) -> bool: return u.id == BattleModel.COMMANDER_ID):
 		model.command = GameState.battle_command()
 	Vitality.apply_start(model, start_hp)

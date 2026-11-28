@@ -113,7 +113,8 @@ var command_used := false
 
 ## formation 是玩家选的阵法（Formations 的 id，空 = 不摆阵）。placement 是我方每人站的格子（和 team 对应，
 ## Vector2i(排, 路)；空着、不合法或重复的按阵法的阵位顺序、再按职业自动摆）。
-func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1, formation: StringName = &"", placement: Array = []) -> void:
+## levels 是我方每人的等级（和 team 对应，统领、好汉各自的等级）；没给的人用 hero_level。
+func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos: Array[ComboData], seed_value: int = -1, formation: StringName = &"", placement: Array = [], levels: Array = []) -> void:
 	stage = p_stage
 	combos = p_combos
 	formation_id = formation
@@ -123,7 +124,8 @@ func _init(p_stage: StageData, team: Array[UnitData], hero_level: int, p_combos:
 		rng.randomize()
 	var players: Array[BattleUnit] = []
 	for i in team.size():
-		players.append(BattleUnit.new(team[i], BattleUnit.Side.PLAYER, i, hero_level))
+		var lv: int = levels[i] if i < levels.size() else hero_level
+		players.append(BattleUnit.new(team[i], BattleUnit.Side.PLAYER, i, lv))
 	var wanted: Array = placement.duplicate()
 	if wanted.is_empty():
 		wanted.assign(Formations.cells(formation))
