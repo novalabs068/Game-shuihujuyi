@@ -15,7 +15,7 @@ var _typing: Tween
 func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	add_theme_stylebox_override("panel", UiKit.box(Color(0.1, 0.09, 0.08, 0.94), UiKit.GOLD, 2, 10))
+	add_theme_stylebox_override("panel", UiKit.panel_box())
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 16)
 	add_child(row)
@@ -24,13 +24,13 @@ func _ready() -> void:
 	var v := VBoxContainer.new()
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(v)
-	_name_label = UiKit.label("", 26, UiKit.GOLD)
+	_name_label = UiKit.brush_label("", 30, UiKit.CINNABAR)
 	v.add_child(_name_label)
-	_text_label = UiKit.label("", 24)
+	_text_label = UiKit.label("", 21, UiKit.INK)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(_text_label)
-	var more := UiKit.label("点击继续 ▼", 16, UiKit.TEXT_DIM)
+	var more := UiKit.label("点击继续 ▾", 14, UiKit.INK_DIM)
 	more.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(more)
 	UiKit.ignore_mouse(self)

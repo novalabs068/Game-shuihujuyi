@@ -80,7 +80,6 @@ const SCROLL_EDGE := Color("c8b48c")
 const SCROLL_EDGE_LINE := Color("967850")
 const RESULT_GOLD := Color("cea656")
 ## 结算卷轴和木牌上的毛笔字体
-const BRUSH_FONT_PATH := "res://art/fonts/MaShanZheng.ttf"
 
 var stage: StageData
 var team: Array[UnitData] = []
@@ -1151,7 +1150,7 @@ func _bead(u: BattleUnit, current: bool) -> Control:
 	var d := BEAD_BIG if current else BEAD_SMALL
 	var ring := PanelContainer.new()
 	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var color := UiKit.GOLD if current else (ALLY_BLUE if u.side == BattleUnit.Side.PLAYER else ENEMY_RED)
+	var color := Color("ffd98a") if current else (UiKit.GILT if u.side == BattleUnit.Side.PLAYER else ENEMY_RED)
 	var style := StyleBoxFlat.new()
 	style.bg_color = color
 	style.set_corner_radius_all(int(d / 2) + 3)
@@ -1280,17 +1279,23 @@ func _build_top_bar() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	shade.offset_bottom = 96
 
-	_round_label = UiKit.outlined("", 28, PAPER)
-	_round_label.z_index = BAR_LAYER
-	_round_label.position = Vector2(24, 16)
-	add_child(_round_label)
+	# 回合数写在一块黑漆小匾上
+	var round_plaque := PanelContainer.new()
+	round_plaque.add_theme_stylebox_override("panel", UiKit.lacquer_box())
+	round_plaque.z_index = BAR_LAYER
+	round_plaque.position = Vector2(18, 16)
+	round_plaque.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(round_plaque)
+	_round_label = UiKit.brush_label("", 28, Color("f1d99c"))
+	round_plaque.add_child(_round_label)
 
+	# 出手顺序串在一根木杆上
 	var line := ColorRect.new()
-	line.color = Color(INK, 0.9)
+	line.color = Color("6a4429")
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	line.z_index = BAR_LAYER
 	line.position = Vector2(196, 42)
-	line.size = Vector2(700, 4)
+	line.size = Vector2(700, 6)
 	add_child(line)
 	_order_box = HBoxContainer.new()
 	_order_box.add_theme_constant_override("separation", 22)
@@ -1356,7 +1361,7 @@ func _set_lit(b: Button, on: bool) -> void:
 	if b == null:
 		return
 	var style := (b.get_theme_stylebox("normal") as StyleBoxFlat).duplicate() as StyleBoxFlat
-	style.border_color = UiKit.GOLD if on else PAPER
+	style.border_color = Color("ffd98a") if on else UiKit.GILT
 	style.set_border_width_all(4 if on else 3)
 	b.add_theme_stylebox_override("normal", style)
 	b.add_theme_stylebox_override("hover", style)
@@ -1422,7 +1427,9 @@ func _build_bottom_bar() -> void:
 	var name_row := HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 14)
 	info.add_child(name_row)
-	_actor_label = UiKit.outlined("", 34, PAPER)
+	# 左下角版式不变，名字换成毛笔字（提示还是正文的宋体）
+	_actor_label = UiKit.outlined("", 40, PAPER)
+	_actor_label.add_theme_font_override("font", UiKit.brush_font())
 	name_row.add_child(_actor_label)
 	_target_label = UiKit.outlined("", 19, Color("d6c4a0"))
 	_target_label.size_flags_vertical = Control.SIZE_SHRINK_END
@@ -1767,17 +1774,10 @@ func _star_seal(got: bool) -> PanelContainer:
 	return seal
 
 
-## 毛笔字（马善政毛笔楷书，只收了结算画面用到的字，见 art/fonts/brush_chars.txt）；
-## 没收的字和数字落到思源黑体。
-static var _brush_font: Font
-
+## 毛笔字（马善政毛笔楷书，见 UiKit.brush_font）；数字落到思源宋体。
 
 static func _brush() -> Font:
-	if _brush_font == null:
-		var font: FontFile = load(BRUSH_FONT_PATH)
-		font.fallbacks = [UiKit.cjk_font()]
-		_brush_font = font
-	return _brush_font
+	return UiKit.brush_font()
 
 
 func _brush_label(text: String, font_size: int, color: Color) -> Label:

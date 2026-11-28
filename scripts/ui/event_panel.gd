@@ -21,15 +21,15 @@ func _ready() -> void:
 	add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiKit.box(Color(0.12, 0.11, 0.1, 0.97), UiKit.GOLD, 2, 12))
+	panel.add_theme_stylebox_override("panel", UiKit.panel_box())
 	panel.custom_minimum_size = Vector2(720, 0)
 	center.add_child(panel)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 14)
 	panel.add_child(v)
-	_title = UiKit.label("", 30, UiKit.GOLD)
+	_title = UiKit.brush_label("", 34, UiKit.INK)
 	v.add_child(_title)
-	_body = UiKit.label("", 22)
+	_body = UiKit.label("", 19, UiKit.INK)
 	_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_body.custom_minimum_size.x = 680
 	v.add_child(_body)

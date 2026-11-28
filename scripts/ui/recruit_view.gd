@@ -59,6 +59,13 @@ const MAGATAMA_STEP := 0.12
 ## 抽卡按钮按下去下沉多久、缩到多小
 const PRESS_TIME := 0.15
 const PRESS_SCALE := 0.93
+## 聚义厅背景（供案、红烛、前排柱上两条空白红对联，见 art/prompts/recruit_hall.txt）
+const HALL_TEXTURE := "res://art/ui/recruit_hall.jpg"
+## 对联：写在背景画里那两条红纸上（横坐标是红纸的中线，按 1280×720 的画面算）
+const COUPLETS := [["四海英雄同聚义", 143.0], ["八方豪杰共结盟", 1143.0]]
+const COUPLET_TOP := 98.0
+## 没在抽卡时，聚义令立在供案正中
+const IDLE_TOKEN_RECT := Rect2(590, 176, 100, 310)
 
 var _rng := RandomNumberGenerator.new()
 var _tokens_label: Label
@@ -73,6 +80,8 @@ var _skip := false
 var _in_showcase := false
 ## 令牌、闪光、登场都画在这一层，盖在最上面
 var _fx: Control
+## 供案上立着的那块聚义令（抽卡、翻牌时收起来）
+var _idle_token: Control
 
 
 func _ready() -> void:
@@ -81,57 +90,128 @@ func _ready() -> void:
 	bg.color = Color("221a14")
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# 聚义厅大堂（水墨），压暗一些好看清卡片
-	var hall_path := StoryScript.background_path("juyiting")
-	if hall_path != "":
-		var hall := TextureRect.new()
-		hall.texture = load(hall_path)
-		hall.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		hall.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		hall.modulate = Color(0.55, 0.5, 0.46)
-		hall.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(hall)
-		hall.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# 聚义厅大堂（水墨淡彩）：供案、红烛、香炉都画在图里
+	var hall := TextureRect.new()
+	hall.texture = load(HALL_TEXTURE)
+	hall.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	hall.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	hall.modulate = Color(0.86, 0.82, 0.78)
+	hall.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(hall)
+	hall.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for c: Array in COUPLETS:
+		var couplet := UiKit.brush_label(UiKit.vertical_text(c[0]), 40, Color(0.1, 0.06, 0.04, 0.85))
+		couplet.add_theme_constant_override("line_spacing", -12)
+		couplet.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		couplet.position = Vector2(c[1] - 24, COUPLET_TOP)
+		couplet.size = Vector2(48, 420)
+		couplet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(couplet)
+
+	_idle_token = Control.new()
+	_idle_token.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_idle_token)
+	var glow := TextureRect.new()
+	var grad := Gradient.new()
+	grad.set_color(0, Color(1.0, 0.86, 0.55, 0.55))
+	grad.set_color(1, Color(1.0, 0.86, 0.55, 0.0))
+	var glow_tex := GradientTexture2D.new()
+	glow_tex.gradient = grad
+	glow_tex.fill = GradientTexture2D.FILL_RADIAL
+	glow_tex.fill_from = Vector2(0.5, 0.5)
+	glow_tex.fill_to = Vector2(0.5, 0.0)
+	glow.texture = glow_tex
+	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	glow.position = IDLE_TOKEN_RECT.get_center() - Vector2(180, 190)
+	glow.size = Vector2(360, 380)
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_idle_token.add_child(glow)
+	var idle := TextureRect.new()
+	idle.texture = load("res://art/ui/juyi_token_old.png")
+	idle.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	idle.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	idle.position = IDLE_TOKEN_RECT.position
+	idle.size = IDLE_TOKEN_RECT.size
+	idle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_idle_token.add_child(idle)
+
+	var title := UiKit.title_plaque("聚　义　厅", 40)
+	add_child(title)
+	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	title.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	title.offset_top = 8
+
+	var corner := HBoxContainer.new()
+	corner.add_theme_constant_override("separation", 14)
+	corner.alignment = BoxContainer.ALIGNMENT_END
+	add_child(corner)
+	corner.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	corner.offset_left = -400
+	corner.offset_right = -20
+	corner.offset_top = 14
+	var purse := PanelContainer.new()
+	purse.add_theme_stylebox_override("panel", UiKit.lacquer_box())
+	purse.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var purse_row := UiKit.amount_row(UiKit.token_icon(), "", 18)
+	purse.add_child(purse_row)
+	_tokens_label = purse_row.get_child(1) as Label
+	corner.add_child(purse)
+	_back = UiKit.back_button()
+	_back.pressed.connect(func() -> void:
+		if not _revealing:
+			back_requested.emit())
+	corner.add_child(_back)
+
+	# 右下角一张招募榜文：每档几率、保底、已招多少人
+	var board := PanelContainer.new()
+	board.add_theme_stylebox_override("panel", UiKit.note_box())
+	board.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(board)
+	board.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	board.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	board.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	board.offset_right = -16
+	board.offset_bottom = -12
+	var rates := VBoxContainer.new()
+	rates.add_theme_constant_override("separation", 2)
+	rates.custom_minimum_size.x = 200
+	board.add_child(rates)
+	rates.add_child(UiKit.brush_label("招募榜文", 22, UiKit.INK))
+	for i in Gacha.RATES.size():
+		var r := HBoxContainer.new()
+		r.add_child(MagatamaRow.for_tier(i, 14))
+		var pct := UiKit.label("%d%%" % Gacha.RATES[i], 15, UiKit.INK)
+		pct.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pct.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		r.add_child(pct)
+		rates.add_child(r)
+	var rule := UiKit.label("五连至少一个四玉；%d 抽必出五玉；重复的好汉化为将魂 +%d" % [Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 12, UiKit.INK_DIM)
+	rule.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rule.custom_minimum_size.x = 200
+	rates.add_child(rule)
+	_pity_label = UiKit.label("", 13, UiKit.CINNABAR)
+	_pity_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_pity_label.custom_minimum_size.x = 200
+	rates.add_child(_pity_label)
+	UiKit.ignore_mouse(board)
 
 	var margin := MarginContainer.new()
 	for side: String in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 20)
+	margin.add_theme_constant_override("margin_top", 74)
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 8)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(v)
 
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 20)
-	v.add_child(top)
-	top.add_child(UiKit.label("聚义厅 · 招募好汉", 34, UiKit.GOLD))
-	_tokens_label = UiKit.label("", 24)
-	_tokens_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_tokens_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	top.add_child(_tokens_label)
-	_back = UiKit.button("返回", Vector2(120, 48), 22)
-	_back.pressed.connect(func() -> void:
-		if not _revealing:
-			back_requested.emit())
-	top.add_child(_back)
-
-	# 概率：每档画勾玉，后面跟百分比
-	var rates := HBoxContainer.new()
-	rates.add_theme_constant_override("separation", 6)
-	rates.add_child(UiKit.label("概率", 16, UiKit.TEXT_DIM))
-	for i in Gacha.RATES.size():
-		rates.add_child(MagatamaRow.for_tier(i, 15))
-		rates.add_child(UiKit.label("%d%%　" % Gacha.RATES[i], 16, UiKit.TEXT_DIM))
-	v.add_child(rates)
-	v.add_child(UiKit.label("五连至少一个四玉或以上；%d 抽内必出五玉。重复的好汉变成将魂 +%d（升星用）。" % [Gacha.PITY_JIA, Gacha.DUPLICATE_SOULS], 16, UiKit.TEXT_DIM))
-	_pity_label = UiKit.label("", 16, UiKit.TEXT_DIM)
-	v.add_child(_pity_label)
-
-	# 五张竖卡排成一排，按钮固定在底部
+	# 五张竖卡排成一排，按钮在供案前、香炉两边
 	var stage := CenterContainer.new()
 	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(stage)
 	_cards = GridContainer.new()
 	_cards.columns = Gacha.MULTI
@@ -140,16 +220,26 @@ func _ready() -> void:
 
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
-	buttons.add_theme_constant_override("separation", 30)
+	buttons.add_theme_constant_override("separation", 300)
 	v.add_child(buttons)
-	_single = UiKit.button("单抽（1 枚）", Vector2(240, 60), 26)
+	_single = UiKit.plaque_button("单　抽", Vector2(200, 62), false, 32)
+	_single.tooltip_text = "用 1 枚聚义令"
 	_single.pressed.connect(_recruit.bind(1))
 	buttons.add_child(_single)
-	_multi = UiKit.button("五连（%d 枚）" % Gacha.MULTI, Vector2(240, 60), 26)
+	_multi = UiKit.plaque_button("五　连", Vector2(220, 68), true, 34)
+	_multi.tooltip_text = "用 %d 枚聚义令" % Gacha.MULTI
 	_multi.pressed.connect(_recruit.bind(Gacha.MULTI))
 	buttons.add_child(_multi)
 	_press_feel(_single)
 	_press_feel(_multi)
+	var costs := HBoxContainer.new()
+	costs.alignment = BoxContainer.ALIGNMENT_CENTER
+	costs.add_theme_constant_override("separation", 420)
+	costs.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(costs)
+	for n in [1, Gacha.MULTI]:
+		var cost := UiKit.amount_row(UiKit.token_icon(20), "× %d" % n, 15)
+		costs.add_child(cost)
 
 	_fx = Control.new()
 	_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -181,6 +271,7 @@ func _input(event: InputEvent) -> void:
 
 func _refresh() -> void:
 	_tokens_label.text = "聚义令 %d" % GameState.tokens
+	_idle_token.visible = not _revealing and _cards.get_child_count() == 0
 	var left := Gacha.PITY_JIA - GameState.pulls_since_jia
 	var first := "（第一次五连必出五玉）" if not GameState.has_flag("first_ten_pull") else ""
 	_pity_label.text = "距保底五玉还有 %d 抽　已招募 %d / %d 位好汉 %s" % [left, GameState.owned.size(), GameDB.heroes.size(), first]

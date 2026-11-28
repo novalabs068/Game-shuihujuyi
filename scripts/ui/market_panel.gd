@@ -25,7 +25,7 @@ func _ready() -> void:
 	add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiKit.box(Color("efe7d4"), INK, 3, 6))
+	panel.add_theme_stylebox_override("panel", UiKit.panel_box())
 	panel.custom_minimum_size = Vector2(820, 560)
 	center.add_child(panel)
 	var v := VBoxContainer.new()
@@ -35,11 +35,13 @@ func _ready() -> void:
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 12)
 	v.add_child(top)
-	top.add_child(UiKit.label("集市", 34, RED))
-	_buy_tab = UiKit.button("买", Vector2(90, 46), 22)
+	top.add_child(UiKit.brush_label("集市", 38, INK))
+	_buy_tab = UiKit.tab_button("买", 24)
+	_buy_tab.custom_minimum_size = Vector2(80, 42)
 	_buy_tab.pressed.connect(_switch.bind(false))
 	top.add_child(_buy_tab)
-	_sell_tab = UiKit.button("卖", Vector2(90, 46), 22)
+	_sell_tab = UiKit.tab_button("卖", 24)
+	_sell_tab.custom_minimum_size = Vector2(80, 42)
 	_sell_tab.pressed.connect(_switch.bind(true))
 	top.add_child(_sell_tab)
 	_silver = UiKit.label("", 22, INK)
@@ -56,7 +58,7 @@ func _ready() -> void:
 	_list.add_theme_constant_override("separation", 8)
 	scroll.add_child(_list)
 
-	var close := UiKit.button("离开", Vector2(160, 52), 22)
+	var close := UiKit.plaque_button("离　开", Vector2(170, 54), false, 26)
 	close.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void: closed.emit())
 	v.add_child(close)
@@ -70,8 +72,8 @@ func _switch(selling: bool) -> void:
 
 func _refresh() -> void:
 	_silver.text = "银两 %d" % GameState.silver
-	_buy_tab.disabled = not _selling
-	_sell_tab.disabled = _selling
+	UiKit.set_tab_on(_buy_tab, not _selling)
+	UiKit.set_tab_on(_sell_tab, _selling)
 	for child in _list.get_children():
 		_list.remove_child(child)
 		child.queue_free()

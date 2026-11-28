@@ -13122,6 +13122,286 @@
         "technical_checks_passed": true,
         "approved_by": ""
       }
+    },
+    {
+      "id": "ui-recruit_hall",
+      "role": "招募画面背景（聚义厅供案、红烛、空白对联）",
+      "path": "art/ui/recruit_hall.jpg",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "1280×720",
+        "alpha": false,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "ink-wash",
+        "palette"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（tools/gen_scene.sh）",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/recruit_hall.txt；原图 art/inbox/recruit_hall.jpg（1280×720）",
+        "prompt_file": "art/prompts/recruit_hall.txt"
+      }
+    },
+    {
+      "id": "ui-kit_slip",
+      "role": "界面零件：挂木签",
+      "path": "art/ui/kit_slip.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "64×160",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_slip_red",
+      "role": "界面零件：朱漆木签",
+      "path": "art/ui/kit_slip_red.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "64×160",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_lacquer",
+      "role": "界面零件：黑漆金边框",
+      "path": "art/ui/kit_lacquer.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "96×64",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_panel",
+      "role": "界面零件：宣纸锦缎面板",
+      "path": "art/ui/kit_panel.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "128×128",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_note",
+      "role": "界面零件：宣纸字条",
+      "path": "art/ui/kit_note.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "96×64",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_seal",
+      "role": "界面零件：圆朱印钮",
+      "path": "art/ui/kit_seal.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256×256",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_copper",
+      "role": "界面零件：铜扣圆钮",
+      "path": "art/ui/kit_copper.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "256×256",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_tab",
+      "role": "界面零件：书签页签",
+      "path": "art/ui/kit_tab.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "96×48",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_tab_on",
+      "role": "界面零件：选中页签",
+      "path": "art/ui/kit_tab_on.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "96×48",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-kit_slot",
+      "role": "界面零件：装备木匣格",
+      "path": "art/ui/kit_slot.png",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "72×72",
+        "alpha": true,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "palette"
+      ],
+      "source": {
+        "kind": "procedural",
+        "url_or_tool": "tools/ui_kit_art.py",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "项目自有",
+        "attribution": "",
+        "prompt_or_source_record": "tools/ui_kit_art.py"
+      }
+    },
+    {
+      "id": "ui-title_bg",
+      "role": "开始界面背景（梁山泊、山寨、空白杏黄旗，左边留白）",
+      "path": "art/ui/title_bg.jpg",
+      "status": "prototype",
+      "technical": {
+        "dimensions": "1280×720",
+        "alpha": false,
+        "filtering": "linear"
+      },
+      "visual_locks": [
+        "ink-wash",
+        "palette"
+      ],
+      "source": {
+        "kind": "ai-generated",
+        "url_or_tool": "Cursor Agent 的 GenerateImage 工具（tools/gen_scene.sh）",
+        "creator": "",
+        "created_at": "2026-11-27",
+        "license": "待确认：Cursor 服务条款对生成图片的商用约定",
+        "attribution": "",
+        "prompt_or_source_record": "art/prompts/title_bg.txt；原图 art/inbox/title_bg.jpg（1280×720）",
+        "prompt_file": "art/prompts/title_bg.txt"
+      }
     }
   ]
 }

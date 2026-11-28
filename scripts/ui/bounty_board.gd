@@ -20,14 +20,14 @@ func _ready() -> void:
 	add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiKit.box(Color("efe7d4"), Color("1e1c1a"), 3, 6))
+	panel.add_theme_stylebox_override("panel", UiKit.panel_box())
 	panel.custom_minimum_size = Vector2(760, 0)
 	center.add_child(panel)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 12)
 	panel.add_child(v)
 	var ink := Color("1e1c1a")
-	var title := UiKit.label("悬赏告示", 34, Color("be3226"))
+	var title := UiKit.brush_label("悬赏告示", 38, ink)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
 	if bounties.is_empty():
@@ -66,7 +66,7 @@ func _ready() -> void:
 				text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				row.add_child(text)
 				row.add_child(UiKit.label("赏：" + OddJobs.reward_text(job), 17, Color("be3226")))
-	var close := UiKit.button("离开", Vector2(160, 52), 22)
+	var close := UiKit.plaque_button("离　开", Vector2(170, 54), false, 26)
 	close.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void: closed.emit())
 	v.add_child(close)

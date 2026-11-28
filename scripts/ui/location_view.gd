@@ -93,6 +93,8 @@ func _process(delta: float) -> void:
 	_step_player(delta)
 	_step_roamers(delta)
 	_center_camera(false)
+	if _minimap != null:
+		_minimap.queue_redraw()
 
 
 # --- 搭场景 ---
@@ -191,45 +193,76 @@ func _spawn_objects() -> void:
 	_spawn_roamers(memory["cleared"])
 
 
+## 左上：地区小印 + 黑漆匾（场景名）；右上：圆形小地图（点了看江湖大地图）；右边一列挂木签；
+## 左下：歇脚铜钮 + 随行好汉的头像和气血。
 func _build_ui() -> void:
-	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", UiKit.box(Color(0.12, 0.11, 0.1, 0.85), Color(0, 0, 0, 0), 0, 0))
-	add_child(bar)
-	bar.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	bar.offset_bottom = 56
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	bar.add_child(row)
-	var title := UiKit.label(scene_data.title, 26, UiKit.GOLD)
-	row.add_child(title)
-	# 等级、经验、银两、聚义令
-	var status := UiKit.label("Lv%d　经验 %d/%d　银两 %d　聚义令 %d" % [GameState.level, GameState.experience, GameState.exp_to_next(GameState.level), GameState.silver, GameState.tokens], 16, UiKit.TEXT_DIM)
-	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	status.clip_text = true
-	row.add_child(status)
-	var camp := UiKit.button("歇脚", Vector2(80, 40), 20)
-	camp.tooltip_text = "就地打坐 %d 分钟，全队回复 %d%% 气血；一小时只能歇一次" % [Vitality.CAMP_SECONDS / 60, roundi(Vitality.CAMP_REGEN * 100)]
-	camp.pressed.connect(_camp)
-	row.add_child(camp)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", -4)
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(head)
+	head.position = Vector2(16, 14)
+	var parts := PackedStringArray([scene_data.title])
+	for sep in [" · ", String.chr(0x30FB), "·"]:
+		if scene_data.title.contains(sep):
+			parts = scene_data.title.split(sep)
+			break
+	if parts.size() >= 2:
+		var region_seal := UiKit.seal_label(parts[0].strip_edges(), 20, true)
+		region_seal.rotation = deg_to_rad(-3)
+		region_seal.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		head.add_child(region_seal)
+	var plaque := UiKit.title_plaque(parts[parts.size() - 1].strip_edges(), 32)
+	head.add_child(plaque)
+
 	var guide_targets := {}
-	for entry: Array in [["江湖榜", jianghu_requested, 5], ["招募", recruit_requested, 1], ["好汉", heroes_requested, 4], ["编队", team_requested, 2]]:
-		var b := UiKit.button(entry[0], Vector2(80 if entry[0].length() == 2 else 96, 40), 20)
+	var menu := VBoxContainer.new()
+	menu.add_theme_constant_override("separation", 16)
+	add_child(menu)
+	menu.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	menu.offset_left = -80
+	menu.offset_right = -28
+	menu.offset_top = 222
+	for entry: Array in [["招募", recruit_requested, 1], ["好汉", heroes_requested, 4], ["编队", team_requested, 2], ["江湖榜", jianghu_requested, 5]]:
+		var b := UiKit.slip_button(entry[0], 50, 24)
 		var sig: Signal = entry[1]
 		b.pressed.connect(func() -> void:
 			if not _busy:
 				_remember()
 				sig.emit())
-		row.add_child(b)
+		menu.add_child(b)
 		guide_targets[entry[2]] = b
-	var world := UiKit.button("地图", Vector2(100, 40), 20)
-	world.pressed.connect(go_back)
-	row.add_child(world)
 
+	_build_minimap()
+
+	var foot := HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 14)
+	add_child(foot)
+	foot.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	foot.offset_left = 16
+	foot.offset_top = -92
+	foot.offset_bottom = -16
+	foot.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	var camp := UiKit.copper_button("歇脚", 76, 22)
+	camp.tooltip_text = "就地打坐 %d 分钟，全队回复 %d%% 气血；一小时只能歇一次" % [Vitality.CAMP_SECONDS / 60, roundi(Vitality.CAMP_REGEN * 100)]
+	camp.pressed.connect(_camp)
+	foot.add_child(camp)
+	var team := GameState.team()
+	if not team.is_empty():
+		var strip := PanelContainer.new()
+		strip.add_theme_stylebox_override("panel", UiKit.lacquer_box())
+		strip.size_flags_vertical = Control.SIZE_SHRINK_END
+		strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		strip.add_child(row)
+		for u in team:
+			row.add_child(_team_face(u))
+		foot.add_child(strip)
 	_build_guide(guide_targets)
 
-	_toast = UiKit.label("", 28, UiKit.GOLD)
+	_toast = UiKit.brush_label("", 30, Color("f4e2b4"))
 	_toast.add_theme_constant_override("outline_size", 8)
-	_toast.add_theme_color_override("font_outline_color", Color.BLACK)
+	_toast.add_theme_color_override("font_outline_color", Color("1a0f08"))
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_toast)
@@ -265,21 +298,25 @@ func _build_guide(targets: Dictionary) -> void:
 	var step := GameState.tutorial_step()
 	if step == 0:
 		return
+	# 宣纸字条，前面盖一方「引」字印
 	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", UiKit.box(Color(0.12, 0.11, 0.1, 0.92), UiKit.GOLD, 2, 8))
+	bar.add_theme_stylebox_override("panel", UiKit.note_box())
 	add_child(bar)
-	bar.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	bar.offset_top = 62
-	bar.offset_left = 16
-	bar.offset_right = -16
+	bar.position = Vector2(16, 86)
+	bar.custom_minimum_size.x = 560
+	bar.size.x = 560
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
+	row.add_theme_constant_override("separation", 10)
 	bar.add_child(row)
-	var text := UiKit.label(GUIDE_TEXTS[step], 20, UiKit.GOLD)
+	var mark := UiKit.seal_label("引", 18)
+	mark.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(mark)
+	var text := UiKit.label(GUIDE_TEXTS[step], 16, UiKit.INK)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)
-	var skip := UiKit.button("跳过引导", Vector2(110, 40), 16)
+	var skip := UiKit.button("跳过", Vector2(70, 36), 18)
+	skip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	skip.pressed.connect(func() -> void:
 		GameState.mark_tutorial("tut_done")
 		bar.queue_free())
@@ -289,6 +326,128 @@ func _build_guide(targets: Dictionary) -> void:
 		var pulse := target.create_tween().set_loops()
 		pulse.tween_property(target, "modulate", Color(1.8, 1.5, 0.6), 0.5)
 		pulse.tween_property(target, "modulate", Color.WHITE, 0.5)
+
+
+## 小地图：一格画成 MINI_CELL 见方的色块，以主角为中心；朱点是自己，墨点是小怪，石青点是人物。
+const MINI_SIZE := 150.0
+const MINI_CELL := 5.0
+const MINI_COLORS := {
+	"~": Color("6f8c96"), "#": Color("5e4b38"), "H": Color("5e4b38"), "T": Color("4f5e3a"),
+	"=": Color("7a6248"), "W": Color("6f8c96"), "P": Color("5e4b38"), "h": Color("8a7458"),
+	"E": Color("b0281c"), "D": Color("c9a25a"),
+}
+var _minimap: Control
+var _mini_rows: PackedStringArray
+
+
+func _build_minimap() -> void:
+	_mini_rows = scene_data.rows()
+	var holder := Button.new()
+	holder.flat = true
+	holder.focus_mode = Control.FOCUS_NONE
+	holder.tooltip_text = "打开江湖大地图"
+	holder.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	holder.custom_minimum_size = Vector2(MINI_SIZE, MINI_SIZE + 22)
+	add_child(holder)
+	holder.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	holder.offset_left = -MINI_SIZE - 30
+	holder.offset_right = -30
+	holder.offset_top = 18
+	holder.pressed.connect(func() -> void:
+		if not _busy:
+			go_back())
+	UiKit.click_sound(holder)
+	var ring := Panel.new()
+	var style := UiKit.box(Color("d9c9a3"), UiKit.GILT, 4, int(MINI_SIZE / 2))
+	style.shadow_color = Color(0, 0, 0, 0.55)
+	style.shadow_size = 10
+	ring.add_theme_stylebox_override("panel", style)
+	ring.size = Vector2(MINI_SIZE, MINI_SIZE)
+	ring.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
+	holder.add_child(ring)
+	_minimap = Control.new()
+	_minimap.size = ring.size
+	_minimap.draw.connect(_draw_minimap)
+	ring.add_child(_minimap)
+	var rim := Control.new()
+	rim.size = ring.size
+	rim.draw.connect(func() -> void:
+		rim.draw_arc(rim.size / 2, MINI_SIZE / 2 - 2, 0, TAU, 48, Color("5a3a22"), 4.0, true)
+		rim.draw_arc(rim.size / 2, MINI_SIZE / 2 - 6, 0, TAU, 48, Color(UiKit.GILT, 0.8), 1.5, true))
+	holder.add_child(rim)
+	var north := UiKit.brush_label("北", 16, Color("f4e2b4"))
+	north.add_theme_constant_override("outline_size", 4)
+	north.add_theme_color_override("font_outline_color", Color("1a0f08"))
+	north.position = Vector2(MINI_SIZE / 2 - 8, -8)
+	holder.add_child(north)
+	var caption := UiKit.title_plaque("舆　图", 18)
+	caption.position = Vector2(MINI_SIZE / 2 - 42, MINI_SIZE - 14)
+	caption.custom_minimum_size.x = 84
+	holder.add_child(caption)
+	UiKit.ignore_mouse(holder)
+
+
+func _draw_minimap() -> void:
+	if _player == null:
+		return
+	var c := _minimap.size / 2
+	var here := _player.position / _tile
+	var reach := int(MINI_SIZE / MINI_CELL / 2) + 2
+	var pc := Vector2i(floori(here.x), floori(here.y))
+	var offset := (here - Vector2(pc)) * MINI_CELL
+	for dy in range(-reach, reach + 1):
+		var y := pc.y + dy
+		if y < 0 or y >= _mini_rows.size():
+			continue
+		var line := _mini_rows[y]
+		for dx in range(-reach, reach + 1):
+			var x := pc.x + dx
+			if x < 0 or x >= line.length():
+				continue
+			var color: Color = MINI_COLORS.get(line[x], Color("d9c9a3"))
+			_minimap.draw_rect(Rect2(c + Vector2(dx, dy) * MINI_CELL - offset, Vector2(MINI_CELL, MINI_CELL)), color)
+	for cell in _npc_at:
+		_minimap.draw_circle(c + (Vector2(cell) + Vector2(0.5, 0.5) - here) * MINI_CELL, 3.0, UiKit.INDIGO)
+	for r in _roamers:
+		if r.actor.visible:
+			_minimap.draw_circle(c + (r.actor.position - _player.position) / _tile * MINI_CELL, 3.2, Color("1f1712"))
+	_minimap.draw_circle(c, 5.0, Color("fff3d6"))
+	_minimap.draw_circle(c, 3.6, UiKit.CINNABAR)
+
+
+## 随行好汉的小头像，下面一道气血；重伤的盖一方「伤」。
+func _team_face(u: UnitData) -> Control:
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var holder := Control.new()
+	holder.custom_minimum_size = Vector2(46, 46)
+	var frame := Panel.new()
+	frame.size = Vector2(46, 46)
+	holder.add_child(frame)
+	frame.add_theme_stylebox_override("panel", UiKit.box(UiKit.PAPER, UiKit.GILT, 2, 23))
+	frame.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
+	var face := UiKit.unit_picture(u, 42, false, true)
+	face.position = Vector2(2, 2)
+	face.size = Vector2(42, 42)
+	frame.add_child(face)
+	v.add_child(holder)
+	var hp := ProgressBar.new()
+	hp.custom_minimum_size = Vector2(46, 5)
+	var ratio := GameState.vitality_of(u.id)
+	UiKit.style_bar(hp, Color("6f9a4e") if not Vitality.is_wounded(ratio) else UiKit.CINNABAR, false)
+	hp.max_value = 1.0
+	hp.step = 0.01
+	hp.value = ratio
+	v.add_child(hp)
+	if Vitality.is_wounded(ratio):
+		frame.modulate = Color(0.75, 0.7, 0.7)
+		var mark := UiKit.seal_label("伤", 12)
+		mark.position = Vector2(30, -6)
+		mark.rotation = deg_to_rad(8)
+		holder.add_child(mark)
+	UiKit.ignore_mouse(v)
+	return v
 
 
 func _make_marker() -> Node2D:
