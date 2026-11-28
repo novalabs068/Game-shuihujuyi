@@ -26,13 +26,16 @@ const KIND_COLORS := {
 }
 ## 告示墙的木板宽
 const PLANK := 160.0
-## 悬赏告示一行几张
+## 悬赏告示一行至少几张、每张多宽、间距（屏幕宽了一行多贴几张）
 const NOTICE_COLUMNS := 4
+const NOTICE_WIDTH := 250.0
+const NOTICE_GAP := 24
 
 var _tab := Tab.TODO
 var _tab_buttons: Array[Button] = []
 var _body: VBoxContainer
 var _scroll: ScrollContainer
+var _notice_grid: GridContainer
 
 
 func _ready() -> void:
@@ -50,18 +53,9 @@ func _ready() -> void:
 	back.offset_right = -20
 	back.offset_top = 16
 	back.pressed.connect(func() -> void: back_requested.emit())
-	# 左边挂三支木签切页
-	var tabs := VBoxContainer.new()
-	tabs.add_theme_constant_override("separation", 18)
-	tabs.position = Vector2(24, 104)
-	add_child(tabs)
-	for i in TAB_NAMES.size():
-		var b := UiKit.slip_button(TAB_NAMES[i], 52, 22)
-		b.pressed.connect(_switch.bind(i))
-		tabs.add_child(b)
-		_tab_buttons.append(b)
-
 	var margin := MarginContainer.new()
+	# 内容区不吃点击，免得盖住左边的木签（它铺满全屏，左边只是留了边距）
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_theme_constant_override("margin_left", 104)
 	margin.add_theme_constant_override("margin_right", 28)
 	margin.add_theme_constant_override("margin_top", 92)
@@ -74,10 +68,23 @@ func _ready() -> void:
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	v.add_child(_scroll)
+	_scroll.resized.connect(func() -> void:
+		if _tab == Tab.BOUNTIES:
+			_layout_notices())
 	_body = VBoxContainer.new()
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_theme_constant_override("separation", 8)
 	_scroll.add_child(_body)
+	# 左边挂三支木签切页（加在内容区后面，压在上面才点得到）
+	var tabs := VBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 18)
+	tabs.position = Vector2(24, 104)
+	add_child(tabs)
+	for i in TAB_NAMES.size():
+		var b := UiKit.slip_button(TAB_NAMES[i], 52, 22)
+		b.pressed.connect(_switch.bind(i))
+		tabs.add_child(b)
+		_tab_buttons.append(b)
 	_switch(Tab.TODO)
 
 
@@ -218,13 +225,23 @@ func _show_bounties() -> void:
 	var map: WorldMapData = GameDB.maps[GameState.DEFAULT_MAP]
 	var grid := GridContainer.new()
 	grid.columns = NOTICE_COLUMNS
-	grid.add_theme_constant_override("h_separation", 24)
+	grid.add_theme_constant_override("h_separation", NOTICE_GAP)
 	grid.add_theme_constant_override("v_separation", 22)
+	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_body.add_child(grid)
+	_notice_grid = grid
 	var i := 0
 	for b: BountyData in all:
 		grid.add_child(_notice(b, map, i))
 		i += 1
+	_layout_notices()
+
+
+## 屏幕宽了一行多贴几张告示（按内容区宽算），整排居中。
+func _layout_notices() -> void:
+	if _notice_grid == null or not is_instance_valid(_notice_grid):
+		return
+	_notice_grid.columns = maxi(1, int((_scroll.size.x - 16 + NOTICE_GAP) / (NOTICE_WIDTH + NOTICE_GAP)))
 
 
 ## 一张钉在墙上的悬赏告示：「悬赏」大字、对象、地点等级、赏格；揭过的盖「已揭」大红印。
@@ -235,7 +252,7 @@ func _notice(b: BountyData, map: WorldMapData, index: int) -> Control:
 	style.content_margin_top = 18
 	style.content_margin_bottom = 12
 	paper.add_theme_stylebox_override("panel", style)
-	paper.custom_minimum_size = Vector2(250, 0)
+	paper.custom_minimum_size = Vector2(NOTICE_WIDTH, 0)
 	# 每张歪一点，像随手钉上去的
 	paper.rotation = deg_to_rad([-1.4, 1.0, -0.5, 1.6][index % 4])
 	paper.resized.connect(func() -> void: paper.pivot_offset = paper.size / 2)
@@ -333,6 +350,7 @@ func _show_album() -> void:
 	_body.add_child(UiKit.label("已招募 %d / %d 位（%s）。108 将会陆续加入卡池。点卡片看详情。" % [owned, GameDB.heroes.size(), "、".join(parts)], 16, Color("e9d3a0")))
 	var grid := GridContainer.new()
 	grid.columns = 7
+	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	_body.add_child(grid)
