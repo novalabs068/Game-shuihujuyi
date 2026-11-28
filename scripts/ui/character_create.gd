@@ -27,11 +27,13 @@ var _role_desc: Label
 
 func _ready() -> void:
 	UiKit.backdrop(self)
+	# 设计稿大小的居中画框（宽屏时整块居中）；「归」贴屏幕右上角，不放进来
+	var frame := UiKit.design_frame(self)
 
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 14)
 	head.position = Vector2(28, 16)
-	add_child(head)
+	frame.add_child(head)
 	head.add_child(UiKit.page_title("投身江湖", "", 46))
 	var hint := UiKit.label("选一条出身，职业定下就不再改", 15, Color("cdb68a"))
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -50,7 +52,7 @@ func _ready() -> void:
 	roles.alignment = BoxContainer.ALIGNMENT_END
 	roles.position = Vector2(30, 120)
 	roles.custom_minimum_size = Vector2(0, 280)
-	add_child(roles)
+	frame.add_child(roles)
 	for o in GameDB.origin_list():
 		var b := UiKit.slip_button(o.display_name, 84, 30)
 		b.custom_minimum_size.y = maxf(b.custom_minimum_size.y + 48, 230)
@@ -80,7 +82,7 @@ func _ready() -> void:
 	info.position = Vector2(30, 430)
 	info.custom_minimum_size.x = 500
 	info.size.x = 500
-	add_child(info)
+	frame.add_child(info)
 	_origin_title = UiKit.brush_label("", 30, Color("e9c979"))
 	info.add_child(_origin_title)
 	_origin_desc = _wrap(UiKit.label("", 16, UiKit.TEXT))
@@ -95,14 +97,14 @@ func _ready() -> void:
 	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_portrait.position = Vector2(530, 90)
 	_portrait.size = Vector2(PORTRAIT_SIZE * 0.78, PORTRAIT_SIZE + 70)
-	add_child(_portrait)
+	frame.add_child(_portrait)
 
 	# 右边：宣纸页上起名、选男女、看开局武学，最后「踏入江湖」
 	var page := PanelContainer.new()
 	page.add_theme_stylebox_override("panel", UiKit.panel_box())
 	page.position = Vector2(916, 110)
 	page.size = Vector2(344, 530)
-	add_child(page)
+	frame.add_child(page)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 14)
 	page.add_child(v)
