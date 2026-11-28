@@ -30,7 +30,7 @@ var player_name := ""
 var origin_id: StringName = &""
 ## 统领的性别：只换立绘、小人和别人怎么称呼（属性不分男女）。旧存档没有这一项，算男
 var gender: StringName = GENDER_MALE
-## 统领的境界（见 Renown）：名望够了打赢立名之战才升一阶
+## 统领的境界（见 Renown）：名望够了纳了投名状才升一阶
 var realm := 0
 ## 修为：修炼武学用（打仗、野外打坐得来）
 var xiuwei := 0
@@ -84,9 +84,17 @@ var scrolls: Array[Dictionary] = []
 ## 选用的阵法（Formations 的 id）
 var formation: StringName = Formations.DEFAULT
 ## 江湖履历：打赢几场、其中游荡小怪几只、闯荡了多少秒（主角页显示）
-var record: Dictionary = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0, "odd_jobs": 0}
+var record: Dictionary = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0, "odd_jobs": 0, "city_jobs": 0}
 ## 小悬赏：{地区 id: [{enemy, name, need, have, silver, exp, tokens}, ...]}，见 OddJobs
 var jobs: Dictionary = {}
+## 地图左上「指引」正在追踪的一件事（江湖榜某一行的 kind、text、detail、location）；空 = 默认追踪「上梁山」（境界）
+var tracked: Dictionary = {}
+## 城中悬赏：{地区 id: {"day", "stock", "job"}}，见 CityJobs
+var city_jobs: Dictionary = {}
+## 甲马：身上有几张；集市哪天买了几张 {"day", "bought"}；戴宗写到了哪天（见 Jiama）
+var jiama := 0
+var jiama_shop: Dictionary = {}
+var jiama_dai_day := 0
 var _next_uid := 1
 
 ## 场景里的临时状态（不存档）：{场景 id: {"cleared": 打败的小怪序号, "cell": 打完仗回来站的格子}}。
@@ -399,18 +407,19 @@ func renown() -> int:
 		"stories": stories,
 		"bounties": bounties,
 		"odd_jobs": int(record.get("odd_jobs", 0)),
+		"city_jobs": int(record.get("city_jobs", 0)),
 		"bosses": bosses,
 		"arena": Arena.best(),
 		"events": events,
 	})
 
 
-## 名望够了，可以去打下一阶的立名之战。
+## 名望够了，可以去纳下一阶的投名状。
 func can_try_trial() -> bool:
 	return Renown.can_try(realm, renown())
 
 
-## 打赢第 n 阶的立名之战：升到这一阶。返回提示。
+## 打赢第 n 阶的投名状：升到这一阶。返回提示。
 func pass_trial(n: int) -> String:
 	if n != realm + 1 or n > Renown.MAX_REALM:
 		return ""
@@ -782,6 +791,87 @@ func finish_roamer(won: bool) -> void:
 	pending_roamer = []
 
 
+# --- 城中悬赏（规则见 CityJobs） ---
+
+## 这个地方眼下的城中悬赏状态（先换天、再补贴一张）；会改 city_jobs，不存档。
+func city_entry(region: StringName) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var e := CityJobs.accrue(city_jobs.get(String(region), {}), CityJobs.today())
+	e = CityJobs.post_next(e, OddJobs.enemy_pool(region), rng)
+	city_jobs[String(region)] = e
+	return e
+
+
+## 去过的地方（江湖榜、聚义令指引列出来用）。
+func visited_regions() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for loc: LocationData in GameDB.maps[DEFAULT_MAP].locations:
+		if has_flag("visited_" + String(loc.id)) or loc.id == location_id:
+			out.append(loc.id)
+	return out
+
+
+## 打赢一场后调用：有这种敌人的城中悬赏进度 +1，够数的发赏、贴下一张。返回给玩家看的一句话。
+func city_on_battle_won(stage: StageData) -> String:
+	var ids := stage.enemies.map(func(e: UnitData) -> String: return String(e.id))
+	var done := PackedStringArray()
+	for region: String in city_jobs.keys():
+		var e: Dictionary = city_jobs[region]
+		var job: Dictionary = e.get("job", {})
+		if job.is_empty() or not job["enemy"] in ids:
+			continue
+		job["have"] = int(job["have"]) + 1
+		if job["have"] >= job["need"]:
+			var gained := Rewards.grant(job["tokens"], job["silver"], job["exp"])
+			record["city_jobs"] = int(record.get("city_jobs", 0)) + 1
+			done.append("城中悬赏「打败%s %d 拨」完成：%s" % [job["name"], job["need"], gained])
+			e["job"] = {}
+			city_jobs[region] = e
+			city_entry(StringName(region))
+	return "　".join(done)
+
+
+# --- 甲马（规则见 Jiama） ---
+
+## 招到了戴宗：按天补他写的甲马（几天不来就攒着，身上最多 Jiama.MAX_CARRY 张）。返回提示，没多就是空。
+func jiama_daily() -> String:
+	if not owns(Jiama.WRITER):
+		return ""
+	var r := Jiama.dai_write(jiama, jiama_dai_day, CityJobs.today())
+	jiama = r[0]
+	jiama_dai_day = r[1]
+	if r[2] <= 0:
+		return ""
+	return "戴宗写好甲马 ×%d" % r[2]
+
+
+## 集市今天还能买几张甲马。
+func jiama_shop_left() -> int:
+	return Jiama.shop_left(jiama_shop, CityJobs.today(), jiama)
+
+
+func buy_jiama() -> bool:
+	if jiama_shop_left() <= 0 or silver < Jiama.PRICE:
+		return false
+	var today := CityJobs.today()
+	var bought := int(jiama_shop.get("bought", 0)) if int(jiama_shop.get("day", -1)) == today else 0
+	jiama_shop = {"day": today, "bought": bought + 1}
+	silver -= Jiama.PRICE
+	jiama += 1
+	save_game()
+	return true
+
+
+## 拴一张甲马，去一个去过的地方（不是眼下这里）。成功了由 main 切到那里的场景。
+func use_jiama(location: StringName) -> bool:
+	if jiama <= 0 or location == location_id or not has_flag("visited_" + String(location)):
+		return false
+	jiama -= 1
+	save_game()
+	return true
+
+
 # --- 列传 ---
 
 func story_done(story: StoryData) -> bool:
@@ -1134,6 +1224,9 @@ func enter_scene(id: String) -> String:
 			set_flag(visit_flag)
 			tokens += WorldMapView.FIRST_VISIT_TOKENS
 			parts.append("初到%s，聚义令 +%d" % [loc.display_name, WorldMapView.FIRST_VISIT_TOKENS])
+		var written := jiama_daily()
+		if written != "":
+			parts.append(written)
 		if loc.arrive_flag != "" and not has_flag(loc.arrive_flag):
 			set_flag(loc.arrive_flag)
 			if loc.arrive_text != "":
@@ -1183,8 +1276,13 @@ func reset() -> void:
 	martial_side = &""
 	martial_levels.clear()
 	positions.clear()
-	record = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0, "odd_jobs": 0}
+	record = {"wins": 0, "roamers": 0, "play_seconds": 0.0, "arena": 0, "odd_jobs": 0, "city_jobs": 0}
 	jobs = {}
+	tracked = {}
+	city_jobs = {}
+	jiama = 0
+	jiama_shop = {}
+	jiama_dai_day = 0
 	flags.clear()
 	location_id = GameDB.maps[DEFAULT_MAP].start_location
 	level = 1
@@ -1269,6 +1367,11 @@ func save_game() -> void:
 		"pages": pages,
 		"record": record,
 		"jobs": jobs,
+		"tracked": tracked,
+		"city_jobs": city_jobs,
+		"jiama": jiama,
+		"jiama_shop": jiama_shop,
+		"jiama_dai_day": jiama_dai_day,
 		"martials": martials.map(func(id: StringName) -> String: return String(id)),
 		"martial_main": String(martial_main),
 		"martial_side": String(martial_side),
@@ -1364,6 +1467,11 @@ func load_game() -> void:
 	for key in record:
 		record[key] = saved_record.get(key, record[key])
 	jobs = data.get("jobs", {})
+	tracked = data.get("tracked", {})
+	city_jobs = data.get("city_jobs", {})
+	jiama = int(data.get("jiama", 0))
+	jiama_shop = data.get("jiama_shop", {})
+	jiama_dai_day = int(data.get("jiama_dai_day", 0))
 	var saved_martials: Array = data.get("martials", [])
 	for id: String in saved_martials:
 		if GameDB.martials.has(StringName(id)):

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"v4_zheng_liao"
+order = 4
+title = "卷四　征辽"
+era = "北上和契丹大军交锋"
+summary = "辽国大军南下，梁山人马北上迎敌，一路打下檀州、蓟州，直到幽州城下，破了辽国的混天象阵。"
+rumor = "北边来的客商说，契丹的兵马已经过了边关。"
+side_story = false
+status = 1
+realm_gate = 5
+level_min = 80
+level_max = 90
+affairs = PackedStringArray("檀州", "蓟州", "幽州", "破混天象阵")
+new_play = PackedStringArray("大阵对大阵：用上阵法和克制")

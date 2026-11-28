@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MijiData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/data/miji_data.gd" id="2_m"]
+
+[sub_resource type="Resource" id="Resource_e"]
+script = ExtResource("1_t")
+display_name = "神行法"
+kind = &"team_haste_open"
+amount = 0.15
+text = "开战时全队速度 +{x}，持续 2 回合"
+
+[resource]
+script = ExtResource("2_m")
+id = &"shen_xing_fa"
+display_name = "神行法"
+quality = 3
+flavor = "戴宗作神行法的口诀：拴上甲马，念动真言，脚下生风。"
+owner = &"dai_zong"
+effect = SubResource("Resource_e")

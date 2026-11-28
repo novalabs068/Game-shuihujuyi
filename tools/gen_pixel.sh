@@ -19,9 +19,9 @@ cursor-agent -p --trust --sandbox enabled --output-format text "请使用你的�
 ${content}
 ${style}"
 
-# Cursor 有时把图存进它自己的素材目录，找回来
+# Cursor 有时把图存进它自己的素材目录，找回来（同名的会存成 <名字>-2、<名字>-3……，取最新的那张）
 if ! ls "$inbox/$name".* >/dev/null 2>&1; then
-	found="$(ls -t "$HOME"/.cursor/projects/*/assets/"$name".* 2>/dev/null | head -1 || true)"
+	found="$(ls -t "$HOME"/.cursor/projects/*/assets/"$name".* "$HOME"/.cursor/projects/*/assets/"$name"-*.* 2>/dev/null | head -1 || true)"
 	if [[ -n "$found" ]]; then
 		cp "$found" "$inbox/$name.${found##*.}"
 	fi

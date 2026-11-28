@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"v1_luo_cao"
+order = 1
+title = "卷一　落草"
+era = "好汉各自被逼上山"
+summary = "林冲刺配、武松打虎、杨志卖刀、鲁达拳打镇关西……一个个好汉被逼得走投无路。你初到东京，从无名小卒做起，在江湖上闯出名头，结识这些好汉。"
+rumor = ""
+side_story = false
+status = 0
+realm_gate = 0
+level_min = 1
+level_max = 69
+affairs = PackedStringArray("白虎堂", "大闹野猪林", "风雪山神庙", "拳打镇关西", "景阳冈打虎", "醉打蒋门神", "智取生辰纲", "二龙山落草")
+new_play = PackedStringArray("走路闯荡、悬赏、奇遇", "招募好汉、升星、装备", "好汉列传", "名望和境界、投名状")

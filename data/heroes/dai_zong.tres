@@ -1,0 +1,52 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Texture2D" path="res://art/busts/dai_zong.png" id="1_b"]
+[ext_resource type="Texture2D" path="res://art/pixel/battle/dai_zong.png" id="1_bs"]
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_u"]
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="2_s"]
+[ext_resource type="Texture2D" path="res://art/faces/dai_zong.png" id="2_f"]
+[ext_resource type="Texture2D" path="res://art/portraits/dai_zong.png" id="3_p"]
+[ext_resource type="Texture2D" path="res://art/pixel/characters/dai_zong.png" id="3_m"]
+[ext_resource type="Script" path="res://scripts/data/talent_data.gd" id="7_t"]
+
+[sub_resource type="Resource" id="Resource_skill"]
+script = ExtResource("2_s")
+display_name = "神行千里"
+description = "作起神行法：全队速度 +25%、怒气 +15，持续 2 回合。"
+effect = 5
+turns = 2
+amount = 0.25
+rage_gain = 15
+cooldown = 4
+
+[sub_resource type="Resource" id="Resource_talent"]
+script = ExtResource("7_t")
+display_name = "日行八百"
+kind = &"stat"
+amount = 0.12
+stats = Array[StringName]([&"spd", &"agi"])
+text = "速度、闪避 +{x}"
+
+[resource]
+script = ExtResource("1_u")
+id = &"dai_zong"
+display_name = "戴宗"
+nickname = "神行太保"
+rarity = 2
+role = 1
+tier = 1
+sort_order = 28
+base_hp = 350
+base_atk = 60
+base_def = 22
+base_spd = 138
+base_res = 30
+base_agi = 110
+portrait = ExtResource("3_p")
+bust = ExtResource("1_b")
+face = ExtResource("2_f")
+map_sprite = ExtResource("3_m")
+battle_sprite = ExtResource("1_bs")
+attack_style = &"thrust"
+skill = SubResource("Resource_skill")
+talent = SubResource("Resource_talent")

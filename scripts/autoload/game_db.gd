@@ -13,6 +13,7 @@ const EQUIPMENT_DIR := "res://data/equipment/"
 const STORIES_DIR := "res://data/stories/"
 const MARTIAL_DIR := "res://data/martial/"
 const MIJI_DIR := "res://data/miji/"
+const VOLUMES_DIR := "res://data/volumes/"
 
 var heroes: Array[UnitData] = []
 var combos: Array[ComboData] = []
@@ -28,6 +29,8 @@ var equipment: Dictionary[StringName, EquipData] = {}
 var stories: Array[StoryData] = []
 var martials: Dictionary[StringName, MartialData] = {}
 var mijis: Dictionary[StringName, MijiData] = {}
+## 江湖年表的各卷，按先后排好（见 VolumeData）
+var volumes: Array[VolumeData] = []
 
 
 func _ready() -> void:
@@ -65,6 +68,7 @@ func _ready() -> void:
 	bounties.sort_custom(func(a: BountyData, b: BountyData) -> bool: return a.grade < b.grade)
 	for res in load_dir(EVENTS_DIR):
 		events.append(res as EventData)
+	volumes = Volumes.sorted(load_dir(VOLUMES_DIR))
 
 
 ## 这位好汉结义时传授的独门秘籍（绝品），没有返回 null。

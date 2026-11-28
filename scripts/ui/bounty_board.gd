@@ -55,6 +55,20 @@ func _ready() -> void:
 		take.pressed.connect(func() -> void: accepted.emit(b))
 		row.add_child(take)
 	if region != &"":
+		# 城中悬赏：每天贴一张，攒着不过期
+		var city := GameState.city_entry(region)
+		var cjob: Dictionary = city.get("job", {})
+		v.add_child(UiKit.label("城中悬赏（每天贴一张，几天不来就攒着，最多攒 %d 张；不用接，打赢了就算）" % CityJobs.MAX_STOCK, 20, Color("be3226")))
+		var crow := HBoxContainer.new()
+		crow.add_theme_constant_override("separation", 14)
+		v.add_child(crow)
+		var ctext := UiKit.label(OddJobs.describe(cjob) if not cjob.is_empty() else "今天的已经做完了，明天再来看", 20, ink)
+		ctext.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		crow.add_child(ctext)
+		if not cjob.is_empty():
+			crow.add_child(UiKit.label("赏：" + CityJobs.reward_text(cjob), 17, Color("be3226")))
+		if int(city.get("stock", 0)) > 0:
+			v.add_child(UiKit.label("另有 ×%d" % int(city["stock"]), 16, Color("5a4a3a")))
 		var jobs := OddJobs.jobs_for(region)
 		if not jobs.is_empty():
 			v.add_child(UiKit.label("小悬赏（不用接，打赢了就算；做完马上换新的）", 22, Color("be3226")))

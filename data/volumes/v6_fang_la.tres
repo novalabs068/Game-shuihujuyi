@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"v6_fang_la"
+order = 6
+title = "卷六　征方腊"
+era = "江南一战，好汉十损其七"
+summary = "下江南征方腊，原著里许多好汉死在这一路上。这一卷你可以「改命」：每位好汉在原著里战死的那一仗，打赢了就改写他的结局，输了可以再来。"
+rumor = "江南睦州有个方腊，起兵造反，连下数州。"
+side_story = false
+status = 1
+realm_gate = 5
+level_min = 90
+level_max = 99
+affairs = PackedStringArray("润州", "杭州", "睦州", "乌龙岭", "帮源洞")
+new_play = PackedStringArray("改命：赢下好汉战死的那一仗，改写他的结局")

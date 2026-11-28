@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="VolumeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/volume_data.gd" id="1_vol"]
+
+[resource]
+script = ExtResource("1_vol")
+id = &"w2_kang_jin"
+order = 8
+title = "外传　抗金"
+era = "北方的雪原上刮起了女真的旋风"
+summary = "辽国灭了，北方又起了女真。这一卷是虚构的故事，参考清初陈忱的《水浒后传》：靖康年间，剩下的好汉再聚首，和金兵的铁浮屠、拐子马周旋。"
+rumor = "关外传来消息：女真人打下了辽国的上京。"
+side_story = true
+status = 2
+realm_gate = 5
+level_min = 99
+level_max = 99
+affairs = PackedStringArray("雪原", "铁浮屠", "拐子马", "靖康")
+new_play = PackedStringArray("满级以后的高难度挑战")
